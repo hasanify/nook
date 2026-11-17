@@ -19,8 +19,17 @@ interface DeploymentItem {
   branch?: string;
 }
 
+interface VercelProjectMeta {
+  domain?: string;
+  domains?: string[];
+  framework?: string;
+  git_repo?: string;
+  updated_at?: number;
+}
+
 interface VercelData {
   project_id: string;
+  meta?: VercelProjectMeta;
   deployments: DeploymentItem[];
 }
 
@@ -58,12 +67,16 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
       ? instance.settings.projectId
       : "";
 
+  const showDomain = instance.settings.showDomain !== false;
+  const showFramework = instance.settings.showFramework !== false;
+
   const { payload, loading, refresh } = useProvider<VercelData>(instance.id);
   const data = payload?.data;
 
   const handleOpenLink = (url: string) => {
     if (url) {
-      void openUrl(url);
+      const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+      void openUrl(fullUrl);
     }
   };
 
@@ -111,6 +124,10 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
     return null;
   })();
 
+  const primaryDomain =
+    data?.meta?.domain ||
+    (latestDeployment?.url ? latestDeployment.url.replace(/^https?:\/\//, "") : undefined);
+
   return (
     <WidgetShell
       instance={instance}
@@ -141,6 +158,56 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
       }
     >
       <div className="flex h-full flex-col gap-2 overflow-hidden select-none">
+        {/* Meta Bar: Domain link, framework, git repo */}
+        {((showDomain && primaryDomain) ||
+          (showFramework && (data?.meta?.framework || data?.meta?.git_repo))) && (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-line/40 pb-2 text-[11px]">
+            {showDomain && primaryDomain && (
+              <button
+                type="button"
+                onClick={() => handleOpenLink(primaryDomain)}
+                className="group flex max-w-[200px] items-center gap-1 truncate rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                title={`Open ${primaryDomain}`}
+              >
+                <svg
+                  className="h-3 w-3 shrink-0 text-accent-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <span className="truncate font-mono text-[10px] text-fg group-hover:text-accent-500">
+                  {primaryDomain}
+                </span>
+              </button>
+            )}
+
+            {showFramework && data?.meta?.framework && (
+              <span className="rounded border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                {data.meta.framework}
+              </span>
+            )}
+
+            {showFramework && data?.meta?.git_repo && (
+              <button
+                type="button"
+                onClick={() => handleOpenLink(`https://github.com/${data.meta!.git_repo}`)}
+                className="group flex max-w-[140px] items-center gap-1 truncate rounded-md border border-line/50 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                title={`GitHub repo: ${data.meta.git_repo}`}
+              >
+                <svg className="h-2.5 w-2.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+                <span className="truncate font-mono text-[9px]">{data.meta.git_repo}</span>
+              </button>
+            )}
+          </div>
+        )}
+
         <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
           Deployments
         </span>
@@ -208,6 +275,10 @@ const module: WidgetModule = {
   component: VercelProjectWidget,
   defaultSettings: {
     projectId: "",
+    showDomain: true,
+    showFramework: true,
+    pollInterval: 30,
+    limit: 5,
   },
   defaultState: {},
 };

@@ -176,6 +176,14 @@ pub fn update_settings(
         "config-changed",
         serde_json::json!({ "ids": [id], "app": false }),
     );
+
+    let app_clone = app.clone();
+    let id_clone = id.clone();
+    tauri::async_runtime::spawn(async move {
+        let state = app_clone.state::<AppState>();
+        let _ = state.poller.poll_widget_now(&app_clone, &id_clone).await;
+    });
+
     Ok(())
 }
 

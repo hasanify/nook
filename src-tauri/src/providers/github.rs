@@ -49,6 +49,7 @@ pub async fn fetch_github(
     repo: &str,
     branch_opt: Option<&str>,
     token_opt: Option<&str>,
+    commit_count_opt: Option<usize>,
 ) -> ProviderPayload {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -66,6 +67,7 @@ pub async fn fetch_github(
     }
 
     let branch = branch_opt.unwrap_or("").trim();
+    let commit_count = commit_count_opt.unwrap_or(5).clamp(1, 20);
 
     let mut headers = HeaderMap::new();
     headers.insert(USER_AGENT, HeaderValue::from_static("nook/0.1.0"));
@@ -86,8 +88,8 @@ pub async fn fetch_github(
 
     // 1. Fetch commits
     let mut commits_url = format!(
-        "https://api.github.com/repos/{}/commits?per_page=5",
-        clean_repo
+        "https://api.github.com/repos/{}/commits?per_page={}",
+        clean_repo, commit_count
     );
     if !branch.is_empty() {
         commits_url.push_str(&format!("&sha={}", branch));

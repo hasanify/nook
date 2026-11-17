@@ -64,11 +64,17 @@ impl PollerManager {
                     let (interval_secs, should_poll) = {
                         let mut times = last_polled.lock().await;
                         let last = times.get(&widget.id).copied().unwrap_or(0);
-                        let interval = match widget.kind.as_str() {
+                        let default_interval = match widget.kind.as_str() {
                             "github-repo" => 60,
                             "vercel-project" => 30,
                             _ => 0,
                         };
+                        let interval = widget
+                            .settings
+                            .get("pollInterval")
+                            .and_then(|v| v.as_u64())
+                            .unwrap_or(default_interval);
+
                         if interval > 0 && (now >= last + interval || last == 0) {
                             times.insert(widget.id.clone(), now);
                             (interval, true)
@@ -91,9 +97,15 @@ impl PollerManager {
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
                             let branch = widget.settings.get("branch").and_then(|v| v.as_str());
+                            let commit_count = widget
+                                .settings
+                                .get("commitCount")
+                                .and_then(|v| v.as_u64())
+                                .map(|n| n as usize);
                             let token = get_secret("github");
 
-                            fetch_github(&client, repo, branch, token.as_deref()).await
+                            fetch_github(&client, repo, branch, token.as_deref(), commit_count)
+                                .await
                         }
                         "vercel-project" => {
                             let project_id = widget
@@ -101,9 +113,14 @@ impl PollerManager {
                                 .get("projectId")
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
+                            let limit = widget
+                                .settings
+                                .get("limit")
+                                .and_then(|v| v.as_u64())
+                                .map(|n| n as usize);
                             let token = get_secret("vercel");
 
-                            fetch_vercel(&client, project_id, token.as_deref()).await
+                            fetch_vercel(&client, project_id, token.as_deref(), limit).await
                         }
                         _ => continue,
                     };
@@ -137,9 +154,14 @@ impl PollerManager {
                     .and_then(|v| v.as_str())
                     .unwrap_or("");
                 let branch = widget.settings.get("branch").and_then(|v| v.as_str());
+                let commit_count = widget
+                    .settings
+                    .get("commitCount")
+                    .and_then(|v| v.as_u64())
+                    .map(|n| n as usize);
                 let token = get_secret("github");
 
-                fetch_github(&self.client, repo, branch, token.as_deref()).await
+                fetch_github(&self.client, repo, branch, token.as_deref(), commit_count).await
             }
             "vercel-project" => {
                 let project_id = widget
@@ -147,9 +169,14 @@ impl PollerManager {
                     .get("projectId")
                     .and_then(|v| v.as_str())
                     .unwrap_or("");
+                let limit = widget
+                    .settings
+                    .get("limit")
+                    .and_then(|v| v.as_u64())
+                    .map(|n| n as usize);
                 let token = get_secret("vercel");
 
-                fetch_vercel(&self.client, project_id, token.as_deref()).await
+                fetch_vercel(&self.client, project_id, token.as_deref(), limit).await
             }
             _ => return None,
         };
@@ -157,6 +184,15 @@ impl PollerManager {
         {
             let mut c = self.cache.lock().await;
             c.insert(widget_id.to_string(), payload.clone());
+        }
+
+        {
+            let mut times = self.last_polled.lock().await;
+            let now = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs();
+            times.insert(widget_id.to_string(), now);
         }
 
         let event_name = format!("provider-data-{}", widget_id);

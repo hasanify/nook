@@ -17,8 +17,18 @@ pub struct DeploymentItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VercelProjectMeta {
+    pub domain: Option<String>,
+    pub domains: Vec<String>,
+    pub framework: Option<String>,
+    pub git_repo: Option<String>,
+    pub updated_at: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VercelData {
     pub project_id: String,
+    pub meta: Option<VercelProjectMeta>,
     pub deployments: Vec<DeploymentItem>,
 }
 
@@ -26,6 +36,7 @@ pub async fn fetch_vercel(
     client: &reqwest::Client,
     project_id: &str,
     token_opt: Option<&str>,
+    limit_opt: Option<usize>,
 ) -> ProviderPayload {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -60,12 +71,13 @@ pub async fn fetch_vercel(
         headers.insert(AUTHORIZATION, val);
     }
 
+    let limit = limit_opt.unwrap_or(5).clamp(1, 20);
     let url = format!(
-        "https://api.vercel.com/v6/deployments?projectId={}&limit=5",
-        clean_project
+        "https://api.vercel.com/v6/deployments?projectId={}&limit={}",
+        clean_project, limit
     );
 
-    let res = match client.get(&url).headers(headers).send().await {
+    let res = match client.get(&url).headers(headers.clone()).send().await {
         Ok(r) => r,
         Err(err) => {
             warn!("Vercel fetch failed (network): {}", err);
@@ -165,14 +177,72 @@ pub async fn fetch_vercel(
         }
     }
 
+    // Fetch project details (domains, framework, git repo)
+    let project_url = format!("https://api.vercel.com/v9/projects/{}", clean_project);
+    let mut project_meta = None;
+    if let Ok(meta_res) = client.get(&project_url).headers(headers).send().await {
+        if meta_res.status().is_success() {
+            if let Ok(json) = meta_res.json::<serde_json::Value>().await {
+                let framework = json
+                    .get("framework")
+                    .and_then(|v| v.as_str())
+                    .map(String::from);
+                let updated_at = json.get("updatedAt").and_then(|v| v.as_u64());
+
+                let mut domains = Vec::new();
+                let mut primary_domain = None;
+
+                if let Some(aliases) = json
+                    .get("targets")
+                    .and_then(|t| t.get("production"))
+                    .and_then(|p| p.get("alias"))
+                    .and_then(|a| a.as_array())
+                {
+                    for a in aliases {
+                        if let Some(d) = a.as_str() {
+                            domains.push(d.to_string());
+                        }
+                    }
+                }
+
+                if let Some(u) = json
+                    .get("targets")
+                    .and_then(|t| t.get("production"))
+                    .and_then(|p| p.get("url"))
+                    .and_then(|v| v.as_str())
+                {
+                    primary_domain = Some(u.to_string());
+                } else if !domains.is_empty() {
+                    primary_domain = Some(domains[0].clone());
+                }
+
+                let git_repo = json.get("link").and_then(|l| {
+                    let org = l.get("org").and_then(|v| v.as_str())?;
+                    let repo = l.get("repo").and_then(|v| v.as_str())?;
+                    Some(format!("{}/{}", org, repo))
+                });
+
+                project_meta = Some(VercelProjectMeta {
+                    domain: primary_domain,
+                    domains,
+                    framework,
+                    git_repo,
+                    updated_at,
+                });
+            }
+        }
+    }
+
     info!(
-        "Successfully fetched Vercel data for '{}' ({} deployments)",
+        "Successfully fetched Vercel data for '{}' ({} deployments, domain: {:?})",
         clean_project,
-        parsed_deployments.len()
+        parsed_deployments.len(),
+        project_meta.as_ref().and_then(|m| m.domain.as_ref())
     );
 
     let data = VercelData {
         project_id: clean_project.to_string(),
+        meta: project_meta,
         deployments: parsed_deployments,
     };
 

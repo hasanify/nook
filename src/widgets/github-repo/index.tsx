@@ -70,6 +70,8 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
       : "";
 
   const showStars = instance.settings.showStars !== false;
+  const showForks = instance.settings.showForks !== false;
+  const showIssues = instance.settings.showIssues !== false;
   const showRelease = instance.settings.showRelease !== false;
   const showRuns = instance.settings.showRuns !== false;
   const showCommits = instance.settings.showCommits !== false;
@@ -161,8 +163,10 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
       }
     >
       <div className="flex h-full flex-col gap-2.5 overflow-hidden select-none">
-        {/* Badges / Meta bar (Stars, Release, Forks) */}
-        {((showStars && (data?.stars !== undefined || data?.forks !== undefined)) ||
+        {/* Badges / Meta bar (Stars, Release, Forks, Issues) */}
+        {((showStars && data?.stars !== undefined) ||
+          (showForks && data?.forks !== undefined && data.forks > 0) ||
+          (showIssues && data?.open_issues !== undefined) ||
           (showRelease && data?.latest_release)) && (
           <div className="flex flex-wrap items-center gap-1.5 border-b border-line/40 pb-2 text-[11px]">
             {showStars && data?.stars !== undefined && (
@@ -181,7 +185,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               </button>
             )}
 
-            {showStars && data?.forks !== undefined && data.forks > 0 && (
+            {showForks && data?.forks !== undefined && data.forks > 0 && (
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/network/members`)}
@@ -203,6 +207,29 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 </svg>
                 <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
                   {formatCount(data.forks)}
+                </span>
+              </button>
+            )}
+
+            {showIssues && data?.open_issues !== undefined && (
+              <button
+                type="button"
+                onClick={() => handleOpenLink(`https://github.com/${repo}/issues`)}
+                className="group flex items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                title="Open Issues"
+              >
+                <svg
+                  className="text-emerald-500 h-3 w-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="1" fill="currentColor" />
+                </svg>
+                <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
+                  {formatCount(data.open_issues)} issues
                 </span>
               </button>
             )}
@@ -326,9 +353,13 @@ const module: WidgetModule = {
     repository: "",
     branch: "main",
     showStars: true,
+    showForks: true,
+    showIssues: true,
     showRelease: true,
     showRuns: true,
     showCommits: true,
+    commitCount: 5,
+    pollInterval: 60,
   },
   defaultState: {},
 };

@@ -1,10 +1,10 @@
 {
   "id": "vercel-project",
   "name": "Vercel Project",
-  "description": "Deployment states, domains, and production build health",
-  "version": "1.0.0",
+  "description": "Deployment states, live domains, git repo, and production build health",
+  "version": "1.1.0",
   "author": "Nook",
-  "defaultSize": { "w": 320, "h": 250 },
+  "defaultSize": { "w": 320, "h": 260 },
   "minSize": { "w": 260, "h": 190 },
   "resizable": true,
   "settingsSchema": [
@@ -15,6 +15,42 @@
       "placeholder": "my-app",
       "defaultValue": "",
       "autocomplete": "vercel-projects"
+    },
+    {
+      "key": "showDomain",
+      "label": "Show Live Domain Link",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showFramework",
+      "label": "Show Framework & Git Repo",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "pollInterval",
+      "label": "Auto-Refresh Interval",
+      "type": "select",
+      "defaultValue": 30,
+      "options": [
+        { "label": "Every 15 seconds", "value": 15 },
+        { "label": "Every 30 seconds (Default)", "value": 30 },
+        { "label": "Every minute", "value": 60 },
+        { "label": "Every 2 minutes", "value": 120 },
+        { "label": "Every 5 minutes", "value": 300 }
+      ]
+    },
+    {
+      "key": "limit",
+      "label": "Recent Deployments",
+      "type": "select",
+      "defaultValue": 5,
+      "options": [
+        { "label": "3 deployments", "value": 3 },
+        { "label": "5 deployments (Default)", "value": 5 },
+        { "label": "10 deployments", "value": 10 }
+      ]
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "id": "github-repo",
   "name": "GitHub Repo",
-  "description": "Recent commits, workflow runs, stars, and release status",
-  "version": "1.1.0",
+  "description": "Recent commits, workflow runs, stars, forks, and release status",
+  "version": "1.2.0",
   "author": "Nook",
   "defaultSize": { "w": 320, "h": 270 },
   "minSize": { "w": 260, "h": 200 },
@@ -24,7 +24,19 @@
     },
     {
       "key": "showStars",
-      "label": "Show Stars & Forks",
+      "label": "Show Stars",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showForks",
+      "label": "Show Forks",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showIssues",
+      "label": "Show Open Issues",
       "type": "boolean",
       "defaultValue": true
     },
@@ -45,6 +57,32 @@
       "label": "Show Recent Commits",
       "type": "boolean",
       "defaultValue": true
+    },
+    {
+      "key": "commitCount",
+      "label": "Recent Commits Count",
+      "type": "select",
+      "defaultValue": 5,
+      "options": [
+        { "label": "3 commits", "value": 3 },
+        { "label": "5 commits (Default)", "value": 5 },
+        { "label": "10 commits", "value": 10 },
+        { "label": "15 commits", "value": 15 }
+      ]
+    },
+    {
+      "key": "pollInterval",
+      "label": "Auto-Refresh Interval",
+      "type": "select",
+      "defaultValue": 60,
+      "options": [
+        { "label": "Every 15 seconds", "value": 15 },
+        { "label": "Every 30 seconds", "value": 30 },
+        { "label": "Every minute (Default)", "value": 60 },
+        { "label": "Every 2 minutes", "value": 120 },
+        { "label": "Every 5 minutes", "value": 300 },
+        { "label": "Every 10 minutes", "value": 600 }
+      ]
     }
   ]
 }
