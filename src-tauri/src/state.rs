@@ -1,4 +1,5 @@
 use crate::config::ConfigManager;
+use crate::poller::PollerManager;
 use crate::timer::TimerScheduler;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -7,6 +8,7 @@ pub struct AppState {
     pub config: Arc<ConfigManager>,
     pub edit_mode: Arc<AtomicBool>,
     pub timer_scheduler: Arc<TimerScheduler>,
+    pub poller: Arc<PollerManager>,
 }
 
 impl Default for AppState {
@@ -21,6 +23,7 @@ impl AppState {
             config: Arc::new(ConfigManager::new()),
             edit_mode: Arc::new(AtomicBool::new(false)),
             timer_scheduler: Arc::new(TimerScheduler::new()),
+            poller: Arc::new(PollerManager::new()),
         }
     }
 

@@ -73,3 +73,13 @@ export interface WidgetModule {
   defaultSettings: Record<string, unknown>;
   defaultState: Record<string, unknown>;
 }
+
+export type ProviderStatus =
+  "ok" | "syncing" | "offline" | "bad-token" | "rate-limited" | "not-found" | "error";
+
+export interface ProviderPayload<T = unknown> {
+  status: ProviderStatus;
+  message?: string;
+  data?: T;
+  updated_at: number;
+}

@@ -104,6 +104,41 @@ export async function timerCancel(id: string): Promise<void> {
   return invoke<void>("timer_cancel", { id });
 }
 
+export async function saveAccountToken(provider: string, token: string): Promise<void> {
+  return invoke<void>("save_account_token", { provider, token });
+}
+
+export async function clearAccountToken(provider: string): Promise<void> {
+  return invoke<void>("clear_account_token", { provider });
+}
+
+export async function hasAccountToken(provider: string): Promise<boolean> {
+  return invoke<boolean>("has_account_token", { provider });
+}
+
+export async function getProviderSnapshot<T = unknown>(
+  widgetId: string,
+): Promise<import("./types").ProviderPayload<T> | null> {
+  return invoke<import("./types").ProviderPayload<T> | null>("get_provider_snapshot", { widgetId });
+}
+
+export async function refreshWidgetProvider<T = unknown>(
+  widgetId: string,
+): Promise<import("./types").ProviderPayload<T> | null> {
+  return invoke<import("./types").ProviderPayload<T> | null>("refresh_widget_provider", {
+    widgetId,
+  });
+}
+
+export function onProviderData<T = unknown>(
+  widgetId: string,
+  callback: (payload: import("./types").ProviderPayload<T>) => void,
+): Promise<UnlistenFn> {
+  return listen<import("./types").ProviderPayload<T>>(`provider-data-${widgetId}`, (event) => {
+    callback(event.payload);
+  });
+}
+
 export function onConfigChanged(
   callback: (payload: ConfigChangedPayload) => void,
 ): Promise<UnlistenFn> {

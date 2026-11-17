@@ -9,6 +9,9 @@ import {
   removeWidget,
   addWidget,
   onConfigChanged,
+  hasAccountToken,
+  saveAccountToken,
+  clearAccountToken,
 } from "../core/ipc";
 import { SettingsForm } from "../components/SettingsForm";
 import { WIDGET_REGISTRY } from "../widgets/registry";
@@ -26,8 +29,21 @@ export function SettingsApp() {
   });
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [autostartEnabled, setAutostartEnabled] = useState(false);
+  const [githubConfigured, setGithubConfigured] = useState(false);
+  const [vercelConfigured, setVercelConfigured] = useState(false);
+  const [githubInput, setGithubInput] = useState("");
+  const [vercelInput, setVercelInput] = useState("");
 
   const { editMode, toggleEditMode } = useEditMode();
+
+  const refreshAccountStatus = useCallback(() => {
+    hasAccountToken("github")
+      .then((has) => setGithubConfigured(has))
+      .catch(() => {});
+    hasAccountToken("vercel")
+      .then((has) => setVercelConfigured(has))
+      .catch(() => {});
+  }, []);
 
   // Load config & autostart
   const fetchConfig = useCallback(() => {
@@ -41,6 +57,7 @@ export function SettingsApp() {
 
   useEffect(() => {
     fetchConfig();
+    refreshAccountStatus();
 
     isEnabled()
       .then((enabled) => setAutostartEnabled(enabled))
@@ -56,7 +73,31 @@ export function SettingsApp() {
     return () => {
       if (unlisten) unlisten();
     };
-  }, [fetchConfig]);
+  }, [fetchConfig, refreshAccountStatus]);
+
+  const handleSaveGithubToken = async () => {
+    if (!githubInput.trim()) return;
+    await saveAccountToken("github", githubInput.trim());
+    setGithubInput("");
+    refreshAccountStatus();
+  };
+
+  const handleClearGithubToken = async () => {
+    await clearAccountToken("github");
+    refreshAccountStatus();
+  };
+
+  const handleSaveVercelToken = async () => {
+    if (!vercelInput.trim()) return;
+    await saveAccountToken("vercel", vercelInput.trim());
+    setVercelInput("");
+    refreshAccountStatus();
+  };
+
+  const handleClearVercelToken = async () => {
+    await clearAccountToken("vercel");
+    refreshAccountStatus();
+  };
 
   const handleThemeChange = (theme: "system" | "light" | "dark") => {
     if (!config) return;
@@ -248,9 +289,18 @@ export function SettingsApp() {
 
             {/* GitHub Token */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="gh-token-input" className="font-medium text-fg">
-                GitHub Personal Access Token
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="gh-token-input" className="font-medium text-fg">
+                  GitHub Personal Access Token
+                </label>
+                <span
+                  className={`text-[10px] font-medium ${
+                    githubConfigured ? "text-ok" : "text-fg-muted"
+                  }`}
+                >
+                  {githubConfigured ? "Configured ✓" : "Not configured"}
+                </span>
+              </div>
               <p className="text-[11px] text-fg-muted">
                 Requires read scope for private repos. Public repos do not strictly require a token.
               </p>
@@ -258,23 +308,44 @@ export function SettingsApp() {
                 <input
                   id="gh-token-input"
                   type="password"
+                  value={githubInput}
+                  onChange={(e) => setGithubInput(e.target.value)}
                   placeholder="ghp_••••••••••••••••••••••••••••••••••••"
                   className="flex-1 rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
                 />
                 <button
                   type="button"
-                  className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium hover:bg-accent-600"
+                  onClick={() => void handleSaveGithubToken()}
+                  className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
                 >
                   Save
                 </button>
+                {githubConfigured && (
+                  <button
+                    type="button"
+                    onClick={() => void handleClearGithubToken()}
+                    className="hover:text-error rounded-md border border-line bg-surface-raised px-2.5 py-1.5 font-medium text-fg-muted transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Vercel Token */}
             <div className="flex flex-col gap-2 border-t border-line pt-4">
-              <label htmlFor="vercel-token-input" className="font-medium text-fg">
-                Vercel API Token
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="vercel-token-input" className="font-medium text-fg">
+                  Vercel API Token
+                </label>
+                <span
+                  className={`text-[10px] font-medium ${
+                    vercelConfigured ? "text-ok" : "text-fg-muted"
+                  }`}
+                >
+                  {vercelConfigured ? "Configured ✓" : "Not configured"}
+                </span>
+              </div>
               <p className="text-[11px] text-fg-muted">
                 Used to fetch deployment states and build health.
               </p>
@@ -282,15 +353,27 @@ export function SettingsApp() {
                 <input
                   id="vercel-token-input"
                   type="password"
+                  value={vercelInput}
+                  onChange={(e) => setVercelInput(e.target.value)}
                   placeholder="••••••••••••••••••••••••"
                   className="flex-1 rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
                 />
                 <button
                   type="button"
-                  className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium hover:bg-accent-600"
+                  onClick={() => void handleSaveVercelToken()}
+                  className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
                 >
                   Save
                 </button>
+                {vercelConfigured && (
+                  <button
+                    type="button"
+                    onClick={() => void handleClearVercelToken()}
+                    className="hover:text-error rounded-md border border-line bg-surface-raised px-2.5 py-1.5 font-medium text-fg-muted transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
             </div>
           </div>

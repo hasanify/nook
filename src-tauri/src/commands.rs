@@ -242,3 +242,35 @@ pub async fn timer_cancel(id: String, state: tauri::State<'_, AppState>) -> Resu
     state.timer_scheduler.cancel(&id).await;
     Ok(())
 }
+
+#[tauri::command]
+pub fn save_account_token(provider: String, token: String) -> Result<(), String> {
+    crate::secrets::set_secret(&provider, &token)
+}
+
+#[tauri::command]
+pub fn clear_account_token(provider: String) -> Result<(), String> {
+    crate::secrets::delete_secret(&provider)
+}
+
+#[tauri::command]
+pub fn has_account_token(provider: String) -> bool {
+    crate::secrets::has_secret(&provider)
+}
+
+#[tauri::command]
+pub async fn get_provider_snapshot(
+    widget_id: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<Option<crate::providers::ProviderPayload>, String> {
+    Ok(state.poller.get_snapshot(&widget_id).await)
+}
+
+#[tauri::command]
+pub async fn refresh_widget_provider(
+    app: AppHandle,
+    widget_id: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<Option<crate::providers::ProviderPayload>, String> {
+    Ok(state.poller.poll_widget_now(&app, &widget_id).await)
+}

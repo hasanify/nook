@@ -2,7 +2,10 @@ pub mod commands;
 pub mod config;
 pub mod migrations;
 pub mod pin;
+pub mod poller;
+pub mod providers;
 pub mod registry;
+pub mod secrets;
 pub mod shell_watch;
 pub mod state;
 pub mod timer;
@@ -56,6 +59,10 @@ pub fn run() {
             // Start background explorer recovery watcher
             shell_watch::start_shell_watch(handle.clone());
 
+            // Start shared background HTTP poller
+            let state = handle.state::<AppState>();
+            state.poller.start_background_loop(handle.clone());
+
             // Spawn or restore configured widgets
             windows::ensure_all_widgets(&handle).map_err(Box::<dyn std::error::Error>::from)?;
 
@@ -99,6 +106,11 @@ pub fn run() {
             commands::get_all_manifests,
             commands::timer_schedule,
             commands::timer_cancel,
+            commands::save_account_token,
+            commands::clear_account_token,
+            commands::has_account_token,
+            commands::get_provider_snapshot,
+            commands::refresh_widget_provider,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
