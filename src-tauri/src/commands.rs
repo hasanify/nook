@@ -90,6 +90,11 @@ pub fn set_bounds(
 }
 
 #[tauri::command]
+pub fn get_edit_mode(state: tauri::State<AppState>) -> bool {
+    state.is_edit_mode()
+}
+
+#[tauri::command]
 pub fn set_edit_mode(app: AppHandle, on: bool) -> Result<(), String> {
     let state = app.state::<AppState>();
     state.set_edit_mode(on);
@@ -176,4 +181,42 @@ pub fn update_settings(
 #[tauri::command]
 pub fn verify_desktop_pin(app: AppHandle, id: String) -> Result<bool, String> {
     windows::verify_widget_pin(&app, &id)
+}
+
+#[tauri::command]
+pub fn update_app_config(
+    app: AppHandle,
+    theme: Option<String>,
+    grid_snap: Option<i32>,
+    autostart: Option<bool>,
+) -> Result<(), String> {
+    let state = app.state::<AppState>();
+    state.config.update_config(|cfg| {
+        if let Some(t) = theme {
+            cfg.app.theme = t;
+        }
+        if let Some(g) = grid_snap {
+            cfg.app.grid_snap = g;
+        }
+        if let Some(a) = autostart {
+            cfg.app.autostart = a;
+        }
+    });
+
+    let _ = app.emit(
+        "config-changed",
+        serde_json::json!({ "ids": [], "app": true }),
+    );
+    Ok(())
+}
+
+#[tauri::command]
+pub fn open_settings_window(app: AppHandle, widget_id: Option<String>) -> Result<(), String> {
+    windows::open_settings_window(&app, widget_id)
+}
+
+#[tauri::command]
+pub fn get_all_manifests() -> Vec<crate::registry::WidgetManifest> {
+    let reg = crate::registry::ManifestRegistry::new();
+    reg.list().into_iter().cloned().collect()
 }

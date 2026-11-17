@@ -1,0 +1,29 @@
+{
+  "id": "timer",
+  "name": "Timer",
+  "description": "Countdown, stopwatch, and Pomodoro focus timer",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 260, "h": 190 },
+  "minSize": { "w": 220, "h": 160 },
+  "resizable": false,
+  "settingsSchema": [
+    {
+      "key": "mode",
+      "label": "Default Mode",
+      "type": "select",
+      "defaultValue": "pomodoro",
+      "options": [
+        { "label": "Pomodoro", "value": "pomodoro" },
+        { "label": "Countdown", "value": "countdown" },
+        { "label": "Stopwatch", "value": "stopwatch" }
+      ]
+    },
+    {
+      "key": "soundNotification",
+      "label": "Sound Alert on Completion",
+      "type": "boolean",
+      "defaultValue": true
+    }
+  ]
+}

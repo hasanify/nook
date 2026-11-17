@@ -7,7 +7,9 @@ export function useTheme() {
   useEffect(() => {
     // Initial fetch
     getAppConfig()
-      .then((cfg) => setTheme(cfg.theme))
+      .then((cfg) => {
+        if (cfg.app?.theme) setTheme(cfg.app.theme);
+      })
       .catch(() => {});
 
     // Listen to config changes
@@ -15,7 +17,9 @@ export function useTheme() {
     onConfigChanged((payload) => {
       if (payload.app) {
         getAppConfig()
-          .then((cfg) => setTheme(cfg.theme))
+          .then((cfg) => {
+            if (cfg.app?.theme) setTheme(cfg.app.theme);
+          })
           .catch(() => {});
       }
     }).then((fn) => {

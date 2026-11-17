@@ -2,11 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getInstance, updateState, updateSettings, onConfigChanged } from "./ipc";
 import type { WidgetInstance } from "./types";
 
-export function useInstance<
-  Settings extends Record<string, unknown> = Record<string, unknown>,
-  State extends Record<string, unknown> = Record<string, unknown>,
->(id: string) {
-  const [instance, setInstance] = useState<WidgetInstance<Settings, State> | null>(null);
+export function useInstance(id: string) {
+  const [instance, setInstance] = useState<WidgetInstance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +13,7 @@ export function useInstance<
   const fetchInstance = useCallback(() => {
     getInstance(id)
       .then((data) => {
-        setInstance(data as WidgetInstance<Settings, State>);
+        setInstance(data);
         setError(null);
         setLoading(false);
       })
@@ -48,7 +45,7 @@ export function useInstance<
 
   // Patch state (debounced 500ms)
   const patchState = useCallback(
-    (patch: Partial<State>) => {
+    (patch: Record<string, unknown>) => {
       setInstance((prev) => {
         if (!prev) return null;
         return {
@@ -77,7 +74,7 @@ export function useInstance<
 
   // Patch settings
   const patchSettings = useCallback(
-    (patch: Partial<Settings>) => {
+    (patch: Record<string, unknown>) => {
       setInstance((prev) => {
         if (!prev) return null;
         return {
@@ -86,7 +83,7 @@ export function useInstance<
         };
       });
 
-      void updateSettings(id, patch as Record<string, unknown>);
+      void updateSettings(id, patch);
     },
     [id],
   );

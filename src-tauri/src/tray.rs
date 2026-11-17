@@ -1,6 +1,6 @@
 use crate::state::AppState;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, Submenu};
-use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager};
 use tracing::{error, info};
 
@@ -16,18 +16,38 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
     let icon = tauri::image::Image::from_bytes(icon_bytes)
         .map_err(|e| format!("Failed to load tray icon image: {}", e))?;
 
-    // Add Widget Submenu
-    let add_placeholder = MenuItem::with_id(
+    // Add Widget Submenu items
+    let add_notes = MenuItem::with_id(app, "add:notes", "Notes", true, None::<&str>)
+        .map_err(|e| e.to_string())?;
+    let add_timer = MenuItem::with_id(app, "add:timer", "Timer", true, None::<&str>)
+        .map_err(|e| e.to_string())?;
+    let add_github = MenuItem::with_id(app, "add:github-repo", "GitHub Repo", true, None::<&str>)
+        .map_err(|e| e.to_string())?;
+    let add_vercel = MenuItem::with_id(
         app,
-        ADD_PLACEHOLDER_ID,
-        "Placeholder Widget",
+        "add:vercel-project",
+        "Vercel Project",
         true,
         None::<&str>,
     )
     .map_err(|e| e.to_string())?;
+    let add_placeholder =
+        MenuItem::with_id(app, ADD_PLACEHOLDER_ID, "Spike Widget", true, None::<&str>)
+            .map_err(|e| e.to_string())?;
 
-    let add_submenu = Submenu::with_items(app, "Add widget", true, &[&add_placeholder])
-        .map_err(|e| e.to_string())?;
+    let add_submenu = Submenu::with_items(
+        app,
+        "Add widget",
+        true,
+        &[
+            &add_notes,
+            &add_timer,
+            &add_github,
+            &add_vercel,
+            &add_placeholder,
+        ],
+    )
+    .map_err(|e| e.to_string())?;
 
     let edit_item = CheckMenuItem::with_id(
         app,
@@ -72,7 +92,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
                 }
                 SETTINGS_ID => {
                     info!("Tray Settings clicked");
-                    let _ = app.emit("open-settings", serde_json::json!({}));
+                    let _ = crate::windows::open_settings_window(app, None);
                 }
                 QUIT_ID => {
                     info!("Tray Quit clicked, flushing config and exiting");
@@ -96,14 +116,10 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
                 }
             }
         })
-        .on_tray_icon_event(|_tray, event| {
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {
-                // Left click opens the menu automatically with show_menu_on_left_click(true)
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::DoubleClick { .. } = event {
+                info!("Tray double-clicked, opening settings");
+                let _ = crate::windows::open_settings_window(tray.app_handle(), None);
             }
         })
         .build(app)

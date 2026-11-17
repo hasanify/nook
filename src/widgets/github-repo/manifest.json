@@ -1,0 +1,26 @@
+{
+  "id": "github-repo",
+  "name": "GitHub Repo",
+  "description": "Recent commits, workflow runs, and repository status",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 260 },
+  "minSize": { "w": 260, "h": 200 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "repository",
+      "label": "Repository (owner/repo)",
+      "type": "text",
+      "placeholder": "facebook/react",
+      "defaultValue": ""
+    },
+    {
+      "key": "branch",
+      "label": "Branch",
+      "type": "text",
+      "placeholder": "main",
+      "defaultValue": "main"
+    }
+  ]
+}

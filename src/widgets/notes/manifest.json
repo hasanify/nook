@@ -1,0 +1,29 @@
+{
+  "id": "notes",
+  "name": "Notes",
+  "description": "Quick scratchpad with auto-saving text",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 240 },
+  "minSize": { "w": 200, "h": 160 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "fontSize",
+      "label": "Font Size",
+      "type": "select",
+      "defaultValue": "13",
+      "options": [
+        { "label": "Small (11px)", "value": "11" },
+        { "label": "Medium (13px)", "value": "13" },
+        { "label": "Large (15px)", "value": "15" }
+      ]
+    },
+    {
+      "key": "lineWrapping",
+      "label": "Wrap Lines",
+      "type": "boolean",
+      "defaultValue": true
+    }
+  ]
+}

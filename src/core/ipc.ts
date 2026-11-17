@@ -42,6 +42,10 @@ export async function setBounds(
   return invoke<void>("set_bounds", { id, x, y, w, h, commit });
 }
 
+export async function getEditMode(): Promise<boolean> {
+  return invoke<boolean>("get_edit_mode");
+}
+
 export async function setEditMode(on: boolean): Promise<void> {
   return invoke<void>("set_edit_mode", { on });
 }
@@ -64,6 +68,22 @@ export async function updateSettings(id: string, patch: Record<string, unknown>)
 
 export async function verifyDesktopPin(id: string): Promise<boolean> {
   return invoke<boolean>("verify_desktop_pin", { id });
+}
+
+export async function updateAppConfig(patch: {
+  theme?: string;
+  gridSnap?: number;
+  autostart?: boolean;
+}): Promise<void> {
+  return invoke<void>("update_app_config", {
+    theme: patch.theme,
+    grid_snap: patch.gridSnap,
+    autostart: patch.autostart,
+  });
+}
+
+export async function openSettingsWindow(widgetId?: string): Promise<void> {
+  return invoke<void>("open_settings_window", { widgetId });
 }
 
 export function onConfigChanged(

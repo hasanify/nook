@@ -1,7 +1,7 @@
 use crate::config::{MonitorRef, Rect, WidgetInstance};
 use crate::pin::{self, PinStrategy};
 use crate::state::AppState;
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tracing::{info, warn};
 use windows::Win32::Foundation::{HWND, RECT};
 
@@ -73,14 +73,23 @@ pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, S
     let existing_count = state.config.get_config().widgets.len();
     let stagger_offset = 24 * (existing_count as i32 % 6);
 
+    let (default_w, default_h) = {
+        let reg = crate::registry::ManifestRegistry::new();
+        if let Some(m) = reg.get(kind) {
+            (m.default_size.w, m.default_size.h)
+        } else {
+            (320, 240)
+        }
+    };
+
     let instance = WidgetInstance {
         id: id.clone(),
         kind: kind.to_string(),
         rect: Rect {
             x: 160 + stagger_offset,
             y: 120 + stagger_offset,
-            w: 320,
-            h: 240,
+            w: default_w,
+            h: default_h,
         },
         monitor: MonitorRef::default(),
         opacity: 0.95,
@@ -298,4 +307,38 @@ pub fn verify_widget_pin(app: &AppHandle, id: &str) -> Result<bool, String> {
         }
     }
     Ok(false)
+}
+
+pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Result<(), String> {
+    const LABEL: &str = "settings";
+
+    if let Some(window) = app.get_webview_window(LABEL) {
+        let _ = window.show();
+        let _ = window.set_focus();
+        if let Some(w_id) = widget_id {
+            let _ = window.emit("focus-widget", serde_json::json!({ "id": w_id }));
+        }
+        return Ok(());
+    }
+
+    let url_str = match &widget_id {
+        Some(w_id) => format!("index.html?view=settings&w={}", w_id),
+        None => "index.html?view=settings".to_string(),
+    };
+    let url = WebviewUrl::App(url_str.into());
+
+    let window = WebviewWindowBuilder::new(app, LABEL, url)
+        .title("Nook Settings")
+        .decorations(true)
+        .skip_taskbar(true)
+        .resizable(true)
+        .inner_size(680.0, 560.0)
+        .min_inner_size(520.0, 420.0)
+        .center()
+        .build()
+        .map_err(|e| format!("Failed to create settings window: {}", e))?;
+
+    let _ = window.show();
+    let _ = window.set_focus();
+    Ok(())
 }

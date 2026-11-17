@@ -2,6 +2,7 @@ pub mod commands;
 pub mod config;
 pub mod migrations;
 pub mod pin;
+pub mod registry;
 pub mod shell_watch;
 pub mod state;
 pub mod tray;
@@ -37,7 +38,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             info!("Second instance launched, activating Settings/widgets");
-            let _ = app.emit("open-settings", serde_json::json!({}));
+            let _ = crate::windows::open_settings_window(app, None);
         }))
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
@@ -84,12 +85,16 @@ pub fn run() {
             commands::duplicate_widget,
             commands::remove_widget,
             commands::set_bounds,
+            commands::get_edit_mode,
             commands::set_edit_mode,
             commands::set_opacity,
             commands::set_always_on_top,
             commands::update_state,
             commands::update_settings,
             commands::verify_desktop_pin,
+            commands::update_app_config,
+            commands::open_settings_window,
+            commands::get_all_manifests,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

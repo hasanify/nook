@@ -1,0 +1,19 @@
+{
+  "id": "vercel-project",
+  "name": "Vercel Project",
+  "description": "Deployment states, domains, and production build health",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 250 },
+  "minSize": { "w": 260, "h": 190 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "projectId",
+      "label": "Project Name or ID",
+      "type": "text",
+      "placeholder": "my-app",
+      "defaultValue": ""
+    }
+  ]
+}

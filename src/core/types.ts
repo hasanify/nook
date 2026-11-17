@@ -11,26 +11,26 @@ export interface MonitorRef {
   bounds: Rect;
 }
 
-export interface WidgetInstance<
-  Settings extends Record<string, unknown> = Record<string, unknown>,
-  State extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface WidgetInstance {
   id: string;
   kind: string;
   rect: Rect;
   opacity: number;
   always_on_top: boolean;
   monitor: MonitorRef;
-  settings: Settings;
-  state: State;
+  settings: Record<string, unknown>;
+  state: Record<string, unknown>;
 }
 
 export interface AppConfig {
   version: number;
-  theme: "system" | "light" | "dark";
-  grid_snap: number;
-  edit_mode: boolean;
-  default_monitor: string;
+  app: {
+    theme: "system" | "light" | "dark";
+    autostart: boolean;
+    editHotkey: string;
+    gridSnap: number;
+    pinStrategy: string;
+  };
   widgets: WidgetInstance[];
 }
 
@@ -60,22 +60,16 @@ export interface Manifest {
   settingsSchema?: SettingsField[];
 }
 
-export interface WidgetProps<
-  Settings extends Record<string, unknown> = Record<string, unknown>,
-  State extends Record<string, unknown> = Record<string, unknown>,
-> {
-  instance: WidgetInstance<Settings, State>;
+export interface WidgetProps {
+  instance: WidgetInstance;
   editMode: boolean;
-  patchState: (patch: Partial<State>) => void;
-  patchSettings: (patch: Partial<Settings>) => void;
+  patchState: (patch: Record<string, unknown>) => void;
+  patchSettings: (patch: Record<string, unknown>) => void;
 }
 
-export interface WidgetModule<
-  Settings extends Record<string, unknown> = Record<string, unknown>,
-  State extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface WidgetModule {
   manifest: Manifest;
-  component: React.ComponentType<WidgetProps<Settings, State>>;
-  defaultSettings: Settings;
-  defaultState: State;
+  component: React.ComponentType<WidgetProps>;
+  defaultSettings: Record<string, unknown>;
+  defaultState: Record<string, unknown>;
 }

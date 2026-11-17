@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { getAppConfig, setEditMode as ipcSetEditMode, onEditMode } from "./ipc";
+import { getEditMode, setEditMode as ipcSetEditMode, onEditMode } from "./ipc";
 
 export function useEditMode() {
   const [editMode, setEditModeState] = useState(false);
 
   useEffect(() => {
     // Initial fetch
-    getAppConfig()
-      .then((cfg) => setEditModeState(cfg.edit_mode))
+    getEditMode()
+      .then((on) => setEditModeState(on))
       .catch(() => {});
 
     // Listen to changes
