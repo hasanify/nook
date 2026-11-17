@@ -1,3 +1,9 @@
+## [0.6.2](https://github.com/hasanify/nook/compare/v0.6.1...v0.6.2) (2026-11-17)
+
+### Bug Fixes
+
+- resolve widget add crash, position placeholder in top right, and polish settings UI ([df57c4d](https://github.com/hasanify/nook/commit/df57c4d4eb2d57fce46b7d7312c01b85f9f2feef))
+
 ## [0.6.1](https://github.com/hasanify/nook/compare/v0.6.0...v0.6.1) (2026-11-17)
 
 # [0.6.0](https://github.com/hasanify/nook/compare/v0.5.0...v0.6.0) (2026-11-17)
