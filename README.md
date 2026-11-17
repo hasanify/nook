@@ -2,6 +2,15 @@
   <img src="banner.webp" alt="Nook" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/hasanify/nook/releases"><img src="https://img.shields.io/github/v/release/hasanify/nook?color=2563eb&label=release" alt="Release" /></a>
+  <a href="https://github.com/hasanify/nook/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/hasanify/nook/release.yml?branch=main&label=build" alt="Build Status" /></a>
+  <a href="https://hasanify.github.io/nook/"><img src="https://img.shields.io/badge/website-live-2563eb" alt="Website" /></a>
+  <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?logo=windows&logoColor=white" alt="Platform" />
+  <img src="https://img.shields.io/badge/Tauri-v2-24C8D8?logo=tauri&logoColor=white" alt="Tauri v2" />
+  <a href="https://github.com/hasanify/nook/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hasanify/nook?color=64748b" alt="License" /></a>
+</p>
+
 # Nook
 
 **Nook** is a lightweight, zero-configuration Windows-only desktop widget application built with Tauri v2, Rust, and React 19. Compact, borderless widgets (Notes, Timer, GitHub Repo, Vercel Project) sit directly on the desktop layer below standard application windows and survive `Win+D` ("Show Desktop") and "Hide desktop icons".
