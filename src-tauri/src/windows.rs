@@ -351,8 +351,8 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
         .decorations(true)
         .skip_taskbar(true)
         .resizable(true)
-        .inner_size(680.0, 560.0)
-        .min_inner_size(520.0, 420.0)
+        .inner_size(720.0, 600.0)
+        .min_inner_size(540.0, 440.0)
         .visible(false)
         .center();
 

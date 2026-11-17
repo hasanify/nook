@@ -369,10 +369,10 @@ export function SettingsApp() {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none p-6 text-xs">
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 pt-5 pb-8 text-xs">
         {/* GENERAL TAB */}
         {activeTab === "general" && (
-          <div className="flex w-full flex-col gap-6">
+          <div className="flex w-full flex-col gap-6 pb-8">
             {/* Appearance / Theme */}
             <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
               <span className="font-semibold text-fg">Appearance</span>
@@ -512,9 +512,9 @@ export function SettingsApp() {
 
         {/* WIDGETS TAB */}
         {activeTab === "widgets" && (
-          <div className="flex h-full gap-5">
+          <div className="flex h-full min-h-0 gap-5 pb-2">
             {/* Left Column: Widget List */}
-            <div className="flex w-52 shrink-0 flex-col gap-2 border-r border-line pr-4">
+            <div className="flex w-52 shrink-0 flex-col gap-2.5 border-r border-line/60 pr-4">
               <div className="flex items-center justify-between font-medium text-fg">
                 <span>Active Widgets</span>
                 <span className="font-mono text-[11px] text-fg-muted">
@@ -522,7 +522,7 @@ export function SettingsApp() {
                 </span>
               </div>
 
-              <div className="flex max-h-80 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-none">
+              <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-none pr-1">
                 {config?.widgets.map((w) => {
                   const widgetKind = w.kind || (w as unknown as { type?: string }).type || "";
                   const title =
@@ -566,7 +566,7 @@ export function SettingsApp() {
               </div>
 
               {/* Add Widget */}
-              <div className="mt-auto flex flex-col gap-1.5 border-t border-line/60 pt-3">
+              <div className="mt-auto flex shrink-0 flex-col gap-1.5 border-t border-line/60 pt-3 pb-2">
                 <span className="text-[11px] font-medium text-fg-muted">Add new widget:</span>
                 <div className="flex gap-1.5">
                   <select
@@ -596,9 +596,9 @@ export function SettingsApp() {
             </div>
 
             {/* Right Column: Widget Inspector */}
-            <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none pl-2">
+            <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none pr-2 pl-2">
               {selectedWidget ? (
-                <div className="flex w-full flex-col gap-5">
+                <div className="flex w-full flex-col gap-5 pb-12">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-sm font-semibold text-fg">
@@ -727,7 +727,7 @@ export function SettingsApp() {
                   )}
 
                   {/* Remove Widget */}
-                  <div className="border-t border-line/60 pt-4">
+                  <div className="border-t border-line/60 pt-4 pb-6">
                     <button
                       type="button"
                       onClick={() => void removeWidget(selectedWidget.id)}
@@ -760,7 +760,7 @@ export function SettingsApp() {
 
         {/* ACCOUNTS TAB */}
         {activeTab === "accounts" && (
-          <div className="flex w-full flex-col gap-6">
+          <div className="flex w-full flex-col gap-6 pb-8">
             <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
               <svg
                 className="h-4 w-4 shrink-0 text-accent-500"
@@ -899,7 +899,7 @@ export function SettingsApp() {
 
         {/* ABOUT TAB */}
         {activeTab === "about" && (
-          <div className="flex w-full flex-col gap-6">
+          <div className="flex w-full flex-col gap-6 pb-8">
             {/* Hero Card */}
             <div className="flex items-center gap-5 rounded-2xl border border-line/70 bg-gradient-to-br from-surface-raised/80 via-surface-raised/40 to-surface/20 p-6 backdrop-blur-xs">
               <img
