@@ -2,7 +2,7 @@ use crate::config::{MonitorRef, Rect, WidgetInstance};
 use crate::pin::{self, PinStrategy};
 use crate::state::AppState;
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
-use tracing::{info, warn};
+use tracing::info;
 use windows::Win32::Foundation::{HWND, RECT};
 
 pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), String> {
@@ -37,16 +37,7 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     let strategy = if instance.always_on_top {
         pin::detach_to_topmost(hwnd, instance.opacity)?
     } else {
-        match pin::attach(hwnd, instance.opacity) {
-            Ok(strat) => strat,
-            Err(err) => {
-                warn!(
-                    "Desktop attach failed for '{}' ({}), falling back to BottomToplevel",
-                    label, err
-                );
-                pin::attach_bottom(hwnd, instance.opacity)?
-            }
-        }
+        pin::attach_bottom(hwnd, instance.opacity)?
     };
 
     let screen_rect = RECT {
@@ -110,29 +101,6 @@ pub fn ensure_all_widgets(app: &AppHandle) -> Result<(), String> {
     let state = app.state::<AppState>();
     let config = state.config.get_config();
 
-    // If config has no widgets yet, spawn at least one placeholder widget for user interaction
-    if config.widgets.is_empty() {
-        let placeholder = WidgetInstance {
-            id: "placeholder".to_string(),
-            kind: "placeholder".to_string(),
-            rect: Rect {
-                x: 160,
-                y: 120,
-                w: 340,
-                h: 320,
-            },
-            monitor: MonitorRef::default(),
-            opacity: 0.95,
-            always_on_top: false,
-            settings: serde_json::Map::new(),
-            state: serde_json::Map::new(),
-        };
-        state.config.update_config(|cfg| {
-            cfg.widgets.push(placeholder.clone());
-        });
-        return spawn_widget(app, &placeholder);
-    }
-
     for instance in config.widgets {
         let label = format!("widget-{}", instance.id);
         if let Some(window) = app.get_webview_window(&label) {
@@ -140,7 +108,7 @@ pub fn ensure_all_widgets(app: &AppHandle) -> Result<(), String> {
                 let hwnd = HWND(raw_hwnd.0);
                 if !instance.always_on_top && !pin::verify(hwnd) {
                     info!("Widget '{}' lost desktop attach, re-attaching", label);
-                    let _ = pin::attach(hwnd, instance.opacity);
+                    let _ = pin::attach_bottom(hwnd, instance.opacity);
                 }
             }
         } else {
@@ -182,6 +150,18 @@ pub fn relayout_all_widgets(app: &AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+fn snap_to_grid(val: i32, grid: i32) -> i32 {
+    if grid <= 1 {
+        return val;
+    }
+    let half = grid / 2;
+    if val >= 0 {
+        ((val + half) / grid) * grid
+    } else {
+        ((val - half) / grid) * grid
+    }
+}
+
 pub fn update_widget_geometry(
     app: &AppHandle,
     id: &str,
@@ -203,13 +183,13 @@ pub fn update_widget_geometry(
     w = w.max(200);
     h = h.max(160);
 
-    // Grid snap if configured
+    // Grid snap if configured (> 1)
     let grid_snap = config.app.grid_snap;
-    if grid_snap > 0 {
-        x = (x / grid_snap) * grid_snap;
-        y = (y / grid_snap) * grid_snap;
-        w = (w / grid_snap) * grid_snap;
-        h = (h / grid_snap) * grid_snap;
+    if grid_snap > 1 {
+        x = snap_to_grid(x, grid_snap);
+        y = snap_to_grid(y, grid_snap);
+        w = snap_to_grid(w, grid_snap);
+        h = snap_to_grid(h, grid_snap);
     }
 
     let raw_hwnd = window
@@ -227,7 +207,7 @@ pub fn update_widget_geometry(
     let strategy = if is_always_on_top {
         PinStrategy::Topmost
     } else {
-        PinStrategy::AboveIcons
+        PinStrategy::BottomToplevel
     };
 
     let rect = RECT {

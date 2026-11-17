@@ -7,7 +7,6 @@ use tracing::{error, info};
 pub const EDIT_LAYOUT_ID: &str = "tray_edit_layout";
 pub const SETTINGS_ID: &str = "tray_settings";
 pub const QUIT_ID: &str = "tray_quit";
-pub const ADD_PLACEHOLDER_ID: &str = "add:placeholder";
 
 pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
     info!("Setting up system tray icon and menu");
@@ -31,21 +30,11 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
         None::<&str>,
     )
     .map_err(|e| e.to_string())?;
-    let add_placeholder =
-        MenuItem::with_id(app, ADD_PLACEHOLDER_ID, "Spike Widget", true, None::<&str>)
-            .map_err(|e| e.to_string())?;
-
     let add_submenu = Submenu::with_items(
         app,
         "Add widget",
         true,
-        &[
-            &add_notes,
-            &add_timer,
-            &add_github,
-            &add_vercel,
-            &add_placeholder,
-        ],
+        &[&add_notes, &add_timer, &add_github, &add_vercel],
     )
     .map_err(|e| e.to_string())?;
 
@@ -99,12 +88,6 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
                     let state = app.state::<AppState>();
                     state.config.flush();
                     app.exit(0);
-                }
-                ADD_PLACEHOLDER_ID => {
-                    info!("Tray Add placeholder clicked");
-                    if let Err(e) = crate::windows::spawn_new_widget(app, "placeholder") {
-                        error!("Failed to spawn widget: {}", e);
-                    }
                 }
                 other => {
                     if let Some(kind) = other.strip_prefix("add:") {

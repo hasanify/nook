@@ -6,15 +6,19 @@ import vercelProjectModule from "./vercel-project";
 import placeholderModule from "./placeholder";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
-  placeholder: placeholderModule,
   notes: notesModule,
   timer: timerModule,
   "github-repo": githubRepoModule,
   "vercel-project": vercelProjectModule,
 };
 
+const ALL_MODULES: Record<string, WidgetModule> = {
+  ...WIDGET_REGISTRY,
+  placeholder: placeholderModule,
+};
+
 export function getWidgetModule(kind: string): WidgetModule | undefined {
-  return WIDGET_REGISTRY[kind];
+  return ALL_MODULES[kind];
 }
 
 export function getAllManifests() {

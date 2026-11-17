@@ -243,11 +243,24 @@ pub fn set_bounds_screen(
         SetWindowPos(hwnd, None, x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE)
             .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
 
-        // Apply rounded window region if requested
+        // Apply rounded window region only if dimensions changed or first set
         if corner_radius > 0 {
-            let rgn = CreateRoundRectRgn(0, 0, w, h, corner_radius, corner_radius);
-            if !rgn.is_invalid() {
-                let _ = SetWindowRgn(hwnd, Some(rgn), true);
+            let mut current_rect = RECT::default();
+            let size_changed =
+                if windows::Win32::UI::WindowsAndMessaging::GetWindowRect(hwnd, &mut current_rect)
+                    .is_ok()
+                {
+                    (current_rect.right - current_rect.left != w)
+                        || (current_rect.bottom - current_rect.top != h)
+                } else {
+                    true
+                };
+
+            if size_changed {
+                let rgn = CreateRoundRectRgn(0, 0, w, h, corner_radius, corner_radius);
+                if !rgn.is_invalid() {
+                    let _ = SetWindowRgn(hwnd, Some(rgn), true);
+                }
             }
         }
 

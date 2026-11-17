@@ -30,10 +30,33 @@ export function EditOverlay({
   const resizeStart = useRef({ mouseX: 0, mouseY: 0, origW: 0, origH: 0 });
 
   const activeBoundsRef = useRef<Rect>(currentBounds);
+  const rafId = useRef<number | null>(null);
+  const pendingBounds = useRef<Rect | null>(null);
 
   useEffect(() => {
     activeBoundsRef.current = currentBounds;
   }, [currentBounds]);
+
+  useEffect(() => {
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
+
+  const scheduleBoundsUpdate = (bounds: Rect) => {
+    pendingBounds.current = bounds;
+    if (rafId.current === null) {
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        if (pendingBounds.current) {
+          activeBoundsRef.current = pendingBounds.current;
+          onBoundsChange(pendingBounds.current, false);
+        }
+      });
+    }
+  };
 
   // Handle Dragging
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -56,18 +79,23 @@ export function EditOverlay({
       x: dragStart.current.origX + deltaX,
       y: dragStart.current.origY + deltaY,
     };
-    onBoundsChange(nextBounds, false);
+    scheduleBoundsUpdate(nextBounds);
   };
 
   const handleDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging.current) return;
     isDragging.current = false;
+    if (rafId.current !== null) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       // Ignore
     }
-    onBoundsChange(activeBoundsRef.current, true);
+    const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
+    onBoundsChange(finalBounds, true);
   };
 
   // Handle Resizing
@@ -95,18 +123,23 @@ export function EditOverlay({
       w: nextW,
       h: nextH,
     };
-    onBoundsChange(nextBounds, false);
+    scheduleBoundsUpdate(nextBounds);
   };
 
   const handleResizeEnd = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isResizing.current) return;
     isResizing.current = false;
+    if (rafId.current !== null) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       // Ignore
     }
-    onBoundsChange(activeBoundsRef.current, true);
+    const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
+    onBoundsChange(finalBounds, true);
   };
 
   return (
