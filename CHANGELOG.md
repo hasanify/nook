@@ -1,3 +1,9 @@
+## [0.10.4](https://github.com/hasanify/nook/compare/v0.10.3...v0.10.4) (2026-11-17)
+
+### Bug Fixes
+
+- **settings:** fix bottom clipping in sidebar and inspector ([d986f44](https://github.com/hasanify/nook/commit/d986f4499acbb14e7fa6153864c152bc0fbd1f96))
+
 ## [0.10.3](https://github.com/hasanify/nook/compare/v0.10.2...v0.10.3) (2026-11-17)
 
 ### Bug Fixes
