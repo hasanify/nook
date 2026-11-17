@@ -1,3 +1,9 @@
+## [0.2.1](https://github.com/hasanify/nook/compare/v0.2.0...v0.2.1) (2026-11-17)
+
+### Bug Fixes
+
+- **icons:** remove icon padding and configure NSIS installerIcon ([d88399e](https://github.com/hasanify/nook/commit/d88399e0a69cfd071918da311650b4110f86ba02))
+
 # [0.2.0](https://github.com/hasanify/nook/compare/v0.1.0...v0.2.0) (2026-11-17)
 
 ### Bug Fixes
