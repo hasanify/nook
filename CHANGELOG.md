@@ -1,3 +1,9 @@
+# [0.8.0](https://github.com/hasanify/nook/compare/v0.7.1...v0.8.0) (2026-11-17)
+
+### Features
+
+- **widgets:** add domain links and configurable polling intervals for vercel and github widgets ([221abf7](https://github.com/hasanify/nook/commit/221abf7ee29213cb16a743a34653997a9ab40874))
+
 ## [0.7.1](https://github.com/hasanify/nook/compare/v0.7.0...v0.7.1) (2026-11-17)
 
 ### Bug Fixes
