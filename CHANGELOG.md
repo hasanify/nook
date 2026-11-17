@@ -1,3 +1,9 @@
+# [0.9.0](https://github.com/hasanify/nook/compare/v0.8.0...v0.9.0) (2026-11-17)
+
+### Features
+
+- **widgets:** add right-click context menu with edit and delete options, hide static edit button ([dfbd595](https://github.com/hasanify/nook/commit/dfbd595a146d26de9271c5ae9c24a46bfac70198))
+
 # [0.8.0](https://github.com/hasanify/nook/compare/v0.7.1...v0.8.0) (2026-11-17)
 
 ### Features
