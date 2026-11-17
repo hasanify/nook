@@ -1,3 +1,9 @@
+## [0.2.2](https://github.com/hasanify/nook/compare/v0.2.1...v0.2.2) (2026-11-17)
+
+### Bug Fixes
+
+- **core:** use tauri async runtime and dispatch shell watcher on main thread ([4ac6f4a](https://github.com/hasanify/nook/commit/4ac6f4aae9b5758b2d095943acbe2d9e1a30eb2e))
+
 ## [0.2.1](https://github.com/hasanify/nook/compare/v0.2.0...v0.2.1) (2026-11-17)
 
 ### Bug Fixes
