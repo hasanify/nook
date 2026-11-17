@@ -8,7 +8,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     SetLayeredWindowAttributes, SetParent, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE,
     HWND_BOTTOM, HWND_TOP, HWND_TOPMOST, LWA_ALPHA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
     SWP_NOSIZE, SWP_NOZORDER, WS_CHILD, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_LAYERED,
-    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP,
+    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -101,7 +101,9 @@ pub fn attach(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String> {
         SetParent(hwnd, Some(host)).map_err(|e| format!("SetParent failed: {}", e))?;
 
         let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
-        style = (style & !(WS_POPUP.0 as isize)) | WS_CHILD.0 as isize | WS_CLIPSIBLINGS.0 as isize;
+        style = (style & !(WS_POPUP.0 as isize | WS_SYSMENU.0 as isize))
+            | WS_CHILD.0 as isize
+            | WS_CLIPSIBLINGS.0 as isize;
         SetWindowLongPtrW(hwnd, GWL_STYLE, style);
 
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
@@ -150,7 +152,9 @@ pub fn attach_bottom(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String> {
         let _ = SetParent(hwnd, None);
 
         let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
-        style = (style & !(WS_CHILD.0 as isize)) | WS_POPUP.0 as isize | WS_CLIPSIBLINGS.0 as isize;
+        style = (style & !(WS_CHILD.0 as isize | WS_SYSMENU.0 as isize))
+            | WS_POPUP.0 as isize
+            | WS_CLIPSIBLINGS.0 as isize;
         SetWindowLongPtrW(hwnd, GWL_STYLE, style);
 
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
@@ -187,7 +191,9 @@ pub fn detach_to_topmost(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String
         let _ = SetParent(hwnd, None);
 
         let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
-        style = (style & !(WS_CHILD.0 as isize)) | WS_POPUP.0 as isize | WS_CLIPSIBLINGS.0 as isize;
+        style = (style & !(WS_CHILD.0 as isize | WS_SYSMENU.0 as isize))
+            | WS_POPUP.0 as isize
+            | WS_CLIPSIBLINGS.0 as isize;
         SetWindowLongPtrW(hwnd, GWL_STYLE, style);
 
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);

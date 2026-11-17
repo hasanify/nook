@@ -67,7 +67,6 @@ function VercelProjectInput({
         <input
           id={id}
           type="text"
-          list="vercel-projects-datalist"
           placeholder={placeholder}
           value={value}
           onChange={(e) => {
@@ -102,14 +101,6 @@ function VercelProjectInput({
           </div>
         )}
       </div>
-
-      <datalist id="vercel-projects-datalist">
-        {projects.map((p) => (
-          <option key={p.id} value={p.name}>
-            {p.id} ({p.framework || "other"})
-          </option>
-        ))}
-      </datalist>
 
       {isOpen && filtered.length > 0 && (
         <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-line bg-surface-raised p-1 shadow-card backdrop-blur-md">

@@ -79,6 +79,17 @@ document.addEventListener("contextmenu", (e) => {
   e.preventDefault();
 });
 
+// Prevent Alt+Space system menu from opening on widget windows
+const preventAltSpace = (e: KeyboardEvent) => {
+  const isWidget = new URLSearchParams(window.location.search).has("w");
+  if (isWidget && e.altKey && (e.code === "Space" || e.key === " ")) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+};
+window.addEventListener("keydown", preventAltSpace, { capture: true });
+window.addEventListener("keyup", preventAltSpace, { capture: true });
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Failed to find the root element");
