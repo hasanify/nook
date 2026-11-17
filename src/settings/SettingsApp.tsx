@@ -213,7 +213,7 @@ export function SettingsApp() {
   const selectedModule = selectedKind ? getWidgetModule(selectedKind) : undefined;
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-surface font-sans text-fg select-none">
+    <div className="flex h-full w-full flex-col overflow-hidden overscroll-none bg-surface font-sans text-fg select-none">
       {/* Tabs */}
       <div className="flex gap-1 border-b border-line/60 bg-surface-raised/40 px-5 pt-1.5 text-xs font-medium">
         <button
@@ -317,7 +317,7 @@ export function SettingsApp() {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-6 text-xs">
+      <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none p-6 text-xs">
         {/* GENERAL TAB */}
         {activeTab === "general" && (
           <div className="flex w-full flex-col gap-6">
@@ -470,7 +470,7 @@ export function SettingsApp() {
                 </span>
               </div>
 
-              <div className="flex max-h-80 flex-col gap-1.5 overflow-y-auto">
+              <div className="flex max-h-80 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-none">
                 {config?.widgets.map((w) => {
                   const widgetKind = w.kind || (w as unknown as { type?: string }).type || "";
                   const title =
@@ -544,7 +544,7 @@ export function SettingsApp() {
             </div>
 
             {/* Right Column: Widget Inspector */}
-            <div className="flex-1 overflow-y-auto pl-2">
+            <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none pl-2">
               {selectedWidget ? (
                 <div className="flex w-full flex-col gap-5">
                   <div className="flex items-center justify-between">

@@ -108,10 +108,17 @@
   body,
   #root {
     height: 100%;
+    width: 100%;
     margin: 0;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    overscroll-behavior-x: none;
   }
   body {
     @apply bg-surface font-sans text-base text-fg antialiased select-none;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    overscroll-behavior-x: none;
   }
   textarea,
   input {
