@@ -214,21 +214,7 @@ export function SettingsApp() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-line/60 bg-surface-raised/80 px-6 py-3.5 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-accent-500/30 bg-accent-500/15 text-accent-500 shadow-xs">
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect width="18" height="18" x="3" y="3" rx="4" />
-              <path d="M3 9h18" />
-              <path d="M9 21V9" />
-            </svg>
-          </div>
+          <img src="/icon.png" alt="Nook" className="h-7 w-7 rounded-lg shadow-xs" />
           <div>
             <h1 className="text-sm font-semibold tracking-tight text-fg">Nook Settings</h1>
           </div>
@@ -796,21 +782,11 @@ export function SettingsApp() {
           <div className="flex w-full flex-col gap-6">
             {/* Hero Card */}
             <div className="flex items-center gap-5 rounded-2xl border border-line/70 bg-gradient-to-br from-surface-raised/80 via-surface-raised/40 to-surface/20 p-6 backdrop-blur-xs">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-accent-500/30 bg-accent-500/15 text-accent-500 shadow-sm">
-                <svg
-                  className="h-8 w-8"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="18" height="18" x="3" y="3" rx="4" />
-                  <path d="M3 9h18" />
-                  <path d="M9 21V9" />
-                </svg>
-              </div>
+              <img
+                src="/icon.png"
+                alt="Nook"
+                className="h-16 w-16 shrink-0 rounded-2xl shadow-sm"
+              />
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2.5">
                   <h2 className="text-lg font-bold tracking-tight text-fg">Nook</h2>
