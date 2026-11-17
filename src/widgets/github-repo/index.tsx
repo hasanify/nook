@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { StatusDot } from "../../components/StatusDot";
 import { Banner } from "../../components/Banner";
@@ -56,6 +57,20 @@ function formatRelativeTime(dateStr: string): string {
   return `${diffDays}d ago`;
 }
 
+function formatLastUpdated(updatedAt: number, now: number): string {
+  if (!updatedAt) return "";
+  const ms = updatedAt > 1e11 ? updatedAt : updatedAt * 1000;
+  const diffSecs = Math.max(0, Math.floor((now - ms) / 1000));
+  if (diffSecs < 10) return "just now";
+  if (diffSecs < 60) return `${diffSecs}s ago`;
+  const diffMins = Math.floor(diffSecs / 60);
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
 function formatCount(num?: number): string {
   if (num === undefined || num === null) return "";
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -78,6 +93,49 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
 
   const { payload, loading, refresh } = useProvider<GitHubData>(instance.id);
   const data = payload?.data;
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleManualRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await refresh();
+      setNow(Date.now());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, refresh]);
+
+  // Initial fetch if cache is empty on mount
+  const initialFetchAttempted = useRef(false);
+  useEffect(() => {
+    if (!loading && !payload && repo && !initialFetchAttempted.current) {
+      initialFetchAttempted.current = true;
+      void handleManualRefresh();
+    }
+  }, [loading, payload, repo, handleManualRefresh]);
+
+  const updatedAt = payload?.updated_at;
+
+  const lastUpdatedText = useMemo(() => {
+    if (!updatedAt) return "";
+    return formatLastUpdated(updatedAt, now);
+  }, [updatedAt, now]);
+
+  const exactUpdatedTime = useMemo(() => {
+    if (!updatedAt) return undefined;
+    const ms = updatedAt > 1e11 ? updatedAt : updatedAt * 1000;
+    return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }, [updatedAt]);
 
   const handleOpenLink = (url: string) => {
     if (url) {
@@ -151,13 +209,51 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
           <StatusDot status={runStatus} title={`CI: ${latestRun?.conclusion || "None"}`} />
         </div>
       }
+      headerActions={
+        repo ? (
+          <div className="flex items-center gap-1.5 text-fg-muted">
+            {lastUpdatedText && (
+              <span
+                className="cursor-default font-mono text-[10px] text-fg-muted/70 select-none"
+                title={exactUpdatedTime ? `Updated at ${exactUpdatedTime}` : undefined}
+              >
+                {lastUpdatedText}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                void handleManualRefresh();
+              }}
+              disabled={isRefreshing}
+              className="flex h-5 w-5 items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised/80 hover:text-fg disabled:opacity-50"
+              title={isRefreshing ? "Refreshing..." : "Refresh repository data"}
+              aria-label="Refresh repository data"
+            >
+              <svg
+                className={`h-3 w-3 ${isRefreshing ? "animate-spin text-accent-500" : ""}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                <polyline points="21 3 21 9 15 9" />
+              </svg>
+            </button>
+          </div>
+        ) : undefined
+      }
       banner={
         bannerInfo ? (
           <Banner
             message={bannerInfo.message}
             type={bannerInfo.type}
             actionText="Refresh"
-            onAction={refresh}
+            onAction={() => void handleManualRefresh()}
           />
         ) : undefined
       }
@@ -359,7 +455,7 @@ const module: WidgetModule = {
     showRuns: true,
     showCommits: true,
     commitCount: 5,
-    pollInterval: 60,
+    pollInterval: 0,
   },
   defaultState: {},
 };

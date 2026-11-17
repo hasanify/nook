@@ -11,6 +11,7 @@ interface WidgetShellProps {
   onToggleEditMode?: () => void;
   title: string;
   headerSlot?: React.ReactNode;
+  headerActions?: React.ReactNode;
   banner?: React.ReactNode;
   resizable?: boolean;
   minSize?: { w: number; h: number };
@@ -23,6 +24,7 @@ export function WidgetShell({
   onToggleEditMode: propToggle,
   title,
   headerSlot,
+  headerActions,
   banner,
   resizable = true,
   minSize = { w: 200, h: 160 },
@@ -130,6 +132,7 @@ export function WidgetShell({
         onBoundsChange={handleBoundsChange}
         onToggleEditMode={effectiveToggle}
         headerSlot={headerSlot}
+        headerActions={headerActions}
         widgetColor={widgetColor}
       />
 

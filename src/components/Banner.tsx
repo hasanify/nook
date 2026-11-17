@@ -29,7 +29,9 @@ export function Banner({
     <div
       className={`flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-xs font-medium ${typeStyles} ${className}`}
     >
-      <span className="truncate">{message}</span>
+      <span className="truncate" title={message}>
+        {message}
+      </span>
       {actionText && onAction && (
         <button
           type="button"

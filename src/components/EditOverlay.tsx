@@ -11,6 +11,7 @@ interface EditOverlayProps {
   onBoundsChange: (bounds: Rect, commit: boolean) => void;
   onToggleEditMode: () => void;
   headerSlot?: React.ReactNode;
+  headerActions?: React.ReactNode;
   widgetColor?: string | undefined;
 }
 
@@ -23,6 +24,7 @@ export function EditOverlay({
   onBoundsChange,
   onToggleEditMode,
   headerSlot,
+  headerActions,
   widgetColor,
 }: EditOverlayProps) {
   const isDragging = useRef(false);
@@ -188,13 +190,13 @@ export function EditOverlay({
         }`}
         onPointerDown={editMode ? handleDragStart : undefined}
       >
-        <div className="flex items-center gap-1.5 truncate font-medium">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 font-medium">
           {headerSlot}
           <span className="truncate text-[11px] font-semibold tracking-tight text-fg/80">
             {title}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5">
           {editMode ? (
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1 font-mono text-[9px] font-semibold tracking-wider text-accent-500 uppercase">
@@ -218,7 +220,9 @@ export function EditOverlay({
                 Done
               </button>
             </div>
-          ) : null}
+          ) : (
+            headerActions
+          )}
         </div>
       </div>
 

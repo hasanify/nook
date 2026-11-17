@@ -66,16 +66,21 @@ impl PollerManager {
                         let mut times = last_polled.lock().await;
                         let last = times.get(&widget.id).copied().unwrap_or(0);
                         let default_interval = match widget.kind.as_str() {
-                            "github-repo" => 60,
+                            "github-repo" => 0,
                             "vercel-project" => 30,
                             "weather" => 900,
                             _ => 0,
                         };
-                        let interval = widget
+                        let mut interval = widget
                             .settings
                             .get("pollInterval")
                             .and_then(|v| v.as_u64())
                             .unwrap_or(default_interval);
+
+                        // Protect GitHub rate limits for existing configs that had aggressive intervals
+                        if widget.kind == "github-repo" && interval > 0 && interval < 300 {
+                            interval = 0;
+                        }
 
                         if interval > 0 && (now >= last + interval || last == 0) {
                             times.insert(widget.id.clone(), now);
