@@ -1,3 +1,9 @@
+## [0.3.1](https://github.com/hasanify/nook/compare/v0.3.0...v0.3.1) (2026-11-17)
+
+### Bug Fixes
+
+- **ui:** improve widget contrast, smooth drag/resize rAF throttling, fix dropdown crash, and add about tab ([a952290](https://github.com/hasanify/nook/commit/a9522905fc7920b47dd0252207d6c1d9a8723974))
+
 # [0.3.0](https://github.com/hasanify/nook/compare/v0.2.3...v0.3.0) (2026-11-17)
 
 ### Features
