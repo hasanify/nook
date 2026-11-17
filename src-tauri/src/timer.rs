@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tauri::async_runtime::JoinHandle;
 use tauri::AppHandle;
 use tauri_plugin_notification::NotificationExt;
 use tokio::sync::Mutex;
-use tokio::task::JoinHandle;
 use tracing::{error, info};
 
 pub struct TimerScheduler {
@@ -56,7 +56,7 @@ impl TimerScheduler {
         let tasks_clone = self.tasks.clone();
         let timer_id = id.clone();
 
-        let handle = tokio::spawn(async move {
+        let handle = tauri::async_runtime::spawn(async move {
             tokio::time::sleep(Duration::from_millis(wait_ms)).await;
 
             info!(

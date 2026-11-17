@@ -19,7 +19,7 @@ use tracing::info;
 
 fn setup_logging() {
     let app_data = std::env::var("APPDATA").unwrap_or_else(|_| ".".to_string());
-    let log_dir = PathBuf::from(app_data).join("com.nook.app").join("logs");
+    let log_dir = PathBuf::from(&app_data).join("com.nook.app").join("logs");
     let _ = std::fs::create_dir_all(&log_dir);
 
     let file_appender = tracing_appender::rolling::daily(&log_dir, "nook.log");
@@ -31,6 +31,13 @@ fn setup_logging() {
     let subscriber = tracing_subscriber::fmt().with_writer(non_blocking).finish();
 
     let _ = tracing::subscriber::set_global_default(subscriber);
+
+    let crash_dir = PathBuf::from(&app_data).join("com.nook.app");
+    std::panic::set_hook(Box::new(move |info| {
+        tracing::error!("FATAL PANIC: {}", info);
+        let crash_path = crash_dir.join("crash.log");
+        let _ = std::fs::write(crash_path, format!("FATAL PANIC: {}\n", info));
+    }));
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -38,7 +45,7 @@ pub fn run() {
     setup_logging();
     info!("Starting Nook application");
 
-    let app = tauri::Builder::default()
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             info!("Second instance launched, activating Settings/widgets");
@@ -48,7 +55,14 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--autostart"]),
         ))
-        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_notification::init());
+
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
+    }
+
+    let app = builder
         .manage(AppState::new())
         .setup(|app| {
             let handle = app.handle().clone();

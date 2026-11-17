@@ -267,6 +267,9 @@ pub fn verify(hwnd: HWND) -> bool {
                 return parent == host;
             }
         }
-        false
+        // If DefView host is unavailable, BottomToplevel is active.
+        // As long as the window exists as a top-level window (parent is 0), it is valid.
+        let parent = GetParent(hwnd).unwrap_or_default();
+        parent.0 as isize == 0
     }
 }

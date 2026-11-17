@@ -66,17 +66,26 @@ pub fn start_shell_watch(app: AppHandle) {
                             let app_clone = app.clone();
                             tauri::async_runtime::spawn(async move {
                                 tokio::time::sleep(Duration::from_millis(1000)).await;
-                                let _ = crate::windows::ensure_all_widgets(&app_clone);
+                                let app_inner = app_clone.clone();
+                                let _ = app_clone.run_on_main_thread(move || {
+                                    let _ = crate::windows::ensure_all_widgets(&app_inner);
+                                });
                             });
                         } else if msg.message == WM_TIMER {
                             debug!("Shell watch 3s verify interval");
-                            let _ = crate::windows::ensure_all_widgets(&app);
+                            let app_clone = app.clone();
+                            let _ = app.run_on_main_thread(move || {
+                                let _ = crate::windows::ensure_all_widgets(&app_clone);
+                            });
                         } else if msg.message == WM_DISPLAYCHANGE
                             || msg.message == WM_DPICHANGED
                             || msg.message == WM_SETTINGCHANGE
                         {
                             info!("Display or DPI change detected, relayouting all widgets");
-                            let _ = crate::windows::relayout_all_widgets(&app);
+                            let app_clone = app.clone();
+                            let _ = app.run_on_main_thread(move || {
+                                let _ = crate::windows::relayout_all_widgets(&app_clone);
+                            });
                         }
                     }
                 }

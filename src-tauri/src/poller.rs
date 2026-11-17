@@ -46,7 +46,7 @@ impl PollerManager {
         let cache = self.cache.clone();
         let last_polled = self.last_polled.clone();
 
-        tokio::spawn(async move {
+        tauri::async_runtime::spawn(async move {
             info!("Started shared background HTTP poller");
 
             loop {
