@@ -1,3 +1,9 @@
+## [0.10.1](https://github.com/hasanify/nook/compare/v0.10.0...v0.10.1) (2026-11-17)
+
+### Bug Fixes
+
+- **updater:** fallback to public web release redirect when github api is rate-limited ([cbbe012](https://github.com/hasanify/nook/commit/cbbe01227cfd4b7e45ed3630a584b2ba294048de))
+
 # [0.10.0](https://github.com/hasanify/nook/compare/v0.9.1...v0.10.0) (2026-11-17)
 
 ### Features
