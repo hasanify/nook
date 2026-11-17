@@ -1,3 +1,9 @@
+# [0.6.0](https://github.com/hasanify/nook/compare/v0.5.0...v0.6.0) (2026-11-17)
+
+### Features
+
+- **ui:** use official nook icon in marketing and settings headers ([935b427](https://github.com/hasanify/nook/commit/935b427a2e1bca8120eacaa02e8cd64abf47725e))
+
 # [0.5.0](https://github.com/hasanify/nook/compare/v0.4.0...v0.5.0) (2026-11-17)
 
 ### Features
