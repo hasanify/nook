@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -39,3 +40,12 @@ let cargoToml = fs.readFileSync(cargoPath, "utf-8");
 cargoToml = cargoToml.replace(/^version\s*=\s*"[^"]+"/m, `version = "${version}"`);
 fs.writeFileSync(cargoPath, cargoToml);
 console.log(`Updated src-tauri/Cargo.toml to ${version}`);
+
+// 5. Update src-tauri/Cargo.lock
+try {
+  execSync("cargo check --manifest-path src-tauri/Cargo.toml", { stdio: "inherit" });
+  console.log(`Updated src-tauri/Cargo.lock to ${version}`);
+} catch (err) {
+  console.error("Failed to update src-tauri/Cargo.lock:", err);
+  process.exit(1);
+}
