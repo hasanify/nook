@@ -86,6 +86,24 @@ export async function openSettingsWindow(widgetId?: string): Promise<void> {
   return invoke<void>("open_settings_window", { widgetId });
 }
 
+export async function timerSchedule(
+  id: string,
+  endsAtMs: number,
+  title: string,
+  body: string,
+): Promise<void> {
+  return invoke<void>("timer_schedule", {
+    id,
+    endsAtMs: Math.round(endsAtMs),
+    title,
+    body,
+  });
+}
+
+export async function timerCancel(id: string): Promise<void> {
+  return invoke<void>("timer_cancel", { id });
+}
+
 export function onConfigChanged(
   callback: (payload: ConfigChangedPayload) => void,
 ): Promise<UnlistenFn> {

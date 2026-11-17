@@ -5,6 +5,7 @@ pub mod pin;
 pub mod registry;
 pub mod shell_watch;
 pub mod state;
+pub mod timer;
 pub mod tray;
 pub mod windows;
 
@@ -44,6 +45,7 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--autostart"]),
         ))
+        .plugin(tauri_plugin_notification::init())
         .manage(AppState::new())
         .setup(|app| {
             let handle = app.handle().clone();
@@ -95,6 +97,8 @@ pub fn run() {
             commands::update_app_config,
             commands::open_settings_window,
             commands::get_all_manifests,
+            commands::timer_schedule,
+            commands::timer_cancel,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

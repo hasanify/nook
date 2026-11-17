@@ -220,3 +220,25 @@ pub fn get_all_manifests() -> Vec<crate::registry::WidgetManifest> {
     let reg = crate::registry::ManifestRegistry::new();
     reg.list().into_iter().cloned().collect()
 }
+
+#[tauri::command]
+pub async fn timer_schedule(
+    app: AppHandle,
+    id: String,
+    ends_at_ms: u64,
+    title: String,
+    body: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    state
+        .timer_scheduler
+        .schedule(app, id, ends_at_ms, title, body)
+        .await;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn timer_cancel(id: String, state: tauri::State<'_, AppState>) -> Result<(), String> {
+    state.timer_scheduler.cancel(&id).await;
+    Ok(())
+}

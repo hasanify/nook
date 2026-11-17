@@ -4,24 +4,53 @@
   "description": "Countdown, stopwatch, and Pomodoro focus timer",
   "version": "1.0.0",
   "author": "Nook",
-  "defaultSize": { "w": 260, "h": 190 },
-  "minSize": { "w": 220, "h": 160 },
+  "defaultSize": { "w": 280, "h": 220 },
+  "minSize": { "w": 240, "h": 180 },
   "resizable": false,
   "settingsSchema": [
     {
-      "key": "mode",
-      "label": "Default Mode",
-      "type": "select",
-      "defaultValue": "pomodoro",
-      "options": [
-        { "label": "Pomodoro", "value": "pomodoro" },
-        { "label": "Countdown", "value": "countdown" },
-        { "label": "Stopwatch", "value": "stopwatch" }
-      ]
+      "key": "countdownMinutes",
+      "label": "Countdown Duration (Minutes)",
+      "type": "number",
+      "defaultValue": 10,
+      "min": 1,
+      "max": 180
     },
     {
-      "key": "soundNotification",
-      "label": "Sound Alert on Completion",
+      "key": "workMinutes",
+      "label": "Pomodoro Work Duration (Minutes)",
+      "type": "number",
+      "defaultValue": 25,
+      "min": 1,
+      "max": 120
+    },
+    {
+      "key": "breakMinutes",
+      "label": "Pomodoro Short Break (Minutes)",
+      "type": "number",
+      "defaultValue": 5,
+      "min": 1,
+      "max": 60
+    },
+    {
+      "key": "longBreakMinutes",
+      "label": "Pomodoro Long Break (Minutes)",
+      "type": "number",
+      "defaultValue": 15,
+      "min": 1,
+      "max": 60
+    },
+    {
+      "key": "cyclesBeforeLong",
+      "label": "Work Cycles Before Long Break",
+      "type": "number",
+      "defaultValue": 4,
+      "min": 1,
+      "max": 12
+    },
+    {
+      "key": "notify",
+      "label": "Windows Toast Notification on Finish",
       "type": "boolean",
       "defaultValue": true
     }

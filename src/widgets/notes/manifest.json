@@ -14,9 +14,14 @@
       "type": "select",
       "defaultValue": "13",
       "options": [
-        { "label": "Small (11px)", "value": "11" },
-        { "label": "Medium (13px)", "value": "13" },
-        { "label": "Large (15px)", "value": "15" }
+        { "label": "11 px", "value": "11" },
+        { "label": "12 px", "value": "12" },
+        { "label": "13 px (Default)", "value": "13" },
+        { "label": "14 px", "value": "14" },
+        { "label": "15 px", "value": "15" },
+        { "label": "16 px", "value": "16" },
+        { "label": "18 px", "value": "18" },
+        { "label": "20 px", "value": "20" }
       ]
     },
     {
