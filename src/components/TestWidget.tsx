@@ -31,6 +31,38 @@ export function TestWidget({ id }: TestWidgetProps) {
   const isResizing = useRef(false);
   const resizeStart = useRef({ mouseX: 0, mouseY: 0, origW: 0, origH: 0 });
 
+  const rafId = useRef<number | null>(null);
+  const pendingBounds = useRef<Rect | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
+
+  const scheduleBoundsUpdate = (bounds: Rect) => {
+    pendingBounds.current = bounds;
+    if (rafId.current === null) {
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        if (pendingBounds.current) {
+          currentBoundsRef.current = pendingBounds.current;
+          setActiveBounds(pendingBounds.current);
+          void setBounds(
+            id,
+            pendingBounds.current.x,
+            pendingBounds.current.y,
+            pendingBounds.current.w,
+            pendingBounds.current.h,
+            false,
+          );
+        }
+      });
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
     verifyDesktopPin(id)
@@ -59,7 +91,8 @@ export function TestWidget({ id }: TestWidgetProps) {
 
   // Handle Dragging
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    if (e.button !== 0) return;
+    e.preventDefault();
     isDragging.current = true;
     dragStart.current = {
       mouseX: e.screenX,
@@ -67,42 +100,45 @@ export function TestWidget({ id }: TestWidgetProps) {
       origX: currentBoundsRef.current.x,
       origY: currentBoundsRef.current.y,
     };
-  };
 
-  const handleDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging.current) return;
-    const deltaX = e.screenX - dragStart.current.mouseX;
-    const deltaY = e.screenY - dragStart.current.mouseY;
-    const nextX = dragStart.current.origX + deltaX;
-    const nextY = dragStart.current.origY + deltaY;
-
-    const nextBounds = {
-      ...currentBoundsRef.current,
-      x: nextX,
-      y: nextY,
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!isDragging.current) return;
+      if (ev.buttons === 0) {
+        onPointerUp();
+        return;
+      }
+      const deltaX = ev.screenX - dragStart.current.mouseX;
+      const deltaY = ev.screenY - dragStart.current.mouseY;
+      scheduleBoundsUpdate({
+        ...currentBoundsRef.current,
+        x: dragStart.current.origX + deltaX,
+        y: dragStart.current.origY + deltaY,
+      });
     };
-    setActiveBounds(nextBounds);
 
-    void setBounds(id, nextX, nextY, nextBounds.w, nextBounds.h, false);
-  };
+    const onPointerUp = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      const final = pendingBounds.current ?? currentBoundsRef.current;
+      setActiveBounds(null);
+      void setBounds(id, final.x, final.y, final.w, final.h, true);
+    };
 
-  const handleDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignore
-    }
-    const final = currentBoundsRef.current;
-    setActiveBounds(null);
-    void setBounds(id, final.x, final.y, final.w, final.h, true);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
   };
 
   // Handle Resizing
   const handleResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
     isResizing.current = true;
     resizeStart.current = {
       mouseX: e.screenX,
@@ -110,36 +146,41 @@ export function TestWidget({ id }: TestWidgetProps) {
       origW: currentBoundsRef.current.w,
       origH: currentBoundsRef.current.h,
     };
-  };
 
-  const handleResizeMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isResizing.current) return;
-    const deltaW = e.screenX - resizeStart.current.mouseX;
-    const deltaH = e.screenY - resizeStart.current.mouseY;
-    const nextW = Math.max(260, resizeStart.current.origW + deltaW);
-    const nextH = Math.max(200, resizeStart.current.origH + deltaH);
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!isResizing.current) return;
+      if (ev.buttons === 0) {
+        onPointerUp();
+        return;
+      }
+      const deltaW = ev.screenX - resizeStart.current.mouseX;
+      const deltaH = ev.screenY - resizeStart.current.mouseY;
+      const nextW = Math.max(260, resizeStart.current.origW + deltaW);
+      const nextH = Math.max(200, resizeStart.current.origH + deltaH);
 
-    const nextBounds = {
-      ...currentBoundsRef.current,
-      w: nextW,
-      h: nextH,
+      scheduleBoundsUpdate({
+        ...currentBoundsRef.current,
+        w: nextW,
+        h: nextH,
+      });
     };
-    setActiveBounds(nextBounds);
 
-    void setBounds(id, nextBounds.x, nextBounds.y, nextW, nextH, false);
-  };
+    const onPointerUp = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      if (!isResizing.current) return;
+      isResizing.current = false;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      const final = pendingBounds.current ?? currentBoundsRef.current;
+      setActiveBounds(null);
+      void setBounds(id, final.x, final.y, final.w, final.h, true);
+    };
 
-  const handleResizeEnd = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isResizing.current) return;
-    isResizing.current = false;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignore
-    }
-    const final = currentBoundsRef.current;
-    setActiveBounds(null);
-    void setBounds(id, final.x, final.y, final.w, final.h, true);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
   };
 
   if (loading) {
@@ -180,9 +221,6 @@ export function TestWidget({ id }: TestWidgetProps) {
             : "bg-surface-raised text-fg-muted"
         }`}
         onPointerDown={editMode ? handleDragStart : undefined}
-        onPointerMove={editMode ? handleDragMove : undefined}
-        onPointerUp={editMode ? handleDragEnd : undefined}
-        onPointerCancel={editMode ? handleDragEnd : undefined}
       >
         <div className="flex items-center gap-1.5 font-medium">
           <span
@@ -291,9 +329,6 @@ export function TestWidget({ id }: TestWidgetProps) {
         <div
           className="absolute right-0 bottom-0 flex h-5 w-5 cursor-se-resize items-end justify-end p-1 text-[11px] text-accent-500 hover:scale-110"
           onPointerDown={handleResizeStart}
-          onPointerMove={handleResizeMove}
-          onPointerUp={handleResizeEnd}
-          onPointerCancel={handleResizeEnd}
         >
           ◢
         </div>

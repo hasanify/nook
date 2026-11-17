@@ -129,6 +129,15 @@ pub fn attach(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String> {
     }
 }
 
+/// Smoothly updates the alpha transparency of a layered window without altering hierarchy or styles.
+pub fn set_opacity(hwnd: HWND, opacity: f32) -> Result<(), String> {
+    unsafe {
+        let alpha = (opacity.clamp(0.1, 1.0) * 255.0) as u8;
+        SetLayeredWindowAttributes(hwnd, COLORREF(0), alpha, LWA_ALPHA)
+            .map_err(|e| format!("SetLayeredWindowAttributes failed: {}", e))
+    }
+}
+
 /// Fallback attach strategy: keeps window top-level at the bottom of z-order (`BottomToplevel`).
 pub fn attach_bottom(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String> {
     // SAFETY: Setting top-level tool window at HWND_BOTTOM

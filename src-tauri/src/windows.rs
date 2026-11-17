@@ -37,7 +37,13 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     let strategy = if instance.always_on_top {
         pin::detach_to_topmost(hwnd, instance.opacity)?
     } else {
-        pin::attach_bottom(hwnd, instance.opacity)?
+        match pin::attach(hwnd, instance.opacity) {
+            Ok(strat) => strat,
+            Err(e) => {
+                tracing::warn!("pin::attach failed, falling back to bottom: {}", e);
+                pin::attach_bottom(hwnd, instance.opacity)?
+            }
+        }
     };
 
     let screen_rect = RECT {
@@ -144,7 +150,9 @@ pub fn ensure_all_widgets(app: &AppHandle) -> Result<(), String> {
                 let hwnd = HWND(raw_hwnd.0);
                 if !instance.always_on_top && !pin::verify(hwnd) {
                     info!("Widget '{}' lost desktop attach, re-attaching", label);
-                    let _ = pin::attach_bottom(hwnd, instance.opacity);
+                    if pin::attach(hwnd, instance.opacity).is_err() {
+                        let _ = pin::attach_bottom(hwnd, instance.opacity);
+                    }
                 }
             }
         } else {
@@ -242,6 +250,8 @@ pub fn update_widget_geometry(
 
     let strategy = if is_always_on_top {
         PinStrategy::Topmost
+    } else if pin::verify(hwnd) {
+        PinStrategy::AboveIcons
     } else {
         PinStrategy::BottomToplevel
     };
@@ -271,20 +281,7 @@ pub fn set_widget_opacity(app: &AppHandle, id: &str, opacity: f32) -> Result<(),
     if let Some(window) = app.get_webview_window(&label) {
         if let Ok(raw) = window.hwnd() {
             let hwnd = HWND(raw.0);
-            let state = app.state::<AppState>();
-            let cfg = state.config.get_config();
-            let is_topmost = cfg
-                .widgets
-                .iter()
-                .find(|w| w.id == id)
-                .map(|w| w.always_on_top)
-                .unwrap_or(false);
-
-            if is_topmost {
-                let _ = pin::detach_to_topmost(hwnd, opacity);
-            } else if pin::attach(hwnd, opacity).is_err() {
-                let _ = pin::attach_bottom(hwnd, opacity);
-            }
+            pin::set_opacity(hwnd, opacity)?;
         }
     }
     Ok(())

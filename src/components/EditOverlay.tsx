@@ -60,7 +60,8 @@ export function EditOverlay({
 
   // Handle Dragging
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    if (e.button !== 0) return;
+    e.preventDefault();
     isDragging.current = true;
     dragStart.current = {
       mouseX: e.screenX,
@@ -68,40 +69,45 @@ export function EditOverlay({
       origX: activeBoundsRef.current.x,
       origY: activeBoundsRef.current.y,
     };
-  };
 
-  const handleDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging.current) return;
-    const deltaX = e.screenX - dragStart.current.mouseX;
-    const deltaY = e.screenY - dragStart.current.mouseY;
-    const nextBounds: Rect = {
-      ...activeBoundsRef.current,
-      x: dragStart.current.origX + deltaX,
-      y: dragStart.current.origY + deltaY,
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!isDragging.current) return;
+      if (ev.buttons === 0) {
+        onPointerUp();
+        return;
+      }
+      const deltaX = ev.screenX - dragStart.current.mouseX;
+      const deltaY = ev.screenY - dragStart.current.mouseY;
+      const nextBounds: Rect = {
+        ...activeBoundsRef.current,
+        x: dragStart.current.origX + deltaX,
+        y: dragStart.current.origY + deltaY,
+      };
+      scheduleBoundsUpdate(nextBounds);
     };
-    scheduleBoundsUpdate(nextBounds);
-  };
 
-  const handleDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    if (rafId.current !== null) {
-      cancelAnimationFrame(rafId.current);
-      rafId.current = null;
-    }
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignore
-    }
-    const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
-    onBoundsChange(finalBounds, true);
+    const onPointerUp = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
+      onBoundsChange(finalBounds, true);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
   };
 
   // Handle Resizing
   const handleResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
     isResizing.current = true;
     resizeStart.current = {
       mouseX: e.screenX,
@@ -109,37 +115,41 @@ export function EditOverlay({
       origW: activeBoundsRef.current.w,
       origH: activeBoundsRef.current.h,
     };
-  };
 
-  const handleResizeMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isResizing.current) return;
-    const deltaW = e.screenX - resizeStart.current.mouseX;
-    const deltaH = e.screenY - resizeStart.current.mouseY;
-    const nextW = Math.max(minSize.w, resizeStart.current.origW + deltaW);
-    const nextH = Math.max(minSize.h, resizeStart.current.origH + deltaH);
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!isResizing.current) return;
+      if (ev.buttons === 0) {
+        onPointerUp();
+        return;
+      }
+      const deltaW = ev.screenX - resizeStart.current.mouseX;
+      const deltaH = ev.screenY - resizeStart.current.mouseY;
+      const nextW = Math.max(minSize.w, resizeStart.current.origW + deltaW);
+      const nextH = Math.max(minSize.h, resizeStart.current.origH + deltaH);
 
-    const nextBounds: Rect = {
-      ...activeBoundsRef.current,
-      w: nextW,
-      h: nextH,
+      const nextBounds: Rect = {
+        ...activeBoundsRef.current,
+        w: nextW,
+        h: nextH,
+      };
+      scheduleBoundsUpdate(nextBounds);
     };
-    scheduleBoundsUpdate(nextBounds);
-  };
 
-  const handleResizeEnd = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isResizing.current) return;
-    isResizing.current = false;
-    if (rafId.current !== null) {
-      cancelAnimationFrame(rafId.current);
-      rafId.current = null;
-    }
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignore
-    }
-    const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
-    onBoundsChange(finalBounds, true);
+    const onPointerUp = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      if (!isResizing.current) return;
+      isResizing.current = false;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
+      onBoundsChange(finalBounds, true);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
   };
 
   return (
@@ -152,9 +162,6 @@ export function EditOverlay({
             : "border-line/40 bg-surface-raised/40 text-fg-muted"
         }`}
         onPointerDown={editMode ? handleDragStart : undefined}
-        onPointerMove={editMode ? handleDragMove : undefined}
-        onPointerUp={editMode ? handleDragEnd : undefined}
-        onPointerCancel={editMode ? handleDragEnd : undefined}
       >
         <div className="flex items-center gap-1.5 truncate font-medium">
           {headerSlot}
@@ -200,9 +207,6 @@ export function EditOverlay({
         <div
           className="absolute right-0 bottom-0 z-50 flex h-6 w-6 cursor-se-resize items-end justify-end p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
           onPointerDown={handleResizeStart}
-          onPointerMove={handleResizeMove}
-          onPointerUp={handleResizeEnd}
-          onPointerCancel={handleResizeEnd}
           title="Drag to resize"
         >
           <svg
