@@ -1,3 +1,9 @@
+## [0.10.3](https://github.com/hasanify/nook/compare/v0.10.2...v0.10.3) (2026-11-17)
+
+### Bug Fixes
+
+- **widgets:** apply full background tint, fix border spilling, restore drag/resize and opacity controls ([d3ecb75](https://github.com/hasanify/nook/commit/d3ecb75fe52bac3a74aeecfca65705b90f41788f))
+
 ## [0.10.2](https://github.com/hasanify/nook/compare/v0.10.1...v0.10.2) (2026-11-17)
 
 ### Bug Fixes
