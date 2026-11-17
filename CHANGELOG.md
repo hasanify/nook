@@ -1,3 +1,9 @@
+# [0.5.0](https://github.com/hasanify/nook/compare/v0.4.0...v0.5.0) (2026-11-17)
+
+### Features
+
+- **docs:** add minimalist marketing page for github pages ([64bdc2c](https://github.com/hasanify/nook/commit/64bdc2cb1bce835b2d6fd2e3600b437d936f4e00))
+
 # [0.4.0](https://github.com/hasanify/nook/compare/v0.3.1...v0.4.0) (2026-11-17)
 
 ### Bug Fixes
