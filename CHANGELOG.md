@@ -1,3 +1,9 @@
+# [0.11.0](https://github.com/hasanify/nook/compare/v0.10.4...v0.11.0) (2026-11-17)
+
+### Features
+
+- **github-repo:** replace aggressive polling with manual refresh button and last updated time ([8a251cc](https://github.com/hasanify/nook/commit/8a251cc63b0ae0d992ca5a5f2b02229736211bcd))
+
 ## [0.10.4](https://github.com/hasanify/nook/compare/v0.10.3...v0.10.4) (2026-11-17)
 
 ### Bug Fixes
