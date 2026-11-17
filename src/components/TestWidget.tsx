@@ -1,12 +1,29 @@
 import { useState, useRef, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { useInstance } from "../core/use-instance";
+import { useEditMode } from "../core/use-edit-mode";
+import { setBounds, verifyDesktopPin, setOpacity, setAlwaysOnTop } from "../core/ipc";
+import type { Rect } from "../core/types";
 
-export function TestWidget() {
-  const [clickCount, setClickCount] = useState(0);
-  const [typedText, setTypedText] = useState("");
-  const [currentStrategy, setCurrentStrategy] = useState("AboveIcons");
+interface TestWidgetProps {
+  id: string;
+}
+
+const DEFAULT_BOUNDS: Rect = { x: 160, y: 120, w: 340, h: 320 };
+
+export function TestWidget({ id }: TestWidgetProps) {
+  const { instance, loading, error, patchState } = useInstance(id);
+  const { editMode, toggleEditMode } = useEditMode();
+
+  const [activeBounds, setActiveBounds] = useState<Rect | null>(null);
+  const [typedText, setTypedText] = useState<string | null>(null);
   const [isAttached, setIsAttached] = useState<boolean | null>(null);
-  const [bounds, setBounds] = useState({ x: 160, y: 120, w: 340, h: 320 });
+
+  const displayedBounds = activeBounds ?? instance?.rect ?? DEFAULT_BOUNDS;
+  const currentBoundsRef = useRef<Rect>(displayedBounds);
+
+  useEffect(() => {
+    currentBoundsRef.current = displayedBounds;
+  }, [displayedBounds]);
 
   const isDragging = useRef(false);
   const dragStart = useRef({ mouseX: 0, mouseY: 0, origX: 0, origY: 0 });
@@ -16,7 +33,7 @@ export function TestWidget() {
 
   useEffect(() => {
     let isMounted = true;
-    invoke<boolean>("verify_desktop_pin", { label: "widget-placeholder" })
+    verifyDesktopPin(id)
       .then((verified) => {
         if (isMounted) setIsAttached(verified);
       })
@@ -25,20 +42,20 @@ export function TestWidget() {
       });
 
     const timer = setInterval(() => {
-      invoke<boolean>("verify_desktop_pin", { label: "widget-placeholder" })
+      verifyDesktopPin(id)
         .then((verified) => {
           if (isMounted) setIsAttached(verified);
         })
         .catch(() => {
           if (isMounted) setIsAttached(false);
         });
-    }, 2000);
+    }, 3000);
 
     return () => {
       isMounted = false;
       clearInterval(timer);
     };
-  }, []);
+  }, [id]);
 
   // Handle Dragging
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -47,8 +64,8 @@ export function TestWidget() {
     dragStart.current = {
       mouseX: e.screenX,
       mouseY: e.screenY,
-      origX: bounds.x,
-      origY: bounds.y,
+      origX: currentBoundsRef.current.x,
+      origY: currentBoundsRef.current.y,
     };
   };
 
@@ -59,23 +76,27 @@ export function TestWidget() {
     const nextX = dragStart.current.origX + deltaX;
     const nextY = dragStart.current.origY + deltaY;
 
-    setBounds((prev) => ({ ...prev, x: nextX, y: nextY }));
-    void invoke("set_bounds", {
-      label: "widget-placeholder",
+    const nextBounds = {
+      ...currentBoundsRef.current,
       x: nextX,
       y: nextY,
-      w: bounds.w,
-      h: bounds.h,
-    });
+    };
+    setActiveBounds(nextBounds);
+
+    void setBounds(id, nextX, nextY, nextBounds.w, nextBounds.h, false);
   };
 
   const handleDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
     isDragging.current = false;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       // Ignore
     }
+    const final = currentBoundsRef.current;
+    setActiveBounds(null);
+    void setBounds(id, final.x, final.y, final.w, final.h, true);
   };
 
   // Handle Resizing
@@ -86,8 +107,8 @@ export function TestWidget() {
     resizeStart.current = {
       mouseX: e.screenX,
       mouseY: e.screenY,
-      origW: bounds.w,
-      origH: bounds.h,
+      origW: currentBoundsRef.current.w,
+      origH: currentBoundsRef.current.h,
     };
   };
 
@@ -96,69 +117,101 @@ export function TestWidget() {
     const deltaW = e.screenX - resizeStart.current.mouseX;
     const deltaH = e.screenY - resizeStart.current.mouseY;
     const nextW = Math.max(260, resizeStart.current.origW + deltaW);
-    const nextH = Math.max(220, resizeStart.current.origH + deltaH);
+    const nextH = Math.max(200, resizeStart.current.origH + deltaH);
 
-    setBounds((prev) => ({ ...prev, w: nextW, h: nextH }));
-    void invoke("set_bounds", {
-      label: "widget-placeholder",
-      x: bounds.x,
-      y: bounds.y,
+    const nextBounds = {
+      ...currentBoundsRef.current,
       w: nextW,
       h: nextH,
-    });
+    };
+    setActiveBounds(nextBounds);
+
+    void setBounds(id, nextBounds.x, nextBounds.y, nextW, nextH, false);
   };
 
   const handleResizeEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isResizing.current) return;
     isResizing.current = false;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       // Ignore
     }
+    const final = currentBoundsRef.current;
+    setActiveBounds(null);
+    void setBounds(id, final.x, final.y, final.w, final.h, true);
   };
 
-  const switchStrategy = async (strat: string) => {
-    try {
-      const result = await invoke<string>("switch_pin_strategy", {
-        label: "widget-placeholder",
-        strategy: strat,
-      });
-      setCurrentStrategy(result);
-      const verified = await invoke<boolean>("verify_desktop_pin", {
-        label: "widget-placeholder",
-      });
-      setIsAttached(verified);
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted">
+        Loading widget...
+      </div>
+    );
+  }
+
+  if (error || !instance) {
+    return (
+      <div className="border-error text-error flex h-full w-full items-center justify-center rounded-card border bg-surface p-4 text-xs">
+        Error: {error || "Instance not found"}
+      </div>
+    );
+  }
+
+  const clicks = typeof instance.state?.clicks === "number" ? instance.state.clicks : 0;
+  const currentText =
+    typedText !== null
+      ? typedText
+      : typeof instance.state?.text === "string"
+        ? instance.state.text
+        : "";
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card select-none">
-      {/* Drag Bar */}
+    <div
+      className={`relative flex h-full w-full flex-col overflow-hidden rounded-card border bg-surface shadow-card transition-shadow select-none ${
+        editMode ? "border-accent-500 ring-2 ring-accent-500/30" : "border-line"
+      }`}
+    >
+      {/* Drag Bar (Active in Edit Mode, or Header in normal mode) */}
       <div
-        className="flex h-7 cursor-grab items-center justify-between border-b border-line bg-surface-raised px-3 text-xs text-fg-muted hover:text-fg active:cursor-grabbing"
-        onPointerDown={handleDragStart}
-        onPointerMove={handleDragMove}
-        onPointerUp={handleDragEnd}
-        onPointerCancel={handleDragEnd}
+        className={`flex h-7 items-center justify-between border-b border-line px-3 text-xs ${
+          editMode
+            ? "cursor-grab bg-accent-500/10 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
+            : "bg-surface-raised text-fg-muted"
+        }`}
+        onPointerDown={editMode ? handleDragStart : undefined}
+        onPointerMove={editMode ? handleDragMove : undefined}
+        onPointerUp={editMode ? handleDragEnd : undefined}
+        onPointerCancel={editMode ? handleDragEnd : undefined}
       >
         <div className="flex items-center gap-1.5 font-medium">
           <span
             className={`inline-block h-2 w-2 rounded-full ${isAttached ? "bg-ok" : "bg-warn"}`}
           />
-          <span>Nook Spike — {currentStrategy}</span>
+          <span className="truncate">
+            {instance.kind} ({instance.id.slice(0, 8)})
+          </span>
         </div>
-        <span className="text-[10px] opacity-75">Drag here</span>
+        <div className="flex items-center gap-2">
+          {editMode ? (
+            <span className="text-[10px] font-semibold tracking-wide text-accent-500 uppercase">
+              Drag to Move
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={toggleEditMode}
+              className="text-[10px] text-fg-muted hover:text-fg"
+              title="Toggle Edit Mode (Ctrl+Alt+E)"
+            >
+              Edit
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Content & Interactive Gate Verification */}
       <div className="flex flex-1 flex-col gap-3 p-3 text-sm">
-        <div className="text-xs text-fg-muted">
-          Phase 1 Decision Gate: test typing and clicks while pinned below windows.
-        </div>
-
         {/* Input Validation (The Critical Test) */}
         <div>
           <label
@@ -172,76 +225,79 @@ export function TestWidget() {
             type="text"
             className="w-full rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none select-text placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
             placeholder="Click here and type to test focus..."
-            value={typedText}
-            onChange={(e) => setTypedText(e.target.value)}
+            value={currentText}
+            onChange={(e) => {
+              const val = e.target.value;
+              setTypedText(val);
+              patchState({ text: val });
+            }}
           />
         </div>
 
-        {/* Mouse Click Counter */}
+        {/* Mouse Click Counter with persistent state */}
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            className="text-white rounded-md bg-accent-500 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent-600"
-            onClick={() => setClickCount((c) => c + 1)}
+            className="text-white rounded-md bg-accent-500 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent-600 active:scale-95"
+            onClick={() => {
+              patchState({ clicks: clicks + 1 });
+            }}
           >
-            Test Button ({clickCount} clicks)
+            Clicks: {clicks} (Saved)
           </button>
           <span className="text-xs text-fg-muted">
             {isAttached ? "Attached to Host ✓" : "Top-level"}
           </span>
         </div>
 
-        {/* Strategy Switcher for Instant Gate Comparison */}
-        <div className="border-t border-line pt-2">
-          <div className="mb-1.5 text-[11px] font-medium text-fg-muted">Test Strategy:</div>
-          <div className="flex gap-1.5">
+        {/* Bounds & Edit Controls */}
+        <div className="border-t border-line pt-2 text-[11px] text-fg-muted">
+          <div className="flex justify-between">
+            <span>
+              Pos: {displayedBounds.x}, {displayedBounds.y}
+            </span>
+            <span>
+              Size: {displayedBounds.w} × {displayedBounds.h}
+            </span>
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-2">
             <button
               type="button"
-              className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                currentStrategy === "AboveIcons"
-                  ? "text-white bg-accent-500"
-                  : "border border-line bg-surface-raised text-fg-muted hover:text-fg"
+              className={`rounded border px-2 py-0.5 text-[10px] font-medium ${
+                instance.always_on_top
+                  ? "border-accent-500 bg-accent-500/10 text-accent-500"
+                  : "border-line bg-surface-raised text-fg-muted hover:text-fg"
               }`}
-              onClick={() => void switchStrategy("above-icons")}
+              onClick={() => void setAlwaysOnTop(id, !instance.always_on_top)}
             >
-              AboveIcons
+              {instance.always_on_top ? "Always on top: ON" : "Always on top: OFF"}
             </button>
             <button
               type="button"
-              className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                currentStrategy === "BottomToplevel"
-                  ? "text-white bg-accent-500"
-                  : "border border-line bg-surface-raised text-fg-muted hover:text-fg"
-              }`}
-              onClick={() => void switchStrategy("bottom")}
+              className="rounded border border-line bg-surface-raised px-2 py-0.5 text-[10px] font-medium text-fg-muted hover:text-fg"
+              onClick={() => {
+                const nextOp = instance.opacity < 0.9 ? 0.95 : 0.6;
+                void setOpacity(id, nextOp);
+              }}
             >
-              Bottom
-            </button>
-            <button
-              type="button"
-              className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                currentStrategy === "Topmost"
-                  ? "text-white bg-accent-500"
-                  : "border border-line bg-surface-raised text-fg-muted hover:text-fg"
-              }`}
-              onClick={() => void switchStrategy("topmost")}
-            >
-              Topmost
+              Opacity: {Math.round(instance.opacity * 100)}%
             </button>
           </div>
         </div>
       </div>
 
-      {/* Resize Grip Corner */}
-      <div
-        className="absolute right-0 bottom-0 flex h-4 w-4 cursor-se-resize items-end justify-end p-0.5 text-[10px] text-fg-muted hover:text-accent-500"
-        onPointerDown={handleResizeStart}
-        onPointerMove={handleResizeMove}
-        onPointerUp={handleResizeEnd}
-        onPointerCancel={handleResizeEnd}
-      >
-        ◢
-      </div>
+      {/* Resize Grip Corner (Only in Edit Mode) */}
+      {editMode && (
+        <div
+          className="absolute right-0 bottom-0 flex h-5 w-5 cursor-se-resize items-end justify-end p-1 text-[11px] text-accent-500 hover:scale-110"
+          onPointerDown={handleResizeStart}
+          onPointerMove={handleResizeMove}
+          onPointerUp={handleResizeEnd}
+          onPointerCancel={handleResizeEnd}
+        >
+          ◢
+        </div>
+      )}
     </div>
   );
 }
