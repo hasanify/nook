@@ -1,3 +1,9 @@
+# [0.10.0](https://github.com/hasanify/nook/compare/v0.9.1...v0.10.0) (2026-11-17)
+
+### Features
+
+- **weather,widgets:** fix weather provider via rust reqwest, add widget color customization, clean inspector metadata ([884d230](https://github.com/hasanify/nook/commit/884d230a995aa35ce4c42f06c5f04c91f4cf3a3b))
+
 ## [0.9.1](https://github.com/hasanify/nook/compare/v0.9.0...v0.9.1) (2026-11-17)
 
 ### Bug Fixes
