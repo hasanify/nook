@@ -47,7 +47,8 @@ export function WidgetShell({
 
   const sendBounds = useCallback(
     (bounds: Rect, commit: boolean) => {
-      queuedBoundsRef.current = { bounds, commit };
+      const prevCommit = queuedBoundsRef.current?.commit ?? false;
+      queuedBoundsRef.current = { bounds, commit: commit || prevCommit };
       if (inFlightRef.current) return;
 
       const flush = async () => {
@@ -99,7 +100,13 @@ export function WidgetShell({
         "--color-accent-400": widgetColor,
         "--color-accent-600": widgetColor,
         "--focus": widgetColor,
-        borderColor: `${widgetColor}40`,
+        borderColor: effectiveEditMode
+          ? widgetColor
+          : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
+        backgroundColor: `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
+        boxShadow: effectiveEditMode
+          ? `0 0 24px -2px color-mix(in srgb, ${widgetColor} 40%, transparent)`
+          : undefined,
       } as React.CSSProperties)
     : {};
 
@@ -107,7 +114,7 @@ export function WidgetShell({
     <div
       onContextMenu={handleContextMenu}
       style={colorStyle}
-      className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-all duration-200 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-all duration-200 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
         effectiveEditMode
           ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25"
           : "border-line/70"
@@ -123,11 +130,12 @@ export function WidgetShell({
         onBoundsChange={handleBoundsChange}
         onToggleEditMode={effectiveToggle}
         headerSlot={headerSlot}
+        widgetColor={widgetColor}
       />
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
 
-      <div className="flex flex-1 flex-col overflow-hidden p-3.5 text-sm select-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto p-3 text-sm select-auto">
         {children}
       </div>
 

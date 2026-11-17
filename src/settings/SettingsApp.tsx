@@ -638,7 +638,20 @@ export function SettingsApp() {
                       max="1.0"
                       step="0.05"
                       value={selectedWidget.opacity}
-                      onChange={(e) => void setOpacity(selectedWidget.id, Number(e.target.value))}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setConfig((prev) => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            widgets: prev.widgets.map((w) =>
+                              w.id === selectedWidget.id ? { ...w, opacity: val } : w,
+                            ),
+                          };
+                        });
+                        void setOpacity(selectedWidget.id, val);
+                      }}
+                      className="cursor-pointer accent-accent-500"
                     />
                   </div>
 

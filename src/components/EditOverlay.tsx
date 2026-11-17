@@ -11,6 +11,7 @@ interface EditOverlayProps {
   onBoundsChange: (bounds: Rect, commit: boolean) => void;
   onToggleEditMode: () => void;
   headerSlot?: React.ReactNode;
+  widgetColor?: string | undefined;
 }
 
 export function EditOverlay({
@@ -22,6 +23,7 @@ export function EditOverlay({
   onBoundsChange,
   onToggleEditMode,
   headerSlot,
+  widgetColor,
 }: EditOverlayProps) {
   const isDragging = useRef(false);
   const isResizing = useRef(false);
@@ -59,10 +61,6 @@ export function EditOverlay({
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     e.preventDefault();
-    const target = e.currentTarget;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {}
 
     isDragging.current = true;
     const startX = e.screenX;
@@ -74,6 +72,10 @@ export function EditOverlay({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isDragging.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
       const deltaX = ev.screenX - startX;
       const deltaY = ev.screenY - startY;
       const nextBounds: Rect = {
@@ -88,10 +90,7 @@ export function EditOverlay({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      try {
-        target.releasePointerCapture(e.pointerId);
-      } catch {}
+      window.removeEventListener("mouseup", onPointerUp);
       if (!isDragging.current) return;
       isDragging.current = false;
       if (rafId.current !== null) {
@@ -108,7 +107,7 @@ export function EditOverlay({
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("mouseup", onPointerUp);
   };
 
   // Handle Resizing
@@ -116,10 +115,6 @@ export function EditOverlay({
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    const target = e.currentTarget;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {}
 
     isResizing.current = true;
     const startX = e.screenX;
@@ -131,6 +126,10 @@ export function EditOverlay({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isResizing.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
       const deltaW = ev.screenX - startX;
       const deltaH = ev.screenY - startY;
       const nextW = Math.max(minSize.w, origW + deltaW);
@@ -148,10 +147,7 @@ export function EditOverlay({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      try {
-        target.releasePointerCapture(e.pointerId);
-      } catch {}
+      window.removeEventListener("mouseup", onPointerUp);
       if (!isResizing.current) return;
       isResizing.current = false;
       if (rafId.current !== null) {
@@ -168,13 +164,23 @@ export function EditOverlay({
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("mouseup", onPointerUp);
   };
 
   return (
     <>
       {/* Top Header / Drag bar */}
       <div
+        style={
+          widgetColor
+            ? {
+                backgroundColor: editMode
+                  ? `color-mix(in srgb, ${widgetColor} 25%, var(--surface-raised))`
+                  : `color-mix(in srgb, ${widgetColor} 18%, var(--surface-raised))`,
+                borderBottomColor: `color-mix(in srgb, ${widgetColor} 35%, var(--line))`,
+              }
+            : undefined
+        }
         className={`flex h-8 items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"

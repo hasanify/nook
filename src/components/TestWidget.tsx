@@ -113,10 +113,6 @@ export function TestWidget({ id }: TestWidgetProps) {
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     e.preventDefault();
-    const target = e.currentTarget;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {}
 
     isDragging.current = true;
     const startX = e.screenX;
@@ -128,6 +124,10 @@ export function TestWidget({ id }: TestWidgetProps) {
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isDragging.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
       const deltaX = ev.screenX - startX;
       const deltaY = ev.screenY - startY;
       scheduleBoundsUpdate({
@@ -141,10 +141,7 @@ export function TestWidget({ id }: TestWidgetProps) {
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      try {
-        target.releasePointerCapture(e.pointerId);
-      } catch {}
+      window.removeEventListener("mouseup", onPointerUp);
       if (!isDragging.current) return;
       isDragging.current = false;
       const final = pendingBounds.current ?? currentBoundsRef.current;
@@ -157,7 +154,7 @@ export function TestWidget({ id }: TestWidgetProps) {
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("mouseup", onPointerUp);
   };
 
   // Handle Resizing
@@ -165,10 +162,6 @@ export function TestWidget({ id }: TestWidgetProps) {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    const target = e.currentTarget;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {}
 
     isResizing.current = true;
     const startX = e.screenX;
@@ -180,6 +173,10 @@ export function TestWidget({ id }: TestWidgetProps) {
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isResizing.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
       const deltaW = ev.screenX - startX;
       const deltaH = ev.screenY - startY;
       const nextW = Math.max(260, origW + deltaW);
@@ -196,10 +193,7 @@ export function TestWidget({ id }: TestWidgetProps) {
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      try {
-        target.releasePointerCapture(e.pointerId);
-      } catch {}
+      window.removeEventListener("mouseup", onPointerUp);
       if (!isResizing.current) return;
       isResizing.current = false;
       const final = pendingBounds.current ?? currentBoundsRef.current;
@@ -212,7 +206,7 @@ export function TestWidget({ id }: TestWidgetProps) {
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("mouseup", onPointerUp);
   };
 
   if (loading) {

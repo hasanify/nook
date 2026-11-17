@@ -132,6 +132,11 @@ pub fn attach(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String> {
 /// Smoothly updates the alpha transparency of a layered window without altering hierarchy or styles.
 pub fn set_opacity(hwnd: HWND, opacity: f32) -> Result<(), String> {
     unsafe {
+        let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        if (ex_style & (WS_EX_LAYERED.0 as isize)) == 0 {
+            ex_style |= WS_EX_LAYERED.0 as isize;
+            SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
+        }
         let alpha = (opacity.clamp(0.1, 1.0) * 255.0) as u8;
         SetLayeredWindowAttributes(hwnd, COLORREF(0), alpha, LWA_ALPHA)
             .map_err(|e| format!("SetLayeredWindowAttributes failed: {}", e))
