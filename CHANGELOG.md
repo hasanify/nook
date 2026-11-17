@@ -1,3 +1,9 @@
+## [0.11.1](https://github.com/hasanify/nook/compare/v0.11.0...v0.11.1) (2026-11-17)
+
+### Bug Fixes
+
+- **widgets:** disable alt+space system menu and remove duplicate datalist popup ([d490639](https://github.com/hasanify/nook/commit/d490639bc2e7f792fc5f52a932a962b94cb7eaba))
+
 # [0.11.0](https://github.com/hasanify/nook/compare/v0.10.4...v0.11.0) (2026-11-17)
 
 ### Features
