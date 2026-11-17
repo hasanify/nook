@@ -1,3 +1,9 @@
+## [0.6.3](https://github.com/hasanify/nook/compare/v0.6.2...v0.6.3) (2026-11-17)
+
+### Bug Fixes
+
+- preserve desktop pin on win+d, fix drag/resize cancellation, and smooth opacity changes ([edb00b8](https://github.com/hasanify/nook/commit/edb00b82111447f0dd1adf5620b3bf6003ea4f1e))
+
 ## [0.6.2](https://github.com/hasanify/nook/compare/v0.6.1...v0.6.2) (2026-11-17)
 
 ### Bug Fixes
