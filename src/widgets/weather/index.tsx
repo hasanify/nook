@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { WidgetShell } from "../../components/WidgetShell";
+import { useProvider } from "../../core/use-provider";
 import manifestJson from "./manifest.json";
 import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
@@ -156,89 +157,25 @@ function WeatherIcon({ code, isDay }: { code: number; isDay: number }) {
 
 export function WeatherWidget({ instance, editMode }: WidgetProps) {
   const city = String(instance.settings.city || "New York").trim();
-  const unit = String(instance.settings.unit || "celsius");
 
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshIndex, setRefreshIndex] = useState(0);
+  const { payload, loading, refresh } = useProvider<WeatherData>(instance.id);
+  const weather = payload?.data;
 
-  const fetchWeather = useCallback(() => {
-    setLoading(true);
-    setRefreshIndex((prev) => prev + 1);
-  }, []);
-
+  // On mount or when city/unit settings change, request fresh weather data if none exists
   useEffect(() => {
-    let active = true;
-
-    async function load(_trigger: number) {
-      if (!city) {
-        if (active) {
-          setError("Set location in Settings");
-          setLoading(false);
-        }
-        return;
-      }
-
-      try {
-        // 1. Geocode city name to lat/lon via Open-Meteo Geocoding
-        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-        const geoRes = await fetch(geoUrl);
-        if (!geoRes.ok) throw new Error("Geocoding failed");
-        const geoData = await geoRes.json();
-
-        if (!geoData.results || geoData.results.length === 0) {
-          throw new Error(`Location "${city}" not found`);
-        }
-
-        const { latitude, longitude, name, country } = geoData.results[0];
-
-        // 2. Fetch current weather forecast
-        const tempParam = unit === "fahrenheit" ? "&temperature_unit=fahrenheit" : "";
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m${tempParam}`;
-        const weatherRes = await fetch(weatherUrl);
-        if (!weatherRes.ok) throw new Error("Weather fetch failed");
-        const weatherJson = await weatherRes.json();
-
-        const current = weatherJson.current;
-        if (active) {
-          setWeather({
-            city: name,
-            country,
-            temperature: Math.round(current.temperature_2m),
-            apparentTemperature: Math.round(current.apparent_temperature),
-            humidity: current.relative_humidity_2m,
-            windSpeed: Math.round(current.wind_speed_10m),
-            weatherCode: current.weather_code,
-            isDay: current.is_day,
-            unit: unit === "fahrenheit" ? "°F" : "°C",
-          });
-          setError(null);
-        }
-      } catch (err: unknown) {
-        if (active) {
-          setError(err instanceof Error ? err.message : "Error fetching weather");
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
+    if (!payload) {
+      void refresh();
     }
+  }, [payload, refresh]);
 
-    void load(refreshIndex);
-    const interval = setInterval(
-      () => {
-        void load(refreshIndex);
-      },
-      15 * 60 * 1000,
-    ); // 15 mins
-
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [city, unit, refreshIndex]);
+  const error = (() => {
+    if (!city) return "Set location in Settings";
+    if (!payload) return null;
+    if (payload.status === "error") return payload.message || "Failed to fetch weather";
+    if (payload.status === "not-found") return payload.message || `Location "${city}" not found`;
+    if (payload.status === "offline" && !weather) return "Offline — cannot reach weather service";
+    return null;
+  })();
 
   return (
     <WidgetShell
@@ -269,7 +206,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
             <span className="text-xs text-error">{error}</span>
             <button
               type="button"
-              onClick={() => void fetchWeather()}
+              onClick={() => void refresh()}
               className="mt-2 rounded bg-surface-raised px-2 py-1 text-[11px] text-fg hover:bg-line/40"
             >
               Retry

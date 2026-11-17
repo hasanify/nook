@@ -1,6 +1,7 @@
 use crate::config::AppConfig;
 use crate::providers::github::fetch_github;
 use crate::providers::vercel::fetch_vercel;
+use crate::providers::weather::fetch_weather;
 use crate::providers::ProviderPayload;
 use crate::secrets::get_secret;
 use std::collections::HashMap;
@@ -67,6 +68,7 @@ impl PollerManager {
                         let default_interval = match widget.kind.as_str() {
                             "github-repo" => 60,
                             "vercel-project" => 30,
+                            "weather" => 900,
                             _ => 0,
                         };
                         let interval = widget
@@ -121,6 +123,20 @@ impl PollerManager {
                             let token = get_secret("vercel");
 
                             fetch_vercel(&client, project_id, token.as_deref(), limit).await
+                        }
+                        "weather" => {
+                            let city = widget
+                                .settings
+                                .get("city")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("New York");
+                            let unit = widget
+                                .settings
+                                .get("unit")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("celsius");
+
+                            fetch_weather(&client, city, unit).await
                         }
                         _ => continue,
                     };
@@ -177,6 +193,20 @@ impl PollerManager {
                 let token = get_secret("vercel");
 
                 fetch_vercel(&self.client, project_id, token.as_deref(), limit).await
+            }
+            "weather" => {
+                let city = widget
+                    .settings
+                    .get("city")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("New York");
+                let unit = widget
+                    .settings
+                    .get("unit")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("celsius");
+
+                fetch_weather(&self.client, city, unit).await
             }
             _ => return None,
         };

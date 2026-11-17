@@ -1,5 +1,6 @@
 pub mod github;
 pub mod vercel;
+pub mod weather;
 
 use serde::{Deserialize, Serialize};
 

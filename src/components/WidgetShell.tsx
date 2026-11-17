@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { EditOverlay } from "./EditOverlay";
 import { WidgetContextMenu } from "./WidgetContextMenu";
-import { setBounds, removeWidget, openSettingsWindow } from "../core/ipc";
+import { setBounds, removeWidget, openSettingsWindow, updateSettings } from "../core/ipc";
 import { useEditMode } from "../core/use-edit-mode";
 import type { WidgetInstance, Rect } from "../core/types";
 
@@ -88,9 +88,25 @@ export function WidgetShell({
     sendBounds(bounds, commit);
   };
 
+  const widgetColor =
+    typeof instance.settings.widgetColor === "string" && instance.settings.widgetColor
+      ? instance.settings.widgetColor
+      : undefined;
+
+  const colorStyle: React.CSSProperties = widgetColor
+    ? ({
+        "--color-accent-500": widgetColor,
+        "--color-accent-400": widgetColor,
+        "--color-accent-600": widgetColor,
+        "--focus": widgetColor,
+        borderColor: `${widgetColor}40`,
+      } as React.CSSProperties)
+    : {};
+
   return (
     <div
       onContextMenu={handleContextMenu}
+      style={colorStyle}
       className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-all duration-200 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
         effectiveEditMode
           ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25"
@@ -119,7 +135,9 @@ export function WidgetShell({
         isOpen={Boolean(contextMenuPos)}
         position={contextMenuPos ?? { x: 0, y: 0 }}
         isEditMode={effectiveEditMode}
+        currentColor={widgetColor || ""}
         onToggleEditMode={effectiveToggle}
+        onSelectColor={(color) => void updateSettings(instance.id, { widgetColor: color })}
         onOpenSettings={() => void openSettingsWindow(instance.id)}
         onDelete={() => void removeWidget(instance.id)}
         onClose={() => setContextMenuPos(null)}

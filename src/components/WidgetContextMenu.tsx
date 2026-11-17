@@ -5,11 +5,23 @@ export interface ContextMenuPosition {
   y: number;
 }
 
+export const WIDGET_COLOR_OPTIONS = [
+  { id: "default", label: "Default Accent", value: "", hex: "#3b82f6" },
+  { id: "emerald", label: "Emerald Green", value: "#10b981", hex: "#10b981" },
+  { id: "amber", label: "Sunset Amber", value: "#f59e0b", hex: "#f59e0b" },
+  { id: "rose", label: "Rose Coral", value: "#f43f5e", hex: "#f43f5e" },
+  { id: "violet", label: "Royal Violet", value: "#8b5cf6", hex: "#8b5cf6" },
+  { id: "cyan", label: "Cyan Blue", value: "#06b6d4", hex: "#06b6d4" },
+  { id: "mono", label: "Zinc Slate", value: "#71717a", hex: "#71717a" },
+] as const;
+
 interface WidgetContextMenuProps {
   isOpen: boolean;
   position: ContextMenuPosition;
   isEditMode: boolean;
+  currentColor?: string;
   onToggleEditMode: () => void;
+  onSelectColor?: (color: string) => void;
   onOpenSettings?: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -19,7 +31,9 @@ export function WidgetContextMenu({
   isOpen,
   position,
   isEditMode,
+  currentColor,
   onToggleEditMode,
+  onSelectColor,
   onOpenSettings,
   onDelete,
   onClose,
@@ -130,6 +144,35 @@ export function WidgetContextMenu({
           </>
         )}
       </button>
+
+      {/* Quick Color Swatches */}
+      {onSelectColor && (
+        <div className="flex flex-col gap-1 border-t border-line/40 px-2.5 py-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium text-fg-muted">Color</span>
+          </div>
+          <div className="flex items-center gap-1.5 pt-0.5">
+            {WIDGET_COLOR_OPTIONS.map((c) => {
+              const active = (currentColor || "") === c.value;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectColor(c.value);
+                    onClose();
+                  }}
+                  className={`h-3.5 w-3.5 rounded-full transition-transform hover:scale-125 ${
+                    active ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface" : ""
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.label}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Settings */}
       {onOpenSettings && (

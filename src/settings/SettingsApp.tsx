@@ -20,6 +20,7 @@ import {
 } from "../core/ipc";
 import { SettingsForm } from "../components/SettingsForm";
 import { Toggle } from "../components/Toggle";
+import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
 import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -571,10 +572,6 @@ export function SettingsApp() {
                       <h2 className="text-sm font-semibold text-fg">
                         {selectedModule?.manifest.name ?? (selectedKind ? selectedKind : "Widget")}
                       </h2>
-                      <p className="font-mono text-[11px] text-fg-muted">
-                        ID: {selectedWidget.id.slice(0, 16)}... • Pos: {selectedWidget.rect.x},{" "}
-                        {selectedWidget.rect.y} ({selectedWidget.rect.w} × {selectedWidget.rect.h})
-                      </p>
                     </div>
                   </div>
 
@@ -611,6 +608,65 @@ export function SettingsApp() {
                       value={selectedWidget.opacity}
                       onChange={(e) => void setOpacity(selectedWidget.id, Number(e.target.value))}
                     />
+                  </div>
+
+                  {/* Widget Accent Color */}
+                  <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-fg">Widget Accent Color</span>
+                      <span className="text-[11px] text-fg-muted">
+                        Customize badge, highlight, and focus tint
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                      {WIDGET_COLOR_OPTIONS.map((c) => {
+                        const isSelected = (selectedWidget.settings.widgetColor || "") === c.value;
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => {
+                              handleWidgetSettingChange(selectedWidget.id, "widgetColor", c.value);
+                            }}
+                            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-all ${
+                              isSelected
+                                ? "border-accent-500 bg-surface-raised font-medium text-fg shadow-xs ring-1 ring-accent-500/20"
+                                : "border-line/60 bg-surface text-fg-muted hover:border-line hover:text-fg"
+                            }`}
+                          >
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{ backgroundColor: c.hex }}
+                            />
+                            <span>{c.label}</span>
+                          </button>
+                        );
+                      })}
+                      {/* Native Custom Color Picker */}
+                      <label
+                        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-line/60 bg-surface px-2.5 py-1 text-xs text-fg-muted hover:border-line hover:text-fg"
+                        title="Pick custom hex color"
+                      >
+                        <input
+                          type="color"
+                          value={
+                            typeof selectedWidget.settings.widgetColor === "string" &&
+                            selectedWidget.settings.widgetColor.startsWith("#")
+                              ? selectedWidget.settings.widgetColor
+                              : "#3b82f6"
+                          }
+                          onChange={(e) => {
+                            handleWidgetSettingChange(
+                              selectedWidget.id,
+                              "widgetColor",
+                              e.target.value,
+                            );
+                          }}
+                          className="h-3 w-3 cursor-pointer appearance-none rounded-full border-none bg-transparent p-0"
+                        />
+                        <span>Custom</span>
+                      </label>
+                    </div>
                   </div>
 
                   {/* Widget Settings Schema Form */}
