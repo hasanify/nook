@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { EditOverlay } from "./EditOverlay";
-import { setBounds, setAlwaysOnTop, duplicateWidget, removeWidget } from "../core/ipc";
-import { invoke } from "@tauri-apps/api/core";
+import { setBounds } from "../core/ipc";
 import type { WidgetInstance, Rect } from "../core/types";
 
 interface WidgetShellProps {
@@ -28,8 +27,6 @@ export function WidgetShell({
   children,
 }: WidgetShellProps) {
   const [activeBounds, setActiveBounds] = useState<Rect | null>(null);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const displayedBounds = activeBounds ?? instance.rect;
 
@@ -43,71 +40,8 @@ export function WidgetShell({
     }
   };
 
-  // Close context menu on outside click or escape
-  useEffect(() => {
-    if (!contextMenu) return;
-
-    const handlePointerDown = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setContextMenu(null);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setContextMenu(null);
-      }
-    };
-
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [contextMenu]);
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Position menu within card boundaries
-    const cardWidth = displayedBounds.w;
-    const cardHeight = displayedBounds.h;
-    const menuWidth = 160;
-    const menuHeight = 140;
-
-    const x = Math.min(e.clientX, cardWidth - menuWidth - 8);
-    const y = Math.min(e.clientY, cardHeight - menuHeight - 8);
-
-    setContextMenu({ x: Math.max(8, x), y: Math.max(8, y) });
-  };
-
-  const handleOpenSettings = () => {
-    setContextMenu(null);
-    void invoke("open_settings_window", { widgetId: instance.id }).catch(() => {
-      // Fallback if command not available
-    });
-  };
-
-  const handleToggleAlwaysOnTop = () => {
-    setContextMenu(null);
-    void setAlwaysOnTop(instance.id, !instance.always_on_top);
-  };
-
-  const handleDuplicate = () => {
-    setContextMenu(null);
-    void duplicateWidget(instance.id);
-  };
-
-  const handleRemove = () => {
-    setContextMenu(null);
-    void removeWidget(instance.id);
-  };
-
   return (
     <div
-      onContextMenu={handleContextMenu}
       className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-all duration-200 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
         editMode ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : "border-line/70"
       }`}
@@ -129,50 +63,6 @@ export function WidgetShell({
       <div className="flex flex-1 flex-col overflow-hidden p-3.5 text-sm select-auto">
         {children}
       </div>
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <div
-          ref={menuRef}
-          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
-          className="absolute z-50 min-w-40 rounded-xl border border-line/80 bg-surface-raised/95 p-1 text-xs text-fg shadow-2xl backdrop-blur-md select-none"
-        >
-          <button
-            type="button"
-            onClick={handleToggleAlwaysOnTop}
-            className="flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg transition-colors hover:bg-surface"
-          >
-            <span>Always on top</span>
-            {instance.always_on_top ? (
-              <span className="font-bold text-accent-500">✓</span>
-            ) : (
-              <span className="text-[10px] text-fg-muted">Off</span>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={handleOpenSettings}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg transition-colors hover:bg-surface"
-          >
-            Settings...
-          </button>
-          <div className="my-1 border-t border-line/60" />
-          <button
-            type="button"
-            onClick={handleDuplicate}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg transition-colors hover:bg-surface"
-          >
-            Duplicate
-          </button>
-          <button
-            type="button"
-            onClick={handleRemove}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-error transition-colors hover:bg-error/15"
-          >
-            Remove
-          </button>
-        </div>
-      )}
     </div>
   );
 }

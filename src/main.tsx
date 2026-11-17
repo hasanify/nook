@@ -72,6 +72,11 @@ function App() {
   );
 }
 
+// Prevent default browser context menu globally across all windows (settings and widgets)
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Failed to find the root element");
