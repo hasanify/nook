@@ -271,6 +271,11 @@ pub fn update_widget_geometry(
                 target.rect = Rect { x, y, w, h };
             }
         });
+
+        let _ = app.emit(
+            "config-changed",
+            serde_json::json!({ "ids": [id], "app": false }),
+        );
     }
 
     Ok(())

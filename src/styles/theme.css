@@ -125,20 +125,17 @@
     @apply select-text;
   }
 
-  /* Sleek modern desktop scrollbars */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  /* Hide scrollbars globally across app settings and widgets while keeping smooth scrolling */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--line);
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--fg-muted);
+  ::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
   }
 
   /* Sleek range sliders */

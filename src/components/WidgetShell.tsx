@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { EditOverlay } from "./EditOverlay";
 import { WidgetContextMenu } from "./WidgetContextMenu";
 import { setBounds, removeWidget, openSettingsWindow } from "../core/ipc";
@@ -33,10 +33,49 @@ export function WidgetShell({
   const effectiveToggle =
     propToggle && propToggle.toString() !== "() => {}" ? propToggle : hookToggleEditMode;
 
-  const [activeBounds, setActiveBounds] = useState<Rect | null>(null);
+  const [prevInstanceRect, setPrevInstanceRect] = useState(instance.rect);
+  const [localBounds, setLocalBounds] = useState<Rect>(instance.rect);
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
-  const displayedBounds = activeBounds ?? instance.rect;
+  if (prevInstanceRect !== instance.rect) {
+    setPrevInstanceRect(instance.rect);
+    setLocalBounds(instance.rect);
+  }
+
+  const inFlightRef = useRef(false);
+  const queuedBoundsRef = useRef<{ bounds: Rect; commit: boolean } | null>(null);
+
+  const sendBounds = useCallback(
+    (bounds: Rect, commit: boolean) => {
+      queuedBoundsRef.current = { bounds, commit };
+      if (inFlightRef.current) return;
+
+      const flush = async () => {
+        while (queuedBoundsRef.current) {
+          const next = queuedBoundsRef.current;
+          queuedBoundsRef.current = null;
+          inFlightRef.current = true;
+          try {
+            await setBounds(
+              instance.id,
+              next.bounds.x,
+              next.bounds.y,
+              next.bounds.w,
+              next.bounds.h,
+              next.commit,
+            );
+          } catch {
+            // Silently catch IPC errors during bounds updates
+          } finally {
+            inFlightRef.current = false;
+          }
+        }
+      };
+
+      void flush();
+    },
+    [instance.id],
+  );
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,13 +84,8 @@ export function WidgetShell({
   };
 
   const handleBoundsChange = (bounds: Rect, commit: boolean) => {
-    if (commit) {
-      setActiveBounds(null);
-      void setBounds(instance.id, bounds.x, bounds.y, bounds.w, bounds.h, true);
-    } else {
-      setActiveBounds(bounds);
-      void setBounds(instance.id, bounds.x, bounds.y, bounds.w, bounds.h, false);
-    }
+    setLocalBounds(bounds);
+    sendBounds(bounds, commit);
   };
 
   return (
@@ -69,7 +103,7 @@ export function WidgetShell({
         editMode={effectiveEditMode}
         resizable={resizable}
         minSize={minSize}
-        currentBounds={displayedBounds}
+        currentBounds={localBounds}
         onBoundsChange={handleBoundsChange}
         onToggleEditMode={effectiveToggle}
         headerSlot={headerSlot}

@@ -41,41 +41,46 @@ export function TestWidget({ id }: TestWidgetProps) {
   }, [displayedBounds]);
 
   const isDragging = useRef(false);
-  const dragStart = useRef({ mouseX: 0, mouseY: 0, origX: 0, origY: 0 });
-
   const isResizing = useRef(false);
-  const resizeStart = useRef({ mouseX: 0, mouseY: 0, origW: 0, origH: 0 });
-
-  const rafId = useRef<number | null>(null);
   const pendingBounds = useRef<Rect | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
+  const inFlightRef = useRef(false);
+  const queuedBoundsRef = useRef<{ bounds: Rect; commit: boolean } | null>(null);
+
+  const sendBounds = (bounds: Rect, commit: boolean) => {
+    queuedBoundsRef.current = { bounds, commit };
+    if (inFlightRef.current) return;
+
+    const flush = async () => {
+      while (queuedBoundsRef.current) {
+        const next = queuedBoundsRef.current;
+        queuedBoundsRef.current = null;
+        inFlightRef.current = true;
+        try {
+          await setBounds(
+            id,
+            next.bounds.x,
+            next.bounds.y,
+            next.bounds.w,
+            next.bounds.h,
+            next.commit,
+          );
+        } catch {
+          // Silently catch IPC errors during bounds updates
+        } finally {
+          inFlightRef.current = false;
+        }
       }
     };
-  }, []);
 
-  const scheduleBoundsUpdate = (bounds: Rect) => {
+    void flush();
+  };
+
+  const scheduleBoundsUpdate = (bounds: Rect, commit = false) => {
     pendingBounds.current = bounds;
-    if (rafId.current === null) {
-      rafId.current = requestAnimationFrame(() => {
-        rafId.current = null;
-        if (pendingBounds.current) {
-          currentBoundsRef.current = pendingBounds.current;
-          setActiveBounds(pendingBounds.current);
-          void setBounds(
-            id,
-            pendingBounds.current.x,
-            pendingBounds.current.y,
-            pendingBounds.current.w,
-            pendingBounds.current.h,
-            false,
-          );
-        }
-      });
-    }
+    currentBoundsRef.current = bounds;
+    setActiveBounds(bounds);
+    sendBounds(bounds, commit);
   };
 
   useEffect(() => {
@@ -108,45 +113,51 @@ export function TestWidget({ id }: TestWidgetProps) {
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     e.preventDefault();
+    const target = e.currentTarget;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {}
+
     isDragging.current = true;
-    dragStart.current = {
-      mouseX: e.screenX,
-      mouseY: e.screenY,
-      origX: currentBoundsRef.current.x,
-      origY: currentBoundsRef.current.y,
-    };
+    const startX = e.screenX;
+    const startY = e.screenY;
+    const origX = currentBoundsRef.current.x;
+    const origY = currentBoundsRef.current.y;
+    const origW = currentBoundsRef.current.w;
+    const origH = currentBoundsRef.current.h;
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isDragging.current) return;
-      if (ev.buttons === 0) {
-        onPointerUp();
-        return;
-      }
-      const deltaX = ev.screenX - dragStart.current.mouseX;
-      const deltaY = ev.screenY - dragStart.current.mouseY;
+      const deltaX = ev.screenX - startX;
+      const deltaY = ev.screenY - startY;
       scheduleBoundsUpdate({
-        ...currentBoundsRef.current,
-        x: dragStart.current.origX + deltaX,
-        y: dragStart.current.origY + deltaY,
+        x: origX + deltaX,
+        y: origY + deltaY,
+        w: origW,
+        h: origH,
       });
     };
 
-    const onPointerUp = () => {
+    const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      try {
+        target.releasePointerCapture(e.pointerId);
+      } catch {}
       if (!isDragging.current) return;
       isDragging.current = false;
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
-        rafId.current = null;
-      }
       const final = pendingBounds.current ?? currentBoundsRef.current;
-      setActiveBounds(null);
-      void setBounds(id, final.x, final.y, final.w, final.h, true);
+      scheduleBoundsUpdate(final, true);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
     };
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
   };
 
   // Handle Resizing
@@ -154,48 +165,54 @@ export function TestWidget({ id }: TestWidgetProps) {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
+    const target = e.currentTarget;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {}
+
     isResizing.current = true;
-    resizeStart.current = {
-      mouseX: e.screenX,
-      mouseY: e.screenY,
-      origW: currentBoundsRef.current.w,
-      origH: currentBoundsRef.current.h,
-    };
+    const startX = e.screenX;
+    const startY = e.screenY;
+    const origX = currentBoundsRef.current.x;
+    const origY = currentBoundsRef.current.y;
+    const origW = currentBoundsRef.current.w;
+    const origH = currentBoundsRef.current.h;
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isResizing.current) return;
-      if (ev.buttons === 0) {
-        onPointerUp();
-        return;
-      }
-      const deltaW = ev.screenX - resizeStart.current.mouseX;
-      const deltaH = ev.screenY - resizeStart.current.mouseY;
-      const nextW = Math.max(260, resizeStart.current.origW + deltaW);
-      const nextH = Math.max(200, resizeStart.current.origH + deltaH);
+      const deltaW = ev.screenX - startX;
+      const deltaH = ev.screenY - startY;
+      const nextW = Math.max(260, origW + deltaW);
+      const nextH = Math.max(200, origH + deltaH);
 
       scheduleBoundsUpdate({
-        ...currentBoundsRef.current,
+        x: origX,
+        y: origY,
         w: nextW,
         h: nextH,
       });
     };
 
-    const onPointerUp = () => {
+    const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      try {
+        target.releasePointerCapture(e.pointerId);
+      } catch {}
       if (!isResizing.current) return;
       isResizing.current = false;
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
-        rafId.current = null;
-      }
       const final = pendingBounds.current ?? currentBoundsRef.current;
-      setActiveBounds(null);
-      void setBounds(id, final.x, final.y, final.w, final.h, true);
+      scheduleBoundsUpdate(final, true);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
     };
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
   };
 
   if (loading) {
