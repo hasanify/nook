@@ -135,7 +135,7 @@ To create and register a new widget type:
 
 ## Known Limitations
 
-1. **Windows Only:** Relies on Win32 desktop parenting (`SHELLDLL_DefView` / `Progman`) and `WS_EX_TOOLWINDOW` semantics.
+1. **Windows Only:** Relies on Win32 desktop parenting (`SHELLDLL_DefView` / `Progman`) and `WS_EX_TOOLWINDOW` semantics. In environments where no `Progman` or `WorkerW` is running, Nook automatically falls back to `PinStrategy::BottomToplevel`.
 2. **Icons Layering:** Widgets sit directly above desktop icons by design, covering desktop icons situated immediately beneath them.
 3. **Tray Overflow:** On Windows, new tray icons may initially be grouped inside the notification overflow chevron (`^`). Users should drag Nook onto the main visible taskbar tray area.
 4. **Code Signing:** Windows installer executable is unsigned in development and triggers Windows SmartScreen warnings ("Unknown Publisher").
