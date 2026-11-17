@@ -1,3 +1,9 @@
+## [0.9.1](https://github.com/hasanify/nook/compare/v0.9.0...v0.9.1) (2026-11-17)
+
+### Bug Fixes
+
+- **ui:** hide scrollbars globally and resolve widget drag/resize lag and snap-back ([6767eb2](https://github.com/hasanify/nook/commit/6767eb2f67265f20d1243f8edd501f5e312240c2))
+
 # [0.9.0](https://github.com/hasanify/nook/compare/v0.8.0...v0.9.0) (2026-11-17)
 
 ### Features
