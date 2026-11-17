@@ -225,6 +225,16 @@ pub fn open_settings_window(app: AppHandle, widget_id: Option<String>) -> Result
 }
 
 #[tauri::command]
+pub fn show_settings_window(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("settings") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+    Ok(())
+}
+
+#[tauri::command]
 pub fn get_all_manifests() -> Vec<crate::registry::WidgetManifest> {
     let reg = crate::registry::ManifestRegistry::new();
     reg.list().into_iter().cloned().collect()

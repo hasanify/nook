@@ -86,6 +86,10 @@ export async function openSettingsWindow(widgetId?: string): Promise<void> {
   return invoke<void>("open_settings_window", { widgetId });
 }
 
+export async function showSettingsWindow(): Promise<void> {
+  return invoke<void>("show_settings_window");
+}
+
 export async function timerSchedule(
   id: string,
   endsAtMs: number,

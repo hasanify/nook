@@ -14,7 +14,7 @@ pub mod windows;
 
 use state::AppState;
 use std::path::PathBuf;
-use tauri::{Emitter, Manager, RunEvent};
+use tauri::{Emitter, Manager, RunEvent, WindowEvent};
 use tracing::info;
 
 fn setup_logging() {
@@ -117,6 +117,7 @@ pub fn run() {
             commands::verify_desktop_pin,
             commands::update_app_config,
             commands::open_settings_window,
+            commands::show_settings_window,
             commands::get_all_manifests,
             commands::timer_schedule,
             commands::timer_cancel,
@@ -133,12 +134,21 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 
-    app.run(|_app_handle, event| {
-        if let RunEvent::ExitRequested { api, code, .. } = event {
+    app.run(|app_handle, event| match event {
+        RunEvent::ExitRequested { api, code, .. } if code.is_none() => {
             // When last window closes, prevent exit so Nook lives in tray
-            if code.is_none() {
-                api.prevent_exit();
+            api.prevent_exit();
+        }
+        RunEvent::WindowEvent {
+            label,
+            event: WindowEvent::CloseRequested { api, .. },
+            ..
+        } if label == "settings" => {
+            api.prevent_close();
+            if let Some(w) = app_handle.get_webview_window(&label) {
+                let _ = w.hide();
             }
         }
+        _ => {}
     });
 }

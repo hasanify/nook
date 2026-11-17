@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useEditMode } from "../core/use-edit-mode";
 import {
   getAppConfig,
@@ -16,8 +16,10 @@ import {
   checkForUpdates,
   installUpdate,
   onUpdateDownloadProgress,
+  showSettingsWindow,
   type UpdateCheckResult,
 } from "../core/ipc";
+import { listen } from "@tauri-apps/api/event";
 import { SettingsForm } from "../components/SettingsForm";
 import { Toggle } from "../components/Toggle";
 import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
@@ -42,6 +44,7 @@ export function SettingsApp() {
   const [githubInput, setGithubInput] = useState("");
   const [vercelInput, setVercelInput] = useState("");
   const [widgetToAdd, setWidgetToAdd] = useState("notes");
+  const hasShownWindowRef = useRef(false);
 
   const [appVersion, setAppVersion] = useState<string>("");
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -98,11 +101,40 @@ export function SettingsApp() {
       unlistenProgress = fn;
     });
 
+    let unlistenFocus: (() => void) | undefined;
+    listen<{ id: string }>("focus-widget", (event) => {
+      if (event.payload?.id) {
+        setSelectedWidgetId(event.payload.id);
+        setActiveTab("widgets");
+      }
+    }).then((fn) => {
+      unlistenFocus = fn;
+    });
+
     return () => {
       if (unlisten) unlisten();
       if (unlistenProgress) unlistenProgress();
+      if (unlistenFocus) unlistenFocus();
     };
   }, [fetchConfig, refreshAccountStatus]);
+
+  // Reveal settings window smoothly only after initial config is loaded and rendered
+  useEffect(() => {
+    if (config && !hasShownWindowRef.current) {
+      hasShownWindowRef.current = true;
+      requestAnimationFrame(() => {
+        void showSettingsWindow();
+      });
+    }
+  }, [config]);
+
+  // Fallback timer so window is guaranteed to show even if config fetch is slow
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void showSettingsWindow();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCheckUpdates = async () => {
     setCheckingUpdate(true);

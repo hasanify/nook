@@ -332,6 +332,7 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
 
     if let Some(window) = app.get_webview_window(LABEL) {
         let _ = window.show();
+        let _ = window.unminimize();
         let _ = window.set_focus();
         if let Some(w_id) = widget_id {
             let _ = window.emit("focus-widget", serde_json::json!({ "id": w_id }));
@@ -352,6 +353,7 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
         .resizable(true)
         .inner_size(680.0, 560.0)
         .min_inner_size(520.0, 420.0)
+        .visible(false)
         .center();
 
     if let Some(icon) = app.default_window_icon() {
@@ -360,11 +362,10 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
             .map_err(|e| format!("Failed to set settings window icon: {}", e))?;
     }
 
-    let window = builder
+    let _window = builder
         .build()
         .map_err(|e| format!("Failed to create settings window: {}", e))?;
 
-    let _ = window.show();
-    let _ = window.set_focus();
+    // Window remains hidden until frontend is mounted and calls show_settings_window
     Ok(())
 }
