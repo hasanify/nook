@@ -1,3 +1,9 @@
+## [0.10.2](https://github.com/hasanify/nook/compare/v0.10.1...v0.10.2) (2026-11-17)
+
+### Bug Fixes
+
+- **settings:** prevent white flash and layout shifts on launch ([73b1b8d](https://github.com/hasanify/nook/commit/73b1b8d2023423ef1fa231e4070f8ba6b07ac5a0))
+
 ## [0.10.1](https://github.com/hasanify/nook/compare/v0.10.0...v0.10.1) (2026-11-17)
 
 ### Bug Fixes
