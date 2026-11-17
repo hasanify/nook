@@ -299,17 +299,22 @@ export function TestWidget({ id }: TestWidgetProps) {
             </span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
-            <button
-              type="button"
-              className={`rounded border px-2 py-0.5 text-[10px] font-medium ${
-                instance.always_on_top
-                  ? "border-accent-500 bg-accent-500/10 text-accent-500"
-                  : "border-line bg-surface-raised text-fg-muted hover:text-fg"
-              }`}
-              onClick={() => void setAlwaysOnTop(id, !instance.always_on_top)}
-            >
-              {instance.always_on_top ? "Always on top: ON" : "Always on top: OFF"}
-            </button>
+            {(() => {
+              const isAlwaysOnTop = Boolean(instance.alwaysOnTop ?? instance.always_on_top);
+              return (
+                <button
+                  type="button"
+                  className={`rounded border px-2 py-0.5 text-[10px] font-medium ${
+                    isAlwaysOnTop
+                      ? "border-accent-500 bg-accent-500/10 text-accent-500"
+                      : "border-line bg-surface-raised text-fg-muted hover:text-fg"
+                  }`}
+                  onClick={() => void setAlwaysOnTop(id, !isAlwaysOnTop)}
+                >
+                  {isAlwaysOnTop ? "Always on top: ON" : "Always on top: OFF"}
+                </button>
+              );
+            })()}
             <button
               type="button"
               className="rounded border border-line bg-surface-raised px-2 py-0.5 text-[10px] font-medium text-fg-muted hover:text-fg"

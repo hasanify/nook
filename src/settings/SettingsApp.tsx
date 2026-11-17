@@ -204,9 +204,28 @@ export function SettingsApp() {
     void updateSettings(widgetId, { [key]: value });
   };
 
+  const handleToggleAlwaysOnTop = async (widgetId: string, current: boolean) => {
+    const next = !current;
+    setConfig((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        widgets: prev.widgets.map((w) =>
+          w.id === widgetId ? { ...w, alwaysOnTop: next, always_on_top: next } : w,
+        ),
+      };
+    });
+    try {
+      await setAlwaysOnTop(widgetId, next);
+    } catch {
+      fetchConfig();
+    }
+  };
+
   const selectedWidget: WidgetInstance | undefined = config?.widgets.find(
     (w) => w.id === selectedWidgetId,
   );
+  const isAlwaysOnTop = Boolean(selectedWidget?.alwaysOnTop ?? selectedWidget?.always_on_top);
   const selectedKind = selectedWidget
     ? selectedWidget.kind || (selectedWidget as unknown as { type?: string }).type || ""
     : "";
@@ -568,9 +587,9 @@ export function SettingsApp() {
                       </div>
                     </div>
                     <Toggle
-                      checked={selectedWidget.always_on_top}
+                      checked={isAlwaysOnTop}
                       onChange={() =>
-                        void setAlwaysOnTop(selectedWidget.id, !selectedWidget.always_on_top)
+                        void handleToggleAlwaysOnTop(selectedWidget.id, isAlwaysOnTop)
                       }
                       ariaLabel="Always on top"
                     />

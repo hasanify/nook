@@ -105,7 +105,7 @@ pub struct WidgetInstance {
     pub rect: Rect,
     pub monitor: MonitorRef,
     pub opacity: f32,
-    #[serde(default)]
+    #[serde(default, alias = "always_on_top")]
     pub always_on_top: bool,
     #[serde(default)]
     pub settings: serde_json::Map<String, serde_json::Value>,

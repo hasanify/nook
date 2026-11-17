@@ -17,7 +17,8 @@ export interface WidgetInstance {
   type?: string;
   rect: Rect;
   opacity: number;
-  always_on_top: boolean;
+  alwaysOnTop?: boolean;
+  always_on_top?: boolean;
   monitor: MonitorRef;
   settings: Record<string, unknown>;
   state: Record<string, unknown>;
