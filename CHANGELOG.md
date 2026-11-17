@@ -1,3 +1,9 @@
+# [0.7.0](https://github.com/hasanify/nook/compare/v0.6.5...v0.7.0) (2026-11-17)
+
+### Features
+
+- **widgets:** add clock, weather, and tasks widgets, vercel autocomplete, and fix edit mode ([bd80c84](https://github.com/hasanify/nook/commit/bd80c844a393a4205f01bf6d7bd3d3e87c657817))
+
 ## [0.6.5](https://github.com/hasanify/nook/compare/v0.6.4...v0.6.5) (2026-11-17)
 
 ### Bug Fixes
