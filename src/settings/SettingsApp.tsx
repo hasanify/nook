@@ -207,22 +207,15 @@ export function SettingsApp() {
   const selectedWidget: WidgetInstance | undefined = config?.widgets.find(
     (w) => w.id === selectedWidgetId,
   );
-  const selectedModule = selectedWidget ? getWidgetModule(selectedWidget.kind) : undefined;
+  const selectedKind = selectedWidget
+    ? selectedWidget.kind || (selectedWidget as unknown as { type?: string }).type || ""
+    : "";
+  const selectedModule = selectedKind ? getWidgetModule(selectedKind) : undefined;
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-surface font-sans text-fg select-none">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-line/60 bg-surface-raised/80 px-6 py-3.5 backdrop-blur-md">
-        <div className="flex items-center gap-2.5">
-          <img src="/icon.png" alt="Nook" className="h-7 w-7 rounded-lg shadow-xs" />
-          <div>
-            <h1 className="text-sm font-semibold tracking-tight text-fg">Nook Settings</h1>
-          </div>
-        </div>
-      </div>
-
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-line/60 bg-surface-raised/30 px-5 text-xs font-medium">
+      <div className="flex gap-1 border-b border-line/60 bg-surface-raised/40 px-5 pt-1.5 text-xs font-medium">
         <button
           type="button"
           onClick={() => setActiveTab("general")}
@@ -479,7 +472,10 @@ export function SettingsApp() {
 
               <div className="flex max-h-80 flex-col gap-1.5 overflow-y-auto">
                 {config?.widgets.map((w) => {
-                  const title = getWidgetModule(w.kind)?.manifest.name ?? w.kind;
+                  const widgetKind = w.kind || (w as unknown as { type?: string }).type || "";
+                  const title =
+                    getWidgetModule(widgetKind)?.manifest.name ??
+                    (widgetKind ? widgetKind : "Widget");
                   const isSelected = selectedWidgetId === w.id;
                   return (
                     <button
@@ -492,7 +488,7 @@ export function SettingsApp() {
                           : "border-transparent bg-surface-raised text-fg hover:border-line hover:bg-surface"
                       }`}
                     >
-                      <div className="flex items-center gap-2 truncate">
+                      <div className="flex min-w-0 items-center gap-2 truncate">
                         <span
                           className={`h-2 w-2 shrink-0 rounded-full ${
                             isSelected ? "bg-accent-500" : "bg-fg-muted/40"
@@ -500,7 +496,11 @@ export function SettingsApp() {
                         />
                         <span className="truncate font-medium text-fg">{title}</span>
                       </div>
-                      <span className="ml-1 font-mono text-[10px] text-fg-muted">
+                      <span
+                        className={`ml-2 shrink-0 font-mono text-[10px] ${
+                          isSelected ? "text-accent-500" : "text-fg-muted"
+                        }`}
+                      >
                         {w.id.slice(0, 5)}
                       </span>
                     </button>
@@ -550,7 +550,7 @@ export function SettingsApp() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-sm font-semibold text-fg">
-                        {selectedModule?.manifest.name ?? selectedWidget.kind}
+                        {selectedModule?.manifest.name ?? (selectedKind ? selectedKind : "Widget")}
                       </h2>
                       <p className="font-mono text-[11px] text-fg-muted">
                         ID: {selectedWidget.id.slice(0, 16)}... • Pos: {selectedWidget.rect.x},{" "}
@@ -785,7 +785,9 @@ export function SettingsApp() {
               <img
                 src="/icon.png"
                 alt="Nook"
-                className="h-16 w-16 shrink-0 rounded-2xl shadow-sm"
+                width={64}
+                height={64}
+                className="h-16 w-16 shrink-0 rounded-2xl object-cover shadow-sm"
               />
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2.5">

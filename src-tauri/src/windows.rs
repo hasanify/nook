@@ -57,6 +57,31 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     Ok(())
 }
 
+pub fn get_primary_work_area() -> (i32, i32, i32, i32) {
+    #[cfg(windows)]
+    unsafe {
+        use windows::Win32::UI::WindowsAndMessaging::{
+            SystemParametersInfoW, SPI_GETWORKAREA, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS,
+        };
+        let mut rc = RECT::default();
+        if SystemParametersInfoW(
+            SPI_GETWORKAREA,
+            0,
+            Some(&mut rc as *mut _ as *mut _),
+            SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
+        )
+        .is_ok()
+        {
+            let width = rc.right - rc.left;
+            let height = rc.bottom - rc.top;
+            if width > 0 && height > 0 {
+                return (rc.left, rc.top, width, height);
+            }
+        }
+    }
+    (0, 0, 1920, 1080)
+}
+
 pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, String> {
     let id = format!("w_{}", uuid::Uuid::new_v4().simple());
     let state = app.state::<AppState>();
@@ -73,12 +98,22 @@ pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, S
         }
     };
 
+    let (work_left, work_top, work_w, _) = get_primary_work_area();
+    let (x, y) = if kind == "placeholder" {
+        (
+            (work_left + work_w - default_w - 24 - stagger_offset).max(work_left),
+            work_top + 24 + stagger_offset,
+        )
+    } else {
+        (160 + stagger_offset, 120 + stagger_offset)
+    };
+
     let instance = WidgetInstance {
         id: id.clone(),
         kind: kind.to_string(),
         rect: Rect {
-            x: 160 + stagger_offset,
-            y: 120 + stagger_offset,
+            x,
+            y,
             w: default_w,
             h: default_h,
         },
@@ -89,11 +124,12 @@ pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, S
         state: serde_json::Map::new(),
     };
 
+    spawn_widget(app, &instance)?;
+
     state.config.update_config(|cfg| {
         cfg.widgets.push(instance.clone());
     });
 
-    spawn_widget(app, &instance)?;
     Ok(instance)
 }
 

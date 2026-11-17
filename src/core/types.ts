@@ -14,6 +14,7 @@ export interface MonitorRef {
 export interface WidgetInstance {
   id: string;
   kind: string;
+  type?: string;
   rect: Rect;
   opacity: number;
   always_on_top: boolean;

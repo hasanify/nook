@@ -19,7 +19,7 @@ pub fn get_instance(state: tauri::State<AppState>, id: String) -> Result<WidgetI
 }
 
 #[tauri::command]
-pub fn add_widget(app: AppHandle, kind: String) -> Result<WidgetInstance, String> {
+pub async fn add_widget(app: AppHandle, kind: String) -> Result<WidgetInstance, String> {
     let instance = windows::spawn_new_widget(&app, &kind)?;
     let _ = app.emit(
         "config-changed",
@@ -29,7 +29,7 @@ pub fn add_widget(app: AppHandle, kind: String) -> Result<WidgetInstance, String
 }
 
 #[tauri::command]
-pub fn duplicate_widget(app: AppHandle, id: String) -> Result<WidgetInstance, String> {
+pub async fn duplicate_widget(app: AppHandle, id: String) -> Result<WidgetInstance, String> {
     let state = app.state::<AppState>();
     let original = state
         .config
@@ -45,11 +45,12 @@ pub fn duplicate_widget(app: AppHandle, id: String) -> Result<WidgetInstance, St
     clone.rect.x += 24;
     clone.rect.y += 24;
 
+    windows::spawn_widget(&app, &clone)?;
+
     state.config.update_config(|cfg| {
         cfg.widgets.push(clone.clone());
     });
 
-    windows::spawn_widget(&app, &clone)?;
     let _ = app.emit(
         "config-changed",
         serde_json::json!({ "ids": [new_id], "app": false }),

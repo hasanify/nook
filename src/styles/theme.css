@@ -136,10 +136,19 @@
 
   /* Sleek range sliders */
   input[type="range"] {
-    @apply h-1.5 w-full appearance-none rounded-full bg-line transition-colors outline-none;
+    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-transparent outline-none;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    @apply h-1.5 w-full rounded-full bg-neutral-200 transition-colors;
+  }
+  .dark input[type="range"]::-webkit-slider-runnable-track {
+    @apply bg-neutral-600;
   }
   input[type="range"]::-webkit-slider-thumb {
-    @apply h-4 w-4 cursor-pointer appearance-none rounded-full border-2 border-white bg-accent-500 shadow-sm transition-transform duration-150 hover:scale-110 active:scale-95;
+    @apply -mt-1.25 h-4 w-4 cursor-pointer appearance-none rounded-full border-2 border-white bg-accent-500 shadow-sm transition-transform duration-150 hover:scale-110 active:scale-95;
+  }
+  .dark input[type="range"]::-webkit-slider-thumb {
+    @apply border-neutral-900 bg-accent-400;
   }
 
   @media (prefers-reduced-motion: reduce) {

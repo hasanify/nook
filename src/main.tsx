@@ -27,11 +27,12 @@ function WidgetHost({ id }: { id: string }) {
     );
   }
 
-  const mod = getWidgetModule(instance.kind) ?? getWidgetModule("placeholder");
+  const widgetKind = instance.kind || instance.type;
+  const mod = getWidgetModule(widgetKind ?? "") ?? getWidgetModule("placeholder");
   if (!mod) {
     return (
       <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none">
-        Unknown widget type: {instance.kind}
+        Unknown widget type: {widgetKind}
       </div>
     );
   }

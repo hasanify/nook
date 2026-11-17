@@ -2,14 +2,13 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::thread;
 use std::time::Duration;
 use tauri::AppHandle;
-use tracing::{debug, info};
+use tracing::info;
 use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, PostQuitMessage,
-    RegisterClassW, RegisterWindowMessageW, SetTimer, TranslateMessage, MSG, WM_DESTROY,
-    WM_DISPLAYCHANGE, WM_DPICHANGED, WM_SETTINGCHANGE, WM_TIMER, WNDCLASSW, WS_EX_TOOLWINDOW,
-    WS_POPUP,
+    RegisterClassW, RegisterWindowMessageW, TranslateMessage, MSG, WM_DESTROY, WM_DISPLAYCHANGE,
+    WM_DPICHANGED, WM_SETTINGCHANGE, WNDCLASSW, WS_EX_TOOLWINDOW, WS_POPUP,
 };
 
 static TASKBAR_CREATED_MSG: AtomicU32 = AtomicU32::new(0);
@@ -52,29 +51,17 @@ pub fn start_shell_watch(app: AppHandle) {
                 if hwnd.0 as isize != 0 {
                     info!("Shell watch hidden window created: {:?}", hwnd);
 
-                    // 3-second safety net timer
-                    let _ = SetTimer(Some(hwnd), 1, 3000, None);
-
                     let mut msg = MSG::default();
                     while GetMessageW(&mut msg, None, 0, 0).as_bool() {
                         let _ = TranslateMessage(&msg);
                         DispatchMessageW(&msg);
 
-                        // Process custom TaskbarCreated or timer events
+                        // Process custom TaskbarCreated (Explorer restarted)
                         if msg.message == taskbar_msg && taskbar_msg != 0 {
                             info!("TaskbarCreated received! Explorer restarted. Recovering widgets...");
                             let app_clone = app.clone();
                             tauri::async_runtime::spawn(async move {
-                                tokio::time::sleep(Duration::from_millis(1000)).await;
-                                let app_inner = app_clone.clone();
-                                let _ = app_clone.run_on_main_thread(move || {
-                                    let _ = crate::windows::ensure_all_widgets(&app_inner);
-                                });
-                            });
-                        } else if msg.message == WM_TIMER {
-                            debug!("Shell watch 3s verify interval");
-                            let app_clone = app.clone();
-                            let _ = app.run_on_main_thread(move || {
+                                tokio::time::sleep(Duration::from_millis(1500)).await;
                                 let _ = crate::windows::ensure_all_widgets(&app_clone);
                             });
                         } else if msg.message == WM_DISPLAYCHANGE

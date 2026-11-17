@@ -17,10 +17,32 @@ pub struct AppConfig {
 
 impl Default for AppConfig {
     fn default() -> Self {
+        let (work_left, work_top, work_w, _) = crate::windows::get_primary_work_area();
+        let default_w = 340;
+        let default_h = 320;
+        let x = (work_left + work_w - default_w - 24).max(work_left);
+        let y = work_top + 24;
+
+        let default_placeholder = WidgetInstance {
+            id: format!("w_{}", uuid::Uuid::new_v4().simple()),
+            kind: "placeholder".to_string(),
+            rect: Rect {
+                x,
+                y,
+                w: default_w,
+                h: default_h,
+            },
+            monitor: MonitorRef::default(),
+            opacity: 0.95,
+            always_on_top: false,
+            settings: serde_json::Map::new(),
+            state: serde_json::Map::new(),
+        };
+
         Self {
             version: 1,
             app: AppSection::default(),
-            widgets: Vec::new(),
+            widgets: vec![default_placeholder],
         }
     }
 }
@@ -78,7 +100,7 @@ impl Default for MonitorRef {
 #[serde(rename_all = "camelCase")]
 pub struct WidgetInstance {
     pub id: String,
-    #[serde(rename = "type")]
+    #[serde(alias = "type")]
     pub kind: String,
     pub rect: Rect,
     pub monitor: MonitorRef,
