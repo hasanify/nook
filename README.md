@@ -179,3 +179,9 @@ To create and register a new widget type:
 8. **Transparent Corners:** Widget window boundaries are clipped using native `SetWindowRgn` for optimal rendering performance without per-pixel blur overhead.
 9. **Multi-Monitor & DPI Scaling:** Widget coordinates are stored in logical pixels and scaled per target display work area. Child windows in WebView2 do not receive `WM_DPICHANGED` directly; Nook monitors shell events to re-clamp bounds during display topology changes.
 10. **Code Signing:** Windows installer executable is unsigned in development and triggers Windows SmartScreen warnings ("Unknown Publisher"). Run anyway or whitelist the binary.
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
