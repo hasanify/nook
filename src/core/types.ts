@@ -46,6 +46,7 @@ export interface SettingsField {
   min?: number;
   max?: number;
   step?: number;
+  autocomplete?: string;
 }
 
 export interface Manifest {
@@ -64,6 +65,7 @@ export interface Manifest {
 export interface WidgetProps {
   instance: WidgetInstance;
   editMode: boolean;
+  onToggleEditMode?: () => void;
   patchState: (patch: Record<string, unknown>) => void;
   patchSettings: (patch: Record<string, unknown>) => void;
 }

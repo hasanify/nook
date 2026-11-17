@@ -9,7 +9,7 @@ import { useTheme } from "./core/use-theme";
 
 function WidgetHost({ id }: { id: string }) {
   const { instance, loading, error, patchState, patchSettings } = useInstance(id);
-  const { editMode } = useEditMode();
+  const { editMode, toggleEditMode } = useEditMode();
 
   if (loading) {
     return (
@@ -42,6 +42,7 @@ function WidgetHost({ id }: { id: string }) {
     <WidgetComponent
       instance={instance}
       editMode={editMode}
+      onToggleEditMode={toggleEditMode}
       patchState={patchState}
       patchSettings={patchSettings}
     />

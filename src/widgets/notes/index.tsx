@@ -78,7 +78,6 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
     <WidgetShell
       instance={instance}
       editMode={editMode}
-      onToggleEditMode={() => {}}
       title={manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}

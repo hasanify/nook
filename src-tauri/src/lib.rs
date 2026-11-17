@@ -128,6 +128,7 @@ pub fn run() {
             commands::get_app_version,
             commands::check_for_updates,
             commands::install_update,
+            commands::list_vercel_projects,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

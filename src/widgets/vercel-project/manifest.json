@@ -13,7 +13,8 @@
       "label": "Project Name or ID",
       "type": "text",
       "placeholder": "my-app",
-      "defaultValue": ""
+      "defaultValue": "",
+      "autocomplete": "vercel-projects"
     }
   ]
 }

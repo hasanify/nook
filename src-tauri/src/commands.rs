@@ -448,3 +448,11 @@ pub async fn install_update(
 
     Ok(())
 }
+
+#[tauri::command]
+pub async fn list_vercel_projects(
+) -> Result<Vec<crate::providers::vercel::VercelProjectSummary>, String> {
+    let token = crate::secrets::get_secret("vercel");
+    let client = reqwest::Client::new();
+    crate::providers::vercel::list_projects(&client, token.as_deref()).await
+}

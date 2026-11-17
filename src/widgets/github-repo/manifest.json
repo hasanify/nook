@@ -1,10 +1,10 @@
 {
   "id": "github-repo",
   "name": "GitHub Repo",
-  "description": "Recent commits, workflow runs, and repository status",
-  "version": "1.0.0",
+  "description": "Recent commits, workflow runs, stars, and release status",
+  "version": "1.1.0",
   "author": "Nook",
-  "defaultSize": { "w": 320, "h": 260 },
+  "defaultSize": { "w": 320, "h": 270 },
   "minSize": { "w": 260, "h": 200 },
   "resizable": true,
   "settingsSchema": [
@@ -21,6 +21,30 @@
       "type": "text",
       "placeholder": "main",
       "defaultValue": "main"
+    },
+    {
+      "key": "showStars",
+      "label": "Show Stars & Forks",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showRelease",
+      "label": "Show Latest Release",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showRuns",
+      "label": "Show Workflow Runs",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showCommits",
+      "label": "Show Recent Commits",
+      "type": "boolean",
+      "defaultValue": true
     }
   ]
 }

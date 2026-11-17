@@ -115,7 +115,6 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
     <WidgetShell
       instance={instance}
       editMode={editMode}
-      onToggleEditMode={() => {}}
       title={projectId || manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}

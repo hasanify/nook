@@ -70,6 +70,21 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let clock_json = include_str!("../../src/widgets/clock/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(clock_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
+        let weather_json = include_str!("../../src/widgets/weather/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(weather_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
+        let todo_json = include_str!("../../src/widgets/todo/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(todo_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

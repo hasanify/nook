@@ -443,7 +443,8 @@
           <div class="hero-content">
             <h1>Desktop widgets for Windows.</h1>
             <p class="hero-desc">
-              Notes, timers, and dev status pinned directly to your Windows desktop wallpaper.
+              Notes, timers, weather, tasks, and dev status pinned directly to your Windows desktop
+              wallpaper.
             </p>
             <div class="hero-actions">
               <a
@@ -498,13 +499,90 @@
       <!-- Widgets Section -->
       <section id="widgets">
         <div class="container">
-          <h2>Four built-in widgets</h2>
+          <h2>Essential desktop widgets</h2>
           <p class="section-intro">
-            Zero configuration required to start. Each widget sits cleanly on your desktop and
-            updates in real time.
+            Zero configuration required to start. Each widget sits cleanly on your desktop, consumes
+            negligible resources, and updates in real time.
           </p>
 
           <div class="widget-grid">
+            <div class="widget-card">
+              <div class="widget-card-header">
+                <div class="widget-icon">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <span>Clock & Date</span>
+              </div>
+              <p>
+                Crisp digital desktop clock with day of week, full date, 12/24-hour modes, optional
+                seconds, and an elapsed day progress bar.
+              </p>
+            </div>
+
+            <div class="widget-card">
+              <div class="widget-card-header">
+                <div class="widget-icon">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                  </svg>
+                </div>
+                <span>Weather</span>
+              </div>
+              <p>
+                Real-time atmospheric conditions, current temperature (°C / °F), humidity, wind, and
+                conditions via keyless Open-Meteo forecasts.
+              </p>
+            </div>
+
+            <div class="widget-card">
+              <div class="widget-card-header">
+                <div class="widget-icon">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 11l3 3L22 4" />
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                  </svg>
+                </div>
+                <span>Quick Tasks</span>
+              </div>
+              <p>
+                Minimalist checklist pinned to your desktop. Quickly capture action items, toggle
+                completion, and clear finished tasks.
+              </p>
+            </div>
+
             <div class="widget-card">
               <div class="widget-card-header">
                 <div class="widget-icon">
@@ -528,8 +606,8 @@
                 <span>Notes</span>
               </div>
               <p>
-                A minimal scratchpad for thoughts, clipboard snippets, and to-do items.
-                Automatically persists changes locally with instant word and character counting.
+                A distraction-free scratchpad for thoughts, snippets, and reference text.
+                Automatically persists changes locally with word counting.
               </p>
             </div>
 
@@ -554,8 +632,8 @@
                 <span>Focus Timer</span>
               </div>
               <p>
-                Pomodoro cycles (25/5 work and break intervals), customizable countdowns, and a
-                stopwatch. Features a real-time progress bar and native Windows notifications.
+                Pomodoro intervals (work and break cycles), custom countdowns, and stopwatch with
+                progress tracking and native notifications.
               </p>
             </div>
 
@@ -577,8 +655,8 @@
                 <span>GitHub Repository</span>
               </div>
               <p>
-                Live commit stream and GitHub Actions workflow status for any repository. Inspect
-                recent author commits and CI run conclusions at a glance.
+                Live commit history, stars, forks, latest release tags, and GitHub Actions workflow
+                status for any repository.
               </p>
             </div>
 
@@ -598,8 +676,8 @@
                 <span>Vercel Projects</span>
               </div>
               <p>
-                Monitor deployment health across your web applications. Displays production and
-                preview deployment state, commit messages, and branch names.
+                Monitor deployment health across your web applications with instant project
+                autocomplete, commit messages, and branch tracking.
               </p>
             </div>
           </div>

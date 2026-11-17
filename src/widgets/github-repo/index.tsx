@@ -26,9 +26,20 @@ interface WorkflowRunItem {
   url: string;
 }
 
+interface ReleaseItem {
+  tag_name: string;
+  name?: string;
+  published_at?: string;
+  url: string;
+}
+
 interface GitHubData {
   repo: string;
   branch: string;
+  stars?: number;
+  forks?: number;
+  open_issues?: number;
+  latest_release?: ReleaseItem;
   commits: CommitItem[];
   runs: WorkflowRunItem[];
 }
@@ -45,11 +56,23 @@ function formatRelativeTime(dateStr: string): string {
   return `${diffDays}d ago`;
 }
 
+function formatCount(num?: number): string {
+  if (num === undefined || num === null) return "";
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
+  return num.toLocaleString();
+}
+
 export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
   const repo =
     typeof instance.settings.repository === "string" && instance.settings.repository
       ? instance.settings.repository
       : "";
+
+  const showStars = instance.settings.showStars !== false;
+  const showRelease = instance.settings.showRelease !== false;
+  const showRuns = instance.settings.showRuns !== false;
+  const showCommits = instance.settings.showCommits !== false;
 
   const { payload, loading, refresh } = useProvider<GitHubData>(instance.id);
   const data = payload?.data;
@@ -60,12 +83,13 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
     }
   };
 
-  const latestRun = data?.runs?.[0];
+  const latestRun = data?.runs && data.runs.length > 0 ? data.runs[0] : null;
+
   const runStatus = (() => {
     if (!latestRun) return "idle";
-    if (latestRun.status === "in_progress" || latestRun.status === "queued") return "syncing";
     if (latestRun.conclusion === "success") return "ok";
     if (latestRun.conclusion === "failure") return "error";
+    if (latestRun.status === "in_progress") return "syncing";
     return "warn";
   })();
 
@@ -114,7 +138,6 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
     <WidgetShell
       instance={instance}
       editMode={editMode}
-      onToggleEditMode={() => {}}
       title={repo || manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}
@@ -137,9 +160,80 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex h-full flex-col gap-3 overflow-hidden select-none">
+      <div className="flex h-full flex-col gap-2.5 overflow-hidden select-none">
+        {/* Badges / Meta bar (Stars, Release, Forks) */}
+        {((showStars && (data?.stars !== undefined || data?.forks !== undefined)) ||
+          (showRelease && data?.latest_release)) && (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-line/40 pb-2 text-[11px]">
+            {showStars && data?.stars !== undefined && (
+              <button
+                type="button"
+                onClick={() => handleOpenLink(`https://github.com/${repo}/stargazers`)}
+                className="group flex items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                title="GitHub Stars"
+              >
+                <svg className="text-amber-500 h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
+                  {formatCount(data.stars)}
+                </span>
+              </button>
+            )}
+
+            {showStars && data?.forks !== undefined && data.forks > 0 && (
+              <button
+                type="button"
+                onClick={() => handleOpenLink(`https://github.com/${repo}/network/members`)}
+                className="group flex items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                title="Forks"
+              >
+                <svg
+                  className="h-3 w-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="18" r="3" />
+                  <circle cx="6" cy="6" r="3" />
+                  <circle cx="18" cy="6" r="3" />
+                  <path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9" />
+                  <path d="M12 12v3" />
+                </svg>
+                <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
+                  {formatCount(data.forks)}
+                </span>
+              </button>
+            )}
+
+            {showRelease && data?.latest_release && (
+              <button
+                type="button"
+                onClick={() => handleOpenLink(data.latest_release!.url)}
+                className="group flex max-w-[140px] items-center gap-1 truncate rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 font-medium text-accent-500 transition-colors hover:bg-accent-500/20"
+                title={`Latest Release: ${data.latest_release.name || data.latest_release.tag_name}`}
+              >
+                <svg
+                  className="h-3 w-3 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                  <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+                <span className="truncate font-mono text-[10px]">
+                  {data.latest_release.tag_name}
+                </span>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Workflow Runs Section */}
-        {data?.runs && data.runs.length > 0 && (
+        {showRuns && data?.runs && data.runs.length > 0 && (
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
               Actions
@@ -184,40 +278,42 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
         )}
 
         {/* Commits Section */}
-        <div className="flex min-h-0 flex-1 flex-col gap-1.5">
-          <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
-            Commits
-          </span>
-          <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
-            {data?.commits && data.commits.length > 0 ? (
-              data.commits.map((c) => (
-                <button
-                  key={c.sha}
-                  type="button"
-                  onClick={() => handleOpenLink(c.url)}
-                  className="group flex flex-col rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-medium text-fg group-hover:text-accent-500">
-                      {c.message}
-                    </span>
-                    <span className="shrink-0 rounded border border-line/50 bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-accent-500">
-                      {c.sha}
-                    </span>
-                  </div>
-                  <div className="mt-0.5 flex items-center justify-between text-[10px] text-fg-muted">
-                    <span>{c.author}</span>
-                    <span>{formatRelativeTime(c.date)}</span>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="py-4 text-center text-xs text-fg-muted italic">
-                {loading ? "Loading repository data..." : "No commit history found."}
-              </div>
-            )}
+        {showCommits && (
+          <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+            <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+              Commits
+            </span>
+            <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
+              {data?.commits && data.commits.length > 0 ? (
+                data.commits.map((c) => (
+                  <button
+                    key={c.sha}
+                    type="button"
+                    onClick={() => handleOpenLink(c.url)}
+                    className="group flex flex-col rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium text-fg group-hover:text-accent-500">
+                        {c.message}
+                      </span>
+                      <span className="shrink-0 rounded border border-line/50 bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-accent-500">
+                        {c.sha}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between text-[10px] text-fg-muted">
+                      <span>{c.author}</span>
+                      <span>{formatRelativeTime(c.date)}</span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="py-4 text-center text-xs text-fg-muted italic">
+                  {loading ? "Loading repository data..." : "No commit history found."}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </WidgetShell>
   );
@@ -229,6 +325,10 @@ const module: WidgetModule = {
   defaultSettings: {
     repository: "",
     branch: "main",
+    showStars: true,
+    showRelease: true,
+    showRuns: true,
+    showCommits: true,
   },
   defaultState: {},
 };

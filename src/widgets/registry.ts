@@ -3,9 +3,15 @@ import notesModule from "./notes";
 import timerModule from "./timer";
 import githubRepoModule from "./github-repo";
 import vercelProjectModule from "./vercel-project";
+import clockModule from "./clock";
+import weatherModule from "./weather";
+import todoModule from "./todo";
 import placeholderModule from "./placeholder";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
+  clock: clockModule,
+  weather: weatherModule,
+  todo: todoModule,
   notes: notesModule,
   timer: timerModule,
   "github-repo": githubRepoModule,

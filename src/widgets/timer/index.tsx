@@ -261,7 +261,6 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
     <WidgetShell
       instance={instance}
       editMode={editMode}
-      onToggleEditMode={() => {}}
       title={manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}

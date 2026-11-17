@@ -1,0 +1,29 @@
+{
+  "id": "weather",
+  "name": "Weather",
+  "description": "Current temperature, forecast, and atmospheric conditions",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 210 },
+  "minSize": { "w": 220, "h": 160 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "city",
+      "label": "City or Location",
+      "type": "text",
+      "placeholder": "London, New York, Tokyo",
+      "defaultValue": "New York"
+    },
+    {
+      "key": "unit",
+      "label": "Temperature Unit",
+      "type": "select",
+      "defaultValue": "celsius",
+      "options": [
+        { "label": "Celsius (°C)", "value": "celsius" },
+        { "label": "Fahrenheit (°F)", "value": "fahrenheit" }
+      ]
+    }
+  ]
+}

@@ -116,6 +116,16 @@ export async function hasAccountToken(provider: string): Promise<boolean> {
   return invoke<boolean>("has_account_token", { provider });
 }
 
+export interface VercelProjectSummary {
+  id: string;
+  name: string;
+  framework?: string;
+}
+
+export async function listVercelProjects(): Promise<VercelProjectSummary[]> {
+  return invoke<VercelProjectSummary[]>("list_vercel_projects");
+}
+
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
 ): Promise<import("./types").ProviderPayload<T> | null> {

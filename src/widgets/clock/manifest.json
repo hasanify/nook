@@ -1,0 +1,40 @@
+{
+  "id": "clock",
+  "name": "Clock & Date",
+  "description": "Digital desktop clock with date, timezone, and 12/24h formats",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 180 },
+  "minSize": { "w": 220, "h": 140 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "format",
+      "label": "Time Format",
+      "type": "select",
+      "defaultValue": "12h",
+      "options": [
+        { "label": "12-hour (1:30 PM)", "value": "12h" },
+        { "label": "24-hour (13:30)", "value": "24h" }
+      ]
+    },
+    {
+      "key": "showSeconds",
+      "label": "Show Seconds",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showDate",
+      "label": "Show Full Date",
+      "type": "boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "showDayProgress",
+      "label": "Show Day Progress Bar",
+      "type": "boolean",
+      "defaultValue": true
+    }
+  ]
+}

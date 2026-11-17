@@ -13,7 +13,7 @@
 
 # Nook
 
-**Nook** is a lightweight, zero-configuration Windows-only desktop widget application built with Tauri v2, Rust, and React 19. Compact, borderless widgets (Notes, Timer, GitHub Repo, Vercel Project) sit directly on the desktop layer below standard application windows and survive `Win+D` ("Show Desktop") and "Hide desktop icons".
+**Nook** is a lightweight, zero-configuration Windows-only desktop widget application built with Tauri v2, Rust, and React 19. Compact, borderless widgets (Clock, Weather, Quick Tasks, Notes, Timer, GitHub Repo, Vercel Project) sit directly on the desktop layer below standard application windows and survive `Win+D` ("Show Desktop") and "Hide desktop icons".
 
 ---
 
@@ -78,7 +78,7 @@ nook/
 │   ├── core/                       # IPC wrappers, types, hooks (use-instance, use-theme, use-provider, etc.)
 │   ├── components/                 # WidgetShell, EditOverlay, Banner, StatusDot, SettingsForm
 │   ├── settings/                   # Settings application interface (General, Accounts, Widget tabs)
-│   └── widgets/                    # Registered widgets (notes, timer, github-repo, vercel-project)
+│   └── widgets/                    # Registered widgets (clock, weather, todo, notes, timer, github-repo, vercel-project)
 └── src-tauri/
     ├── Cargo.toml                  # Pinned Rust dependencies
     ├── build.rs                    # Tauri build hook

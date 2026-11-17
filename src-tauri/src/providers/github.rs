@@ -25,9 +25,21 @@ pub struct WorkflowRunItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReleaseItem {
+    pub tag_name: String,
+    pub name: Option<String>,
+    pub published_at: Option<String>,
+    pub url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitHubData {
     pub repo: String,
     pub branch: String,
+    pub stars: Option<u64>,
+    pub forks: Option<u64>,
+    pub open_issues: Option<u64>,
+    pub latest_release: Option<ReleaseItem>,
     pub commits: Vec<CommitItem>,
     pub runs: Vec<WorkflowRunItem>,
 }
@@ -194,7 +206,7 @@ pub async fn fetch_github(
     }
 
     let mut parsed_runs = Vec::new();
-    if let Ok(runs_res) = client.get(&runs_url).headers(headers).send().await {
+    if let Ok(runs_res) = client.get(&runs_url).headers(headers.clone()).send().await {
         if runs_res.status().is_success() {
             if let Ok(runs_json) = runs_res.json::<serde_json::Value>().await {
                 if let Some(arr) = runs_json.get("workflow_runs").and_then(|v| v.as_array()) {
@@ -245,16 +257,75 @@ pub async fn fetch_github(
         }
     }
 
+    // 3. Fetch repo stats (stars, forks, open issues)
+    let repo_meta_url = format!("https://api.github.com/repos/{}", clean_repo);
+    let mut stars = None;
+    let mut forks = None;
+    let mut open_issues = None;
+
+    if let Ok(repo_res) = client
+        .get(&repo_meta_url)
+        .headers(headers.clone())
+        .send()
+        .await
+    {
+        if repo_res.status().is_success() {
+            if let Ok(json) = repo_res.json::<serde_json::Value>().await {
+                stars = json.get("stargazers_count").and_then(|v| v.as_u64());
+                forks = json.get("forks_count").and_then(|v| v.as_u64());
+                open_issues = json.get("open_issues_count").and_then(|v| v.as_u64());
+            }
+        }
+    }
+
+    // 4. Fetch latest release
+    let release_url = format!(
+        "https://api.github.com/repos/{}/releases/latest",
+        clean_repo
+    );
+    let mut latest_release = None;
+
+    if let Ok(rel_res) = client.get(&release_url).headers(headers).send().await {
+        if rel_res.status().is_success() {
+            if let Ok(json) = rel_res.json::<serde_json::Value>().await {
+                if let Some(tag) = json.get("tag_name").and_then(|v| v.as_str()) {
+                    let name = json.get("name").and_then(|v| v.as_str()).map(String::from);
+                    let published_at = json
+                        .get("published_at")
+                        .and_then(|v| v.as_str())
+                        .map(String::from);
+                    let url = json
+                        .get("html_url")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    latest_release = Some(ReleaseItem {
+                        tag_name: tag.to_string(),
+                        name,
+                        published_at,
+                        url,
+                    });
+                }
+            }
+        }
+    }
+
     info!(
-        "Successfully fetched GitHub data for '{}' ({} commits, {} runs)",
+        "Successfully fetched GitHub data for '{}' ({} commits, {} runs, stars: {:?}, release: {:?})",
         clean_repo,
         parsed_commits.len(),
-        parsed_runs.len()
+        parsed_runs.len(),
+        stars,
+        latest_release.as_ref().map(|r| &r.tag_name)
     );
 
     let data = GitHubData {
         repo: clean_repo.to_string(),
         branch: branch.to_string(),
+        stars,
+        forks,
+        open_issues,
+        latest_release,
         commits: parsed_commits,
         runs: parsed_runs,
     };

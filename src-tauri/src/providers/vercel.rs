@@ -183,3 +183,72 @@ pub async fn fetch_vercel(
         updated_at: now,
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VercelProjectSummary {
+    pub id: String,
+    pub name: String,
+    pub framework: Option<String>,
+}
+
+pub async fn list_projects(
+    client: &reqwest::Client,
+    token_opt: Option<&str>,
+) -> Result<Vec<VercelProjectSummary>, String> {
+    let token = match token_opt {
+        Some(t) if !t.trim().is_empty() => t.trim(),
+        _ => return Err("Vercel token not configured".to_string()),
+    };
+
+    let mut headers = HeaderMap::new();
+    headers.insert(USER_AGENT, HeaderValue::from_static("nook/0.1.0"));
+    if let Ok(val) = HeaderValue::from_str(&format!("Bearer {}", token)) {
+        headers.insert(AUTHORIZATION, val);
+    }
+
+    let url = "https://api.vercel.com/v9/projects?limit=100";
+    let res = client
+        .get(url)
+        .headers(headers)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to reach Vercel API: {}", e))?;
+
+    if !res.status().is_success() {
+        return Err(format!("Vercel returned status {}", res.status()));
+    }
+
+    let json: serde_json::Value = res
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse Vercel response: {}", e))?;
+
+    let mut list = Vec::new();
+    if let Some(arr) = json.get("projects").and_then(|v| v.as_array()) {
+        for p in arr {
+            let id = p
+                .get("id")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let name = p
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let framework = p
+                .get("framework")
+                .and_then(|v| v.as_str())
+                .map(String::from);
+            if !name.is_empty() {
+                list.push(VercelProjectSummary {
+                    id,
+                    name,
+                    framework,
+                });
+            }
+        }
+    }
+
+    Ok(list)
+}

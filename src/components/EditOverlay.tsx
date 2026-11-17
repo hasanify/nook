@@ -183,7 +183,11 @@ export function EditOverlay({
               </span>
               <button
                 type="button"
-                onClick={onToggleEditMode}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleEditMode();
+                }}
                 className="rounded bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-500 transition-colors hover:bg-accent-500/30"
               >
                 Done
@@ -192,7 +196,11 @@ export function EditOverlay({
           ) : (
             <button
               type="button"
-              onClick={onToggleEditMode}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleEditMode();
+              }}
               className="rounded px-1.5 py-0.5 text-[10px] text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
               title="Toggle Edit Mode (Ctrl+Alt+E)"
             >

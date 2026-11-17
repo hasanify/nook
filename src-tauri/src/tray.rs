@@ -16,6 +16,12 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
         .map_err(|e| format!("Failed to load tray icon image: {}", e))?;
 
     // Add Widget Submenu items
+    let add_clock = MenuItem::with_id(app, "add:clock", "Clock & Date", true, None::<&str>)
+        .map_err(|e| e.to_string())?;
+    let add_weather = MenuItem::with_id(app, "add:weather", "Weather", true, None::<&str>)
+        .map_err(|e| e.to_string())?;
+    let add_todo = MenuItem::with_id(app, "add:todo", "Quick Tasks", true, None::<&str>)
+        .map_err(|e| e.to_string())?;
     let add_notes = MenuItem::with_id(app, "add:notes", "Notes", true, None::<&str>)
         .map_err(|e| e.to_string())?;
     let add_timer = MenuItem::with_id(app, "add:timer", "Timer", true, None::<&str>)
@@ -34,7 +40,15 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
         app,
         "Add widget",
         true,
-        &[&add_notes, &add_timer, &add_github, &add_vercel],
+        &[
+            &add_clock,
+            &add_weather,
+            &add_todo,
+            &add_notes,
+            &add_timer,
+            &add_github,
+            &add_vercel,
+        ],
     )
     .map_err(|e| e.to_string())?;
 

@@ -1,0 +1,18 @@
+{
+  "id": "todo",
+  "name": "Quick Tasks",
+  "description": "Minimalist desktop checklist with quick add and completion states",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 300, "h": 260 },
+  "minSize": { "w": 240, "h": 180 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "showCompleted",
+      "label": "Show Completed Tasks",
+      "type": "boolean",
+      "defaultValue": true
+    }
+  ]
+}
