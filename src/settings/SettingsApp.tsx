@@ -230,7 +230,6 @@ export function SettingsApp() {
           </div>
           <h1 className="text-sm font-semibold tracking-tight text-fg">Nook Settings</h1>
         </div>
-        <div className="font-mono text-xs text-fg-muted">{appVersion ? `v${appVersion}` : ""}</div>
       </div>
 
       {/* Tabs */}
@@ -650,9 +649,11 @@ export function SettingsApp() {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2.5">
                   <h2 className="text-base font-bold tracking-tight text-fg">Nook</h2>
-                  <span className="rounded-full border border-line bg-surface px-2 py-0.5 font-mono text-[11px] font-medium text-fg-muted">
-                    v{appVersion || "0.3.0"}
-                  </span>
+                  {appVersion && (
+                    <span className="rounded-full border border-line bg-surface px-2 py-0.5 font-mono text-[11px] font-medium text-fg-muted">
+                      v{appVersion}
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-fg-muted">
                   Lightweight, distraction-free desktop widgets pinned directly to your Windows
