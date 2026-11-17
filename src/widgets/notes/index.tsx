@@ -72,6 +72,8 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
     };
   }, []);
 
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+
   return (
     <WidgetShell
       instance={instance}
@@ -81,13 +83,29 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       headerSlot={
-        <span
-          className={`text-[10px] font-medium text-ok transition-opacity duration-300 ${
-            showSaved ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          Saved ✓
-        </span>
+        <div className="flex items-center gap-1.5">
+          <svg
+            className="h-3 w-3 text-fg-muted"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <span
+            className={`text-[10px] font-medium text-ok transition-opacity duration-300 ${
+              showSaved ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            Saved ✓
+          </span>
+        </div>
       }
       banner={
         errorBanner ? (
@@ -95,15 +113,22 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
         ) : undefined
       }
     >
-      <textarea
-        value={text}
-        onChange={handleTextChange}
-        placeholder="Write something…"
-        style={{ fontSize: `${fontSize}px` }}
-        className={`h-full w-full resize-none border-none bg-transparent p-0 text-fg outline-none select-text placeholder:text-fg-muted ${
-          lineWrapping ? "whitespace-pre-wrap" : "overflow-x-auto whitespace-pre"
-        }`}
-      />
+      <div className="flex h-full flex-col justify-between">
+        <textarea
+          value={text}
+          onChange={handleTextChange}
+          placeholder="Write something…"
+          style={{ fontSize: `${fontSize}px` }}
+          className={`h-full w-full resize-none border-none bg-transparent p-0 leading-relaxed text-fg outline-none select-text placeholder:text-fg-muted/40 ${
+            lineWrapping ? "whitespace-pre-wrap" : "overflow-x-auto whitespace-pre"
+          }`}
+        />
+        <div className="mt-1 flex items-center justify-end border-t border-line/20 pt-1 font-mono text-[9px] text-fg-muted/50 select-none">
+          <span>
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
+        </div>
+      </div>
     </WidgetShell>
   );
 }

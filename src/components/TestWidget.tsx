@@ -152,7 +152,7 @@ export function TestWidget({ id }: TestWidgetProps) {
 
   if (error || !instance) {
     return (
-      <div className="border-error text-error flex h-full w-full items-center justify-center rounded-card border bg-surface p-4 text-xs">
+      <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error">
         Error: {error || "Instance not found"}
       </div>
     );
@@ -238,7 +238,7 @@ export function TestWidget({ id }: TestWidgetProps) {
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            className="text-white rounded-md bg-accent-500 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent-600 active:scale-95"
+            className="rounded-md bg-accent-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-600 active:scale-95"
             onClick={() => {
               patchState({ clicks: clicks + 1 });
             }}

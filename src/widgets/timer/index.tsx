@@ -249,6 +249,13 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
   };
 
   const display = getDisplayTime();
+  const targetDuration = getTargetDurationMs();
+  const elapsedMs =
+    status === "running" && state.endsAt
+      ? Math.max(0, targetDuration - (state.endsAt - now))
+      : (state.accumulatedMs ?? 0);
+  const progressPercent =
+    targetDuration > 0 ? Math.min(100, Math.max(0, (elapsedMs / targetDuration) * 100)) : 0;
 
   return (
     <WidgetShell
@@ -260,7 +267,7 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
       minSize={manifest.minSize}
       headerSlot={
         mode === "pomodoro" ? (
-          <span className="text-[10px] font-medium tracking-wide text-fg-muted uppercase">
+          <span className="font-mono text-[9px] font-semibold tracking-wider text-accent-500 uppercase">
             {phase} • {cycle}/{cyclesBeforeLong}
           </span>
         ) : undefined
@@ -268,14 +275,16 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
     >
       <div className="flex h-full flex-col justify-between select-none">
         {/* Mode Selector */}
-        <div className="flex rounded-md border border-line bg-surface-raised p-0.5 text-xs">
+        <div className="flex rounded-lg border border-line/50 bg-surface-raised/70 p-0.5 text-xs">
           {(["pomodoro", "countdown", "stopwatch"] as const).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => handleSwitchMode(m)}
-              className={`flex-1 rounded py-1 text-center font-medium capitalize transition-colors ${
-                mode === m ? "bg-surface text-fg shadow-sm" : "text-fg-muted hover:text-fg"
+              className={`flex-1 rounded-md py-1 text-center font-medium capitalize transition-all ${
+                mode === m
+                  ? "bg-surface font-semibold text-fg shadow-xs"
+                  : "text-fg-muted hover:text-fg"
               }`}
             >
               {m}
@@ -284,13 +293,27 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
         </div>
 
         {/* Time Display */}
-        <div className="my-auto flex flex-col items-center justify-center">
-          <div className="font-mono text-3xl font-bold tracking-wider text-fg tabular-nums">
+        <div className="my-auto flex flex-col items-center justify-center py-2">
+          <div className="font-mono text-4xl font-light tracking-tight text-fg tabular-nums">
             {display.main}
           </div>
           {mode === "pomodoro" && (
             <div className="mt-1 text-xs text-fg-muted capitalize">
-              {phase === "work" ? "Focus" : phase === "break" ? "Short Break" : "Long Break"}
+              {phase === "work"
+                ? "Focus Session"
+                : phase === "break"
+                  ? "Short Break"
+                  : "Long Break"}
+            </div>
+          )}
+
+          {/* Progress Bar (countdown & pomodoro) */}
+          {mode !== "stopwatch" && targetDuration > 0 && (
+            <div className="mt-2.5 h-1 w-32 overflow-hidden rounded-full bg-surface-raised">
+              <div
+                className="h-full bg-accent-500 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
           )}
         </div>
@@ -301,17 +324,24 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
             <button
               type="button"
               onClick={handlePause}
-              className="flex-1 rounded-md border border-line bg-surface-raised py-1.5 text-xs font-medium text-fg transition-colors hover:bg-surface"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface-raised py-1.5 text-xs font-medium text-fg transition-colors hover:bg-surface"
             >
-              Pause
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
+              </svg>
+              <span>Pause</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={handleStart}
-              className="text-white flex-1 rounded-md bg-accent-500 py-1.5 text-xs font-medium transition-colors hover:bg-accent-600"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-accent-500 py-1.5 text-xs font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
             >
-              {status === "paused" ? "Resume" : "Start"}
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span>{status === "paused" ? "Resume" : "Start"}</span>
             </button>
           )}
 
@@ -319,9 +349,22 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
             type="button"
             onClick={handleReset}
             disabled={status === "idle" && (state.accumulatedMs || 0) === 0}
-            className="rounded-md border border-line bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-fg disabled:opacity-40"
+            className="flex items-center justify-center gap-1 rounded-lg border border-line bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-fg disabled:opacity-40"
+            title="Reset timer"
           >
-            Reset
+            <svg
+              className="h-3 w-3"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+            <span>Reset</span>
           </button>
         </div>
       </div>

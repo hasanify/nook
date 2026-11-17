@@ -120,10 +120,15 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       headerSlot={
-        <StatusDot
-          status={overallStatus}
-          title={`Deployment: ${latestDeployment?.state || "None"}`}
-        />
+        <div className="flex items-center gap-1.5">
+          <svg className="h-3 w-3 text-fg-muted" viewBox="0 0 76 65" fill="currentColor">
+            <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
+          </svg>
+          <StatusDot
+            status={overallStatus}
+            title={`Deployment: ${latestDeployment?.state || "None"}`}
+          />
+        </div>
       }
       banner={
         bannerInfo ? (
@@ -150,9 +155,9 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                   key={dep.id}
                   type="button"
                   onClick={() => handleOpenLink(dep.url)}
-                  className="group flex flex-col rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised"
+                  className="group flex flex-col rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-between gap-1.5">
                     <div className="flex min-w-0 items-center gap-1.5">
                       <StatusDot status={status} />
                       <span className="truncate font-medium text-fg group-hover:text-accent-500">
@@ -160,10 +165,10 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                       </span>
                       {dep.target && (
                         <span
-                          className={`py-0.2 rounded px-1 text-[9px] font-semibold uppercase ${
+                          className={`py-0.2 rounded-full px-1.5 font-mono text-[9px] font-medium uppercase ${
                             dep.target === "production"
-                              ? "bg-ok/10 text-ok"
-                              : "border border-line bg-surface text-fg-muted"
+                              ? "border border-ok/30 bg-ok/15 text-ok"
+                              : "border border-line/60 bg-surface-raised text-fg-muted"
                           }`}
                         >
                           {dep.target}
@@ -180,7 +185,9 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                       {dep.commit_msg || dep.branch || "Manual deploy"}
                     </span>
                     {dep.branch && (
-                      <span className="ml-1 shrink-0 font-mono text-accent-500">{dep.branch}</span>
+                      <span className="py-0.2 ml-1 shrink-0 rounded bg-surface-raised px-1 font-mono text-accent-500">
+                        {dep.branch}
+                      </span>
                     )}
                   </div>
                 </button>

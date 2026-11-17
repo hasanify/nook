@@ -1,4 +1,5 @@
 import type { SettingsField } from "../core/types";
+import { Toggle } from "./Toggle";
 
 interface SettingsFormProps {
   fields: SettingsField[];
@@ -12,23 +13,21 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3.5">
       {fields.map((field) => {
         const val = values[field.key] ?? field.defaultValue;
 
         return (
-          <div key={field.key} className="flex flex-col gap-1">
+          <div key={field.key} className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor={`field-${field.key}`} className="text-xs font-medium text-fg">
                 {field.label}
               </label>
               {field.type === "boolean" && (
-                <input
+                <Toggle
                   id={`field-${field.key}`}
-                  type="checkbox"
                   checked={Boolean(val)}
-                  onChange={(e) => onChange(field.key, e.target.checked)}
-                  className="h-4 w-4 rounded border-line bg-surface-raised text-accent-500 accent-accent-500 focus:ring-1 focus:ring-focus"
+                  onChange={(next) => onChange(field.key, next)}
                 />
               )}
             </div>
@@ -42,7 +41,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 placeholder={field.placeholder}
                 value={String(val ?? "")}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
+                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
               />
             )}
 
@@ -55,7 +54,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 step={field.step}
                 value={Number(val ?? 0)}
                 onChange={(e) => onChange(field.key, Number(e.target.value))}
-                className="rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
+                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
               />
             )}
 
@@ -64,7 +63,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 id={`field-${field.key}`}
                 value={String(val ?? "")}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="rounded-md border border-line bg-surface-raised px-2 py-1.5 text-xs text-fg outline-none focus:ring-1 focus:ring-focus"
+                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
               >
                 {field.options?.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -81,7 +80,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 placeholder={field.placeholder ?? "••••••••••••••••"}
                 value={String(val ?? "")}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
+                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
               />
             )}
           </div>

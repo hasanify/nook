@@ -146,10 +146,10 @@ export function EditOverlay({
     <>
       {/* Top Header / Drag bar */}
       <div
-        className={`flex h-7 items-center justify-between border-b border-line px-3 text-xs select-none ${
+        className={`flex h-8 items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
-            ? "cursor-grab bg-accent-500/10 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : "bg-surface-raised text-fg-muted"
+            ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
+            : "border-line/40 bg-surface-raised/40 text-fg-muted"
         }`}
         onPointerDown={editMode ? handleDragStart : undefined}
         onPointerMove={editMode ? handleDragMove : undefined}
@@ -158,18 +158,35 @@ export function EditOverlay({
       >
         <div className="flex items-center gap-1.5 truncate font-medium">
           {headerSlot}
-          <span className="truncate">{title}</span>
+          <span className="truncate text-[11px] font-semibold tracking-tight text-fg/80">
+            {title}
+          </span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {editMode ? (
-            <span className="text-[10px] font-semibold tracking-wide text-accent-500 uppercase">
-              Drag to Move
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 font-mono text-[9px] font-semibold tracking-wider text-accent-500 uppercase">
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="8" cy="8" r="2" />
+                  <circle cx="16" cy="8" r="2" />
+                  <circle cx="8" cy="16" r="2" />
+                  <circle cx="16" cy="16" r="2" />
+                </svg>
+                Drag
+              </span>
+              <button
+                type="button"
+                onClick={onToggleEditMode}
+                className="rounded bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-500 transition-colors hover:bg-accent-500/30"
+              >
+                Done
+              </button>
+            </div>
           ) : (
             <button
               type="button"
               onClick={onToggleEditMode}
-              className="text-[10px] text-fg-muted transition-colors hover:text-fg"
+              className="rounded px-1.5 py-0.5 text-[10px] text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
               title="Toggle Edit Mode (Ctrl+Alt+E)"
             >
               Edit
@@ -181,14 +198,24 @@ export function EditOverlay({
       {/* Resize Grip Corner (Visible when in Edit Mode and Resizable) */}
       {editMode && resizable && (
         <div
-          className="absolute right-0 bottom-0 z-50 flex h-5 w-5 cursor-se-resize items-end justify-end p-1 text-[11px] text-accent-500 select-none hover:scale-110"
+          className="absolute right-0 bottom-0 z-50 flex h-6 w-6 cursor-se-resize items-end justify-end p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
           onPointerDown={handleResizeStart}
           onPointerMove={handleResizeMove}
           onPointerUp={handleResizeEnd}
           onPointerCancel={handleResizeEnd}
           title="Drag to resize"
         >
-          ◢
+          <svg
+            className="h-3 w-3 opacity-70 hover:opacity-100"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <line x1="10" y1="2" x2="2" y2="10" />
+            <line x1="10" y1="6" x2="6" y2="10" />
+          </svg>
         </div>
       )}
     </>

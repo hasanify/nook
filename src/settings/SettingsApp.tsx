@@ -19,6 +19,7 @@ import {
   type UpdateCheckResult,
 } from "../core/ipc";
 import { SettingsForm } from "../components/SettingsForm";
+import { Toggle } from "../components/Toggle";
 import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -211,15 +212,15 @@ export function SettingsApp() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-surface font-sans text-fg select-none">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-line bg-surface-raised px-5 py-3">
+      <div className="flex items-center justify-between border-b border-line/60 bg-surface-raised/80 px-6 py-3.5 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-accent-500/30 bg-accent-500/15 text-accent-500">
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-accent-500/30 bg-accent-500/15 text-accent-500 shadow-xs">
             <svg
-              className="h-3.5 w-3.5"
+              className="h-4 w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
@@ -228,122 +229,235 @@ export function SettingsApp() {
               <path d="M9 21V9" />
             </svg>
           </div>
-          <h1 className="text-sm font-semibold tracking-tight text-fg">Nook Settings</h1>
+          <div>
+            <h1 className="text-sm font-semibold tracking-tight text-fg">Nook Settings</h1>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-line px-5 text-xs font-medium">
+      <div className="flex gap-1 border-b border-line/60 bg-surface-raised/30 px-5 text-xs font-medium">
         <button
           type="button"
           onClick={() => setActiveTab("general")}
-          className={`border-b-2 py-2.5 transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "general"
-              ? "border-accent-500 text-fg"
+              ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          General
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span>General</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("widgets")}
-          className={`border-b-2 py-2.5 transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "widgets"
-              ? "border-accent-500 text-fg"
+              ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          Widgets ({config?.widgets.length ?? 0})
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect width="7" height="7" x="3" y="3" rx="1.5" />
+            <rect width="7" height="7" x="14" y="3" rx="1.5" />
+            <rect width="7" height="7" x="14" y="14" rx="1.5" />
+            <rect width="7" height="7" x="3" y="14" rx="1.5" />
+          </svg>
+          <span>Widgets</span>
+          <span className="py-0.2 rounded-full bg-surface-raised px-1.5 font-mono text-[10px] text-fg-muted">
+            {config?.widgets.length ?? 0}
+          </span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("accounts")}
-          className={`border-b-2 py-2.5 transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "accounts"
-              ? "border-accent-500 text-fg"
+              ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          Accounts
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span>Accounts</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("about")}
-          className={`border-b-2 py-2.5 transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "about"
-              ? "border-accent-500 text-fg"
+              ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          About
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          <span>About</span>
         </button>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-5 text-xs">
+      <div className="flex-1 overflow-y-auto p-6 text-xs">
         {/* GENERAL TAB */}
         {activeTab === "general" && (
           <div className="flex w-full flex-col gap-6">
             {/* Appearance / Theme */}
-            <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-raised p-4">
-              <span className="font-medium text-fg">Appearance</span>
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                {(["system", "light", "dark"] as const).map((t) => (
+            <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+              <span className="font-semibold text-fg">Appearance</span>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  {
+                    id: "system" as const,
+                    label: "System",
+                    icon: (
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect width="20" height="14" x="2" y="3" rx="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "light" as const,
+                    label: "Light",
+                    icon: (
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2" />
+                        <path d="M12 20v2" />
+                        <path d="m4.93 4.93 1.41 1.41" />
+                        <path d="m17.66 17.66 1.41 1.41" />
+                        <path d="M2 12h2" />
+                        <path d="M20 12h2" />
+                        <path d="m6.34 17.66-1.41 1.41" />
+                        <path d="m19.07 4.93-1.41 1.41" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "dark" as const,
+                    label: "Dark",
+                    icon: (
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                      </svg>
+                    ),
+                  },
+                ].map((item) => (
                   <button
-                    key={t}
+                    key={item.id}
                     type="button"
-                    onClick={() => handleThemeChange(t)}
-                    className={`rounded-md border p-2.5 text-center capitalize transition-colors ${
-                      config?.app?.theme === t
-                        ? "border-accent-500 bg-accent-500/10 font-semibold text-accent-500"
-                        : "border-line bg-surface text-fg-muted hover:text-fg"
+                    onClick={() => handleThemeChange(item.id)}
+                    className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-center transition-all ${
+                      config?.app?.theme === item.id
+                        ? "border-accent-500 bg-accent-500/15 font-semibold text-accent-500 shadow-xs"
+                        : "border-line/60 bg-surface text-fg-muted hover:border-line hover:text-fg"
                     }`}
                   >
-                    {t}
+                    {item.icon}
+                    <span>{item.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Desktop & Interaction Settings */}
-            <div className="flex flex-col gap-4 rounded-xl border border-line bg-surface-raised p-4">
-              <span className="font-medium text-fg">Desktop & Interaction</span>
+            <div className="flex flex-col gap-4 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+              <span className="font-semibold text-fg">Desktop & Interaction</span>
 
               {/* Edit Mode Toggle */}
-              <div className="flex items-center justify-between border-t border-line/60 pt-3">
+              <div className="flex items-center justify-between border-t border-line/40 pt-4">
                 <div>
                   <div className="font-medium text-fg">Edit Layout</div>
                   <div className="text-[11px] text-fg-muted">
                     Show drag bars and resize handles on all desktop widgets (Ctrl+Alt+E)
                   </div>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={editMode}
-                  onChange={toggleEditMode}
-                  className="h-4 w-4 rounded border-line bg-surface accent-accent-500"
-                />
+                <Toggle checked={editMode} onChange={toggleEditMode} ariaLabel="Toggle edit mode" />
               </div>
 
               {/* Launch on Startup */}
-              <div className="flex items-center justify-between border-t border-line/60 pt-3">
+              <div className="flex items-center justify-between border-t border-line/40 pt-4">
                 <div>
                   <div className="font-medium text-fg">Launch on Startup</div>
                   <div className="text-[11px] text-fg-muted">
                     Automatically start Nook when Windows boots
                   </div>
                 </div>
-                <input
-                  type="checkbox"
+                <Toggle
                   checked={autostartEnabled}
                   onChange={() => void handleAutostartToggle()}
-                  className="h-4 w-4 rounded border-line bg-surface accent-accent-500"
+                  ariaLabel="Toggle launch on startup"
                 />
               </div>
 
               {/* Grid Snap */}
-              <div className="flex items-center justify-between border-t border-line/60 pt-3">
+              <div className="flex items-center justify-between border-t border-line/40 pt-4">
                 <div>
                   <div className="font-medium text-fg">Grid Snap</div>
                   <div className="text-[11px] text-fg-muted">
@@ -353,12 +467,12 @@ export function SettingsApp() {
                 <select
                   value={config?.app?.gridSnap ?? 0}
                   onChange={(e) => handleGridSnapChange(Number(e.target.value))}
-                  className="rounded-md border border-line bg-surface px-2.5 py-1 text-xs text-fg outline-none focus:ring-1 focus:ring-focus"
+                  className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                 >
                   <option value={0}>Disabled (Free Movement)</option>
-                  <option value={4}>4 px</option>
-                  <option value={8}>8 px</option>
-                  <option value={16}>16 px</option>
+                  <option value={4}>4 px (Fine)</option>
+                  <option value={8}>8 px (Default)</option>
+                  <option value={16}>16 px (Coarse)</option>
                 </select>
               </div>
             </div>
@@ -414,13 +528,13 @@ export function SettingsApp() {
               </div>
 
               {/* Add Widget */}
-              <div className="mt-auto flex flex-col gap-1.5 border-t border-line pt-3">
+              <div className="mt-auto flex flex-col gap-1.5 border-t border-line/60 pt-3">
                 <span className="text-[11px] font-medium text-fg-muted">Add new widget:</span>
                 <div className="flex gap-1.5">
                   <select
                     value={widgetToAdd}
                     onChange={(e) => setWidgetToAdd(e.target.value)}
-                    className="flex-1 rounded-md border border-line bg-surface-raised px-2 py-1.5 text-xs text-fg outline-none focus:ring-1 focus:ring-focus"
+                    className="flex-1 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                   >
                     {Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => (
                       <option key={kind} value={kind}>
@@ -435,9 +549,9 @@ export function SettingsApp() {
                         void handleAddWidget(widgetToAdd);
                       }
                     }}
-                    className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                    className="flex items-center gap-1 rounded-lg bg-accent-500 px-3 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
                   >
-                    Add
+                    <span>+ Add</span>
                   </button>
                 </div>
               </div>
@@ -447,39 +561,40 @@ export function SettingsApp() {
             <div className="flex-1 overflow-y-auto pl-2">
               {selectedWidget ? (
                 <div className="flex w-full flex-col gap-5">
-                  <div>
-                    <h2 className="text-sm font-semibold text-fg">
-                      {selectedModule?.manifest.name ?? selectedWidget.kind}
-                    </h2>
-                    <p className="text-[11px] text-fg-muted">
-                      ID: {selectedWidget.id} • Position: {selectedWidget.rect.x},{" "}
-                      {selectedWidget.rect.y} ({selectedWidget.rect.w} × {selectedWidget.rect.h})
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm font-semibold text-fg">
+                        {selectedModule?.manifest.name ?? selectedWidget.kind}
+                      </h2>
+                      <p className="font-mono text-[11px] text-fg-muted">
+                        ID: {selectedWidget.id.slice(0, 16)}... • Pos: {selectedWidget.rect.x},{" "}
+                        {selectedWidget.rect.y} ({selectedWidget.rect.w} × {selectedWidget.rect.h})
+                      </p>
+                    </div>
                   </div>
 
                   {/* Always on top */}
-                  <div className="flex items-center justify-between border-t border-line pt-3">
+                  <div className="flex items-center justify-between border-t border-line/60 pt-3">
                     <div>
                       <div className="font-medium text-fg">Always on Top</div>
                       <div className="text-[11px] text-fg-muted">
                         Detach from desktop layer to float above all windows
                       </div>
                     </div>
-                    <input
-                      type="checkbox"
+                    <Toggle
                       checked={selectedWidget.always_on_top}
                       onChange={() =>
                         void setAlwaysOnTop(selectedWidget.id, !selectedWidget.always_on_top)
                       }
-                      className="h-4 w-4 rounded border-line bg-surface-raised accent-accent-500"
+                      ariaLabel="Always on top"
                     />
                   </div>
 
                   {/* Opacity slider */}
-                  <div className="flex flex-col gap-1.5 border-t border-line pt-3">
+                  <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
                     <div className="flex justify-between">
                       <span className="font-medium text-fg">Window Opacity</span>
-                      <span className="text-fg-muted">
+                      <span className="font-mono font-medium text-accent-500">
                         {Math.round(selectedWidget.opacity * 100)}%
                       </span>
                     </div>
@@ -490,13 +605,12 @@ export function SettingsApp() {
                       step="0.05"
                       value={selectedWidget.opacity}
                       onChange={(e) => void setOpacity(selectedWidget.id, Number(e.target.value))}
-                      className="accent-accent-500"
                     />
                   </div>
 
                   {/* Widget Settings Schema Form */}
                   {selectedModule?.manifest.settingsSchema && (
-                    <div className="border-t border-line pt-3">
+                    <div className="border-t border-line/60 pt-3">
                       <span className="mb-2 block font-medium text-fg">Configuration</span>
                       <SettingsForm
                         fields={selectedModule.manifest.settingsSchema}
@@ -507,13 +621,25 @@ export function SettingsApp() {
                   )}
 
                   {/* Remove Widget */}
-                  <div className="border-t border-line pt-4">
+                  <div className="border-t border-line/60 pt-4">
                     <button
                       type="button"
                       onClick={() => void removeWidget(selectedWidget.id)}
-                      className="border-error/30 bg-error/10 text-error hover:bg-error/20 rounded border px-3 py-1.5 text-xs font-medium"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-error/40 bg-error/10 px-3 py-1.5 text-xs font-medium text-error transition-colors hover:bg-error/20"
                     >
-                      Remove Widget
+                      <svg
+                        className="h-3.5 w-3.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                      <span>Remove Widget</span>
                     </button>
                   </div>
                 </div>
@@ -529,27 +655,54 @@ export function SettingsApp() {
         {/* ACCOUNTS TAB */}
         {activeTab === "accounts" && (
           <div className="flex w-full flex-col gap-6">
-            <div className="rounded-xl border border-line bg-surface-raised p-4 text-[11px] text-fg-muted">
-              Credentials are saved securely in Windows Credential Manager and never logged or
-              exported.
+            <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
+              <svg
+                className="h-4 w-4 shrink-0 text-accent-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <span>
+                Tokens are stored securely in Windows Credential Manager and never logged or
+                exported.
+              </span>
             </div>
 
             {/* GitHub Token */}
-            <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-raised p-4">
+            <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
               <div className="flex items-center justify-between">
-                <label htmlFor="gh-token-input" className="font-medium text-fg">
-                  GitHub Personal Access Token
-                </label>
+                <div className="flex items-center gap-2">
+                  <svg className="h-4 w-4 text-fg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
+                  <label htmlFor="gh-token-input" className="font-semibold text-fg">
+                    GitHub Personal Access Token
+                  </label>
+                </div>
                 <span
-                  className={`text-[10px] font-medium ${
-                    githubConfigured ? "text-ok" : "text-fg-muted"
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    githubConfigured
+                      ? "border border-ok/30 bg-ok/10 text-ok"
+                      : "border border-line bg-surface text-fg-muted"
                   }`}
                 >
-                  {githubConfigured ? "Configured ✓" : "Not configured"}
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      githubConfigured ? "bg-ok" : "bg-fg-muted/50"
+                    }`}
+                  />
+                  {githubConfigured ? "Configured" : "Not configured"}
                 </span>
               </div>
               <p className="text-[11px] text-fg-muted">
-                Requires read scope for private repos. Public repos do not strictly require a token.
+                Required for private repository commits and CI workflow runs. Public repos do not
+                strictly require a token.
               </p>
               <div className="flex gap-2 pt-1">
                 <input
@@ -558,12 +711,12 @@ export function SettingsApp() {
                   value={githubInput}
                   onChange={(e) => setGithubInput(e.target.value)}
                   placeholder="ghp_••••••••••••••••••••••••••••••••••••"
-                  className="flex-1 rounded-md border border-line bg-surface px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
+                  className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => void handleSaveGithubToken()}
-                  className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                  className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
                 >
                   Save
                 </button>
@@ -571,7 +724,7 @@ export function SettingsApp() {
                   <button
                     type="button"
                     onClick={() => void handleClearGithubToken()}
-                    className="hover:text-error rounded-md border border-line bg-surface px-2.5 py-1.5 font-medium text-fg-muted transition-colors"
+                    className="rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
                   >
                     Clear
                   </button>
@@ -580,21 +733,33 @@ export function SettingsApp() {
             </div>
 
             {/* Vercel Token */}
-            <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-raised p-4">
+            <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
               <div className="flex items-center justify-between">
-                <label htmlFor="vercel-token-input" className="font-medium text-fg">
-                  Vercel API Token
-                </label>
+                <div className="flex items-center gap-2">
+                  <svg className="h-3.5 w-3.5 text-fg" viewBox="0 0 76 65" fill="currentColor">
+                    <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
+                  </svg>
+                  <label htmlFor="vercel-token-input" className="font-semibold text-fg">
+                    Vercel API Token
+                  </label>
+                </div>
                 <span
-                  className={`text-[10px] font-medium ${
-                    vercelConfigured ? "text-ok" : "text-fg-muted"
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    vercelConfigured
+                      ? "border border-ok/30 bg-ok/10 text-ok"
+                      : "border border-line bg-surface text-fg-muted"
                   }`}
                 >
-                  {vercelConfigured ? "Configured ✓" : "Not configured"}
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      vercelConfigured ? "bg-ok" : "bg-fg-muted/50"
+                    }`}
+                  />
+                  {vercelConfigured ? "Configured" : "Not configured"}
                 </span>
               </div>
               <p className="text-[11px] text-fg-muted">
-                Used to fetch deployment states and build health.
+                Used to query deployment pipeline states and build status.
               </p>
               <div className="flex gap-2 pt-1">
                 <input
@@ -603,12 +768,12 @@ export function SettingsApp() {
                   value={vercelInput}
                   onChange={(e) => setVercelInput(e.target.value)}
                   placeholder="••••••••••••••••••••••••"
-                  className="flex-1 rounded-md border border-line bg-surface px-2.5 py-1.5 text-xs text-fg outline-none placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
+                  className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => void handleSaveVercelToken()}
-                  className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                  className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
                 >
                   Save
                 </button>
@@ -616,7 +781,7 @@ export function SettingsApp() {
                   <button
                     type="button"
                     onClick={() => void handleClearVercelToken()}
-                    className="hover:text-error rounded-md border border-line bg-surface px-2.5 py-1.5 font-medium text-fg-muted transition-colors"
+                    className="rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
                   >
                     Clear
                   </button>
@@ -630,14 +795,14 @@ export function SettingsApp() {
         {activeTab === "about" && (
           <div className="flex w-full flex-col gap-6">
             {/* Hero Card */}
-            <div className="flex items-center gap-4 rounded-xl border border-line bg-surface-raised p-5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-accent-500/30 bg-accent-500/15 text-accent-500">
+            <div className="flex items-center gap-5 rounded-2xl border border-line/70 bg-gradient-to-br from-surface-raised/80 via-surface-raised/40 to-surface/20 p-6 backdrop-blur-xs">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-accent-500/30 bg-accent-500/15 text-accent-500 shadow-sm">
                 <svg
-                  className="h-7 w-7"
+                  className="h-8 w-8"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
@@ -646,11 +811,11 @@ export function SettingsApp() {
                   <path d="M9 21V9" />
                 </svg>
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2.5">
-                  <h2 className="text-base font-bold tracking-tight text-fg">Nook</h2>
+                  <h2 className="text-lg font-bold tracking-tight text-fg">Nook</h2>
                   {appVersion && (
-                    <span className="rounded-full border border-line bg-surface px-2 py-0.5 font-mono text-[11px] font-medium text-fg-muted">
+                    <span className="rounded-full border border-line/80 bg-surface px-2.5 py-0.5 font-mono text-[11px] font-medium text-fg-muted shadow-xs">
                       v{appVersion}
                     </span>
                   )}
@@ -659,23 +824,33 @@ export function SettingsApp() {
                   Lightweight, distraction-free desktop widgets pinned directly to your Windows
                   desktop.
                 </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {["Tauri v2", "Rust", "React", "TypeScript", "Tailwind v4"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-md border border-line/50 bg-surface/60 px-2 py-0.5 font-mono text-[10px] text-fg-muted"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Developer & Project Info */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-raised p-4">
+              <div className="flex flex-col gap-2 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <span className="font-semibold text-fg">Developer</span>
                 <p className="text-[11px] leading-relaxed text-fg-muted">
                   Crafted with care by <span className="font-medium text-fg">Hasan</span> (
                   <button
                     type="button"
                     onClick={() => void openUrl("https://github.com/hasanify")}
-                    className="text-accent-500 underline hover:text-accent-600"
+                    className="text-accent-500 underline underline-offset-2 hover:text-accent-600"
                   >
                     @hasanify
                   </button>
-                  ). Built with Tauri v2, Rust, and React.
+                  ).
                 </p>
                 <div className="pt-2">
                   <button
@@ -689,7 +864,7 @@ export function SettingsApp() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-raised p-4">
+              <div className="flex flex-col gap-2 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <span className="font-semibold text-fg">Links & Support</span>
                 <div className="flex flex-col gap-1.5 text-[11px]">
                   <button
@@ -714,13 +889,13 @@ export function SettingsApp() {
             </div>
 
             {/* Software Updates Section */}
-            <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface-raised p-4">
+            <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold text-fg">Software Updates</div>
                   <div className="text-[11px] text-fg-muted">
                     Installed version:{" "}
-                    <span className="font-mono text-fg">
+                    <span className="font-mono font-medium text-fg">
                       {appVersion ? `v${appVersion}` : "..."}
                     </span>
                   </div>
@@ -729,28 +904,42 @@ export function SettingsApp() {
                   type="button"
                   disabled={checkingUpdate || downloadingUpdate}
                   onClick={() => void handleCheckUpdates()}
-                  className="rounded-md border border-line bg-surface px-3 py-1.5 font-medium text-fg transition-colors hover:border-accent-500 hover:text-accent-500 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 py-1.5 font-medium text-fg shadow-xs transition-colors hover:border-accent-500 hover:text-accent-500 disabled:opacity-50"
                 >
-                  {checkingUpdate ? "Checking..." : "Check for Updates"}
+                  <svg
+                    className={`h-3.5 w-3.5 ${checkingUpdate ? "animate-spin" : ""}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21.5 2v6h-6" />
+                    <path d="M2.5 22v-6h6" />
+                    <path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8" />
+                    <path d="M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16" />
+                  </svg>
+                  <span>{checkingUpdate ? "Checking..." : "Check for Updates"}</span>
                 </button>
               </div>
 
               {/* Status messages */}
               {updateError && (
-                <div className="border-red-500/30 bg-red-500/10 text-red-400 rounded-md border p-2.5 text-[11px]">
+                <div className="rounded-xl border border-error/40 bg-error/10 p-3 text-[11px] text-error">
                   {updateError}
                 </div>
               )}
 
               {updateResult && !updateResult.has_update && !updateError && (
-                <div className="flex items-center gap-2 rounded-md border border-ok/30 bg-ok/10 p-2.5 text-[11px] text-ok">
+                <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-[11px] text-ok">
                   <span>✓</span>
                   <span>You are running the latest version of Nook.</span>
                 </div>
               )}
 
               {updateResult && updateResult.has_update && (
-                <div className="flex flex-col gap-2.5 rounded-md border border-accent-500/30 bg-accent-500/10 p-3">
+                <div className="flex flex-col gap-2.5 rounded-xl border border-accent-500/30 bg-accent-500/10 p-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="font-semibold text-accent-500">Update Available: </span>
@@ -791,7 +980,7 @@ export function SettingsApp() {
                         <button
                           type="button"
                           onClick={() => void handleInstallUpdate()}
-                          className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                          className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
                         >
                           Download & Install Update
                         </button>
@@ -799,7 +988,7 @@ export function SettingsApp() {
                         <button
                           type="button"
                           onClick={() => void openUrl(updateResult.release_url)}
-                          className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                          className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
                         >
                           Download from GitHub
                         </button>
@@ -808,7 +997,7 @@ export function SettingsApp() {
                   )}
 
                   {installError && (
-                    <div className="text-red-400 text-[11px]">Install error: {installError}</div>
+                    <div className="text-[11px] text-error">Install error: {installError}</div>
                   )}
                 </div>
               )}

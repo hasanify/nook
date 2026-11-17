@@ -21,7 +21,7 @@ function WidgetHost({ id }: { id: string }) {
 
   if (error || !instance) {
     return (
-      <div className="border-error text-error flex h-full w-full items-center justify-center rounded-card border bg-surface p-4 text-xs select-none">
+      <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none">
         {error || "Widget not found"}
       </div>
     );
@@ -30,7 +30,7 @@ function WidgetHost({ id }: { id: string }) {
   const mod = getWidgetModule(instance.kind) ?? getWidgetModule("placeholder");
   if (!mod) {
     return (
-      <div className="border-error text-error flex h-full w-full items-center justify-center rounded-card border bg-surface p-4 text-xs select-none">
+      <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none">
         Unknown widget type: {instance.kind}
       </div>
     );

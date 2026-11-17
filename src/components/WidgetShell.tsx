@@ -108,8 +108,8 @@ export function WidgetShell({
   return (
     <div
       onContextMenu={handleContextMenu}
-      className={`relative flex h-full w-full flex-col overflow-hidden rounded-card border bg-surface shadow-card transition-shadow select-none ${
-        editMode ? "border-accent-500 ring-2 ring-accent-500/30" : "border-line"
+      className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-all duration-200 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
+        editMode ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : "border-line/70"
       }`}
     >
       <EditOverlay
@@ -126,42 +126,48 @@ export function WidgetShell({
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
 
-      <div className="flex flex-1 flex-col overflow-hidden p-3 text-sm select-auto">{children}</div>
+      <div className="flex flex-1 flex-col overflow-hidden p-3.5 text-sm select-auto">
+        {children}
+      </div>
 
       {/* Context Menu */}
       {contextMenu && (
         <div
           ref={menuRef}
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
-          className="animate-in fade-in zoom-in-95 absolute z-50 min-w-36 rounded-md border border-line bg-surface-raised p-1 text-xs text-fg shadow-lg duration-100 select-none"
+          className="absolute z-50 min-w-40 rounded-xl border border-line/80 bg-surface-raised/95 p-1 text-xs text-fg shadow-2xl backdrop-blur-md select-none"
         >
           <button
             type="button"
             onClick={handleToggleAlwaysOnTop}
-            className="flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left text-fg hover:bg-surface"
+            className="flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg transition-colors hover:bg-surface"
           >
             <span>Always on top</span>
-            {instance.always_on_top && <span className="font-bold text-accent-500">✓</span>}
+            {instance.always_on_top ? (
+              <span className="font-bold text-accent-500">✓</span>
+            ) : (
+              <span className="text-[10px] text-fg-muted">Off</span>
+            )}
           </button>
           <button
             type="button"
             onClick={handleOpenSettings}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-fg hover:bg-surface"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg transition-colors hover:bg-surface"
           >
             Settings...
           </button>
-          <div className="my-1 border-t border-line" />
+          <div className="my-1 border-t border-line/60" />
           <button
             type="button"
             onClick={handleDuplicate}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-fg hover:bg-surface"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg transition-colors hover:bg-surface"
           >
             Duplicate
           </button>
           <button
             type="button"
             onClick={handleRemove}
-            className="text-error hover:bg-error/10 flex w-full items-center gap-2 rounded px-2 py-1.5 text-left"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-error transition-colors hover:bg-error/15"
           >
             Remove
           </button>
