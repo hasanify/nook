@@ -321,65 +321,142 @@ pub fn get_app_version(app: AppHandle) -> String {
 #[tauri::command]
 pub async fn check_for_updates(app: AppHandle) -> Result<UpdateCheckResult, String> {
     let current_version = app.package_info().version.to_string();
+    let token = crate::secrets::get_secret("github");
+
     let client = reqwest::Client::builder()
-        .user_agent("Nook-App")
+        .user_agent("Nook-Desktop-Widgets/1.0")
         .build()
         .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
 
-    let url = "https://api.github.com/repos/hasanify/nook/releases/latest";
-    let resp = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to fetch latest release: {}", e))?;
-
-    if !resp.status().is_success() {
-        return Err(format!("GitHub API returned HTTP status {}", resp.status()));
+    let api_url = "https://api.github.com/repos/hasanify/nook/releases/latest";
+    let mut req = client.get(api_url);
+    if let Some(t) = &token {
+        req = req.header("Authorization", format!("Bearer {}", t));
     }
 
-    let release: serde_json::Value = resp
-        .json()
-        .await
-        .map_err(|e| format!("Failed to parse release response: {}", e))?;
-
-    let tag_name = release["tag_name"]
-        .as_str()
-        .ok_or_else(|| "Missing tag_name in release".to_string())?;
-
-    let release_name = release["name"].as_str().unwrap_or(tag_name).to_string();
-
-    let release_url = release["html_url"]
-        .as_str()
-        .unwrap_or("https://github.com/hasanify/nook/releases")
-        .to_string();
-
-    let release_notes = release["body"].as_str().map(|s| s.to_string());
-    let has_update = is_newer_version(tag_name, &current_version);
-
-    let mut download_url = None;
-    let mut asset_name = None;
-
-    if let Some(assets) = release["assets"].as_array() {
-        for asset in assets {
-            if let Some(name) = asset["name"].as_str() {
-                if name.ends_with(".exe") {
-                    asset_name = Some(name.to_string());
-                    download_url = asset["browser_download_url"]
+    // Attempt 1: Official GitHub REST API
+    if let Ok(resp) = req.send().await {
+        if resp.status().is_success() {
+            if let Ok(release) = resp.json::<serde_json::Value>().await {
+                if let Some(tag_name) = release["tag_name"].as_str() {
+                    let release_name = release["name"].as_str().unwrap_or(tag_name).to_string();
+                    let release_url = release["html_url"]
                         .as_str()
-                        .map(|s| s.to_string());
-                    break;
+                        .unwrap_or("https://github.com/hasanify/nook/releases")
+                        .to_string();
+                    let release_notes = release["body"].as_str().map(|s| s.to_string());
+                    let has_update = is_newer_version(tag_name, &current_version);
+
+                    let mut download_url = None;
+                    let mut asset_name = None;
+
+                    if let Some(assets) = release["assets"].as_array() {
+                        for asset in assets {
+                            if let Some(name) = asset["name"].as_str() {
+                                if name.ends_with(".exe") {
+                                    asset_name = Some(name.to_string());
+                                    download_url = asset["browser_download_url"]
+                                        .as_str()
+                                        .map(|s| s.to_string());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    return Ok(UpdateCheckResult {
+                        current_version,
+                        latest_version: tag_name.trim_start_matches('v').to_string(),
+                        has_update,
+                        release_name,
+                        release_url,
+                        release_notes,
+                        download_url,
+                        asset_name,
+                    });
                 }
             }
         }
     }
 
+    // Attempt 2: Fallback to public web redirect if unauthenticated API is rate limited (HTTP 403/429)
+    let no_redirect_client = reqwest::Client::builder()
+        .user_agent("Nook-Desktop-Widgets/1.0")
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
+    let web_res = no_redirect_client
+        .get("https://github.com/hasanify/nook/releases/latest")
+        .send()
+        .await
+        .map_err(|e| format!("Failed to check updates: {}", e))?;
+
+    let location = web_res
+        .headers()
+        .get("location")
+        .and_then(|v| v.to_str().ok())
+        .ok_or_else(|| "Failed to resolve latest release URL from GitHub".to_string())?;
+
+    // location format: https://github.com/hasanify/nook/releases/tag/v0.9.1
+    let tag_name = location
+        .rsplit('/')
+        .next()
+        .ok_or_else(|| "Invalid release redirect URL".to_string())?;
+
+    let clean_version = tag_name.trim_start_matches('v');
+    let has_update = is_newer_version(tag_name, &current_version);
+    let release_url = format!("https://github.com/hasanify/nook/releases/tag/{}", tag_name);
+    let release_name = format!("Nook {}", tag_name);
+
+    let mut download_url = None;
+    let mut asset_name = None;
+
+    if has_update {
+        let assets_url = format!(
+            "https://github.com/hasanify/nook/releases/expanded_assets/{}",
+            tag_name
+        );
+        if let Ok(assets_res) = client.get(&assets_url).send().await {
+            if let Ok(html) = assets_res.text().await {
+                for part in html.split("href=\"") {
+                    if let Some(url_end) = part.find(".exe\"") {
+                        let path = &part[..url_end + 4];
+                        let full_url = if path.starts_with("http") {
+                            path.to_string()
+                        } else {
+                            format!("https://github.com{}", path)
+                        };
+                        let name = full_url
+                            .rsplit('/')
+                            .next()
+                            .unwrap_or("nook_setup.exe")
+                            .to_string();
+                        download_url = Some(full_url);
+                        asset_name = Some(name);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if download_url.is_none() {
+            let default_name = format!("Nook_{}_x64-setup.exe", clean_version);
+            download_url = Some(format!(
+                "https://github.com/hasanify/nook/releases/download/{}/{}",
+                tag_name, default_name
+            ));
+            asset_name = Some(default_name);
+        }
+    }
+
     Ok(UpdateCheckResult {
         current_version,
-        latest_version: tag_name.trim_start_matches('v').to_string(),
+        latest_version: clean_version.to_string(),
         has_update,
         release_name,
         release_url,
-        release_notes,
+        release_notes: None,
         download_url,
         asset_name,
     })
