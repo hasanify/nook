@@ -152,3 +152,41 @@ export function onEditMode(callback: (payload: EditModePayload) => void): Promis
     callback(event.payload);
   });
 }
+
+export interface UpdateCheckResult {
+  current_version: string;
+  latest_version: string;
+  has_update: boolean;
+  release_name: string;
+  release_url: string;
+  release_notes?: string;
+  download_url?: string;
+  asset_name?: string;
+}
+
+export interface UpdateDownloadProgressPayload {
+  percent: number;
+}
+
+export async function getAppVersion(): Promise<string> {
+  return invoke<string>("get_app_version");
+}
+
+export async function checkForUpdates(): Promise<UpdateCheckResult> {
+  return invoke<UpdateCheckResult>("check_for_updates");
+}
+
+export async function installUpdate(downloadUrl: string, assetName: string): Promise<void> {
+  return invoke<void>("install_update", {
+    downloadUrl,
+    assetName,
+  });
+}
+
+export function onUpdateDownloadProgress(
+  callback: (payload: UpdateDownloadProgressPayload) => void,
+): Promise<UnlistenFn> {
+  return listen<UpdateDownloadProgressPayload>("update-download-progress", (event) => {
+    callback(event.payload);
+  });
+}

@@ -125,6 +125,9 @@ pub fn run() {
             commands::has_account_token,
             commands::get_provider_snapshot,
             commands::refresh_widget_provider,
+            commands::get_app_version,
+            commands::check_for_updates,
+            commands::install_update,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

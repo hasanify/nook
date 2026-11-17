@@ -12,10 +12,16 @@ import {
   hasAccountToken,
   saveAccountToken,
   clearAccountToken,
+  getAppVersion,
+  checkForUpdates,
+  installUpdate,
+  onUpdateDownloadProgress,
+  type UpdateCheckResult,
 } from "../core/ipc";
 import { SettingsForm } from "../components/SettingsForm";
 import { WIDGET_REGISTRY } from "../widgets/registry";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import type { AppConfig, WidgetInstance } from "../core/types";
 
 export function SettingsApp() {
@@ -33,6 +39,14 @@ export function SettingsApp() {
   const [vercelConfigured, setVercelConfigured] = useState(false);
   const [githubInput, setGithubInput] = useState("");
   const [vercelInput, setVercelInput] = useState("");
+
+  const [appVersion, setAppVersion] = useState<string>("");
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateResult, setUpdateResult] = useState<UpdateCheckResult | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [downloadingUpdate, setDownloadingUpdate] = useState(false);
+  const [downloadPercent, setDownloadPercent] = useState(0);
+  const [installError, setInstallError] = useState<string | null>(null);
 
   const { editMode, toggleEditMode } = useEditMode();
 
@@ -59,6 +73,10 @@ export function SettingsApp() {
     fetchConfig();
     refreshAccountStatus();
 
+    getAppVersion()
+      .then((ver) => setAppVersion(ver))
+      .catch(() => {});
+
     isEnabled()
       .then((enabled) => setAutostartEnabled(enabled))
       .catch(() => {});
@@ -70,10 +88,48 @@ export function SettingsApp() {
       unlisten = fn;
     });
 
+    let unlistenProgress: (() => void) | undefined;
+    onUpdateDownloadProgress((payload) => {
+      setDownloadPercent(payload.percent);
+    }).then((fn) => {
+      unlistenProgress = fn;
+    });
+
     return () => {
       if (unlisten) unlisten();
+      if (unlistenProgress) unlistenProgress();
     };
   }, [fetchConfig, refreshAccountStatus]);
+
+  const handleCheckUpdates = async () => {
+    setCheckingUpdate(true);
+    setUpdateError(null);
+    setInstallError(null);
+    try {
+      const res = await checkForUpdates();
+      setUpdateResult(res);
+      if (res.current_version) {
+        setAppVersion(res.current_version);
+      }
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!updateResult?.download_url) return;
+    setDownloadingUpdate(true);
+    setInstallError(null);
+    setDownloadPercent(0);
+    try {
+      await installUpdate(updateResult.download_url, updateResult.asset_name ?? "");
+    } catch (err) {
+      setInstallError(err instanceof Error ? err.message : String(err));
+      setDownloadingUpdate(false);
+    }
+  };
 
   const handleSaveGithubToken = async () => {
     if (!githubInput.trim()) return;
@@ -159,7 +215,7 @@ export function SettingsApp() {
           <div className="h-4 w-4 rounded-full bg-accent-500" />
           <h1 className="text-sm font-semibold text-fg">Nook Settings</h1>
         </div>
-        <div className="text-xs text-fg-muted">v0.1.0</div>
+        <div className="font-mono text-xs text-fg-muted">{appVersion ? `v${appVersion}` : ""}</div>
       </div>
 
       {/* Tabs */}
@@ -275,6 +331,107 @@ export function SettingsApp() {
                 <option value={8}>8 px (Default)</option>
                 <option value={16}>16 px</option>
               </select>
+            </div>
+
+            {/* Updates Section */}
+            <div className="flex flex-col gap-3 border-t border-line pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-fg">App Updates</div>
+                  <div className="text-[11px] text-fg-muted">
+                    Current version:{" "}
+                    <span className="font-mono text-fg">
+                      {appVersion ? `v${appVersion}` : "..."}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={checkingUpdate || downloadingUpdate}
+                  onClick={() => void handleCheckUpdates()}
+                  className="rounded-md border border-line bg-surface-raised px-3 py-1.5 font-medium text-fg transition-colors hover:bg-surface hover:text-accent-500 disabled:opacity-50"
+                >
+                  {checkingUpdate ? "Checking..." : "Check for Updates"}
+                </button>
+              </div>
+
+              {/* Status messages */}
+              {updateError && (
+                <div className="border-red-500/30 bg-red-500/10 text-red-400 rounded-md border p-2.5 text-[11px]">
+                  {updateError}
+                </div>
+              )}
+
+              {updateResult && !updateResult.has_update && !updateError && (
+                <div className="flex items-center gap-2 rounded-md border border-ok/30 bg-ok/10 p-2.5 text-[11px] text-ok">
+                  <span>✓</span>
+                  <span>You are on the latest version (v{updateResult.current_version}).</span>
+                </div>
+              )}
+
+              {updateResult && updateResult.has_update && (
+                <div className="flex flex-col gap-2.5 rounded-md border border-accent-500/30 bg-accent-500/10 p-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-semibold text-accent-500">Update Available: </span>
+                      <span className="font-mono font-medium text-fg">
+                        v{updateResult.latest_version}
+                      </span>
+                    </div>
+                    {updateResult.release_url && (
+                      <button
+                        type="button"
+                        onClick={() => void openUrl(updateResult.release_url)}
+                        className="text-[11px] text-accent-500 underline underline-offset-2 hover:text-accent-600"
+                      >
+                        View Release Notes
+                      </button>
+                    )}
+                  </div>
+
+                  {downloadingUpdate ? (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-between text-[11px] text-fg-muted">
+                        <span>Downloading update...</span>
+                        <span>{downloadPercent}%</span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
+                        <div
+                          className="h-full bg-accent-500 transition-all duration-150"
+                          style={{ width: `${downloadPercent}%` }}
+                        />
+                      </div>
+                      <div className="text-[10px] text-fg-muted">
+                        Nook will restart once installation begins.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 pt-1">
+                      {updateResult.download_url ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleInstallUpdate()}
+                          className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                        >
+                          Download & Install Update
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => void openUrl(updateResult.release_url)}
+                          className="text-white rounded-md bg-accent-500 px-3 py-1.5 font-medium transition-colors hover:bg-accent-600"
+                        >
+                          Download from GitHub
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {installError && (
+                    <div className="text-red-400 text-[11px]">Install error: {installError}</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

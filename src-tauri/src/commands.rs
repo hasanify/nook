@@ -274,3 +274,176 @@ pub async fn refresh_widget_provider(
 ) -> Result<Option<crate::providers::ProviderPayload>, String> {
     Ok(state.poller.poll_widget_now(&app, &widget_id).await)
 }
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct UpdateCheckResult {
+    pub current_version: String,
+    pub latest_version: String,
+    pub has_update: bool,
+    pub release_name: String,
+    pub release_url: String,
+    pub release_notes: Option<String>,
+    pub download_url: Option<String>,
+    pub asset_name: Option<String>,
+}
+
+fn parse_version(v: &str) -> (u64, u64, u64) {
+    let clean = v.trim().trim_start_matches('v');
+    let mut parts = clean.split('.');
+    let major = parts.next().and_then(|p| p.parse().ok()).unwrap_or(0);
+    let minor = parts.next().and_then(|p| p.parse().ok()).unwrap_or(0);
+    let patch = parts
+        .next()
+        .and_then(|p| p.split('-').next())
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(0);
+    (major, minor, patch)
+}
+
+fn is_newer_version(latest: &str, current: &str) -> bool {
+    parse_version(latest) > parse_version(current)
+}
+
+#[tauri::command]
+pub fn get_app_version(app: AppHandle) -> String {
+    app.package_info().version.to_string()
+}
+
+#[tauri::command]
+pub async fn check_for_updates(app: AppHandle) -> Result<UpdateCheckResult, String> {
+    let current_version = app.package_info().version.to_string();
+    let client = reqwest::Client::builder()
+        .user_agent("Nook-App")
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
+    let url = "https://api.github.com/repos/hasanify/nook/releases/latest";
+    let resp = client
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to fetch latest release: {}", e))?;
+
+    if !resp.status().is_success() {
+        return Err(format!("GitHub API returned HTTP status {}", resp.status()));
+    }
+
+    let release: serde_json::Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse release response: {}", e))?;
+
+    let tag_name = release["tag_name"]
+        .as_str()
+        .ok_or_else(|| "Missing tag_name in release".to_string())?;
+
+    let release_name = release["name"].as_str().unwrap_or(tag_name).to_string();
+
+    let release_url = release["html_url"]
+        .as_str()
+        .unwrap_or("https://github.com/hasanify/nook/releases")
+        .to_string();
+
+    let release_notes = release["body"].as_str().map(|s| s.to_string());
+    let has_update = is_newer_version(tag_name, &current_version);
+
+    let mut download_url = None;
+    let mut asset_name = None;
+
+    if let Some(assets) = release["assets"].as_array() {
+        for asset in assets {
+            if let Some(name) = asset["name"].as_str() {
+                if name.ends_with(".exe") {
+                    asset_name = Some(name.to_string());
+                    download_url = asset["browser_download_url"]
+                        .as_str()
+                        .map(|s| s.to_string());
+                    break;
+                }
+            }
+        }
+    }
+
+    Ok(UpdateCheckResult {
+        current_version,
+        latest_version: tag_name.trim_start_matches('v').to_string(),
+        has_update,
+        release_name,
+        release_url,
+        release_notes,
+        download_url,
+        asset_name,
+    })
+}
+
+#[tauri::command]
+pub async fn install_update(
+    app: AppHandle,
+    download_url: String,
+    asset_name: String,
+) -> Result<(), String> {
+    let client = reqwest::Client::builder()
+        .user_agent("Nook-App")
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
+    let mut resp = client
+        .get(&download_url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to start update download: {}", e))?;
+
+    if !resp.status().is_success() {
+        return Err(format!("Download failed with status: {}", resp.status()));
+    }
+
+    let temp_dir = std::env::temp_dir();
+    let safe_name = if asset_name.is_empty() {
+        "Nook_Setup.exe".to_string()
+    } else {
+        asset_name
+    };
+    let dest_path = temp_dir.join(&safe_name);
+
+    let total_size = resp.content_length().unwrap_or(0);
+    let mut downloaded: u64 = 0;
+    let mut file = std::fs::File::create(&dest_path)
+        .map_err(|e| format!("Failed to create temporary file: {}", e))?;
+
+    use std::io::Write;
+    while let Some(chunk) = resp
+        .chunk()
+        .await
+        .map_err(|e| format!("Error while downloading: {}", e))?
+    {
+        file.write_all(&chunk)
+            .map_err(|e| format!("Failed to write to file: {}", e))?;
+        downloaded += chunk.len() as u64;
+
+        if total_size > 0 {
+            let percent = ((downloaded as f64 / total_size as f64) * 100.0) as u32;
+            let _ = app.emit(
+                "update-download-progress",
+                serde_json::json!({ "percent": percent }),
+            );
+        }
+    }
+    drop(file);
+
+    info!(
+        "Update downloaded to {:?}, launching installer...",
+        dest_path
+    );
+
+    #[cfg(windows)]
+    {
+        std::process::Command::new(&dest_path)
+            .spawn()
+            .map_err(|e| format!("Failed to launch installer: {}", e))?;
+
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        app.exit(0);
+    }
+
+    Ok(())
+}
