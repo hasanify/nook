@@ -1,3 +1,13 @@
+# [0.4.0](https://github.com/hasanify/nook/compare/v0.3.1...v0.4.0) (2026-11-17)
+
+### Bug Fixes
+
+- **ui:** disable right-click context menu globally across all windows ([69d6de8](https://github.com/hasanify/nook/commit/69d6de854c3d1cdd5309e62b4906a9e4d067c9b0))
+
+### Features
+
+- **ui:** enhance widgets and settings with modern minimal aesthetic ([63453df](https://github.com/hasanify/nook/commit/63453dff6360d3521eabe7b4d2fd911a3194e368))
+
 ## [0.3.1](https://github.com/hasanify/nook/compare/v0.3.0...v0.3.1) (2026-11-17)
 
 ### Bug Fixes
