@@ -1,3 +1,9 @@
+## [0.7.1](https://github.com/hasanify/nook/compare/v0.7.0...v0.7.1) (2026-11-17)
+
+### Bug Fixes
+
+- **ui:** resolve always-on-top serialization mismatch and toggle clipping ([4a71e46](https://github.com/hasanify/nook/commit/4a71e46ed341e82bf0a287482be02b566683ac2c))
+
 # [0.7.0](https://github.com/hasanify/nook/compare/v0.6.5...v0.7.0) (2026-11-17)
 
 ### Features
