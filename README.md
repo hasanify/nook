@@ -22,21 +22,21 @@
 
 ## Stack
 
-| Layer          | Technology          | Version        | Purpose                                                                  |
-| -------------- | ------------------- | -------------- | ------------------------------------------------------------------------ |
-| Shell          | Tauri               | 2.x            | Multi-window management, tray icon, native capabilities                  |
-| Backend        | Rust                | 1.95+          | Desktop attachment, Win32 API integration, IPC                           |
-| Win32 API      | `windows` crate     | 0.61           | Direct Win32 window reparenting and z-ordering                           |
-| Frontend       | React               | 19.1.0         | Component rendering, reactive state management                           |
-| Build Tool     | Vite                | 8.0.16         | Fast bundling and development server                                     |
-| Language       | TypeScript (strict) | 6.0.3          | Full static typing across the UI layer                                   |
-| Styling        | Tailwind CSS v4     | 4.3.5          | CSS-first `@theme` design system in `theme.css`                          |
-| HTTP Client    | `reqwest`           | 0.12           | Rustls-based shared async HTTP poller                                    |
-| Async Runtime  | `tokio`             | 1.x            | Task scheduling and background pollers                                   |
-| Secret Storage | `keyring`           | 3.x            | Windows Credential Manager integration                                   |
-| Linter         | `oxlint`            | 1.94.0         | High-performance TypeScript and React linting                            |
-| Formatter      | `prettier`          | 3.10.1         | Code formatting with `prettier-plugin-tailwindcss`                       |
-| CI/CD          | GitHub Actions      | Windows Latest | Automated lint, format, typecheck, clippy, and NSIS installer generation |
+| Layer          | Technology          | Version        | Purpose                                                                                    |
+| -------------- | ------------------- | -------------- | ------------------------------------------------------------------------------------------ |
+| Shell          | Tauri               | 2.x            | Multi-window management, tray icon, native capabilities                                    |
+| Backend        | Rust                | 1.95+          | Desktop attachment, Win32 API integration, IPC                                             |
+| Win32 API      | `windows` crate     | 0.61           | Direct Win32 window reparenting and z-ordering                                             |
+| Frontend       | React               | 19.1.0         | Component rendering, reactive state management                                             |
+| Build Tool     | Vite                | 8.0.16         | Fast bundling and development server                                                       |
+| Language       | TypeScript (strict) | 6.0.3          | Full static typing across the UI layer                                                     |
+| Styling        | Tailwind CSS v4     | 4.3.5          | CSS-first `@theme` design system in `theme.css`                                            |
+| HTTP Client    | `reqwest`           | 0.12           | Rustls-based shared async HTTP poller                                                      |
+| Async Runtime  | `tokio`             | 1.x            | Task scheduling and background pollers                                                     |
+| Secret Storage | `keyring`           | 3.x            | Windows Credential Manager integration                                                     |
+| Linter         | `oxlint`            | 1.94.0         | High-performance TypeScript and React linting                                              |
+| Formatter      | `prettier`          | 3.10.1         | Code formatting with `prettier-plugin-tailwindcss`                                         |
+| CI/CD          | GitHub Actions      | Windows Latest | Automated lint, format, typecheck, clippy, semantic release, and NSIS installer generation |
 
 ---
 
@@ -45,10 +45,13 @@
 ```
 nook/
 ├── .agent/rules/                   # Antigravity workspace rules (readme-sync, code-standards, no-cheap-fixes)
-├── .github/workflows/build.yml     # Automated lint, clippy, and NSIS packaging pipeline
+├── .github/workflows/
+│   ├── build.yml                   # PR verification pipeline
+│   └── release.yml                 # Automated semantic release & installer packaging on push
 ├── .husky/pre-commit               # Git hook triggering lint-staged
 ├── .oxlintrc.json                  # Oxlint configuration
 ├── .prettierrc.json                # Prettier configuration
+├── .releaserc.json                 # Semantic release rules & asset publishing configuration
 ├── lint-staged.config.mjs          # Staged file linting and formatting configuration
 ├── icon.png                        # Master application icon (1024x1024)
 ├── banner.webp                     # GitHub banner graphic
@@ -58,6 +61,8 @@ nook/
 ├── tsconfig.json                   # Strict TypeScript compiler options
 ├── vite.config.ts                  # Vite config (React + Tailwind v4 + port 1420)
 ├── public/                         # Public assets (favicon & application icon)
+├── scripts/
+│   └── bump-version.mjs            # Synchronized version bump helper across configs
 ├── src/
 │   ├── main.tsx                    # Window router (?w=<id> or ?view=settings)
 │   ├── styles/theme.css            # Tailwind v4 semantic tokens & styles
@@ -120,6 +125,9 @@ npm run fmt:rust:check
 # Auto-format codebase
 npm run format
 npm run fmt:rust
+
+# Run semantic release locally (dry-run)
+npx semantic-release --dry-run
 
 # Build production NSIS installer
 npm run tauri -- build --bundles nsis

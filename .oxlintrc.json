@@ -10,5 +10,13 @@
     "react/react-in-jsx-scope": "off",
     "import/no-unassigned-import": "off"
   },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.mjs"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["dist", "src-tauri/target", "src-tauri/gen"]
 }
