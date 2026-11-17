@@ -209,7 +209,7 @@ export function WidgetContextMenu({
           onClose();
           onDelete();
         }}
-        className="text-red-500 hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/20 dark:hover:text-red-400 flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors"
+        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-error/10 hover:text-error dark:hover:bg-error/20"
       >
         <svg
           className="h-3.5 w-3.5 shrink-0"
