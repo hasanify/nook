@@ -1,3 +1,9 @@
+# [0.3.0](https://github.com/hasanify/nook/compare/v0.2.3...v0.3.0) (2026-11-17)
+
+### Features
+
+- **settings:** display current app version and in-app update checker ([e49a99d](https://github.com/hasanify/nook/commit/e49a99d84580c3aa8873bbe3ee5f23f12ea6855c))
+
 ## [0.2.3](https://github.com/hasanify/nook/compare/v0.2.2...v0.2.3) (2026-11-17)
 
 ## [0.2.2](https://github.com/hasanify/nook/compare/v0.2.1...v0.2.2) (2026-11-17)
