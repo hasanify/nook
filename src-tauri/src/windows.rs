@@ -327,14 +327,22 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
     };
     let url = WebviewUrl::App(url_str.into());
 
-    let window = WebviewWindowBuilder::new(app, LABEL, url)
+    let mut builder = WebviewWindowBuilder::new(app, LABEL, url)
         .title("Nook Settings")
         .decorations(true)
         .skip_taskbar(true)
         .resizable(true)
         .inner_size(680.0, 560.0)
         .min_inner_size(520.0, 420.0)
-        .center()
+        .center();
+
+    if let Some(icon) = app.default_window_icon() {
+        builder = builder
+            .icon(icon.clone())
+            .map_err(|e| format!("Failed to set settings window icon: {}", e))?;
+    }
+
+    let window = builder
         .build()
         .map_err(|e| format!("Failed to create settings window: {}", e))?;
 

@@ -10,12 +10,13 @@
 
 ## Features
 
-- **Tray-Only Presence:** Runs exclusively from the notification tray. Never displays in the taskbar or Alt+Tab switcher (for any window, including Settings). Closing Settings keeps Nook running.
-- **Desktop Attachment (`PinStrategy::AboveIcons`):** Pinned directly into the desktop hierarchy above icons.
+- **Tray-Only Presence:** Runs exclusively from the notification tray. Never displays in the taskbar or Alt+Tab switcher for any window (including Settings). Closing Settings keeps Nook running.
+- **Desktop Attachment (`PinStrategy::AboveIcons`):** Pinned directly into the desktop hierarchy above icons (`SHELLDLL_DefView`), surviving `Win+D` without losing keyboard focus.
 - **Per-Widget Always on Top (`PinStrategy::Topmost`):** Any widget can be detached to stay above all normal application windows via right-click or settings.
-- **Zero-Lag & Low Footprint:** Single shared Rust background HTTP poller with ETag caching; near-zero idle CPU usage.
+- **Zero-Lag & Low Footprint:** Single shared Rust background HTTP poller with ETag caching and rate-limit backoff; near-zero idle CPU usage (< 1%).
 - **Pluggable Architecture:** Adding a new widget type requires only a manifest, an `index.tsx` component, and single-line registrations.
 - **Resilient Lifecycle:** Automatic self-healing and reparenting after Windows Explorer restarts (`TaskbarCreated`).
+- **Secure Secret Storage:** API tokens (GitHub PAT, Vercel token) are stored in Windows Credential Manager via `keyring` and never written to disk, config, or logs.
 
 ---
 
@@ -27,14 +28,14 @@
 | Backend        | Rust                | 1.95+          | Desktop attachment, Win32 API integration, IPC                           |
 | Win32 API      | `windows` crate     | 0.61           | Direct Win32 window reparenting and z-ordering                           |
 | Frontend       | React               | 19.1.0         | Component rendering, reactive state management                           |
-| Build Tool     | Vite                | 8.0+           | Fast bundling and development server                                     |
-| Language       | TypeScript (strict) | 6.0+           | Full static typing across the UI layer                                   |
+| Build Tool     | Vite                | 8.0.16         | Fast bundling and development server                                     |
+| Language       | TypeScript (strict) | 6.0.3          | Full static typing across the UI layer                                   |
 | Styling        | Tailwind CSS v4     | 4.3.5          | CSS-first `@theme` design system in `theme.css`                          |
 | HTTP Client    | `reqwest`           | 0.12           | Rustls-based shared async HTTP poller                                    |
 | Async Runtime  | `tokio`             | 1.x            | Task scheduling and background pollers                                   |
 | Secret Storage | `keyring`           | 3.x            | Windows Credential Manager integration                                   |
-| Linter         | `oxlint`            | 1.94+          | High-performance TypeScript and React linting                            |
-| Formatter      | `prettier`          | 3.10+          | Code formatting with `prettier-plugin-tailwindcss`                       |
+| Linter         | `oxlint`            | 1.94.0         | High-performance TypeScript and React linting                            |
+| Formatter      | `prettier`          | 3.10.1         | Code formatting with `prettier-plugin-tailwindcss`                       |
 | CI/CD          | GitHub Actions      | Windows Latest | Automated lint, format, typecheck, clippy, and NSIS installer generation |
 
 ---
@@ -56,21 +57,37 @@ nook/
 ├── package.json                    # Project dependencies and operational scripts
 ├── tsconfig.json                   # Strict TypeScript compiler options
 ├── vite.config.ts                  # Vite config (React + Tailwind v4 + port 1420)
+├── public/                         # Public assets (favicon & application icon)
 ├── src/
 │   ├── main.tsx                    # Window router (?w=<id> or ?view=settings)
 │   ├── styles/theme.css            # Tailwind v4 semantic tokens & styles
-│   ├── core/                       # IPC wrappers, types, hooks
-│   ├── components/                 # WidgetShell, EditOverlay, Banner, etc.
-│   ├── settings/                   # Settings application interface
-│   └── widgets/                    # Registered widget implementations
+│   ├── core/                       # IPC wrappers, types, hooks (use-instance, use-theme, use-provider, etc.)
+│   ├── components/                 # WidgetShell, EditOverlay, Banner, StatusDot, SettingsForm
+│   ├── settings/                   # Settings application interface (General, Accounts, Widget tabs)
+│   └── widgets/                    # Registered widgets (notes, timer, github-repo, vercel-project)
 └── src-tauri/
     ├── Cargo.toml                  # Pinned Rust dependencies
     ├── build.rs                    # Tauri build hook
     ├── rustfmt.toml                # Rust formatting standards
     ├── tauri.conf.json             # Tauri configuration (tray, NSIS, permissions)
-    ├── capabilities/               # Window capability manifests
-    ├── icons/                      # Generated application icons
-    └── src/                        # Rust backend implementation
+    ├── capabilities/               # Window capability manifests (widget, settings)
+    ├── icons/                      # Generated application icons (ico, png, etc.)
+    └── src/
+        ├── commands.rs             # Tauri IPC command handlers
+        ├── config.rs               # Atomic debounced config persistence
+        ├── lib.rs                  # Tauri runtime builder & plugin setup
+        ├── main.rs                 # Native Windows entrypoint
+        ├── migrations.rs           # Config schema migrations
+        ├── pin.rs                  # Win32 desktop parenting & z-ordering
+        ├── poller.rs               # Shared background HTTP poller with ETag caching
+        ├── providers/              # Remote provider clients (GitHub, Vercel)
+        ├── registry.rs             # Static manifest registration
+        ├── secrets.rs              # Windows Credential Manager interface
+        ├── shell_watch.rs          # Hidden window monitoring Explorer & DPI events
+        ├── state.rs                # AppState container & concurrency primitives
+        ├── timer.rs                # Native notification scheduler for timers
+        ├── tray.rs                 # System tray icon & context menu
+        └── windows.rs              # Window lifecycle, layout, and bounds management
 ```
 
 ---
@@ -82,7 +99,7 @@ nook/
 - **Operating System:** Windows 10 (1809+) or Windows 11
 - **Node.js:** v22 LTS+
 - **Rust:** Stable toolchain (`x86_64-pc-windows-msvc`) with `rustfmt` and `clippy`
-- **Build Tools:** Visual Studio C++ Build Tools (Desktop development with C++)
+- **Build Tools:** Visual Studio C++ Build Tools ("Desktop development with C++")
 
 ### Commands
 
@@ -129,13 +146,19 @@ To create and register a new widget type:
 2. **Implement Component:** Create `src/widgets/<name>/index.tsx` exporting default `{ manifest, Component }` using `WidgetShell`.
 3. **Register Frontend:** Add the widget module export to `src/widgets/registry.ts`.
 4. **Register Backend:** Add an `include_str!` entry in `src-tauri/src/registry.rs` to expose the manifest to the native tray menu.
-5. **Add Remote Provider (Optional):** If network data is required, implement the provider trait in `src-tauri/src/providers/<name>.rs` and specify `"provider": "<name>"` in `manifest.json`.
+5. **Add Remote Provider (Optional):** If network data is required, implement the provider trait in `src-tauri/src/providers/<name>.rs` and specify `"provider": "<name>"` in `manifest.json`. Local-only updates (e.g. clocks or stopwatch ticks) can run directly in the webview.
 
 ---
 
 ## Known Limitations
 
-1. **Windows Only:** Relies on Win32 desktop parenting (`SHELLDLL_DefView` / `Progman`) and `WS_EX_TOOLWINDOW` semantics. In environments where no `Progman` or `WorkerW` is running, Nook automatically falls back to `PinStrategy::BottomToplevel`.
-2. **Icons Layering:** Widgets sit directly above desktop icons by design, covering desktop icons situated immediately beneath them.
-3. **Tray Overflow:** On Windows, new tray icons may initially be grouped inside the notification overflow chevron (`^`). Users should drag Nook onto the main visible taskbar tray area.
-4. **Code Signing:** Windows installer executable is unsigned in development and triggers Windows SmartScreen warnings ("Unknown Publisher").
+1. **Windows Only:** Relies on Win32 desktop parenting (`SHELLDLL_DefView` / `Progman`) and `WS_EX_TOOLWINDOW` semantics. In environments where no `Progman` or `WorkerW` is running (e.g., sandbox or CI containers), Nook automatically falls back to `PinStrategy::BottomToplevel`.
+2. **Icons Layering:** Widgets sit directly above desktop icons by design, covering desktop icons situated immediately beneath them. Users should arrange widgets on clear desktop regions.
+3. **Show Desktop (`Win+D`):** Desktop-pinned widgets remain visible when pressing `Win+D` or clicking "Show desktop", as they belong to the desktop hierarchy.
+4. **Always-on-top Mode:** When enabled, widgets are promoted to detached top-level `HWND_TOPMOST` tool windows (`WS_EX_TOOLWINDOW`). They remain above normal application windows and survive `Win+D`, but may be occluded by exclusive-fullscreen DirectX/Vulkan games.
+5. **Tray Overflow:** On Windows, new tray icons may initially be grouped inside the notification overflow chevron (`^`). Users can drag Nook onto the main visible taskbar tray area.
+6. **Last Window Close Behavior:** Nook is a tray-only application (`skip_taskbar(true)` on all windows). Closing the Settings window hides/destroys it while Nook continues running in the background. Only selecting "Quit" from the tray context menu terminates the process.
+7. **Explorer Restarts:** When `explorer.exe` restarts, Nook automatically catches the `TaskbarCreated` message via a dedicated hidden listener window and restores all widgets within ~2 seconds.
+8. **Transparent Corners:** Widget window boundaries are clipped using native `SetWindowRgn` for optimal rendering performance without per-pixel blur overhead.
+9. **Multi-Monitor & DPI Scaling:** Widget coordinates are stored in logical pixels and scaled per target display work area. Child windows in WebView2 do not receive `WM_DPICHANGED` directly; Nook monitors shell events to re-clamp bounds during display topology changes.
+10. **Code Signing:** Windows installer executable is unsigned in development and triggers Windows SmartScreen warnings ("Unknown Publisher"). Run anyway or whitelist the binary.
