@@ -1,3 +1,9 @@
+## [0.6.5](https://github.com/hasanify/nook/compare/v0.6.4...v0.6.5) (2026-11-17)
+
+### Bug Fixes
+
+- **ui:** disable horizontal overscroll and overflow in settings layout ([d044846](https://github.com/hasanify/nook/commit/d0448465b378bf65a1d792f5f939a5a2df570016))
+
 ## [0.6.4](https://github.com/hasanify/nook/compare/v0.6.3...v0.6.4) (2026-11-17)
 
 ## [0.6.3](https://github.com/hasanify/nook/compare/v0.6.2...v0.6.3) (2026-11-17)
