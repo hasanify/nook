@@ -1,7 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useInstance } from "../core/use-instance";
 import { useEditMode } from "../core/use-edit-mode";
-import { setBounds, verifyDesktopPin, setOpacity, setAlwaysOnTop } from "../core/ipc";
+import {
+  setBounds,
+  verifyDesktopPin,
+  setOpacity,
+  setAlwaysOnTop,
+  removeWidget,
+  openSettingsWindow,
+} from "../core/ipc";
+import { WidgetContextMenu } from "./WidgetContextMenu";
 import type { Rect } from "../core/types";
 
 interface TestWidgetProps {
@@ -17,6 +25,13 @@ export function TestWidget({ id }: TestWidgetProps) {
   const [activeBounds, setActiveBounds] = useState<Rect | null>(null);
   const [typedText, setTypedText] = useState<string | null>(null);
   const [isAttached, setIsAttached] = useState<boolean | null>(null);
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+  };
 
   const displayedBounds = activeBounds ?? instance?.rect ?? DEFAULT_BOUNDS;
   const currentBoundsRef = useRef<Rect>(displayedBounds);
@@ -209,6 +224,7 @@ export function TestWidget({ id }: TestWidgetProps) {
 
   return (
     <div
+      onContextMenu={handleContextMenu}
       className={`relative flex h-full w-full flex-col overflow-hidden rounded-card border bg-surface shadow-card transition-shadow select-none ${
         editMode ? "border-accent-500 ring-2 ring-accent-500/30" : "border-line"
       }`}
@@ -235,16 +251,7 @@ export function TestWidget({ id }: TestWidgetProps) {
             <span className="text-[10px] font-semibold tracking-wide text-accent-500 uppercase">
               Drag to Move
             </span>
-          ) : (
-            <button
-              type="button"
-              onClick={toggleEditMode}
-              className="text-[10px] text-fg-muted hover:text-fg"
-              title="Toggle Edit Mode (Ctrl+Alt+E)"
-            >
-              Edit
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -338,6 +345,16 @@ export function TestWidget({ id }: TestWidgetProps) {
           ◢
         </div>
       )}
+
+      <WidgetContextMenu
+        isOpen={Boolean(contextMenuPos)}
+        position={contextMenuPos ?? { x: 0, y: 0 }}
+        isEditMode={editMode}
+        onToggleEditMode={toggleEditMode}
+        onOpenSettings={() => void openSettingsWindow(id)}
+        onDelete={() => void removeWidget(id)}
+        onClose={() => setContextMenuPos(null)}
+      />
     </div>
   );
 }

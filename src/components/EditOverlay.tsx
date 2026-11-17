@@ -193,20 +193,7 @@ export function EditOverlay({
                 Done
               </button>
             </div>
-          ) : (
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleEditMode();
-              }}
-              className="rounded px-1.5 py-0.5 text-[10px] text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
-              title="Toggle Edit Mode (Ctrl+Alt+E)"
-            >
-              Edit
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
 
