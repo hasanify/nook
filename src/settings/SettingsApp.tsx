@@ -1263,18 +1263,18 @@ export function SettingsApp() {
 
                 <div className="flex flex-col gap-2 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                   <span className="font-semibold text-fg">Links & Support</span>
-                  <div className="flex flex-col gap-1.5 text-[11px]">
+                  <div className="flex flex-col items-start gap-1.5 text-[11px]">
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/issues")}
-                      className="cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
+                      className="w-fit cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
                     >
                       • Report a Bug or Request Feature
                     </button>
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/releases")}
-                      className="cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
+                      className="w-fit cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
                     >
                       • View Release Changelog
                     </button>
