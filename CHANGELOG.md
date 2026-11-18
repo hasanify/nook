@@ -1,3 +1,9 @@
+## [0.15.1](https://github.com/hasanify/nook/compare/v0.15.0...v0.15.1) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** resolve edge spilling, fix blur transparency, enable native resize permissions, and scope context menu to header ([a0fc6a2](https://github.com/hasanify/nook/commit/a0fc6a292499256e1fe5482043c0779b397f6f99))
+
 # [0.15.0](https://github.com/hasanify/nook/compare/v0.14.0...v0.15.0) (2026-11-18)
 
 ### Features
