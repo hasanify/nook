@@ -1,3 +1,9 @@
+# [0.19.0](https://github.com/hasanify/nook/compare/v0.18.0...v0.19.0) (2026-11-18)
+
+### Features
+
+- **widgets:** enable external links in github and vercel widgets and display primary domain ([4317b23](https://github.com/hasanify/nook/commit/4317b2397e62083a8f753a02ea90fde0c1701b55))
+
 # [0.18.0](https://github.com/hasanify/nook/compare/v0.17.0...v0.18.0) (2026-11-18)
 
 ### Bug Fixes
