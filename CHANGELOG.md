@@ -1,3 +1,9 @@
+## [0.11.3](https://github.com/hasanify/nook/compare/v0.11.2...v0.11.3) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** fix drag and resize pointer capture, remove GDI stalls, and fix corner radius and bottom clipping ([3ef4cb7](https://github.com/hasanify/nook/commit/3ef4cb766aa69b7b7d7f7667943e7bde7c1a005f))
+
 ## [0.11.2](https://github.com/hasanify/nook/compare/v0.11.1...v0.11.2) (2026-11-18)
 
 ### Bug Fixes
