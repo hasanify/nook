@@ -814,6 +814,10 @@ export function SettingsApp() {
                 <input
                   id="gh-token-input"
                   type="password"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   value={githubInput}
                   onChange={(e) => setGithubInput(e.target.value)}
                   placeholder="ghp_••••••••••••••••••••••••••••••••••••"
@@ -871,6 +875,10 @@ export function SettingsApp() {
                 <input
                   id="vercel-token-input"
                   type="password"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   value={vercelInput}
                   onChange={(e) => setVercelInput(e.target.value)}
                   placeholder="••••••••••••••••••••••••"

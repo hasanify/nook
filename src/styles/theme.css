@@ -130,6 +130,36 @@
     @apply select-text;
   }
 
+  /* Disable browser / WebView2 default indicators, spin buttons, and autofill styling */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  input::-webkit-calendar-picker-indicator {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+  input::-webkit-search-decoration,
+  input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+  }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: var(--fg);
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
   /* Hide scrollbars globally across app settings and widgets while keeping smooth scrolling */
   * {
     scrollbar-width: none;

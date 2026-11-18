@@ -89,6 +89,25 @@ const preventAltSpace = (e: KeyboardEvent) => {
 window.addEventListener("keydown", preventAltSpace, { capture: true });
 window.addEventListener("keyup", preventAltSpace, { capture: true });
 
+// Disable browser / WebView2 default autocomplete, autofill suggestions, and spellcheck on all inputs
+document.addEventListener(
+  "focusin",
+  (e) => {
+    const target = e.target;
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      if (!target.hasAttribute("autocomplete")) {
+        target.setAttribute("autocomplete", target.type === "password" ? "new-password" : "off");
+      }
+      if (!target.hasAttribute("autocorrect")) target.setAttribute("autocorrect", "off");
+      if (!target.hasAttribute("autocapitalize")) target.setAttribute("autocapitalize", "off");
+      if (!target.hasAttribute("spellcheck")) target.setAttribute("spellcheck", "false");
+      target.setAttribute("data-form-type", "other");
+      target.setAttribute("data-lpignore", "true");
+    }
+  },
+  { capture: true },
+);
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Failed to find the root element");

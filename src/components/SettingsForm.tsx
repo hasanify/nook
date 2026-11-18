@@ -67,6 +67,10 @@ function VercelProjectInput({
         <input
           id={id}
           type="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           placeholder={placeholder}
           value={value}
           onChange={(e) => {
@@ -176,6 +180,10 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 <input
                   id={`field-${field.key}`}
                   type="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   placeholder={field.placeholder}
                   value={String(val ?? "")}
                   onChange={(e) => onChange(field.key, e.target.value)}
@@ -187,6 +195,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
               <input
                 id={`field-${field.key}`}
                 type="number"
+                autoComplete="off"
                 min={field.min}
                 max={field.max}
                 step={field.step}
@@ -215,6 +224,10 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
               <input
                 id={`field-${field.key}`}
                 type="password"
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 placeholder={field.placeholder ?? "••••••••••••••••"}
                 value={String(val ?? "")}
                 onChange={(e) => onChange(field.key, e.target.value)}

@@ -85,6 +85,10 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
         <form onSubmit={handleAddTodo} className="flex gap-1.5">
           <input
             type="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             placeholder="Add task... (Press Enter)"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
