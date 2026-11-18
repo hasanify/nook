@@ -3,6 +3,8 @@ import { EditOverlay } from "./EditOverlay";
 import { WidgetContextMenu } from "./WidgetContextMenu";
 import { setBounds, removeWidget, openSettingsWindow, updateSettings } from "../core/ipc";
 import { useEditMode } from "../core/use-edit-mode";
+import { useTheme } from "../core/use-theme";
+import { getWidgetPreset } from "../core/presets";
 import type { WidgetInstance, Rect } from "../core/types";
 
 function rectsEqual(a: Rect, b: Rect): boolean {
@@ -108,7 +110,9 @@ export function WidgetShell({
       ? instance.settings.widgetColor
       : undefined;
 
-  const hasBlur = Boolean(instance.settings.backgroundBlur);
+  const { preset: globalPresetId } = useTheme();
+  const preset = getWidgetPreset(globalPresetId);
+  const hasBlur = Boolean(instance.settings.backgroundBlur) || preset.hasBlur;
 
   const colorStyle: React.CSSProperties = widgetColor
     ? ({
@@ -135,12 +139,10 @@ export function WidgetShell({
         ...colorStyle,
         opacity: widgetOpacity,
       }}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border shadow-card transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
-        hasBlur ? "bg-surface/75 backdrop-blur-xl" : "bg-surface"
-      } ${
-        effectiveEditMode
-          ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25"
-          : "border-line/70"
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
+        preset.highlightClass
+      } before:to-transparent ${preset.containerClass} ${hasBlur ? "backdrop-blur-xl" : ""} ${
+        effectiveEditMode ? "!border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : ""
       }`}
     >
       <EditOverlay

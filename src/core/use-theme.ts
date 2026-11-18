@@ -3,12 +3,14 @@ import { getAppConfig, onConfigChanged } from "./ipc";
 
 export function useTheme() {
   const [theme, setTheme] = useState<"system" | "light" | "dark">("system");
+  const [preset, setPreset] = useState<string>("default");
 
   useEffect(() => {
     // Initial fetch
     getAppConfig()
       .then((cfg) => {
         if (cfg.app?.theme) setTheme(cfg.app.theme);
+        if (cfg.app?.widgetPreset) setPreset(cfg.app.widgetPreset);
       })
       .catch(() => {});
 
@@ -19,6 +21,7 @@ export function useTheme() {
         getAppConfig()
           .then((cfg) => {
             if (cfg.app?.theme) setTheme(cfg.app.theme);
+            if (cfg.app?.widgetPreset) setPreset(cfg.app.widgetPreset);
           })
           .catch(() => {});
       }
@@ -30,6 +33,10 @@ export function useTheme() {
       if (unlisten) unlisten();
     };
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-widget-preset", preset);
+  }, [preset]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -58,5 +65,5 @@ export function useTheme() {
     }
   }, [theme]);
 
-  return { theme };
+  return { theme, preset };
 }

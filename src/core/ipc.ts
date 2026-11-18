@@ -74,11 +74,13 @@ export async function updateAppConfig(patch: {
   theme?: string;
   gridSnap?: number;
   autostart?: boolean;
+  widgetPreset?: string;
 }): Promise<void> {
   return invoke<void>("update_app_config", {
     theme: patch.theme,
     grid_snap: patch.gridSnap,
     autostart: patch.autostart,
+    widget_preset: patch.widgetPreset,
   });
 }
 

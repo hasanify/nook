@@ -55,6 +55,12 @@ pub struct AppSection {
     pub edit_hotkey: String,
     pub grid_snap: i32,
     pub pin_strategy: String,
+    #[serde(default = "default_widget_preset")]
+    pub widget_preset: String,
+}
+
+fn default_widget_preset() -> String {
+    "default".to_string()
 }
 
 impl Default for AppSection {
@@ -65,6 +71,7 @@ impl Default for AppSection {
             edit_hotkey: "Ctrl+Alt+E".to_string(),
             grid_snap: 8,
             pin_strategy: "auto".to_string(),
+            widget_preset: "default".to_string(),
         }
     }
 }

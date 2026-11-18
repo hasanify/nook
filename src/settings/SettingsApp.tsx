@@ -24,12 +24,15 @@ import { SettingsForm } from "../components/SettingsForm";
 import { Toggle } from "../components/Toggle";
 import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
 import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
+import { WIDGET_PRESETS } from "../core/presets";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { AppConfig, WidgetInstance } from "../core/types";
 
 export function SettingsApp() {
-  const [activeTab, setActiveTab] = useState<"general" | "widgets" | "accounts" | "about">(() => {
+  const [activeTab, setActiveTab] = useState<
+    "general" | "appearance" | "widgets" | "accounts" | "about"
+  >(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("w") ? "widgets" : "general";
   });
@@ -214,6 +217,15 @@ export function SettingsApp() {
     void updateAppConfig({ theme });
   };
 
+  const handlePresetChange = (presetId: string) => {
+    if (!config) return;
+    setConfig({
+      ...config,
+      app: { ...config.app, widgetPreset: presetId },
+    });
+    void updateAppConfig({ widgetPreset: presetId });
+  };
+
   const handleGridSnapChange = (gridSnap: number) => {
     if (!config) return;
     setConfig({
@@ -308,6 +320,32 @@ export function SettingsApp() {
         </button>
         <button
           type="button"
+          onClick={() => setActiveTab("appearance")}
+          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
+            activeTab === "appearance"
+              ? "border-accent-500 font-semibold text-fg"
+              : "border-transparent text-fg-muted hover:text-fg"
+          }`}
+        >
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+          </svg>
+          <span>Appearance</span>
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab("widgets")}
           className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "widgets"
@@ -389,9 +427,76 @@ export function SettingsApp() {
         {activeTab === "general" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex w-full flex-col gap-5 pb-4">
-              {/* Appearance / Theme */}
+              {/* Desktop & Interaction Settings */}
+              <div className="flex flex-col gap-4 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+                <span className="font-semibold text-fg">Desktop & Interaction</span>
+
+                {/* Edit Mode Toggle */}
+                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                  <div>
+                    <div className="font-medium text-fg">Edit Layout</div>
+                    <div className="text-[11px] text-fg-muted">
+                      Show drag bars and resize handles on all desktop widgets (Ctrl+Alt+E)
+                    </div>
+                  </div>
+                  <Toggle
+                    checked={editMode}
+                    onChange={toggleEditMode}
+                    ariaLabel="Toggle edit mode"
+                  />
+                </div>
+
+                {/* Launch on Startup */}
+                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                  <div>
+                    <div className="font-medium text-fg">Launch on Startup</div>
+                    <div className="text-[11px] text-fg-muted">
+                      Automatically start Nook when Windows boots
+                    </div>
+                  </div>
+                  <Toggle
+                    checked={autostartEnabled}
+                    onChange={() => void handleAutostartToggle()}
+                    ariaLabel="Toggle launch on startup"
+                  />
+                </div>
+
+                {/* Grid Snap */}
+                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                  <div>
+                    <div className="font-medium text-fg">Grid Snap</div>
+                    <div className="text-[11px] text-fg-muted">
+                      Snap widget position and size during drag (0 for free movement)
+                    </div>
+                  </div>
+                  <select
+                    value={config?.app?.gridSnap ?? 0}
+                    onChange={(e) => handleGridSnapChange(Number(e.target.value))}
+                    className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                  >
+                    <option value={0}>Disabled (Free Movement)</option>
+                    <option value={4}>4 px (Fine)</option>
+                    <option value={8}>8 px (Default)</option>
+                    <option value={16}>16 px (Coarse)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* APPEARANCE TAB */}
+        {activeTab === "appearance" && (
+          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
+            <div className="my-3 flex w-full flex-col gap-5 pb-4">
+              {/* Color Theme */}
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
-                <span className="font-semibold text-fg">Appearance</span>
+                <div>
+                  <div className="font-semibold text-fg">Color Theme</div>
+                  <div className="text-[11px] text-fg-muted">
+                    Choose whether Nook follows your system color scheme or stays light / dark
+                  </div>
+                </div>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     {
@@ -473,58 +578,97 @@ export function SettingsApp() {
                 </div>
               </div>
 
-              {/* Desktop & Interaction Settings */}
-              <div className="flex flex-col gap-4 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
-                <span className="font-semibold text-fg">Desktop & Interaction</span>
-
-                {/* Edit Mode Toggle */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
-                  <div>
-                    <div className="font-medium text-fg">Edit Layout</div>
-                    <div className="text-[11px] text-fg-muted">
-                      Show drag bars and resize handles on all desktop widgets (Ctrl+Alt+E)
-                    </div>
+              {/* Widget Style Presets */}
+              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+                <div>
+                  <div className="font-semibold text-fg">Widget Style Presets</div>
+                  <div className="text-[11px] text-fg-muted">
+                    Apply a cohesive visual styling across all active desktop widgets
                   </div>
-                  <Toggle
-                    checked={editMode}
-                    onChange={toggleEditMode}
-                    ariaLabel="Toggle edit mode"
-                  />
                 </div>
 
-                {/* Launch on Startup */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
-                  <div>
-                    <div className="font-medium text-fg">Launch on Startup</div>
-                    <div className="text-[11px] text-fg-muted">
-                      Automatically start Nook when Windows boots
-                    </div>
-                  </div>
-                  <Toggle
-                    checked={autostartEnabled}
-                    onChange={() => void handleAutostartToggle()}
-                    ariaLabel="Toggle launch on startup"
-                  />
-                </div>
+                <div className="grid grid-cols-2 gap-3.5 pt-1">
+                  {WIDGET_PRESETS.map((preset) => {
+                    const isSelected = (config?.app?.widgetPreset || "default") === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => handlePresetChange(preset.id)}
+                        className={`group relative flex cursor-pointer flex-col gap-3 rounded-xl border p-4 text-left transition-all ${
+                          isSelected
+                            ? "border-accent-500 bg-accent-500/[0.08] shadow-xs ring-1 ring-accent-500/40"
+                            : "border-line/70 bg-surface/80 hover:border-line hover:bg-surface"
+                        }`}
+                      >
+                        {/* Mini Widget Preview Mockup */}
+                        <div className="relative flex h-24 w-full items-center justify-center overflow-hidden rounded-lg border border-line/40 bg-surface-raised/60 p-2.5">
+                          {/* Simulated mini desktop wallpaper texture */}
+                          <div className="absolute inset-0 bg-radial from-accent-500/5 via-transparent to-transparent opacity-50" />
 
-                {/* Grid Snap */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
-                  <div>
-                    <div className="font-medium text-fg">Grid Snap</div>
-                    <div className="text-[11px] text-fg-muted">
-                      Snap widget position and size during drag (0 for free movement)
-                    </div>
-                  </div>
-                  <select
-                    value={config?.app?.gridSnap ?? 0}
-                    onChange={(e) => handleGridSnapChange(Number(e.target.value))}
-                    className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
-                  >
-                    <option value={0}>Disabled (Free Movement)</option>
-                    <option value={4}>4 px (Fine)</option>
-                    <option value={8}>8 px (Default)</option>
-                    <option value={16}>16 px (Coarse)</option>
-                  </select>
+                          {/* The Mini Widget Box */}
+                          <div
+                            className={`relative flex h-full w-full flex-col overflow-hidden transition-all duration-200 ${preset.containerClass}`}
+                          >
+                            {/* Mini Header Bar */}
+                            <div
+                              className={`flex items-center justify-between px-2 py-1 ${preset.headerClass}`}
+                            >
+                              <div className="flex items-center gap-1">
+                                <div className="h-1.5 w-1.5 rounded-full bg-accent-500" />
+                                <span className="font-mono text-[9px] font-medium text-fg/80">
+                                  Widget
+                                </span>
+                              </div>
+                              <div className="h-1 w-3 rounded-full bg-fg-muted/40" />
+                            </div>
+
+                            {/* Mini Content Skeleton */}
+                            <div className="flex flex-1 flex-col justify-center gap-1.5 px-2.5 py-1.5">
+                              <div className="h-1.5 w-3/4 rounded-full bg-fg-muted/20" />
+                              <div className="h-1.5 w-1/2 rounded-full bg-fg-muted/15" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Text and Selection Meta */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-fg">{preset.name}</span>
+                              <span className="rounded-md bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-fg-muted">
+                                {preset.tagline}
+                              </span>
+                            </div>
+                            <div className="mt-1 text-[11px] leading-relaxed text-fg-muted">
+                              {preset.description}
+                            </div>
+                          </div>
+
+                          {/* Active Indicator Icon */}
+                          <div
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                              isSelected
+                                ? "bg-accent-500 text-white"
+                                : "border border-line/60 bg-surface-raised text-transparent group-hover:border-line"
+                            }`}
+                          >
+                            <svg
+                              className="h-3 w-3"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

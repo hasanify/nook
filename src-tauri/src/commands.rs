@@ -185,6 +185,7 @@ pub fn update_app_config(
     theme: Option<String>,
     grid_snap: Option<i32>,
     autostart: Option<bool>,
+    widget_preset: Option<String>,
 ) -> Result<(), String> {
     let state = app.state::<AppState>();
     state.config.update_config(|cfg| {
@@ -196,6 +197,9 @@ pub fn update_app_config(
         }
         if let Some(a) = autostart {
             cfg.app.autostart = a;
+        }
+        if let Some(p) = widget_preset {
+            cfg.app.widget_preset = p;
         }
     });
 

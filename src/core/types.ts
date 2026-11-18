@@ -32,6 +32,7 @@ export interface AppConfig {
     editHotkey: string;
     gridSnap: number;
     pinStrategy: string;
+    widgetPreset?: string;
   };
   widgets: WidgetInstance[];
 }
