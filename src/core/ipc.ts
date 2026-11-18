@@ -90,6 +90,22 @@ export async function openSettingsWindow(widgetId?: string): Promise<void> {
   return invoke<void>("open_settings_window", { widgetId });
 }
 
+export async function openContextMenu(
+  widgetId: string,
+  screenX?: number,
+  screenY?: number,
+): Promise<void> {
+  return invoke<void>("open_context_menu", {
+    widgetId,
+    screenX: screenX !== undefined ? Math.round(screenX) : null,
+    screenY: screenY !== undefined ? Math.round(screenY) : null,
+  });
+}
+
+export async function hideContextMenu(): Promise<void> {
+  return invoke<void>("hide_context_menu");
+}
+
 export async function showSettingsWindow(): Promise<void> {
   return invoke<void>("show_settings_window");
 }

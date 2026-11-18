@@ -128,6 +128,8 @@ pub fn run() {
             commands::update_app_config,
             commands::open_settings_window,
             commands::show_settings_window,
+            commands::open_context_menu,
+            commands::hide_context_menu,
             commands::get_all_manifests,
             commands::timer_schedule,
             commands::timer_cancel,
@@ -153,7 +155,7 @@ pub fn run() {
             label,
             event: WindowEvent::CloseRequested { api, .. },
             ..
-        } if label == "settings" => {
+        } if label == "settings" || label == "widget-context-menu" => {
             api.prevent_close();
             if let Some(w) = app_handle.get_webview_window(&label) {
                 let _ = w.hide();

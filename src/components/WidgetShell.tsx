@@ -1,8 +1,6 @@
 import { useState, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
 import { EditOverlay } from "./EditOverlay";
-import { WidgetContextMenu } from "./WidgetContextMenu";
-import { setBounds, removeWidget, openSettingsWindow, updateSettings } from "../core/ipc";
+import { setBounds, openContextMenu } from "../core/ipc";
 import { useEditMode } from "../core/use-edit-mode";
 import { useTheme } from "../core/use-theme";
 import { getWidgetPreset } from "../core/presets";
@@ -47,7 +45,6 @@ export function WidgetShell({
   const [isInteracting, setIsInteracting] = useState(false);
   const [prevInstanceRect, setPrevInstanceRect] = useState(instance.rect);
   const [localBounds, setLocalBounds] = useState<Rect>(instance.rect);
-  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   if (!isInteracting && !rectsEqual(prevInstanceRect, instance.rect)) {
     setPrevInstanceRect(instance.rect);
@@ -93,7 +90,7 @@ export function WidgetShell({
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setContextMenuPos({ x: e.clientX, y: e.clientY });
+    void openContextMenu(instance.id, e.screenX, e.screenY);
   };
 
   const handleBoundsChange = (bounds: Rect, commit: boolean) => {
@@ -193,28 +190,6 @@ export function WidgetShell({
       <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto px-3.5 pt-2 pb-0 text-sm select-auto">
         {children}
       </div>
-
-      {typeof document !== "undefined" &&
-        createPortal(
-          <WidgetContextMenu
-            isOpen={Boolean(contextMenuPos)}
-            position={contextMenuPos ?? { x: 0, y: 0 }}
-            isEditMode={effectiveEditMode}
-            currentColor={widgetColor || ""}
-            hasBackgroundBlur={hasBlur}
-            onToggleBackgroundBlur={() =>
-              void updateSettings(instance.id, { backgroundBlur: !hasBlur })
-            }
-            onToggleEditMode={effectiveToggle}
-            onSelectColor={(color) => void updateSettings(instance.id, { widgetColor: color })}
-            onResetToDefault={defaultSize ? handleResetToDefault : undefined}
-            onResetToFit={handleResetToFit}
-            onOpenSettings={() => void openSettingsWindow(instance.id)}
-            onDelete={() => void removeWidget(instance.id)}
-            onClose={() => setContextMenuPos(null)}
-          />,
-          document.body,
-        )}
     </div>
   );
 }

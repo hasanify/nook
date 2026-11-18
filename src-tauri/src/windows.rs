@@ -519,3 +519,95 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
     // Window remains hidden until frontend is mounted and calls show_settings_window
     Ok(())
 }
+
+pub fn show_context_menu_window(
+    app: &AppHandle,
+    widget_id: &str,
+    screen_x: Option<i32>,
+    screen_y: Option<i32>,
+) -> Result<(), String> {
+    const LABEL: &str = "widget-context-menu";
+    const MENU_W: f64 = 180.0;
+    const MENU_H: f64 = 320.0;
+
+    let (mut x, mut y) = match (screen_x, screen_y) {
+        (Some(sx), Some(sy)) => (sx, sy),
+        _ => {
+            #[cfg(windows)]
+            unsafe {
+                use windows::Win32::Foundation::POINT;
+                use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+                let mut pt = POINT::default();
+                let _ = GetCursorPos(&mut pt);
+                (pt.x, pt.y)
+            }
+            #[cfg(not(windows))]
+            (100, 100)
+        }
+    };
+
+    let (work_left, work_top, work_w, work_h) = get_primary_work_area();
+    if x + MENU_W as i32 > work_left + work_w {
+        x = (x - MENU_W as i32).max(work_left);
+    }
+    if y + MENU_H as i32 > work_top + work_h {
+        y = (y - MENU_H as i32).max(work_top);
+    }
+    x = x.max(work_left);
+    y = y.max(work_top);
+
+    if let Some(window) = app.get_webview_window(LABEL) {
+        let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition::new(
+            x as f64, y as f64,
+        )));
+        let _ = window.emit(
+            "context-menu-open",
+            serde_json::json!({ "widgetId": widget_id }),
+        );
+        let _ = window.show();
+        let _ = window.set_focus();
+        return Ok(());
+    }
+
+    let url_str = format!("index.html?view=context-menu&w={}", widget_id);
+    let url = WebviewUrl::App(url_str.into());
+
+    let window = WebviewWindowBuilder::new(app, LABEL, url)
+        .title("Nook Menu")
+        .decorations(false)
+        .transparent(true)
+        .always_on_top(true)
+        .skip_taskbar(true)
+        .resizable(false)
+        .maximizable(false)
+        .shadow(false)
+        .inner_size(MENU_W, MENU_H)
+        .position(x as f64, y as f64)
+        .visible(false)
+        .focused(true)
+        .build()
+        .map_err(|e| format!("Failed to create context menu window: {}", e))?;
+
+    if let Ok(raw_hwnd) = window.hwnd() {
+        pin::disable_system_menu(HWND(raw_hwnd.0));
+    }
+
+    let w_clone = window.clone();
+    window.on_window_event(move |event| {
+        if let tauri::WindowEvent::Focused(false) = event {
+            let _ = w_clone.hide();
+        }
+    });
+
+    let _ = window.show();
+    let _ = window.set_focus();
+
+    Ok(())
+}
+
+pub fn hide_context_menu_window(app: &AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("widget-context-menu") {
+        let _ = window.hide();
+    }
+    Ok(())
+}

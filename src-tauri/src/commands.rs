@@ -224,6 +224,21 @@ pub fn open_settings_window(app: AppHandle, widget_id: Option<String>) -> Result
 }
 
 #[tauri::command]
+pub fn open_context_menu(
+    app: AppHandle,
+    widget_id: String,
+    screen_x: Option<i32>,
+    screen_y: Option<i32>,
+) -> Result<(), String> {
+    windows::show_context_menu_window(&app, &widget_id, screen_x, screen_y)
+}
+
+#[tauri::command]
+pub fn hide_context_menu(app: AppHandle) -> Result<(), String> {
+    windows::hide_context_menu_window(&app)
+}
+
+#[tauri::command]
 pub fn show_settings_window(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("settings") {
         let _ = window.show();

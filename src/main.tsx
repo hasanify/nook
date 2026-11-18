@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./styles/theme.css";
 import { SettingsApp } from "./settings/SettingsApp";
+import { ContextMenuApp } from "./components/ContextMenuApp";
 import { getWidgetModule } from "./widgets/registry";
 import { useInstance } from "./core/use-instance";
 import { useEditMode } from "./core/use-edit-mode";
@@ -58,6 +59,10 @@ function App() {
 
   if (view === "settings") {
     return <SettingsApp />;
+  }
+
+  if (view === "context-menu") {
+    return <ContextMenuApp />;
   }
 
   if (widgetId) {
