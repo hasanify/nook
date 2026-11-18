@@ -1,3 +1,9 @@
+## [0.15.2](https://github.com/hasanify/nook/compare/v0.15.1...v0.15.2) (2026-11-18)
+
+### Bug Fixes
+
+- **appearance:** fix IPC argument casing for widget presets and wire header styling ([41c9983](https://github.com/hasanify/nook/commit/41c99832934bbf1929b732ffb01dd97ced491dd7))
+
 ## [0.15.1](https://github.com/hasanify/nook/compare/v0.15.0...v0.15.1) (2026-11-18)
 
 ### Bug Fixes
