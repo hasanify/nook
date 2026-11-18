@@ -1,11 +1,13 @@
 use tracing::info;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
+use windows::Win32::Graphics::Gdi::{CreateRoundRectRgn, SetWindowRgn};
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
     DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
-    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HWND_NOTOPMOST, HWND_TOPMOST,
+    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT,
+    HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOPMOST,
     MF_BYPOSITION, SC_KEYMENU, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-    SWP_NOZORDER, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCLBUTTONDBLCLK, WM_SYSCOMMAND, WM_SYSKEYDOWN,
+    WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SYSCOMMAND, WM_SYSKEYDOWN,
     WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
     WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
@@ -113,6 +115,14 @@ pub unsafe extern "system" fn widget_subclass_proc(
         WM_SYSCOMMAND if (wparam.0 & 0xFFF0) == SC_KEYMENU as usize => return LRESULT(0),
         WM_SYSKEYDOWN if wparam.0 == 0x20 => return LRESULT(0),
         WM_NCLBUTTONDBLCLK => return LRESULT(0),
+        WM_NCHITTEST => {
+            let hit = DefSubclassProc(hwnd, msg, wparam, lparam);
+            match hit.0 as u32 {
+                HTLEFT | HTRIGHT | HTTOP | HTBOTTOM | HTTOPLEFT | HTTOPRIGHT | HTBOTTOMLEFT
+                | HTBOTTOMRIGHT => return LRESULT(HTCLIENT as isize),
+                _ => return hit,
+            }
+        }
         WM_EXITSIZEMOVE => {
             if let Some(app) = crate::get_app_handle() {
                 crate::windows::handle_widget_move_end(app, hwnd);
@@ -139,21 +149,49 @@ pub fn disable_system_menu(hwnd: HWND) {
     }
 }
 
-/// Applies screen-space rect to the window without modifying z-order.
+/// Applies a rounded region to the HWND so no pixels or DWM effects spill outside the corner radius.
+pub fn apply_rounded_region(hwnd: HWND, w: i32, h: i32, radius: i32) {
+    if w <= 0 || h <= 0 {
+        return;
+    }
+    unsafe {
+        let d = radius * 2;
+        let rgn = CreateRoundRectRgn(0, 0, w + 1, h + 1, d, d);
+        if !rgn.is_invalid() {
+            let _ = SetWindowRgn(hwnd, Some(rgn), true);
+        }
+    }
+}
+
+/// Applies screen-space rect to the window, enforcing safe z-order and rounded corner clipping.
 pub fn set_bounds_screen(
     hwnd: HWND,
     screen_rect: RECT,
-    _strategy: PinStrategy,
+    strategy: PinStrategy,
 ) -> Result<(), String> {
-    // SAFETY: Setting top-level window geometry without altering Z-order
     unsafe {
         let x = screen_rect.left;
         let y = screen_rect.top;
         let w = screen_rect.right - screen_rect.left;
         let h = screen_rect.bottom - screen_rect.top;
 
-        SetWindowPos(hwnd, None, x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE)
-            .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
+        let insert_after = match strategy {
+            PinStrategy::Topmost => Some(HWND_TOPMOST),
+            _ => Some(HWND_NOTOPMOST),
+        };
+
+        SetWindowPos(
+            hwnd,
+            insert_after,
+            x,
+            y,
+            w,
+            h,
+            SWP_NOACTIVATE | SWP_FRAMECHANGED,
+        )
+        .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
+
+        apply_rounded_region(hwnd, w, h, 16);
 
         Ok(())
     }

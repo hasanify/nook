@@ -110,8 +110,13 @@ export function WidgetContextMenu({
   return (
     <div
       ref={menuRef}
-      style={{ left: `${coords.x}px`, top: `${coords.y}px` }}
-      className="fixed z-50 flex max-w-[calc(100vw-12px)] min-w-[144px] animate-appear flex-col rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
+      style={{
+        left: `${coords.x}px`,
+        top: `${coords.y}px`,
+        maxWidth: "calc(100vw - 12px)",
+        maxHeight: "calc(100vh - 12px)",
+      }}
+      className="fixed z-[999999] flex max-w-[calc(100vw-12px)] min-w-[140px] animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

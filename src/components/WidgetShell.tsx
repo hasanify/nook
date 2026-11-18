@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { EditOverlay } from "./EditOverlay";
 import { WidgetContextMenu } from "./WidgetContextMenu";
 import { setBounds, removeWidget, openSettingsWindow, updateSettings } from "../core/ipc";
@@ -127,6 +128,9 @@ export function WidgetShell({
   const preset = getWidgetPreset(globalPresetId);
   const hasBlur = Boolean(instance.settings.backgroundBlur) || preset.hasBlur;
 
+  const blurStrength =
+    typeof instance.settings.blurStrength === "number" ? instance.settings.blurStrength : 20;
+
   const colorStyle: React.CSSProperties = widgetColor
     ? ({
         "--color-accent-500": widgetColor,
@@ -142,10 +146,14 @@ export function WidgetShell({
         boxShadow: effectiveEditMode
           ? `0 0 24px -2px color-mix(in srgb, ${widgetColor} 40%, transparent)`
           : undefined,
+        backdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
+        WebkitBackdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
       } as React.CSSProperties)
     : hasBlur
       ? ({
           backgroundColor: "color-mix(in srgb, var(--surface) 35%, transparent)",
+          backdropFilter: `blur(${blurStrength}px) saturate(150%)`,
+          WebkitBackdropFilter: `blur(${blurStrength}px) saturate(150%)`,
         } as React.CSSProperties)
       : {};
 
@@ -155,11 +163,11 @@ export function WidgetShell({
         ...colorStyle,
         opacity: widgetOpacity,
       }}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
         preset.highlightClass
       } before:to-transparent ${preset.containerClass} ${
-        hasBlur ? "backdrop-blur-xl backdrop-saturate-150" : ""
-      } ${effectiveEditMode ? "!border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : ""}`}
+        effectiveEditMode ? "!border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : ""
+      }`}
     >
       <EditOverlay
         id={instance.id}
@@ -186,23 +194,27 @@ export function WidgetShell({
         {children}
       </div>
 
-      <WidgetContextMenu
-        isOpen={Boolean(contextMenuPos)}
-        position={contextMenuPos ?? { x: 0, y: 0 }}
-        isEditMode={effectiveEditMode}
-        currentColor={widgetColor || ""}
-        hasBackgroundBlur={hasBlur}
-        onToggleBackgroundBlur={() =>
-          void updateSettings(instance.id, { backgroundBlur: !hasBlur })
-        }
-        onToggleEditMode={effectiveToggle}
-        onSelectColor={(color) => void updateSettings(instance.id, { widgetColor: color })}
-        onResetToDefault={defaultSize ? handleResetToDefault : undefined}
-        onResetToFit={handleResetToFit}
-        onOpenSettings={() => void openSettingsWindow(instance.id)}
-        onDelete={() => void removeWidget(instance.id)}
-        onClose={() => setContextMenuPos(null)}
-      />
+      {typeof document !== "undefined" &&
+        createPortal(
+          <WidgetContextMenu
+            isOpen={Boolean(contextMenuPos)}
+            position={contextMenuPos ?? { x: 0, y: 0 }}
+            isEditMode={effectiveEditMode}
+            currentColor={widgetColor || ""}
+            hasBackgroundBlur={hasBlur}
+            onToggleBackgroundBlur={() =>
+              void updateSettings(instance.id, { backgroundBlur: !hasBlur })
+            }
+            onToggleEditMode={effectiveToggle}
+            onSelectColor={(color) => void updateSettings(instance.id, { widgetColor: color })}
+            onResetToDefault={defaultSize ? handleResetToDefault : undefined}
+            onResetToFit={handleResetToFit}
+            onOpenSettings={() => void openSettingsWindow(instance.id)}
+            onDelete={() => void removeWidget(instance.id)}
+            onClose={() => setContextMenuPos(null)}
+          />,
+          document.body,
+        )}
     </div>
   );
 }

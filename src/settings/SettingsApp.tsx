@@ -861,6 +861,37 @@ export function SettingsApp() {
                     />
                   </div>
 
+                  {/* Blur Strength Slider */}
+                  {Boolean(selectedWidget.settings.backgroundBlur) && (
+                    <div className="flex flex-col gap-1.5 pt-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-fg-muted">Blur Strength</span>
+                        <span className="font-mono text-accent-500">
+                          {typeof selectedWidget.settings.blurStrength === "number"
+                            ? selectedWidget.settings.blurStrength
+                            : 20}
+                          px
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="4"
+                        max="48"
+                        step="2"
+                        value={
+                          typeof selectedWidget.settings.blurStrength === "number"
+                            ? selectedWidget.settings.blurStrength
+                            : 20
+                        }
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          handleWidgetSettingChange(selectedWidget.id, "blurStrength", val);
+                        }}
+                        className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-surface-raised accent-accent-500"
+                      />
+                    </div>
+                  )}
+
                   {/* Widget Accent Color */}
                   <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
                     <div className="flex items-center justify-between">

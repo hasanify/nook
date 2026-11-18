@@ -77,7 +77,7 @@ export function EditOverlay({
               }
             : undefined
         }
-        className={`flex h-8 touch-none items-center justify-between border-b px-3 text-xs transition-colors select-none ${
+        className={`flex h-8 items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
             : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
@@ -90,7 +90,9 @@ export function EditOverlay({
       >
         <div
           {...(editMode ? { "data-tauri-drag-region": "" } : {})}
-          className="flex min-w-0 flex-1 items-center gap-1.5 font-medium"
+          className={`flex min-w-0 flex-1 items-center gap-1.5 font-medium ${
+            editMode ? "pointer-events-none" : ""
+          }`}
         >
           {headerSlot}
           <span
@@ -100,7 +102,10 @@ export function EditOverlay({
             {title}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div
+          className="flex shrink-0 items-center gap-1.5"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {editMode ? (
             <div className="flex items-center gap-1.5">
               {/* Fit & Default quick resize buttons */}
