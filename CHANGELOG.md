@@ -1,3 +1,10 @@
+## [0.11.2](https://github.com/hasanify/nook/compare/v0.11.1...v0.11.2) (2026-11-18)
+
+### Bug Fixes
+
+- **ui:** disable browser and webview defaults across all input fields ([29b4b0c](https://github.com/hasanify/nook/commit/29b4b0c832c1d79d843c8811e0a5469dd4f35725))
+- **widgets:** fix DPI scaling, remove GDI region clipping, and intercept system menu subclass ([9bae089](https://github.com/hasanify/nook/commit/9bae089db7e334c40a299627f86cada84ca37512))
+
 ## [0.11.1](https://github.com/hasanify/nook/compare/v0.11.0...v0.11.1) (2026-11-17)
 
 ### Bug Fixes
