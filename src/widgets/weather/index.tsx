@@ -200,7 +200,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
         </svg>
       }
     >
-      <div className="flex h-full flex-col justify-between py-1 select-none">
+      <div className="flex h-full flex-col justify-between select-none">
         {error ? (
           <div className="flex h-full flex-col items-center justify-center p-3 text-center">
             <span className="text-xs text-error">{error}</span>

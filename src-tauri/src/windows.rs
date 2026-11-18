@@ -19,6 +19,7 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
 
     let window = WebviewWindowBuilder::new(app, &label, url)
         .title(format!("Nook Widget ({})", instance.kind))
+        .inner_size(instance.rect.w as f64, instance.rect.h as f64)
         .decorations(false)
         .skip_taskbar(true)
         .resizable(false)

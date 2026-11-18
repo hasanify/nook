@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "author": "Nook",
   "defaultSize": { "w": 280, "h": 210 },
-  "minSize": { "w": 220, "h": 160 },
+  "minSize": { "w": 220, "h": 175 },
   "resizable": true,
   "settingsSchema": [
     {

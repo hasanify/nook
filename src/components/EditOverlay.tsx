@@ -64,6 +64,13 @@ export function EditOverlay({
     if (e.button !== 0) return;
     e.preventDefault();
 
+    const target = e.currentTarget;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignore if pointer capture fails
+    }
+
     isDragging.current = true;
     const startX = e.screenX;
     const startY = e.screenY;
@@ -92,7 +99,14 @@ export function EditOverlay({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("mouseup", onPointerUp);
+      try {
+        if (target.hasPointerCapture(e.pointerId)) {
+          target.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+
       if (!isDragging.current) return;
       isDragging.current = false;
       if (rafId.current !== null) {
@@ -109,6 +123,7 @@ export function EditOverlay({
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
     window.addEventListener("mouseup", onPointerUp);
   };
 
@@ -117,6 +132,13 @@ export function EditOverlay({
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
+
+    const target = e.currentTarget;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignore if pointer capture fails
+    }
 
     isResizing.current = true;
     const startX = e.screenX;
@@ -149,7 +171,14 @@ export function EditOverlay({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("mouseup", onPointerUp);
+      try {
+        if (target.hasPointerCapture(e.pointerId)) {
+          target.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+
       if (!isResizing.current) return;
       isResizing.current = false;
       if (rafId.current !== null) {
@@ -166,6 +195,7 @@ export function EditOverlay({
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
     window.addEventListener("mouseup", onPointerUp);
   };
 
@@ -183,12 +213,12 @@ export function EditOverlay({
               }
             : undefined
         }
-        className={`flex h-8 items-center justify-between border-b px-3 text-xs transition-colors select-none ${
+        className={`flex h-8 touch-none items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : "border-line/40 bg-surface-raised/40 text-fg-muted"
+            : "cursor-grab border-line/40 bg-surface-raised/40 text-fg-muted hover:bg-surface-raised/60 active:cursor-grabbing"
         }`}
-        onPointerDown={editMode ? handleDragStart : undefined}
+        onPointerDown={handleDragStart}
       >
         <div className="flex min-w-0 flex-1 items-center gap-1.5 font-medium">
           {headerSlot}
@@ -229,7 +259,7 @@ export function EditOverlay({
       {/* Resize Grip Corner (Visible when in Edit Mode and Resizable) */}
       {editMode && resizable && (
         <div
-          className="absolute right-0 bottom-0 z-50 flex h-6 w-6 cursor-se-resize items-end justify-end p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
+          className="absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-2xl p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >

@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicIsize, Ordering};
 use tracing::{debug, error, info};
 use windows::core::{w, BOOL};
 use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM};
-use windows::Win32::Graphics::Gdi::{ScreenToClient, SetWindowRgn};
+use windows::Win32::Graphics::Gdi::ScreenToClient;
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
     DeleteMenu, EnumWindows, FindWindowExW, FindWindowW, GetMenuItemCount, GetParent,
@@ -299,11 +299,16 @@ pub fn set_bounds_screen(
             )
         };
 
-        SetWindowPos(hwnd, None, x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE)
-            .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
-
-        // Clear any GDI window region so the window maintains full DWM hardware-accelerated per-pixel alpha transparency
-        let _ = SetWindowRgn(hwnd, None, true);
+        SetWindowPos(
+            hwnd,
+            None,
+            x,
+            y,
+            w,
+            h,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+        )
+        .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
 
         Ok(())
     }
