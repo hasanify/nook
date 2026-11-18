@@ -5,38 +5,13 @@ use tauri::AppHandle;
 use tracing::info;
 use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
-use windows::Win32::UI::Accessibility::{SetWinEventHook, UnhookWinEvent, HWINEVENTHOOK};
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, DefWindowProcW, DispatchMessageW, GetClassNameW, GetMessageW, PostQuitMessage,
-    RegisterClassW, RegisterWindowMessageW, TranslateMessage, EVENT_SYSTEM_FOREGROUND, MSG,
-    WINEVENT_OUTOFCONTEXT, WM_DESTROY, WM_DISPLAYCHANGE, WM_DPICHANGED, WM_SETTINGCHANGE,
-    WNDCLASSW, WS_EX_TOOLWINDOW, WS_POPUP,
+    CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, PostQuitMessage,
+    RegisterClassW, RegisterWindowMessageW, TranslateMessage, MSG, WM_DESTROY, WM_DISPLAYCHANGE,
+    WM_DPICHANGED, WM_SETTINGCHANGE, WNDCLASSW, WS_EX_TOOLWINDOW, WS_POPUP,
 };
 
 static TASKBAR_CREATED_MSG: AtomicU32 = AtomicU32::new(0);
-
-unsafe extern "system" fn win_event_proc(
-    _hook: HWINEVENTHOOK,
-    event: u32,
-    hwnd: HWND,
-    _id_object: i32,
-    _id_child: i32,
-    _event_thread: u32,
-    _event_time: u32,
-) {
-    if event == EVENT_SYSTEM_FOREGROUND {
-        let mut class_name = [0u16; 64];
-        let len = GetClassNameW(hwnd, &mut class_name);
-        if len > 0 {
-            let name = String::from_utf16_lossy(&class_name[..len as usize]);
-            if name == "WorkerW" || name == "Progman" {
-                if let Some(app) = crate::get_app_handle() {
-                    crate::windows::restack_bottom_widgets(app);
-                }
-            }
-        }
-    }
-}
 
 pub fn start_shell_watch(app: AppHandle) {
     thread::spawn(move || {
@@ -76,16 +51,6 @@ pub fn start_shell_watch(app: AppHandle) {
                 if hwnd.0 as isize != 0 {
                     info!("Shell watch hidden window created: {:?}", hwnd);
 
-                    let hook = SetWinEventHook(
-                        EVENT_SYSTEM_FOREGROUND,
-                        EVENT_SYSTEM_FOREGROUND,
-                        None,
-                        Some(win_event_proc),
-                        0,
-                        0,
-                        WINEVENT_OUTOFCONTEXT,
-                    );
-
                     let mut msg = MSG::default();
                     while GetMessageW(&mut msg, None, 0, 0).as_bool() {
                         let _ = TranslateMessage(&msg);
@@ -109,10 +74,6 @@ pub fn start_shell_watch(app: AppHandle) {
                                 let _ = crate::windows::relayout_all_widgets(&app_clone);
                             });
                         }
-                    }
-
-                    if !hook.is_invalid() {
-                        let _ = UnhookWinEvent(hook);
                     }
                 }
             }

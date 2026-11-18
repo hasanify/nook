@@ -490,36 +490,6 @@ pub fn verify_widget_pin(app: &AppHandle, id: &str) -> Result<bool, String> {
     Ok(false)
 }
 
-pub fn restack_bottom_widgets(app: &AppHandle) {
-    let state = app.state::<AppState>();
-    let cfg = state.config.get_config();
-    let windows = app.webview_windows();
-
-    for w in &cfg.widgets {
-        if !w.always_on_top {
-            let label = format!("widget-{}", w.id);
-            if let Some(win) = windows.get(&label) {
-                if let Ok(raw_hwnd) = win.hwnd() {
-                    unsafe {
-                        use windows::Win32::UI::WindowsAndMessaging::{
-                            SetWindowPos, HWND_TOP, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-                        };
-                        let _ = SetWindowPos(
-                            HWND(raw_hwnd.0),
-                            Some(HWND_TOP),
-                            0,
-                            0,
-                            0,
-                            0,
-                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
-                        );
-                    }
-                }
-            }
-        }
-    }
-}
-
 pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Result<(), String> {
     const LABEL: &str = "settings";
 
