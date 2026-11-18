@@ -1,15 +1,17 @@
 use tracing::info;
+use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
-    DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
-    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT,
-    HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOP,
-    HWND_TOPMOST, MF_BYPOSITION, SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED, SWP_HIDEWINDOW,
-    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS, WM_EXITSIZEMOVE, WM_NCDESTROY,
-    WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND, WM_SYSKEYDOWN,
-    WM_WINDOWPOSCHANGING, WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW,
-    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
+    DeleteMenu, FindWindowExW, FindWindowW, GetDesktopWindow, GetMenuItemCount, GetSystemMenu,
+    GetWindowLongPtrW, IsWindow, SetParent, SetWindowLongPtrW, SetWindowPos, GWLP_HWNDPARENT,
+    GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT, HTCLIENT, HTLEFT, HTRIGHT,
+    HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOP, HWND_TOPMOST, MF_BYPOSITION,
+    SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED, SWP_HIDEWINDOW, SWP_NOACTIVATE, SWP_NOMOVE,
+    SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST,
+    WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND, WM_SYSKEYDOWN, WM_WINDOWPOSCHANGING,
+    WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
+    WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,6 +32,42 @@ pub fn set_opacity(_hwnd: HWND, _opacity: f32) -> Result<(), String> {
     Ok(())
 }
 
+/// Locates the desktop view window (SHELLDLL_DefView) which hosts desktop icons.
+/// Setting this as the owner prevents Explorer's ToggleDesktop (Win+D) from hiding widget windows.
+pub fn find_shelldll_defview() -> Option<HWND> {
+    unsafe {
+        // 1. Check under Progman (default desktop manager)
+        let progman = FindWindowW(w!("Progman"), None).unwrap_or_default();
+        if !progman.is_invalid() {
+            if let Ok(view) = FindWindowExW(Some(progman), None, w!("SHELLDLL_DefView"), None) {
+                if !view.is_invalid() {
+                    return Some(view);
+                }
+            }
+        }
+
+        // 2. Iterate through WorkerW windows (used during wallpaper slideshows and on modern Windows 11)
+        let desktop = GetDesktopWindow();
+        let mut worker: Option<HWND> = None;
+        loop {
+            match FindWindowExW(Some(desktop), worker, w!("WorkerW"), None) {
+                Ok(w_hwnd) if !w_hwnd.is_invalid() => {
+                    if let Ok(view) =
+                        FindWindowExW(Some(w_hwnd), None, w!("SHELLDLL_DefView"), None)
+                    {
+                        if !view.is_invalid() {
+                            return Some(view);
+                        }
+                    }
+                    worker = Some(w_hwnd);
+                }
+                _ => break,
+            }
+        }
+    }
+    None
+}
+
 /// Sets widget as a top-level tool window pinned at the desktop normal level.
 pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
     // SAFETY: Setting top-level tool window at HWND_NOTOPMOST
@@ -47,6 +85,24 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
         ex_style = (ex_style | WS_EX_TOOLWINDOW.0 as isize)
             & !(WS_EX_APPWINDOW.0 as isize | WS_EX_NOACTIVATE.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
+
+        // Make the desktop view (SHELLDLL_DefView) the owner so Explorer's ToggleDesktop (Win+D) treats it as part of the desktop
+        if let Some(def_view) = find_shelldll_defview() {
+            let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, def_view.0 as isize);
+            info!(
+                "Attached widget HWND {:?} owner to SHELLDLL_DefView {:?}",
+                hwnd, def_view
+            );
+        } else {
+            let progman = FindWindowW(w!("Progman"), None).unwrap_or_default();
+            if !progman.is_invalid() {
+                let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, progman.0 as isize);
+                info!(
+                    "Attached widget HWND {:?} owner to Progman {:?}",
+                    hwnd, progman
+                );
+            }
+        }
 
         SetWindowPos(
             hwnd,
@@ -91,6 +147,9 @@ pub fn detach_to_topmost(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, Strin
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
         ex_style = (ex_style | WS_EX_TOOLWINDOW.0 as isize) & !(WS_EX_APPWINDOW.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
+
+        // Clear owner when detached to topmost
+        let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, 0);
 
         SetWindowPos(
             hwnd,
