@@ -5,8 +5,8 @@ use windows::Win32::UI::WindowsAndMessaging::{
     DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
     SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HWND_BOTTOM, HWND_TOPMOST,
     MF_BYPOSITION, SC_KEYMENU, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-    WM_NCDESTROY, WM_SYSCOMMAND, WM_SYSKEYDOWN, WS_CHILD, WS_CLIPSIBLINGS, WS_EX_APPWINDOW,
-    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
+    SWP_NOZORDER, WM_NCDESTROY, WM_SYSCOMMAND, WM_SYSKEYDOWN, WS_CHILD, WS_CLIPCHILDREN,
+    WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -36,7 +36,8 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
         let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
         style = (style & !(WS_CHILD.0 as isize | WS_SYSMENU.0 as isize))
             | WS_POPUP.0 as isize
-            | WS_CLIPSIBLINGS.0 as isize;
+            | WS_CLIPSIBLINGS.0 as isize
+            | WS_CLIPCHILDREN.0 as isize;
         SetWindowLongPtrW(hwnd, GWL_STYLE, style);
 
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
@@ -69,7 +70,8 @@ pub fn detach_to_topmost(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, Strin
         let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
         style = (style & !(WS_CHILD.0 as isize | WS_SYSMENU.0 as isize))
             | WS_POPUP.0 as isize
-            | WS_CLIPSIBLINGS.0 as isize;
+            | WS_CLIPSIBLINGS.0 as isize
+            | WS_CLIPCHILDREN.0 as isize;
         SetWindowLongPtrW(hwnd, GWL_STYLE, style);
 
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
@@ -130,34 +132,21 @@ pub fn disable_system_menu(hwnd: HWND) {
     }
 }
 
-/// Applies screen-space rect to the window at the correct z-order.
+/// Applies screen-space rect to the window without modifying z-order.
 pub fn set_bounds_screen(
     hwnd: HWND,
     screen_rect: RECT,
-    strategy: PinStrategy,
+    _strategy: PinStrategy,
 ) -> Result<(), String> {
-    // SAFETY: Setting top-level window geometry and z-order
+    // SAFETY: Setting top-level window geometry without altering Z-order
     unsafe {
         let x = screen_rect.left;
         let y = screen_rect.top;
         let w = screen_rect.right - screen_rect.left;
         let h = screen_rect.bottom - screen_rect.top;
 
-        let insert_after = match strategy {
-            PinStrategy::Topmost => Some(HWND_TOPMOST),
-            _ => Some(HWND_BOTTOM),
-        };
-
-        SetWindowPos(
-            hwnd,
-            insert_after,
-            x,
-            y,
-            w,
-            h,
-            SWP_NOACTIVATE | SWP_FRAMECHANGED,
-        )
-        .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
+        SetWindowPos(hwnd, None, x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE)
+            .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
 
         Ok(())
     }

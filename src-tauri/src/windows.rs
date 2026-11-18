@@ -27,6 +27,7 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
         .focused(false)
         .visible(false)
         .transparent(true)
+        .no_redirection_bitmap(true)
         .build()
         .map_err(|e| format!("Failed to build webview window '{}': {}", label, e))?;
 

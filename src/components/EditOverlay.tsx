@@ -81,6 +81,10 @@ export function EditOverlay({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isDragging.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
       const deltaX = ev.screenX - startX;
       const deltaY = ev.screenY - startY;
       const nextBounds: Rect = {
@@ -90,6 +94,10 @@ export function EditOverlay({
         h: origH,
       };
       scheduleBoundsUpdate(nextBounds);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
     };
 
     const cleanup = () => {
@@ -111,10 +119,6 @@ export function EditOverlay({
       }
       const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
       onBoundsChange(finalBounds, true);
-    };
-
-    const onPointerUp = () => {
-      cleanup();
     };
 
     window.addEventListener("pointermove", onPointerMove, { capture: true });
@@ -146,6 +150,10 @@ export function EditOverlay({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isResizing.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
       const deltaW = ev.screenX - startX;
       const deltaH = ev.screenY - startY;
       const nextW = Math.max(minSize.w, origW + deltaW);
@@ -158,6 +166,10 @@ export function EditOverlay({
         h: nextH,
       };
       scheduleBoundsUpdate(nextBounds);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
     };
 
     const cleanup = () => {
@@ -179,10 +191,6 @@ export function EditOverlay({
       }
       const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
       onBoundsChange(finalBounds, true);
-    };
-
-    const onPointerUp = () => {
-      cleanup();
     };
 
     window.addEventListener("pointermove", onPointerMove, { capture: true });

@@ -674,10 +674,15 @@ export function SettingsApp() {
                         if (opacityDebounceRef.current) {
                           clearTimeout(opacityDebounceRef.current);
                         }
-                        opacityDebounceRef.current = setTimeout(() => {
-                          isSlidingOpacityRef.current = false;
-                          void setOpacity(selectedWidget.id, val);
-                        }, 50);
+                        opacityDebounceRef.current = setTimeout(async () => {
+                          try {
+                            await setOpacity(selectedWidget.id, val);
+                          } finally {
+                            setTimeout(() => {
+                              isSlidingOpacityRef.current = false;
+                            }, 150);
+                          }
+                        }, 40);
                       }}
                       className="cursor-pointer accent-accent-500"
                     />
