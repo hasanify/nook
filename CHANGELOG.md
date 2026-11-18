@@ -1,3 +1,9 @@
+## [0.19.1](https://github.com/hasanify/nook/compare/v0.19.0...v0.19.1) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** resolve window transparency, native dragging, context menu freezing, and preset border radii ([1c6aa8b](https://github.com/hasanify/nook/commit/1c6aa8b8336c08e2c1af9ab15e423838591298e0))
+
 # [0.19.0](https://github.com/hasanify/nook/compare/v0.18.0...v0.19.0) (2026-11-18)
 
 ### Features
