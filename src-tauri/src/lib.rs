@@ -51,6 +51,9 @@ pub fn run() {
     setup_logging();
     info!("Starting Nook application");
 
+    // Ensure WebView2 default clear background is completely transparent (RGBA 0)
+    std::env::set_var("WEBVIEW2_DEFAULT_BACKGROUND_COLOR", "0");
+
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {

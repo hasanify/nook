@@ -15,6 +15,7 @@ interface EditOverlayProps {
   headerSlot?: React.ReactNode;
   headerActions?: React.ReactNode;
   widgetColor?: string | undefined;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
 export function EditOverlay({
@@ -25,6 +26,7 @@ export function EditOverlay({
   headerSlot,
   headerActions,
   widgetColor,
+  onContextMenu,
 }: EditOverlayProps) {
   // Handle Native Dragging
   const handleDragStart = async (e: React.PointerEvent<HTMLDivElement>) => {
@@ -33,7 +35,6 @@ export function EditOverlay({
     if (target.closest("button") || target.closest("input") || target.closest("select")) {
       return;
     }
-    e.preventDefault();
     try {
       await appWindow.startDragging();
     } catch {
@@ -58,6 +59,7 @@ export function EditOverlay({
       {/* Top Header / Drag bar */}
       <div
         data-tauri-drag-region
+        onContextMenu={onContextMenu}
         style={
           widgetColor
             ? {
@@ -112,14 +114,18 @@ export function EditOverlay({
       </div>
 
       {/* Resize Grip Corner (Visible when in Edit Mode and Resizable) */}
-      {editMode && resizable && (
+      {resizable && (
         <div
-          className="absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-2xl p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
+          className={`absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-2xl p-1.5 transition-transform select-none hover:scale-110 active:scale-95 ${
+            editMode
+              ? "text-accent-500 opacity-100"
+              : "text-fg-muted/30 opacity-40 hover:opacity-100"
+          }`}
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >
           <svg
-            className="h-3 w-3 opacity-70 hover:opacity-100"
+            className="h-3 w-3"
             viewBox="0 0 12 12"
             fill="none"
             stroke="currentColor"

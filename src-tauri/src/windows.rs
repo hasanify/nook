@@ -27,6 +27,7 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
         .focused(false)
         .visible(false)
         .transparent(true)
+        .no_redirection_bitmap(true)
         .build()
         .map_err(|e| format!("Failed to build webview window '{}': {}", label, e))?;
 
@@ -322,29 +323,6 @@ pub fn handle_widget_move_end(app: &AppHandle, hwnd: HWND) {
                     let h = ((rc.bottom - rc.top) as f64 / scale).round() as i32;
 
                     let state = app.state::<AppState>();
-                    let is_always_on_top = state
-                        .config
-                        .get_config()
-                        .widgets
-                        .iter()
-                        .find(|w_item| w_item.id == id)
-                        .map(|w_item| w_item.always_on_top)
-                        .unwrap_or(false);
-
-                    if !is_always_on_top {
-                        let _ = windows::Win32::UI::WindowsAndMessaging::SetWindowPos(
-                            hwnd,
-                            Some(windows::Win32::UI::WindowsAndMessaging::HWND_BOTTOM),
-                            0,
-                            0,
-                            0,
-                            0,
-                            windows::Win32::UI::WindowsAndMessaging::SWP_NOMOVE
-                                | windows::Win32::UI::WindowsAndMessaging::SWP_NOSIZE
-                                | windows::Win32::UI::WindowsAndMessaging::SWP_NOACTIVATE,
-                        );
-                    }
-
                     let id_str = id.to_string();
                     state.config.update_config(|cfg| {
                         if let Some(w_item) =

@@ -124,26 +124,29 @@ export function WidgetShell({
           ? widgetColor
           : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
         backgroundColor: hasBlur
-          ? `color-mix(in srgb, ${widgetColor} 18%, color-mix(in srgb, var(--surface) 72%, transparent))`
+          ? `color-mix(in srgb, ${widgetColor} 20%, color-mix(in srgb, var(--surface) 60%, transparent))`
           : `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
         boxShadow: effectiveEditMode
           ? `0 0 24px -2px color-mix(in srgb, ${widgetColor} 40%, transparent)`
           : undefined,
       } as React.CSSProperties)
-    : {};
+    : hasBlur
+      ? ({
+          backgroundColor: "color-mix(in srgb, var(--surface) 65%, transparent)",
+        } as React.CSSProperties)
+      : {};
 
   return (
     <div
-      onContextMenu={handleContextMenu}
       style={{
         ...colorStyle,
         opacity: widgetOpacity,
       }}
       className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
         preset.highlightClass
-      } before:to-transparent ${preset.containerClass} ${hasBlur ? "backdrop-blur-xl" : ""} ${
-        effectiveEditMode ? "!border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : ""
-      }`}
+      } before:to-transparent ${preset.containerClass} ${
+        hasBlur ? "backdrop-blur-xl backdrop-saturate-150" : ""
+      } ${effectiveEditMode ? "!border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : ""}`}
     >
       <EditOverlay
         id={instance.id}
@@ -157,6 +160,7 @@ export function WidgetShell({
         headerSlot={headerSlot}
         headerActions={headerActions}
         widgetColor={widgetColor}
+        onContextMenu={handleContextMenu}
       />
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
