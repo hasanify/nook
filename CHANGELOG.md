@@ -1,3 +1,9 @@
+# [0.14.0](https://github.com/hasanify/nook/compare/v0.13.0...v0.14.0) (2026-11-18)
+
+### Features
+
+- **settings:** simplify token status indicators, replace checkmarks with svg, clean color swatches, and add proper cursor styles ([6e407b0](https://github.com/hasanify/nook/commit/6e407b025b93691b488440e5602ceefd71968f1a))
+
 # [0.13.0](https://github.com/hasanify/nook/compare/v0.12.0...v0.13.0) (2026-11-18)
 
 ### Features
