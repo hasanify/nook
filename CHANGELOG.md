@@ -1,3 +1,9 @@
+## [0.19.6](https://github.com/hasanify/nook/compare/v0.19.5...v0.19.6) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** restore smooth dragging, eliminate resize jank, and prevent hiding on Win+D ([3a1d1ae](https://github.com/hasanify/nook/commit/3a1d1ae22a85cff08eab068c7537a582a77860a1))
+
 ## [0.19.5](https://github.com/hasanify/nook/compare/v0.19.4...v0.19.5) (2026-11-18)
 
 ## [0.19.4](https://github.com/hasanify/nook/compare/v0.19.3...v0.19.4) (2026-11-18)
