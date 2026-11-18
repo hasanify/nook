@@ -1,3 +1,9 @@
+# [0.17.0](https://github.com/hasanify/nook/compare/v0.16.0...v0.17.0) (2026-11-18)
+
+### Features
+
+- **settings:** show settings in taskbar until manually closed ([5b1d865](https://github.com/hasanify/nook/commit/5b1d86599698bf1e5868a0b29a02c116738b2c95))
+
 # [0.16.0](https://github.com/hasanify/nook/compare/v0.15.6...v0.16.0) (2026-11-18)
 
 ### Features
