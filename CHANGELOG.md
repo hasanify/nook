@@ -1,3 +1,9 @@
+## [0.15.5](https://github.com/hasanify/nook/compare/v0.15.4...v0.15.5) (2026-11-18)
+
+### Bug Fixes
+
+- **settings:** limit support links clickable area to text width ([b57fb9c](https://github.com/hasanify/nook/commit/b57fb9ca5199a26b028ae334ac45b24f8ebb7a22))
+
 ## [0.15.4](https://github.com/hasanify/nook/compare/v0.15.3...v0.15.4) (2026-11-18)
 
 ### Bug Fixes
