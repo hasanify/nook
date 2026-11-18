@@ -1,14 +1,16 @@
 use std::sync::atomic::{AtomicIsize, Ordering};
 use tracing::{debug, error, info};
 use windows::core::{w, BOOL};
-use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, POINT, RECT};
-use windows::Win32::Graphics::Gdi::{CreateRoundRectRgn, ScreenToClient, SetWindowRgn};
+use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM};
+use windows::Win32::Graphics::Gdi::{ScreenToClient, SetWindowRgn};
+use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
-    EnumWindows, FindWindowExW, FindWindowW, GetParent, GetWindowLongPtrW, IsWindow,
-    SetLayeredWindowAttributes, SetParent, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE,
-    HWND_BOTTOM, HWND_TOP, HWND_TOPMOST, LWA_ALPHA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
-    SWP_NOSIZE, SWP_NOZORDER, WS_CHILD, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_LAYERED,
-    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
+    DeleteMenu, EnumWindows, FindWindowExW, FindWindowW, GetMenuItemCount, GetParent,
+    GetSystemMenu, GetWindowLongPtrW, IsWindow, SetLayeredWindowAttributes, SetParent,
+    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HWND_BOTTOM, HWND_TOP, HWND_TOPMOST,
+    LWA_ALPHA, MF_BYPOSITION, SC_KEYMENU, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+    SWP_NOZORDER, WM_NCDESTROY, WM_SYSCOMMAND, WM_SYSKEYDOWN, WS_CHILD, WS_CLIPSIBLINGS,
+    WS_EX_APPWINDOW, WS_EX_LAYERED, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -220,13 +222,50 @@ pub fn detach_to_topmost(hwnd: HWND, opacity: f32) -> Result<PinStrategy, String
     }
 }
 
+const WIDGET_SUBCLASS_ID: usize = 0x5749;
+
+/// Window subclass procedure to intercept system menu and Alt+Space commands.
+///
+/// # Safety
+/// Called by Windows ComCtl32 subclassing dispatcher with valid HWND and message params.
+pub unsafe extern "system" fn widget_subclass_proc(
+    hwnd: HWND,
+    msg: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+    _id: usize,
+    _ref_data: usize,
+) -> LRESULT {
+    match msg {
+        WM_SYSCOMMAND if (wparam.0 & 0xFFF0) == SC_KEYMENU as usize => return LRESULT(0),
+        WM_SYSKEYDOWN if wparam.0 == 0x20 => return LRESULT(0),
+        WM_NCDESTROY => {
+            let _ = RemoveWindowSubclass(hwnd, Some(widget_subclass_proc), WIDGET_SUBCLASS_ID);
+        }
+        _ => {}
+    }
+    DefSubclassProc(hwnd, msg, wparam, lparam)
+}
+
+pub fn disable_system_menu(hwnd: HWND) {
+    unsafe {
+        let sys_menu = GetSystemMenu(hwnd, false);
+        if !sys_menu.is_invalid() {
+            let count = GetMenuItemCount(Some(sys_menu));
+            for i in (0..count).rev() {
+                let _ = DeleteMenu(sys_menu, i as u32, MF_BYPOSITION);
+            }
+        }
+        let _ = SetWindowSubclass(hwnd, Some(widget_subclass_proc), WIDGET_SUBCLASS_ID, 0);
+    }
+}
+
 /// Applies screen-space rect to the window.
 /// If child of desktop host, translates screen coordinates to host client coordinates.
 pub fn set_bounds_screen(
     hwnd: HWND,
     screen_rect: RECT,
     strategy: PinStrategy,
-    corner_radius: i32,
 ) -> Result<(), String> {
     // SAFETY: Translating coordinates and setting window geometry
     unsafe {
@@ -263,26 +302,8 @@ pub fn set_bounds_screen(
         SetWindowPos(hwnd, None, x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE)
             .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
 
-        // Apply rounded window region only if dimensions changed or first set
-        if corner_radius > 0 {
-            let mut current_rect = RECT::default();
-            let size_changed =
-                if windows::Win32::UI::WindowsAndMessaging::GetWindowRect(hwnd, &mut current_rect)
-                    .is_ok()
-                {
-                    (current_rect.right - current_rect.left != w)
-                        || (current_rect.bottom - current_rect.top != h)
-                } else {
-                    true
-                };
-
-            if size_changed {
-                let rgn = CreateRoundRectRgn(0, 0, w, h, corner_radius, corner_radius);
-                if !rgn.is_invalid() {
-                    let _ = SetWindowRgn(hwnd, Some(rgn), true);
-                }
-            }
-        }
+        // Clear any GDI window region so the window maintains full DWM hardware-accelerated per-pixel alpha transparency
+        let _ = SetWindowRgn(hwnd, None, true);
 
         Ok(())
     }

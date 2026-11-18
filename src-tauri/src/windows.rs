@@ -34,6 +34,8 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
         .map_err(|e| format!("Failed to get raw HWND from '{}': {}", label, e))?;
     let hwnd = HWND(raw_hwnd.0);
 
+    pin::disable_system_menu(hwnd);
+
     let strategy = if instance.always_on_top {
         pin::detach_to_topmost(hwnd, instance.opacity)?
     } else {
@@ -46,14 +48,20 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
         }
     };
 
+    let scale = window.scale_factor().unwrap_or(1.0);
+    let phys_x = (instance.rect.x as f64 * scale).round() as i32;
+    let phys_y = (instance.rect.y as f64 * scale).round() as i32;
+    let phys_w = (instance.rect.w as f64 * scale).round() as i32;
+    let phys_h = (instance.rect.h as f64 * scale).round() as i32;
+
     let screen_rect = RECT {
-        left: instance.rect.x,
-        top: instance.rect.y,
-        right: instance.rect.x + instance.rect.w,
-        bottom: instance.rect.y + instance.rect.h,
+        left: phys_x,
+        top: phys_y,
+        right: phys_x + phys_w,
+        bottom: phys_y + phys_h,
     };
 
-    pin::set_bounds_screen(hwnd, screen_rect, strategy, 16)?;
+    pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
 
     window
         .show()
@@ -173,20 +181,27 @@ pub fn relayout_all_widgets(app: &AppHandle) -> Result<(), String> {
         if let Some(window) = app.get_webview_window(&label) {
             if let Ok(raw_hwnd) = window.hwnd() {
                 let hwnd = HWND(raw_hwnd.0);
+                pin::disable_system_menu(hwnd);
                 let strategy = if instance.always_on_top {
                     PinStrategy::Topmost
                 } else {
                     PinStrategy::AboveIcons
                 };
 
+                let scale = window.scale_factor().unwrap_or(1.0);
+                let phys_x = (instance.rect.x as f64 * scale).round() as i32;
+                let phys_y = (instance.rect.y as f64 * scale).round() as i32;
+                let phys_w = (instance.rect.w as f64 * scale).round() as i32;
+                let phys_h = (instance.rect.h as f64 * scale).round() as i32;
+
                 let screen_rect = RECT {
-                    left: instance.rect.x,
-                    top: instance.rect.y,
-                    right: instance.rect.x + instance.rect.w,
-                    bottom: instance.rect.y + instance.rect.h,
+                    left: phys_x,
+                    top: phys_y,
+                    right: phys_x + phys_w,
+                    bottom: phys_y + phys_h,
                 };
 
-                let _ = pin::set_bounds_screen(hwnd, screen_rect, strategy, 16);
+                let _ = pin::set_bounds_screen(hwnd, screen_rect, strategy);
             }
         }
     }
@@ -256,14 +271,20 @@ pub fn update_widget_geometry(
         PinStrategy::BottomToplevel
     };
 
+    let scale = window.scale_factor().unwrap_or(1.0);
+    let phys_x = (x as f64 * scale).round() as i32;
+    let phys_y = (y as f64 * scale).round() as i32;
+    let phys_w = (w as f64 * scale).round() as i32;
+    let phys_h = (h as f64 * scale).round() as i32;
+
     let rect = RECT {
-        left: x,
-        top: y,
-        right: x + w,
-        bottom: y + h,
+        left: phys_x,
+        top: phys_y,
+        right: phys_x + phys_w,
+        bottom: phys_y + phys_h,
     };
 
-    pin::set_bounds_screen(hwnd, rect, strategy, 16)?;
+    pin::set_bounds_screen(hwnd, rect, strategy)?;
 
     if commit {
         state.config.update_config(|cfg| {

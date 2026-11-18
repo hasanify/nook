@@ -79,10 +79,9 @@ document.addEventListener("contextmenu", (e) => {
   e.preventDefault();
 });
 
-// Prevent Alt+Space system menu from opening on widget windows
+// Prevent Alt+Space system menu from opening
 const preventAltSpace = (e: KeyboardEvent) => {
-  const isWidget = new URLSearchParams(window.location.search).has("w");
-  if (isWidget && e.altKey && (e.code === "Space" || e.key === " ")) {
+  if (e.altKey && (e.code === "Space" || e.key === " ")) {
     e.preventDefault();
     e.stopPropagation();
   }
