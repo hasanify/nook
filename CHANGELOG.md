@@ -1,3 +1,9 @@
+## [0.15.4](https://github.com/hasanify/nook/compare/v0.15.3...v0.15.4) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** clip window region to corner radius, add blur strength slider, portal context menu, remove edge resize cursor, and fix desktop vanishing ([f7871cb](https://github.com/hasanify/nook/commit/f7871cb2ea0b5d471eaaf0b854fe73923faa2156))
+
 ## [0.15.3](https://github.com/hasanify/nook/compare/v0.15.2...v0.15.3) (2026-11-18)
 
 ### Bug Fixes
