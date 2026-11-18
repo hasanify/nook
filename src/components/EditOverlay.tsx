@@ -100,7 +100,7 @@ export function EditOverlay({
                   e.stopPropagation();
                   onToggleEditMode();
                 }}
-                className="rounded bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-500 transition-colors hover:bg-accent-500/30"
+                className="cursor-pointer rounded bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-500 transition-colors hover:bg-accent-500/30"
               >
                 Done
               </button>

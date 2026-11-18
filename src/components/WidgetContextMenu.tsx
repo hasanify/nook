@@ -112,7 +112,7 @@ export function WidgetContextMenu({
           onClose();
           onToggleEditMode();
         }}
-        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
       >
         {isEditMode ? (
           <>
@@ -166,7 +166,7 @@ export function WidgetContextMenu({
                     onSelectColor(c.value);
                     onClose();
                   }}
-                  className={`h-3.5 w-3.5 rounded-full transition-transform hover:scale-125 ${
+                  className={`h-3.5 w-3.5 cursor-pointer rounded-full transition-transform hover:scale-125 ${
                     active ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface" : ""
                   }`}
                   style={{ backgroundColor: c.hex }}
@@ -174,6 +174,41 @@ export function WidgetContextMenu({
                 />
               );
             })}
+
+            {/* Custom Color Swatch */}
+            {(() => {
+              const isCustomActive =
+                Boolean(currentColor) &&
+                !WIDGET_COLOR_OPTIONS.some((o) => o.value === currentColor);
+              return (
+                <label
+                  title={isCustomActive ? `Custom Color (${currentColor})` : "Pick custom color"}
+                  className={`relative flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
+                    isCustomActive
+                      ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface"
+                      : "border border-line/60"
+                  }`}
+                  style={
+                    isCustomActive
+                      ? { backgroundColor: currentColor }
+                      : {
+                          background:
+                            "conic-gradient(from 180deg at 50% 50%, #f43f5e, #fbbf24, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e)",
+                        }
+                  }
+                >
+                  <input
+                    type="color"
+                    value={currentColor?.startsWith("#") ? currentColor : "#3b82f6"}
+                    onChange={(e) => {
+                      onSelectColor(e.target.value);
+                      onClose();
+                    }}
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                </label>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -186,7 +221,7 @@ export function WidgetContextMenu({
             onClose();
             onToggleBackgroundBlur();
           }}
-          className="flex w-full items-center justify-between border-t border-line/40 px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+          className="flex w-full cursor-pointer items-center justify-between border-t border-line/40 px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
         >
           <div className="flex items-center gap-2">
             <svg
@@ -221,7 +256,7 @@ export function WidgetContextMenu({
             onClose();
             onOpenSettings();
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
         >
           <svg
             className="h-3.5 w-3.5 shrink-0 text-fg-muted"
@@ -248,7 +283,7 @@ export function WidgetContextMenu({
           onClose();
           onDelete();
         }}
-        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-error/10 hover:text-error dark:hover:bg-error/20"
+        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-error/10 hover:text-error dark:hover:bg-error/20"
       >
         <svg
           className="h-3.5 w-3.5 shrink-0"

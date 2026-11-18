@@ -301,8 +301,25 @@ export function TestWidget({ id }: TestWidgetProps) {
           >
             Clicks: {clicks} (Saved)
           </button>
-          <span className="text-xs text-fg-muted">
-            {isAttached ? "Attached to Host ✓" : "Top-level"}
+          <span className="inline-flex items-center gap-1 text-xs text-fg-muted">
+            {isAttached ? (
+              <>
+                <span>Attached to Host</span>
+                <svg
+                  className="h-3 w-3 text-ok"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </>
+            ) : (
+              "Top-level"
+            )}
           </span>
         </div>
 

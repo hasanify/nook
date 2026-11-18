@@ -36,7 +36,7 @@ export function Banner({
         <button
           type="button"
           onClick={onAction}
-          className="shrink-0 underline hover:opacity-80 active:opacity-60"
+          className="shrink-0 cursor-pointer underline hover:opacity-80 active:opacity-60"
         >
           {actionText}
         </button>

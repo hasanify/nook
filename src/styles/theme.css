@@ -133,6 +133,32 @@
     @apply select-text;
   }
 
+  /* Interactive and disabled cursor hygiene */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="range"]:not(:disabled),
+  input[type="color"]:not(:disabled),
+  select:not(:disabled),
+  label:has(input:not(:disabled)),
+  label:has(select:not(:disabled)) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  label:has(input:disabled),
+  label:has(select:disabled) {
+    cursor: not-allowed !important;
+  }
+
   /* Disable browser / WebView2 default indicators, spin buttons, and autofill styling */
   input::-webkit-outer-spin-button,
   input::-webkit-inner-spin-button {

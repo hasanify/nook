@@ -286,7 +286,7 @@ export function SettingsApp() {
         <button
           type="button"
           onClick={() => setActiveTab("general")}
-          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
+          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "general"
               ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
@@ -309,7 +309,7 @@ export function SettingsApp() {
         <button
           type="button"
           onClick={() => setActiveTab("widgets")}
-          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
+          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "widgets"
               ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
@@ -337,7 +337,7 @@ export function SettingsApp() {
         <button
           type="button"
           onClick={() => setActiveTab("accounts")}
-          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
+          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "accounts"
               ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
@@ -360,7 +360,7 @@ export function SettingsApp() {
         <button
           type="button"
           onClick={() => setActiveTab("about")}
-          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
+          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
             activeTab === "about"
               ? "border-accent-500 font-semibold text-fg"
               : "border-transparent text-fg-muted hover:text-fg"
@@ -460,7 +460,7 @@ export function SettingsApp() {
                       key={item.id}
                       type="button"
                       onClick={() => handleThemeChange(item.id)}
-                      className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-center transition-all ${
+                      className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border p-3 text-center transition-all ${
                         config?.app?.theme === item.id
                           ? "border-accent-500 bg-accent-500/15 font-semibold text-accent-500 shadow-xs"
                           : "border-line/60 bg-surface text-fg-muted hover:border-line hover:text-fg"
@@ -555,7 +555,7 @@ export function SettingsApp() {
                       key={w.id}
                       type="button"
                       onClick={() => setSelectedWidgetId(w.id)}
-                      className={`group flex items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition-all ${
+                      className={`group flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition-all ${
                         isSelected
                           ? "border-accent-500/60 bg-accent-500/15 font-semibold text-fg shadow-sm"
                           : "border-transparent bg-surface-raised text-fg hover:border-line hover:bg-surface"
@@ -593,7 +593,7 @@ export function SettingsApp() {
                   <select
                     value={widgetToAdd}
                     onChange={(e) => setWidgetToAdd(e.target.value)}
-                    className="flex-1 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                    className="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                   >
                     {Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => (
                       <option key={kind} value={kind}>
@@ -608,7 +608,7 @@ export function SettingsApp() {
                         void handleAddWidget(widgetToAdd);
                       }
                     }}
-                    className="flex items-center gap-1 rounded-lg bg-accent-500 px-3 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
+                    className="flex cursor-pointer items-center gap-1 rounded-lg bg-accent-500 px-3 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span>+ Add</span>
                   </button>
@@ -725,7 +725,7 @@ export function SettingsApp() {
                         Customize badge, highlight, and focus tint
                       </span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <div className="flex items-center gap-2.5 pt-1">
                       {WIDGET_COLOR_OPTIONS.map((c) => {
                         const isSelected = (selectedWidget.settings.widgetColor || "") === c.value;
                         return (
@@ -735,44 +735,103 @@ export function SettingsApp() {
                             onClick={() => {
                               handleWidgetSettingChange(selectedWidget.id, "widgetColor", c.value);
                             }}
-                            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-all ${
+                            title={c.label}
+                            aria-label={c.label}
+                            className={`group relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 active:scale-95 ${
                               isSelected
-                                ? "border-accent-500 bg-surface-raised font-medium text-fg shadow-xs ring-1 ring-accent-500/20"
-                                : "border-line/60 bg-surface text-fg-muted hover:border-line hover:text-fg"
+                                ? "scale-105 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface"
+                                : "hover:ring-1 hover:ring-line"
                             }`}
+                            style={{ backgroundColor: c.hex }}
                           >
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: c.hex }}
-                            />
-                            <span>{c.label}</span>
+                            {isSelected && (
+                              <svg
+                                className="pointer-events-none h-3.5 w-3.5 text-white drop-shadow-sm"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
                           </button>
                         );
                       })}
-                      {/* Native Custom Color Picker */}
-                      <label
-                        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-line/60 bg-surface px-2.5 py-1 text-xs text-fg-muted hover:border-line hover:text-fg"
-                        title="Pick custom hex color"
-                      >
-                        <input
-                          type="color"
-                          value={
-                            typeof selectedWidget.settings.widgetColor === "string" &&
-                            selectedWidget.settings.widgetColor.startsWith("#")
-                              ? selectedWidget.settings.widgetColor
-                              : "#3b82f6"
-                          }
-                          onChange={(e) => {
-                            handleWidgetSettingChange(
-                              selectedWidget.id,
-                              "widgetColor",
-                              e.target.value,
-                            );
-                          }}
-                          className="h-3 w-3 cursor-pointer appearance-none rounded-full border-none bg-transparent p-0"
-                        />
-                        <span>Custom</span>
-                      </label>
+
+                      {/* Native Custom Color Picker Swatch */}
+                      {(() => {
+                        const customVal =
+                          typeof selectedWidget.settings.widgetColor === "string" &&
+                          selectedWidget.settings.widgetColor.startsWith("#")
+                            ? selectedWidget.settings.widgetColor
+                            : "";
+                        const isCustomSelected =
+                          customVal !== "" &&
+                          !WIDGET_COLOR_OPTIONS.some((o) => o.value === customVal);
+
+                        return (
+                          <label
+                            title={
+                              isCustomSelected ? `Custom Color (${customVal})` : "Pick custom color"
+                            }
+                            className={`group relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 active:scale-95 ${
+                              isCustomSelected
+                                ? "scale-105 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface"
+                                : "border border-line/80 hover:border-fg-muted"
+                            }`}
+                            style={
+                              isCustomSelected
+                                ? { backgroundColor: customVal }
+                                : {
+                                    background:
+                                      "conic-gradient(from 180deg at 50% 50%, #f43f5e, #fbbf24, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e)",
+                                  }
+                            }
+                          >
+                            <input
+                              type="color"
+                              value={customVal || "#3b82f6"}
+                              onChange={(e) => {
+                                handleWidgetSettingChange(
+                                  selectedWidget.id,
+                                  "widgetColor",
+                                  e.target.value,
+                                );
+                              }}
+                              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                            />
+                            {isCustomSelected ? (
+                              <svg
+                                className="pointer-events-none h-3.5 w-3.5 text-white drop-shadow-sm"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="pointer-events-none h-3 w-3 text-white drop-shadow-sm"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                              </svg>
+                            )}
+                          </label>
+                        );
+                      })()}
                     </div>
                   </div>
 
@@ -793,7 +852,7 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void removeWidget(selectedWidget.id)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-error/40 bg-error/10 px-3 py-1.5 text-xs font-medium text-error transition-colors hover:bg-error/20"
+                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-error/40 bg-error/10 px-3 py-1.5 text-xs font-medium text-error transition-colors hover:bg-error/20"
                     >
                       <svg
                         className="h-3.5 w-3.5"
@@ -854,20 +913,18 @@ export function SettingsApp() {
                       GitHub Personal Access Token
                     </label>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      githubConfigured
-                        ? "border border-ok/30 bg-ok/10 text-ok"
-                        : "border border-line bg-surface text-fg-muted"
+                  <div
+                    className={`flex items-center gap-1.5 text-xs font-medium ${
+                      githubConfigured ? "text-ok" : "text-fg-muted/60"
                     }`}
                   >
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${
-                        githubConfigured ? "bg-ok" : "bg-fg-muted/50"
+                        githubConfigured ? "bg-ok" : "bg-fg-muted/40"
                       }`}
                     />
-                    {githubConfigured ? "Configured" : "Not configured"}
-                  </span>
+                    <span>{githubConfigured ? "Configured" : "Not configured"}</span>
+                  </div>
                 </div>
                 <p className="text-[11px] text-fg-muted">
                   Required for private repository commits and CI workflow runs. Public repos do not
@@ -889,7 +946,7 @@ export function SettingsApp() {
                   <button
                     type="button"
                     onClick={() => void handleSaveGithubToken()}
-                    className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
+                    className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Save
                   </button>
@@ -897,7 +954,7 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void handleClearGithubToken()}
-                      className="rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                      className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
                     >
                       Clear
                     </button>
@@ -916,20 +973,18 @@ export function SettingsApp() {
                       Vercel API Token
                     </label>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      vercelConfigured
-                        ? "border border-ok/30 bg-ok/10 text-ok"
-                        : "border border-line bg-surface text-fg-muted"
+                  <div
+                    className={`flex items-center gap-1.5 text-xs font-medium ${
+                      vercelConfigured ? "text-ok" : "text-fg-muted/60"
                     }`}
                   >
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${
-                        vercelConfigured ? "bg-ok" : "bg-fg-muted/50"
+                        vercelConfigured ? "bg-ok" : "bg-fg-muted/40"
                       }`}
                     />
-                    {vercelConfigured ? "Configured" : "Not configured"}
-                  </span>
+                    <span>{vercelConfigured ? "Configured" : "Not configured"}</span>
+                  </div>
                 </div>
                 <p className="text-[11px] text-fg-muted">
                   Used to query deployment pipeline states and build status.
@@ -950,7 +1005,7 @@ export function SettingsApp() {
                   <button
                     type="button"
                     onClick={() => void handleSaveVercelToken()}
-                    className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
+                    className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Save
                   </button>
@@ -958,7 +1013,7 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void handleClearVercelToken()}
-                      className="rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                      className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
                     >
                       Clear
                     </button>
@@ -1017,7 +1072,7 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify")}
-                      className="text-accent-500 underline underline-offset-2 hover:text-accent-600"
+                      className="cursor-pointer text-accent-500 underline underline-offset-2 hover:text-accent-600"
                     >
                       @hasanify
                     </button>
@@ -1027,7 +1082,7 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook")}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-500 hover:text-accent-600"
+                      className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-accent-500 hover:text-accent-600"
                     >
                       <span>Visit GitHub Repository</span>
                       <span>→</span>
@@ -1041,14 +1096,14 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/issues")}
-                      className="text-left text-fg-muted transition-colors hover:text-accent-500"
+                      className="cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
                     >
                       • Report a Bug or Request Feature
                     </button>
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/releases")}
-                      className="text-left text-fg-muted transition-colors hover:text-accent-500"
+                      className="cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
                     >
                       • View Release Changelog
                     </button>
@@ -1075,7 +1130,7 @@ export function SettingsApp() {
                     type="button"
                     disabled={checkingUpdate || downloadingUpdate}
                     onClick={() => void handleCheckUpdates()}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 py-1.5 font-medium text-fg shadow-xs transition-colors hover:border-accent-500 hover:text-accent-500 disabled:opacity-50"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 py-1.5 font-medium text-fg shadow-xs transition-colors hover:border-accent-500 hover:text-accent-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <svg
                       className={`h-3.5 w-3.5 ${checkingUpdate ? "animate-spin" : ""}`}
@@ -1104,7 +1159,17 @@ export function SettingsApp() {
 
                 {updateResult && !updateResult.has_update && !updateError && (
                   <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-[11px] text-ok">
-                    <span>✓</span>
+                    <svg
+                      className="h-3.5 w-3.5 shrink-0 text-ok"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                     <span>You are running the latest version of Nook.</span>
                   </div>
                 )}
@@ -1122,7 +1187,7 @@ export function SettingsApp() {
                         <button
                           type="button"
                           onClick={() => void openUrl(updateResult.release_url)}
-                          className="text-[11px] text-accent-500 underline underline-offset-2 hover:text-accent-600"
+                          className="cursor-pointer text-[11px] text-accent-500 underline underline-offset-2 hover:text-accent-600"
                         >
                           Release Notes
                         </button>
@@ -1151,7 +1216,7 @@ export function SettingsApp() {
                           <button
                             type="button"
                             onClick={() => void handleInstallUpdate()}
-                            className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
+                            className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             Download & Install Update
                           </button>
@@ -1159,7 +1224,7 @@ export function SettingsApp() {
                           <button
                             type="button"
                             onClick={() => void openUrl(updateResult.release_url)}
-                            className="rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
+                            className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             Download from GitHub
                           </button>
