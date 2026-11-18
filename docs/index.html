@@ -522,8 +522,8 @@
         <div class="container">
           <h2>Essential desktop widgets</h2>
           <p class="section-intro">
-            Zero configuration required to start. Each widget sits cleanly on your desktop, consumes
-            negligible resources, and updates in real time.
+            Each widget sits cleanly on your desktop, updates in real time, and stays out of your
+            active workflow.
           </p>
 
           <div class="widget-grid">
@@ -732,18 +732,18 @@
             </div>
 
             <div class="spec-item">
-              <div class="spec-title">Low resource consumption</div>
+              <div class="spec-title">Efficient background polling</div>
               <p class="spec-desc">
-                Single asynchronous Rust background poller with HTTP ETag caching. Idles under 1%
-                CPU usage and approximately 40 MB of memory.
+                An asynchronous Rust background poller coordinates data updates across active
+                widgets to minimize CPU and memory usage while idle.
               </p>
             </div>
 
             <div class="spec-item">
               <div class="spec-title">Encrypted token storage</div>
               <p class="spec-desc">
-                GitHub and Vercel personal access tokens are stored in Windows Credential Manager
-                via the native Win32 keyring API. Never written to disk or logs.
+                GitHub and Vercel personal access tokens are stored securely in Windows Credential
+                Manager. Never written to disk or logs.
               </p>
             </div>
 
