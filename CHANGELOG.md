@@ -1,3 +1,9 @@
+# [0.12.0](https://github.com/hasanify/nook/compare/v0.11.6...v0.12.0) (2026-11-18)
+
+### Features
+
+- **timer:** allow changing duration directly from the widget ([dd91c1c](https://github.com/hasanify/nook/commit/dd91c1ca62512351a4e4db9daa3ee3a08dbae900))
+
 ## [0.11.6](https://github.com/hasanify/nook/compare/v0.11.5...v0.11.6) (2026-11-18)
 
 ### Bug Fixes
