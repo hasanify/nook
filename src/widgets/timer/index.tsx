@@ -29,7 +29,7 @@ interface TimerState {
   cycle?: number;
 }
 
-export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
+export function TimerWidget({ instance, editMode, patchState, patchSettings }: WidgetProps) {
   const settings = instance.settings as TimerSettings;
   const state = instance.state as TimerState;
 
@@ -47,6 +47,112 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
 
   // Current time state for pure rendering
   const [now, setNow] = useState(() => Date.now());
+
+  // Inline duration editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const getCurrentDurationMinutes = useCallback((): number => {
+    if (mode === "countdown") return countdownMinutes;
+    if (mode === "pomodoro") {
+      if (phase === "work") return workMinutes;
+      if (phase === "break") return breakMinutes;
+      if (phase === "long") return longBreakMinutes;
+    }
+    return 10;
+  }, [mode, phase, countdownMinutes, workMinutes, breakMinutes, longBreakMinutes]);
+
+  const applyDuration = useCallback(
+    (mins: number) => {
+      const clamped = Math.max(1, Math.min(999, mins));
+      if (mode === "countdown") {
+        patchSettings({ countdownMinutes: clamped });
+      } else if (mode === "pomodoro") {
+        if (phase === "work") {
+          patchSettings({ workMinutes: clamped });
+        } else if (phase === "break") {
+          patchSettings({ breakMinutes: clamped });
+        } else if (phase === "long") {
+          patchSettings({ longBreakMinutes: clamped });
+        }
+      }
+      if (status === "idle") {
+        patchState({ accumulatedMs: 0 });
+      }
+    },
+    [mode, phase, status, patchSettings, patchState],
+  );
+
+  const adjustDuration = useCallback(
+    (delta: number, e?: React.MouseEvent) => {
+      const step = e?.shiftKey ? 5 : 1;
+      const current = getCurrentDurationMinutes();
+      applyDuration(current + delta * step);
+    },
+    [getCurrentDurationMinutes, applyDuration],
+  );
+
+  const handleInlineCommit = useCallback(() => {
+    setIsEditing(false);
+    const parsed = parseInt(editValue, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      applyDuration(parsed);
+    }
+  }, [editValue, applyDuration]);
+
+  const handleInlineSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleInlineCommit();
+  };
+
+  const handleAddMinutes = useCallback(
+    (mins: number) => {
+      const addMs = mins * 60 * 1000;
+      if (status === "running" && state.endsAt) {
+        const nextEndsAt = state.endsAt + addMs;
+        patchState({ endsAt: nextEndsAt });
+        if (notify) {
+          const title =
+            mode === "pomodoro"
+              ? `${phase === "work" ? "Focus Session" : "Break"} Complete!`
+              : "Countdown Finished!";
+          const body =
+            mode === "pomodoro"
+              ? phase === "work"
+                ? "Great work. Time to take a break!"
+                : "Break is over. Ready to focus again?"
+              : "Your timer has finished.";
+          void timerSchedule(instance.id, nextEndsAt, title, body);
+        }
+      } else if (status === "paused") {
+        const current = getCurrentDurationMinutes();
+        applyDuration(current + mins);
+      }
+    },
+    [
+      status,
+      state.endsAt,
+      notify,
+      mode,
+      phase,
+      instance.id,
+      patchState,
+      getCurrentDurationMinutes,
+      applyDuration,
+    ],
+  );
+
+  const presets =
+    mode === "countdown"
+      ? [5, 10, 15, 20, 25, 30, 45, 60]
+      : phase === "work"
+        ? [15, 20, 25, 30, 45, 50]
+        : phase === "break"
+          ? [3, 5, 10, 15]
+          : [10, 15, 20, 30];
+
+  const currentDurationMins = getCurrentDurationMinutes();
 
   // Active running tick (every 250ms only when running)
   useEffect(() => {
@@ -292,33 +398,149 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
         </div>
 
         {/* Time Display */}
-        <div className="my-auto flex flex-col items-center justify-center py-2">
-          <div className="font-mono text-4xl font-light tracking-tight text-fg tabular-nums">
-            {display.main}
-          </div>
-          {mode === "pomodoro" && (
-            <div className="mt-1 text-xs text-fg-muted capitalize">
-              {phase === "work"
-                ? "Focus Session"
-                : phase === "break"
-                  ? "Short Break"
-                  : "Long Break"}
-            </div>
-          )}
+        <div className="my-auto flex flex-col items-center justify-center py-1">
+          {mode !== "stopwatch" && status === "idle" ? (
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => adjustDuration(-1, e)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-line/60 bg-surface-raised/40 text-fg-muted transition-colors hover:border-accent-500/60 hover:text-accent-500 active:scale-95"
+                  title="Decrease 1 min (Shift for 5 min)"
+                >
+                  <svg
+                    className="h-3 w-3"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
 
-          {/* Progress Bar (countdown & pomodoro) */}
-          {mode !== "stopwatch" && targetDuration > 0 && (
-            <div className="mt-2.5 h-1 w-32 overflow-hidden rounded-full bg-surface-raised">
-              <div
-                className="h-full bg-accent-500 transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
+                {isEditing ? (
+                  <form onSubmit={handleInlineSubmit} className="flex items-center">
+                    <input
+                      ref={inputRef}
+                      type="number"
+                      min="1"
+                      max="999"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={handleInlineCommit}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setIsEditing(false);
+                      }}
+                      className="w-20 rounded-md border border-accent-500 bg-surface px-1.5 py-0.5 text-center font-mono text-3xl font-light text-fg outline-none focus:ring-1 focus:ring-accent-500"
+                      autoFocus
+                    />
+                    <span className="ml-1 font-mono text-xs text-fg-muted">m</span>
+                  </form>
+                ) : (
+                  <div
+                    onClick={() => {
+                      setEditValue(String(currentDurationMins));
+                      setIsEditing(true);
+                    }}
+                    className="group flex cursor-pointer items-center gap-1 rounded-lg px-2 py-0.5 font-mono text-4xl font-light tracking-tight text-fg tabular-nums transition-colors hover:bg-surface-raised/80"
+                    title="Click to type custom duration"
+                  >
+                    <span>{display.main}</span>
+                    <svg
+                      className="h-3 w-3 text-fg-muted opacity-0 transition-opacity group-hover:opacity-70"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    </svg>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={(e) => adjustDuration(1, e)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-line/60 bg-surface-raised/40 text-fg-muted transition-colors hover:border-accent-500/60 hover:text-accent-500 active:scale-95"
+                  title="Increase 1 min (Shift for 5 min)"
+                >
+                  <svg
+                    className="h-3 w-3"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
+
+              {mode === "pomodoro" && (
+                <div className="mt-0.5 text-xs text-fg-muted capitalize">
+                  {phase === "work"
+                    ? "Focus Session"
+                    : phase === "break"
+                      ? "Short Break"
+                      : "Long Break"}
+                </div>
+              )}
+
+              {/* Preset Pills */}
+              <div className="mt-2 flex max-w-full flex-wrap items-center justify-center gap-1">
+                {presets.map((preset) => {
+                  const isCurrent = preset === currentDurationMins;
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => applyDuration(preset)}
+                      className={`rounded px-1.5 py-0.5 font-mono text-[10px] transition-colors ${
+                        isCurrent
+                          ? "border border-accent-500/30 bg-accent-500/20 font-semibold text-accent-500"
+                          : "bg-surface-raised/50 text-fg-muted hover:bg-surface-raised hover:text-fg"
+                      }`}
+                    >
+                      {preset}m
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="font-mono text-4xl font-light tracking-tight text-fg tabular-nums">
+                {display.main}
+              </div>
+              {mode === "pomodoro" && (
+                <div className="mt-1 text-xs text-fg-muted capitalize">
+                  {phase === "work"
+                    ? "Focus Session"
+                    : phase === "break"
+                      ? "Short Break"
+                      : "Long Break"}
+                </div>
+              )}
+
+              {/* Progress Bar (countdown & pomodoro) */}
+              {mode !== "stopwatch" && targetDuration > 0 && (
+                <div className="mt-2.5 h-1 w-32 overflow-hidden rounded-full bg-surface-raised">
+                  <div
+                    className="h-full bg-accent-500 transition-all duration-300"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-2 pb-2">
+        <div className="flex items-center gap-1.5 pb-2">
           {status === "running" ? (
             <button
               type="button"
@@ -342,6 +564,28 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
               </svg>
               <span>{status === "paused" ? "Resume" : "Start"}</span>
             </button>
+          )}
+
+          {/* Quick extend buttons when running or paused in countdown / pomodoro */}
+          {mode !== "stopwatch" && (status === "running" || status === "paused") && (
+            <>
+              <button
+                type="button"
+                onClick={() => handleAddMinutes(1)}
+                className="flex items-center justify-center rounded-lg border border-line bg-surface-raised px-2 py-1.5 font-mono text-xs font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:text-fg"
+                title="Add 1 minute"
+              >
+                +1m
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAddMinutes(5)}
+                className="flex items-center justify-center rounded-lg border border-line bg-surface-raised px-2 py-1.5 font-mono text-xs font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:text-fg"
+                title="Add 5 minutes"
+              >
+                +5m
+              </button>
+            </>
           )}
 
           <button
