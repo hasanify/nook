@@ -1,3 +1,9 @@
+## [0.19.2](https://github.com/hasanify/nook/compare/v0.19.1...v0.19.2) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** prevent hiding on Win+D, enable DWM blur behind, and smooth resize ([22c6736](https://github.com/hasanify/nook/commit/22c6736ed32c45d3d5f8da99a220cccddcec4bad))
+
 ## [0.19.1](https://github.com/hasanify/nook/compare/v0.19.0...v0.19.1) (2026-11-18)
 
 ### Bug Fixes
