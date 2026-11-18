@@ -176,6 +176,60 @@
         border-color: var(--border-hover);
       }
 
+      /* Release Badge */
+      .release-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px 4px 10px;
+        border-radius: 9999px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 20px;
+        transition:
+          background-color 150ms ease,
+          border-color 150ms ease,
+          transform 100ms ease;
+      }
+
+      .release-badge:hover {
+        background: var(--surface-raised);
+        border-color: var(--border-hover);
+        transform: translateY(-1px);
+      }
+
+      .badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: oklch(0.65 0.2 145);
+        box-shadow: 0 0 0 2px var(--accent-subtle);
+      }
+
+      .badge-label {
+        color: var(--text-muted);
+      }
+
+      .badge-version {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .badge-arrow {
+        color: var(--text-muted);
+        transition: transform 150ms ease;
+      }
+
+      .release-badge:hover .badge-arrow {
+        transform: translateX(2px);
+        color: var(--text);
+      }
+
       /* Hero Section */
       .hero {
         padding: 72px 0 56px;
@@ -426,11 +480,9 @@
             >GitHub</a
           >
           <a
-            href="https://github.com/hasanify/nook/releases/latest"
-            class="btn btn-primary"
-            target="_blank"
-            rel="noopener"
-            >Download</a
+            href="https://github.com/hasanify/nook/releases/download/v0.19.2/Nook_0.19.2_x64-setup.exe"
+            class="btn btn-primary direct-download-link"
+            >Download <span class="version-tag">v0.19.2</span></a
           >
         </nav>
       </div>
@@ -441,6 +493,32 @@
       <section class="hero" style="border-top: none">
         <div class="container">
           <div class="hero-content">
+            <a
+              href="https://github.com/hasanify/nook/releases/tag/v0.19.2"
+              class="release-badge release-notes-link"
+              target="_blank"
+              rel="noopener"
+              aria-label="Latest release: v0.19.2"
+            >
+              <span class="badge-dot" aria-hidden="true"></span>
+              <span class="badge-label">Latest release</span>
+              <span class="badge-version version-tag">v0.19.2</span>
+              <svg
+                class="badge-arrow"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5l7 7-7 7" />
+              </svg>
+            </a>
             <h1>Desktop widgets for Windows.</h1>
             <p class="hero-desc">
               Notes, timers, weather, tasks, and dev status pinned directly to your Windows desktop
@@ -448,10 +526,8 @@
             </p>
             <div class="hero-actions">
               <a
-                href="https://github.com/hasanify/nook/releases/latest"
-                class="btn btn-primary"
-                target="_blank"
-                rel="noopener"
+                href="https://github.com/hasanify/nook/releases/download/v0.19.2/Nook_0.19.2_x64-setup.exe"
+                class="btn btn-primary direct-download-link"
               >
                 <svg
                   width="16"
@@ -468,7 +544,15 @@
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                Download for Windows
+                <span>Download for Windows (<span class="version-tag">v0.19.2</span>)</span>
+              </a>
+              <a
+                href="https://github.com/hasanify/nook/releases/tag/v0.19.2"
+                class="btn btn-secondary release-notes-link"
+                target="_blank"
+                rel="noopener"
+              >
+                Release notes
               </a>
               <a
                 href="https://github.com/hasanify/nook"
@@ -480,7 +564,10 @@
               </a>
             </div>
             <div class="meta-note">
-              Windows 10 (1809+) and Windows 11. Free and open source (MIT).
+              Windows 10 (1809+) &amp; Windows 11 &middot; 64-bit installer (<span
+                id="meta-filename"
+                >Nook_0.19.2_x64-setup.exe</span
+              >) &middot; Free and open source (MIT).
             </div>
           </div>
 
@@ -756,6 +843,48 @@
 
           <div class="install-card">
             <div>
+              <div style="font-weight: 600; margin-bottom: 6px">Direct download</div>
+              <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 14px">
+                Download the standalone Windows 64-bit installer executable (<span
+                  class="version-tag"
+                  >v0.19.2</span
+                >). No build steps or package managers required.
+              </p>
+              <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+                <a
+                  href="https://github.com/hasanify/nook/releases/download/v0.19.2/Nook_0.19.2_x64-setup.exe"
+                  class="btn btn-primary direct-download-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  <span>Download Nook (<span class="version-tag">v0.19.2</span>)</span>
+                </a>
+                <a
+                  href="https://github.com/hasanify/nook/releases/tag/v0.19.2"
+                  class="hero-link release-notes-link"
+                  target="_blank"
+                  rel="noopener"
+                  style="font-size: 13px"
+                >
+                  All releases &amp; changelog &rarr;
+                </a>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border); padding-top: 16px">
               <div style="font-weight: 600; margin-bottom: 8px">Keyboard shortcuts</div>
               <div class="shortcut-list">
                 <div class="shortcut-item">
@@ -794,8 +923,12 @@
         </div>
         <div class="footer-links">
           <a href="https://github.com/hasanify/nook" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://github.com/hasanify/nook/releases" target="_blank" rel="noopener"
-            >Releases</a
+          <a
+            href="https://github.com/hasanify/nook/releases"
+            target="_blank"
+            rel="noopener"
+            class="release-notes-link"
+            >Releases (<span class="version-tag">v0.19.2</span>)</a
           >
           <a href="https://github.com/hasanify/nook/issues" target="_blank" rel="noopener"
             >Issues</a
@@ -809,5 +942,39 @@
         </div>
       </div>
     </footer>
+
+    <script>
+      (function () {
+        fetch("https://api.github.com/repos/hasanify/nook/releases/latest")
+          .then(function (res) {
+            return res.ok ? res.json() : null;
+          })
+          .then(function (data) {
+            if (!data || !data.tag_name) return;
+            var tag = data.tag_name;
+            var asset =
+              Array.isArray(data.assets) &&
+              data.assets.find(function (a) {
+                return a.name && a.name.endsWith(".exe");
+              });
+            var downloadUrl = asset ? asset.browser_download_url : data.html_url;
+
+            document.querySelectorAll(".version-tag").forEach(function (el) {
+              el.textContent = tag;
+            });
+            document.querySelectorAll(".direct-download-link").forEach(function (link) {
+              link.href = downloadUrl;
+            });
+            document.querySelectorAll(".release-notes-link").forEach(function (link) {
+              link.href = data.html_url;
+            });
+            var metaFile = document.getElementById("meta-filename");
+            if (metaFile && asset) {
+              metaFile.textContent = asset.name;
+            }
+          })
+          .catch(function () {});
+      })();
+    </script>
   </body>
 </html>

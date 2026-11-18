@@ -154,6 +154,13 @@ export function EditOverlay({
     e.preventDefault();
     e.stopPropagation();
 
+    const target = e.currentTarget;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignore
+    }
+
     // Enforce resize cursor and disable text selection globally during resize drag
     document.body.style.cursor = "se-resize";
     document.body.style.userSelect = "none";
@@ -193,6 +200,12 @@ export function EditOverlay({
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("mouseup", onPointerUp);
+
+      try {
+        if (target.hasPointerCapture(e.pointerId)) {
+          target.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
 
       document.body.style.cursor = "";
       document.body.style.userSelect = "";

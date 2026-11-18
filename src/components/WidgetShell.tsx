@@ -95,8 +95,8 @@ export function WidgetShell({
 
   const handleBoundsChange = (bounds: Rect, commit: boolean) => {
     setIsInteracting(!commit);
-    setLocalBounds(bounds);
     if (commit) {
+      setLocalBounds(bounds);
       setPrevInstanceRect(bounds);
     }
     sendBounds(bounds, commit);
@@ -137,18 +137,16 @@ export function WidgetShell({
         borderColor: effectiveEditMode
           ? widgetColor
           : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
-        backgroundColor: hasBlur
-          ? `color-mix(in srgb, ${widgetColor} 25%, color-mix(in srgb, var(--surface) 25%, transparent))`
-          : `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
+        backgroundColor: `color-mix(in srgb, ${widgetColor} 16%, var(--surface))`,
         boxShadow: undefined,
-        backdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
-        WebkitBackdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
+        backdropFilter: hasBlur ? `blur(${blurStrength}px)` : undefined,
+        WebkitBackdropFilter: hasBlur ? `blur(${blurStrength}px)` : undefined,
       } as React.CSSProperties)
     : hasBlur
       ? ({
-          backgroundColor: "color-mix(in srgb, var(--surface) 25%, transparent)",
-          backdropFilter: `blur(${blurStrength}px) saturate(150%)`,
-          WebkitBackdropFilter: `blur(${blurStrength}px) saturate(150%)`,
+          backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)",
+          backdropFilter: `blur(${blurStrength}px)`,
+          WebkitBackdropFilter: `blur(${blurStrength}px)`,
         } as React.CSSProperties)
       : {};
 

@@ -30,7 +30,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Mica & Aero Blur",
     description: "Translucent frosted glass with real-time blur and luminous specular edges.",
     containerClass:
-      "rounded-2xl border border-white/20 bg-surface/30 backdrop-blur-xl ring-1 ring-inset ring-white/20",
+      "rounded-2xl border border-white/20 bg-surface/50 backdrop-blur-xl ring-1 ring-inset ring-white/20",
     headerClass: "border-b border-white/10 bg-surface-raised/30 backdrop-blur-md",
     hasBlur: true,
     highlightClass: "before:via-white/30",

@@ -1,16 +1,15 @@
 use tracing::info;
-use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
-    DeleteMenu, FindWindowW, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow,
-    SetParent, SetWindowLongPtrW, SetWindowPos, GWLP_HWNDPARENT, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM,
-    HTBOTTOMLEFT, HTBOTTOMRIGHT, HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT,
-    HWND_NOTOPMOST, HWND_TOPMOST, MF_BYPOSITION, SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED,
-    SWP_HIDEWINDOW, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS,
-    WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND,
-    WM_SYSKEYDOWN, WM_WINDOWPOSCHANGING, WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS,
-    WS_EX_APPWINDOW, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
+    DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
+    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT,
+    HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOPMOST,
+    MF_BYPOSITION, SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED, SWP_HIDEWINDOW, SWP_NOACTIVATE,
+    SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST,
+    WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND, WM_SYSKEYDOWN, WM_WINDOWPOSCHANGING,
+    WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
+    WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -49,12 +48,6 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
             & !(WS_EX_APPWINDOW.0 as isize | WS_EX_NOACTIVATE.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
 
-        // Make Progman the owner of the window so Explorer's ToggleDesktop (Win+D) treats it as part of the desktop
-        let progman = FindWindowW(w!("Progman"), None).unwrap_or_default();
-        if !progman.is_invalid() {
-            let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, progman.0 as isize);
-        }
-
         SetWindowPos(
             hwnd,
             Some(HWND_NOTOPMOST),
@@ -66,10 +59,7 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
         )
         .map_err(|e| format!("SetWindowPos to bottom failed: {}", e))?;
 
-        info!(
-            "Set widget HWND {:?} to BottomToplevel (owned by Progman)",
-            hwnd
-        );
+        info!("Set widget HWND {:?} to BottomToplevel", hwnd);
         Ok(PinStrategy::BottomToplevel)
     }
 }
@@ -90,9 +80,6 @@ pub fn detach_to_topmost(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, Strin
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
         ex_style = (ex_style | WS_EX_TOOLWINDOW.0 as isize) & !(WS_EX_APPWINDOW.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
-
-        // Clear owner when detached to topmost
-        let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, 0);
 
         SetWindowPos(
             hwnd,
