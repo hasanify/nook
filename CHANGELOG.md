@@ -1,3 +1,9 @@
+# [0.16.0](https://github.com/hasanify/nook/compare/v0.15.6...v0.16.0) (2026-11-18)
+
+### Features
+
+- **widgets:** open context menu in dedicated popup window with auto-dismiss ([e0f04ee](https://github.com/hasanify/nook/commit/e0f04ee1fcd74896619ec61132330a4c056a4256))
+
 ## [0.15.6](https://github.com/hasanify/nook/compare/v0.15.5...v0.15.6) (2026-11-18)
 
 ### Bug Fixes
