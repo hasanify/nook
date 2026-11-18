@@ -1,5 +1,4 @@
 import { useRef, useEffect } from "react";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import type { Rect } from "../core/types";
 
 interface EditOverlayProps {
@@ -71,18 +70,16 @@ export function EditOverlay({
 
   // Handle Dragging
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!editMode || e.button !== 0) return;
+    if (e.button !== 0) return;
     const target = e.target as HTMLElement;
-    if (target.closest("button") || target.closest("input") || target.closest("select")) {
+    if (
+      target.closest("button") ||
+      target.closest("input") ||
+      target.closest("select") ||
+      target.closest("a") ||
+      target.closest("[role='button']")
+    ) {
       return;
-    }
-
-    try {
-      const appWindow = getCurrentWebviewWindow();
-      void appWindow.startDragging();
-      return;
-    } catch {
-      // Fallback to manual dragging if native startDragging is unavailable
     }
 
     const currentTarget = e.currentTarget;
@@ -93,6 +90,9 @@ export function EditOverlay({
     }
 
     isDragging.current = true;
+    document.body.style.cursor = "grabbing";
+    document.body.style.userSelect = "none";
+
     const startX = e.screenX;
     const startY = e.screenY;
     const origX = activeBoundsRef.current.x;
@@ -109,8 +109,8 @@ export function EditOverlay({
       const deltaX = ev.screenX - startX;
       const deltaY = ev.screenY - startY;
       const nextBounds: Rect = {
-        x: origX + deltaX,
-        y: origY + deltaY,
+        x: Math.round(origX + deltaX),
+        y: Math.round(origY + deltaY),
         w: origW,
         h: origH,
       };
@@ -120,13 +120,15 @@ export function EditOverlay({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("mouseup", onPointerUp);
       try {
         if (currentTarget.hasPointerCapture(e.pointerId)) {
           currentTarget.releasePointerCapture(e.pointerId);
         }
       } catch {}
+
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
 
       if (!isDragging.current) return;
       isDragging.current = false;
@@ -138,13 +140,14 @@ export function EditOverlay({
       onBoundsChange?.(finalBounds, true);
     };
 
-    const onPointerUp = () => {
-      cleanup();
+    const onPointerUp = (ev: PointerEvent | MouseEvent) => {
+      if (ev.button === 0 || ev.buttons === 0) {
+        cleanup();
+      }
     };
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
     window.addEventListener("mouseup", onPointerUp);
   };
 
@@ -183,8 +186,8 @@ export function EditOverlay({
       const deltaY = ev.screenY - startY;
       const minW = minSize?.w ?? 200;
       const minH = minSize?.h ?? 160;
-      const nextW = Math.max(minW, origW + deltaX);
-      const nextH = Math.max(minH, origH + deltaY);
+      const nextW = Math.max(minW, Math.round(origW + deltaX));
+      const nextH = Math.max(minH, Math.round(origH + deltaY));
 
       const nextBounds: Rect = {
         x: origX,
@@ -198,7 +201,6 @@ export function EditOverlay({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("mouseup", onPointerUp);
 
       try {
@@ -220,13 +222,14 @@ export function EditOverlay({
       onBoundsChange?.(finalBounds, true);
     };
 
-    const onPointerUp = () => {
-      cleanup();
+    const onPointerUp = (ev: PointerEvent | MouseEvent) => {
+      if (ev.button === 0 || ev.buttons === 0) {
+        cleanup();
+      }
     };
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
     window.addEventListener("mouseup", onPointerUp);
   };
 
@@ -248,9 +251,9 @@ export function EditOverlay({
         className={`flex h-8 touch-none items-center justify-between rounded-t-[inherit] border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
+            : `cursor-grab text-fg-muted hover:bg-surface-raised/50 active:cursor-grabbing ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
         }`}
-        onPointerDown={editMode ? handleDragStart : undefined}
+        onPointerDown={handleDragStart}
       >
         <div
           className={`flex min-w-0 flex-1 items-center gap-1.5 font-medium ${
@@ -316,7 +319,7 @@ export function EditOverlay({
       {/* Resize Grip Corner (ONLY rendered when in Edit Mode and Resizable) */}
       {editMode && resizable && (
         <div
-          className="absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-[inherit] p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
+          className="absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-[inherit] p-1.5 text-accent-500 select-none hover:text-accent-400 active:text-accent-600"
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >

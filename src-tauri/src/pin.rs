@@ -4,12 +4,12 @@ use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindow
 use windows::Win32::UI::WindowsAndMessaging::{
     DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
     SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT,
-    HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOPMOST,
-    MF_BYPOSITION, SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED, SWP_HIDEWINDOW, SWP_NOACTIVATE,
-    SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST,
-    WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND, WM_SYSKEYDOWN, WM_WINDOWPOSCHANGING,
-    WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
-    WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
+    HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOP,
+    HWND_TOPMOST, MF_BYPOSITION, SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED, SWP_HIDEWINDOW,
+    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS, WM_EXITSIZEMOVE, WM_NCDESTROY,
+    WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND, WM_SYSKEYDOWN,
+    WM_WINDOWPOSCHANGING, WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW,
+    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -58,6 +58,17 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
             SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED,
         )
         .map_err(|e| format!("SetWindowPos to bottom failed: {}", e))?;
+
+        // Position right above desktop shell layer
+        let _ = SetWindowPos(
+            hwnd,
+            Some(HWND_TOP),
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+        );
 
         info!("Set widget HWND {:?} to BottomToplevel", hwnd);
         Ok(PinStrategy::BottomToplevel)
@@ -121,12 +132,15 @@ pub unsafe extern "system" fn widget_subclass_proc(
         }
         WM_SYSKEYDOWN if wparam.0 == 0x20 => return LRESULT(0),
         WM_NCLBUTTONDBLCLK => return LRESULT(0),
-        // Prevent Explorer's ToggleDesktop (Win+D) from hiding the window
+        // Prevent Explorer's ToggleDesktop (Win+D) from hiding or minimizing the window
         WM_WINDOWPOSCHANGING if lparam.0 != 0 => {
             let wp = &mut *(lparam.0 as *mut WINDOWPOS);
             wp.flags.0 &= !SWP_HIDEWINDOW.0;
+            if (wp.flags.0 & SWP_NOMOVE.0) == 0 && (wp.x <= -10000 || wp.y <= -10000) {
+                wp.flags.0 |= SWP_NOMOVE.0 | SWP_NOSIZE.0;
+            }
         }
-        WM_SHOWWINDOW if wparam.0 == 0 && lparam.0 != 0 => return LRESULT(0),
+        WM_SHOWWINDOW if wparam.0 == 0 => return LRESULT(0),
         WM_NCHITTEST => {
             let hit = DefSubclassProc(hwnd, msg, wparam, lparam);
             match hit.0 as u32 {

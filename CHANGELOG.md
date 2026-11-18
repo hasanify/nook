@@ -2,6 +2,10 @@
 
 ## [0.19.4](https://github.com/hasanify/nook/compare/v0.19.3...v0.19.4) (2026-11-18)
 
+### Bug Fixes
+
+- **widgets:** restore smooth drag moving from header, jank-free resizing, and prevent hiding on Win+D
+
 ## [0.19.3](https://github.com/hasanify/nook/compare/v0.19.2...v0.19.3) (2026-11-18)
 
 ### Bug Fixes
