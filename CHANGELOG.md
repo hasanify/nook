@@ -1,3 +1,9 @@
+## [0.19.8](https://github.com/hasanify/nook/compare/v0.19.7...v0.19.8) (2026-11-18)
+
+### Bug Fixes
+
+- **shell:** remove global event hook to prevent false-positive antivirus heuristic detection ([ee13665](https://github.com/hasanify/nook/commit/ee1366516c2fc249c6b037591625ff7016b757d2))
+
 ## [0.19.7](https://github.com/hasanify/nook/compare/v0.19.6...v0.19.7) (2026-11-18)
 
 ## [0.19.6](https://github.com/hasanify/nook/compare/v0.19.5...v0.19.6) (2026-11-18)
