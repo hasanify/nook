@@ -10,12 +10,18 @@ interface WeatherData {
   city: string;
   country?: string;
   temperature: number;
-  apparentTemperature: number;
+  apparentTemperature?: number;
+  apparent_temperature?: number;
   humidity: number;
-  windSpeed: number;
-  weatherCode: number;
-  isDay: number;
+  windSpeed?: number;
+  wind_speed?: number;
+  weatherCode?: number;
+  weather_code?: number;
+  isDay?: number;
+  is_day?: number;
   unit: string;
+  windUnit?: string;
+  wind_unit?: string;
 }
 
 function getWeatherDescription(code: number): string {
@@ -161,6 +167,16 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
   const { payload, loading, refresh } = useProvider<WeatherData>(instance.id);
   const weather = payload?.data;
 
+  const windSpeed = weather ? (weather.windSpeed ?? weather.wind_speed ?? 0) : 0;
+  const windUnit = weather
+    ? (weather.windUnit ?? weather.wind_unit ?? (weather.unit === "°F" ? "mph" : "km/h"))
+    : "km/h";
+  const apparentTemperature = weather
+    ? (weather.apparentTemperature ?? weather.apparent_temperature ?? weather.temperature)
+    : 0;
+  const weatherCode = weather ? (weather.weatherCode ?? weather.weather_code ?? 0) : 0;
+  const isDay = weather ? (weather.isDay ?? weather.is_day ?? 1) : 1;
+
   // On mount or when city/unit settings change, request fresh weather data if none exists
   useEffect(() => {
     if (!payload) {
@@ -229,16 +245,16 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
                   <span className="text-lg font-medium text-fg-muted">{weather.unit}</span>
                 </div>
                 <span className="text-xs font-medium text-fg/80">
-                  {getWeatherDescription(weather.weatherCode)}
+                  {getWeatherDescription(weatherCode)}
                 </span>
                 <span className="text-[10px] text-fg-muted">
-                  Feels like {weather.apparentTemperature}
+                  Feels like {apparentTemperature}
                   {weather.unit}
                 </span>
               </div>
 
               <div className="pr-1">
-                <WeatherIcon code={weather.weatherCode} isDay={weather.isDay} />
+                <WeatherIcon code={weatherCode} isDay={isDay} />
               </div>
             </div>
 
@@ -269,7 +285,9 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
                   <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
                 </svg>
                 <span>Wind:</span>
-                <span className="font-mono font-medium text-fg">{weather.windSpeed} km/h</span>
+                <span className="font-mono font-medium text-fg">
+                  {windSpeed} {windUnit}
+                </span>
               </div>
             </div>
           </>

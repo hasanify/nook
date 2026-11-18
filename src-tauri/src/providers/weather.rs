@@ -4,6 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::{info, warn};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WeatherData {
     pub city: String,
     pub country: Option<String>,
@@ -14,6 +15,7 @@ pub struct WeatherData {
     pub weather_code: i32,
     pub is_day: i32,
     pub unit: String,
+    pub wind_unit: String,
 }
 
 pub async fn fetch_weather(
@@ -141,6 +143,7 @@ pub async fn fetch_weather(
     ];
     if is_fahrenheit {
         query_params.push(("temperature_unit", "fahrenheit".to_string()));
+        query_params.push(("wind_speed_unit", "mph".to_string()));
     }
 
     let forecast_res = match client
@@ -229,10 +232,10 @@ pub async fn fetch_weather(
         .map(|v| v as i32)
         .unwrap_or(1);
 
-    let unit_display = if is_fahrenheit {
-        "°F".to_string()
+    let (unit_display, wind_unit_display) = if is_fahrenheit {
+        ("°F".to_string(), "mph".to_string())
     } else {
-        "°C".to_string()
+        ("°C".to_string(), "km/h".to_string())
     };
 
     let data = WeatherData {
@@ -245,6 +248,7 @@ pub async fn fetch_weather(
         weather_code,
         is_day,
         unit: unit_display,
+        wind_unit: wind_unit_display,
     };
 
     ProviderPayload {
