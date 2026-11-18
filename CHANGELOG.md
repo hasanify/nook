@@ -1,3 +1,9 @@
+## [0.15.3](https://github.com/hasanify/nook/compare/v0.15.2...v0.15.3) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** native acrylic blur, edit-mode drag lock, fit and default resize, and window vanishing fix ([328e027](https://github.com/hasanify/nook/commit/328e02740655368a5556ccbdafcc2d67ed542940))
+
 ## [0.15.2](https://github.com/hasanify/nook/compare/v0.15.1...v0.15.2) (2026-11-18)
 
 ### Bug Fixes
