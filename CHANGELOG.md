@@ -1,3 +1,9 @@
+## [0.19.12](https://github.com/hasanify/nook/compare/v0.19.11...v0.19.12) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** completely remove blur effects and native DWM attributes to prevent antivirus heuristic false positives ([9d1f4b1](https://github.com/hasanify/nook/commit/9d1f4b1a9bffcfb9471930ada830c54a9e6fe2d2))
+
 ## [0.19.11](https://github.com/hasanify/nook/compare/v0.19.10...v0.19.11) (2026-11-18)
 
 ### Bug Fixes
