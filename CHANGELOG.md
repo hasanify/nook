@@ -1,3 +1,5 @@
+## [0.19.13](https://github.com/hasanify/nook/compare/v0.19.12...v0.19.13) (2026-11-18)
+
 ## [0.19.12](https://github.com/hasanify/nook/compare/v0.19.11...v0.19.12) (2026-11-18)
 
 ### Bug Fixes
