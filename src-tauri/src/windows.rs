@@ -47,7 +47,6 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     let hwnd = HWND(raw_hwnd.0);
 
     pin::disable_system_menu(hwnd);
-    apply_window_corners(hwnd);
 
     let strategy = if instance.always_on_top {
         pin::detach_to_topmost(hwnd, instance.opacity)?
@@ -76,34 +75,8 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
 
     pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
 
-    let has_blur = instance
-        .settings
-        .get("backgroundBlur")
-        .and_then(|v| v.as_bool())
-        .unwrap_or(false)
-        || app
-            .state::<AppState>()
-            .config
-            .get_config()
-            .app
-            .widget_preset
-            == "glass"
-        || app
-            .state::<AppState>()
-            .config
-            .get_config()
-            .app
-            .widget_preset
-            == "ghost";
-
-    if has_blur {
-        let _ = window.set_effects(
-            tauri::window::EffectsBuilder::new()
-                .effect(tauri::window::Effect::Acrylic)
-                .state(tauri::window::EffectState::Active)
-                .build(),
-        );
-    }
+    // Ensure widget windows maintain pure DirectComposition transparent composition without OS rectangular artifacts
+    let _ = window.set_effects(None);
 
     window
         .show()
@@ -154,7 +127,17 @@ pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, S
         }
     };
 
-    let (work_left, work_top, work_w, _) = get_primary_work_area();
+    let scale = app
+        .webview_windows()
+        .values()
+        .next()
+        .and_then(|w| w.scale_factor().ok())
+        .unwrap_or(1.0);
+
+    let (raw_left, raw_top, raw_w, _) = get_primary_work_area();
+    let work_left = (raw_left as f64 / scale).round() as i32;
+    let work_top = (raw_top as f64 / scale).round() as i32;
+    let work_w = (raw_w as f64 / scale).round() as i32;
     let (x, y) = if kind == "placeholder" {
         (
             (work_left + work_w - default_w - 24 - stagger_offset).max(work_left),
@@ -347,37 +330,18 @@ pub fn update_widget_geometry(
 pub fn sync_widget_effects(app: &AppHandle, widget_id: Option<&str>) {
     let state = app.state::<AppState>();
     let cfg = state.config.get_config();
-    let global_preset = &cfg.app.widget_preset;
 
-    let targets: Vec<(String, bool)> = cfg
+    let targets: Vec<String> = cfg
         .widgets
         .iter()
         .filter(|w| widget_id.is_none() || widget_id == Some(&w.id))
-        .map(|w| {
-            let blur = w
-                .settings
-                .get("backgroundBlur")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false)
-                || global_preset == "glass"
-                || global_preset == "ghost";
-            (w.id.clone(), blur)
-        })
+        .map(|w| w.id.clone())
         .collect();
 
-    for (id, has_blur) in targets {
+    for id in targets {
         let label = format!("widget-{}", id);
         if let Some(window) = app.get_webview_window(&label) {
-            if has_blur {
-                let _ = window.set_effects(
-                    tauri::window::EffectsBuilder::new()
-                        .effect(tauri::window::Effect::Acrylic)
-                        .state(tauri::window::EffectState::Active)
-                        .build(),
-                );
-            } else {
-                let _ = window.set_effects(None);
-            }
+            let _ = window.set_effects(None);
         }
     }
 }
@@ -586,51 +550,17 @@ pub fn apply_window_corners(hwnd: HWND) {
     }
 }
 
-pub fn show_context_menu_window(
-    app: &AppHandle,
-    widget_id: &str,
-    _screen_x: Option<i32>,
-    _screen_y: Option<i32>,
-) -> Result<(), String> {
+pub fn ensure_context_menu_window(app: &AppHandle) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: f64 = 180.0;
-    const MENU_H: f64 = 320.0;
+    const MENU_W: f64 = 190.0;
+    const MENU_H: f64 = 300.0;
 
-    #[cfg(windows)]
-    let (phys_x, phys_y) = unsafe {
-        use windows::Win32::Foundation::POINT;
-        use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
-        let mut pt = POINT::default();
-        let _ = GetCursorPos(&mut pt);
-        (pt.x, pt.y)
-    };
-    #[cfg(not(windows))]
-    let (phys_x, phys_y) = (100, 100);
-
-    if let Some(window) = app.get_webview_window(LABEL) {
-        let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-            phys_x, phys_y,
-        )));
-        let _ = window.emit(
-            "context-menu-open",
-            serde_json::json!({ "widgetId": widget_id }),
-        );
-        let _ = window.show();
-        let _ = window.set_focus();
-        #[cfg(windows)]
-        unsafe {
-            if let Ok(raw_hwnd) = window.hwnd() {
-                use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
-                let _ = SetForegroundWindow(HWND(raw_hwnd.0));
-            }
-        }
+    if app.get_webview_window(LABEL).is_some() {
         return Ok(());
     }
 
-    let url_str = format!("index.html?view=context-menu&w={}", widget_id);
-    let url = WebviewUrl::App(url_str.into());
-
-    let window = WebviewWindowBuilder::new(app, LABEL, url)
+    let url = WebviewUrl::App("index.html?view=context-menu".into());
+    let _window = WebviewWindowBuilder::new(app, LABEL, url)
         .title("Nook Menu")
         .decorations(false)
         .transparent(true)
@@ -640,22 +570,63 @@ pub fn show_context_menu_window(
         .maximizable(false)
         .shadow(false)
         .inner_size(MENU_W, MENU_H)
-        .position(phys_x as f64, phys_y as f64)
         .visible(false)
-        .focused(true)
+        .focused(false)
         .build()
         .map_err(|e| format!("Failed to create context menu window: {}", e))?;
 
-    if let Ok(raw_hwnd) = window.hwnd() {
-        pin::disable_system_menu(HWND(raw_hwnd.0));
-        apply_window_corners(HWND(raw_hwnd.0));
+    info!("Pre-initialized context menu window: {}", LABEL);
+    Ok(())
+}
+
+pub fn show_context_menu_window(
+    app: &AppHandle,
+    widget_id: &str,
+    _screen_x: Option<i32>,
+    _screen_y: Option<i32>,
+) -> Result<(), String> {
+    const LABEL: &str = "widget-context-menu";
+    const MENU_W: i32 = 190;
+    const MENU_H: i32 = 300;
+
+    #[cfg(windows)]
+    let (mut phys_x, mut phys_y) = unsafe {
+        use windows::Win32::Foundation::POINT;
+        use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+        let mut pt = POINT::default();
+        let _ = GetCursorPos(&mut pt);
+        (pt.x, pt.y)
+    };
+    #[cfg(not(windows))]
+    let (mut phys_x, mut phys_y) = (100, 100);
+
+    let (work_left, work_top, work_w, work_h) = get_primary_work_area();
+    if phys_x + MENU_W > work_left + work_w {
+        phys_x = (work_left + work_w - MENU_W).max(work_left);
     }
+    if phys_y + MENU_H > work_top + work_h {
+        phys_y = (work_top + work_h - MENU_H).max(work_top);
+    }
+
+    let window = match app.get_webview_window(LABEL) {
+        Some(w) => w,
+        None => {
+            ensure_context_menu_window(app)?;
+            app.get_webview_window(LABEL)
+                .ok_or_else(|| "Failed to get context menu window".to_string())?
+        }
+    };
 
     let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
         phys_x, phys_y,
     )));
+    let _ = window.emit(
+        "context-menu-open",
+        serde_json::json!({ "widgetId": widget_id }),
+    );
     let _ = window.show();
     let _ = window.set_focus();
+
     #[cfg(windows)]
     unsafe {
         if let Ok(raw_hwnd) = window.hwnd() {

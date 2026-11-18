@@ -154,11 +154,12 @@ export function WidgetShell({
 
   return (
     <div
+      onContextMenu={handleContextMenu}
       style={{
         ...colorStyle,
         opacity: widgetOpacity,
       }}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl transition-[border-color,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
         preset.highlightClass
       } before:to-transparent ${preset.containerClass} ${
         effectiveEditMode ? "!border-accent-500/80 ring-2 ring-accent-500/80 ring-inset" : ""

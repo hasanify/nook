@@ -6,8 +6,8 @@ use windows::Win32::UI::WindowsAndMessaging::{
     SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT,
     HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOPMOST,
     MF_BYPOSITION, SC_KEYMENU, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-    WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SYSCOMMAND, WM_SYSKEYDOWN,
-    WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
+    SWP_NOZORDER, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SYSCOMMAND,
+    WM_SYSKEYDOWN, WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
     WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
@@ -162,19 +162,17 @@ pub fn set_bounds_screen(
 
         let insert_after = match strategy {
             PinStrategy::Topmost => Some(HWND_TOPMOST),
-            _ => Some(HWND_NOTOPMOST),
+            _ => None,
         };
 
-        SetWindowPos(
-            hwnd,
-            insert_after,
-            x,
-            y,
-            w,
-            h,
-            SWP_NOACTIVATE | SWP_FRAMECHANGED,
-        )
-        .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
+        let flags = if insert_after.is_some() {
+            SWP_NOACTIVATE
+        } else {
+            SWP_NOACTIVATE | SWP_NOZORDER
+        };
+
+        SetWindowPos(hwnd, insert_after, x, y, w, h, flags)
+            .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
 
         Ok(())
     }

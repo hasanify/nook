@@ -90,6 +90,10 @@ pub fn run() {
             // Spawn or restore configured widgets
             windows::ensure_all_widgets(&handle).map_err(Box::<dyn std::error::Error>::from)?;
 
+            // Pre-initialize context menu window so right-click is instantaneous and thread-safe
+            windows::ensure_context_menu_window(&handle)
+                .map_err(Box::<dyn std::error::Error>::from)?;
+
             // Register global edit mode hotkey Ctrl+Alt+E
             #[cfg(desktop)]
             {
