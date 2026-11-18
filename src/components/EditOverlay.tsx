@@ -16,6 +16,7 @@ interface EditOverlayProps {
   headerActions?: React.ReactNode;
   widgetColor?: string | undefined;
   onContextMenu?: (e: React.MouseEvent) => void;
+  headerClass?: string;
 }
 
 export function EditOverlay({
@@ -27,6 +28,7 @@ export function EditOverlay({
   headerActions,
   widgetColor,
   onContextMenu,
+  headerClass,
 }: EditOverlayProps) {
   // Handle Native Dragging
   const handleDragStart = async (e: React.PointerEvent<HTMLDivElement>) => {
@@ -73,7 +75,7 @@ export function EditOverlay({
         className={`flex h-8 touch-none items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : "cursor-grab border-line/40 bg-surface-raised/40 text-fg-muted hover:bg-surface-raised/60 active:cursor-grabbing"
+            : `cursor-grab text-fg-muted hover:bg-surface-raised/60 active:cursor-grabbing ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
         }`}
         onPointerDown={handleDragStart}
       >

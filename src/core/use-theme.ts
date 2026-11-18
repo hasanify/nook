@@ -17,7 +17,7 @@ export function useTheme() {
     // Listen to config changes
     let unlisten: (() => void) | undefined;
     onConfigChanged((payload) => {
-      if (payload.app) {
+      if (payload.app || !payload.ids || payload.ids.length === 0) {
         getAppConfig()
           .then((cfg) => {
             if (cfg.app?.theme) setTheme(cfg.app.theme);

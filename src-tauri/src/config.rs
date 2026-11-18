@@ -52,10 +52,13 @@ impl Default for AppConfig {
 pub struct AppSection {
     pub theme: String,
     pub autostart: bool,
+    #[serde(alias = "edit_hotkey")]
     pub edit_hotkey: String,
+    #[serde(alias = "grid_snap")]
     pub grid_snap: i32,
+    #[serde(alias = "pin_strategy")]
     pub pin_strategy: String,
-    #[serde(default = "default_widget_preset")]
+    #[serde(default = "default_widget_preset", alias = "widget_preset")]
     pub widget_preset: String,
 }
 

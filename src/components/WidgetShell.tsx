@@ -161,6 +161,7 @@ export function WidgetShell({
         headerActions={headerActions}
         widgetColor={widgetColor}
         onContextMenu={handleContextMenu}
+        headerClass={preset.headerClass}
       />
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
