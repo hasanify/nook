@@ -241,6 +241,7 @@ pub fn hide_context_menu(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub fn show_settings_window(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("settings") {
+        let _ = window.set_skip_taskbar(false);
         let _ = window.show();
         let _ = window.unminimize();
         let _ = window.set_focus();

@@ -481,6 +481,7 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
     const LABEL: &str = "settings";
 
     if let Some(window) = app.get_webview_window(LABEL) {
+        let _ = window.set_skip_taskbar(false);
         let _ = window.show();
         let _ = window.unminimize();
         let _ = window.set_focus();
@@ -499,7 +500,7 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
     let mut builder = WebviewWindowBuilder::new(app, LABEL, url)
         .title("Nook Settings")
         .decorations(true)
-        .skip_taskbar(true)
+        .skip_taskbar(false)
         .resizable(true)
         .inner_size(720.0, 600.0)
         .min_inner_size(540.0, 440.0)
