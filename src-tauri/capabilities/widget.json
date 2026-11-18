@@ -5,6 +5,7 @@
   "windows": ["widget-*"],
   "permissions": [
     "core:default",
+    "core:window:default",
     "core:event:default",
     "core:menu:default",
     "core:webview:allow-set-webview-zoom"

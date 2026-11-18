@@ -22,12 +22,11 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
         .inner_size(instance.rect.w as f64, instance.rect.h as f64)
         .decorations(false)
         .skip_taskbar(true)
-        .resizable(false)
+        .resizable(true)
         .shadow(false)
         .focused(false)
         .visible(false)
         .transparent(true)
-        .no_redirection_bitmap(true)
         .build()
         .map_err(|e| format!("Failed to build webview window '{}': {}", label, e))?;
 
@@ -302,6 +301,67 @@ pub fn update_widget_geometry(
     }
 
     Ok(())
+}
+
+pub fn handle_widget_move_end(app: &AppHandle, hwnd: HWND) {
+    let windows = app.webview_windows();
+    let target = windows
+        .values()
+        .find(|w| w.hwnd().map(|h| HWND(h.0) == hwnd).unwrap_or(false));
+
+    if let Some(window) = target {
+        let label = window.label().to_string();
+        if let Some(id) = label.strip_prefix("widget-") {
+            let mut rc = RECT::default();
+            unsafe {
+                if windows::Win32::UI::WindowsAndMessaging::GetWindowRect(hwnd, &mut rc).is_ok() {
+                    let scale = window.scale_factor().unwrap_or(1.0);
+                    let x = (rc.left as f64 / scale).round() as i32;
+                    let y = (rc.top as f64 / scale).round() as i32;
+                    let w = ((rc.right - rc.left) as f64 / scale).round() as i32;
+                    let h = ((rc.bottom - rc.top) as f64 / scale).round() as i32;
+
+                    let state = app.state::<AppState>();
+                    let is_always_on_top = state
+                        .config
+                        .get_config()
+                        .widgets
+                        .iter()
+                        .find(|w_item| w_item.id == id)
+                        .map(|w_item| w_item.always_on_top)
+                        .unwrap_or(false);
+
+                    if !is_always_on_top {
+                        let _ = windows::Win32::UI::WindowsAndMessaging::SetWindowPos(
+                            hwnd,
+                            Some(windows::Win32::UI::WindowsAndMessaging::HWND_BOTTOM),
+                            0,
+                            0,
+                            0,
+                            0,
+                            windows::Win32::UI::WindowsAndMessaging::SWP_NOMOVE
+                                | windows::Win32::UI::WindowsAndMessaging::SWP_NOSIZE
+                                | windows::Win32::UI::WindowsAndMessaging::SWP_NOACTIVATE,
+                        );
+                    }
+
+                    let id_str = id.to_string();
+                    state.config.update_config(|cfg| {
+                        if let Some(w_item) =
+                            cfg.widgets.iter_mut().find(|w_item| w_item.id == id_str)
+                        {
+                            w_item.rect = Rect { x, y, w, h };
+                        }
+                    });
+
+                    let _ = app.emit(
+                        "config-changed",
+                        serde_json::json!({ "ids": [id_str], "app": false }),
+                    );
+                }
+            }
+        }
+    }
 }
 
 pub fn set_widget_opacity(app: &AppHandle, id: &str, opacity: f32) -> Result<(), String> {

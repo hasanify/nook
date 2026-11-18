@@ -116,11 +116,11 @@
     overflow: hidden;
     overscroll-behavior: none;
     overscroll-behavior-x: none;
-    background-color: transparent;
+    background-color: transparent !important;
   }
   body {
     @apply font-sans text-base text-fg antialiased select-none;
-    background-color: transparent;
+    background-color: transparent !important;
     overflow: hidden;
     overscroll-behavior: none;
     overscroll-behavior-x: none;

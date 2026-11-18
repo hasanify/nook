@@ -40,6 +40,12 @@ fn setup_logging() {
     }));
 }
 
+static GLOBAL_APP: std::sync::OnceLock<tauri::AppHandle> = std::sync::OnceLock::new();
+
+pub fn get_app_handle() -> Option<&'static tauri::AppHandle> {
+    GLOBAL_APP.get()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     setup_logging();
@@ -66,6 +72,7 @@ pub fn run() {
         .manage(AppState::new())
         .setup(|app| {
             let handle = app.handle().clone();
+            let _ = GLOBAL_APP.set(handle.clone());
 
             // Set up system tray
             tray::setup_tray(&handle).map_err(Box::<dyn std::error::Error>::from)?;

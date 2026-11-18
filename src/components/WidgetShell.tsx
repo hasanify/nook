@@ -108,6 +108,8 @@ export function WidgetShell({
       ? instance.settings.widgetColor
       : undefined;
 
+  const hasBlur = Boolean(instance.settings.backgroundBlur);
+
   const colorStyle: React.CSSProperties = widgetColor
     ? ({
         "--color-accent-500": widgetColor,
@@ -117,7 +119,9 @@ export function WidgetShell({
         borderColor: effectiveEditMode
           ? widgetColor
           : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
-        backgroundColor: `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
+        backgroundColor: hasBlur
+          ? `color-mix(in srgb, ${widgetColor} 18%, color-mix(in srgb, var(--surface) 72%, transparent))`
+          : `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
         boxShadow: effectiveEditMode
           ? `0 0 24px -2px color-mix(in srgb, ${widgetColor} 40%, transparent)`
           : undefined,
@@ -131,7 +135,9 @@ export function WidgetShell({
         ...colorStyle,
         opacity: widgetOpacity,
       }}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border shadow-card transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
+        hasBlur ? "bg-surface/75 backdrop-blur-xl" : "bg-surface"
+      } ${
         effectiveEditMode
           ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25"
           : "border-line/70"
@@ -162,6 +168,10 @@ export function WidgetShell({
         position={contextMenuPos ?? { x: 0, y: 0 }}
         isEditMode={effectiveEditMode}
         currentColor={widgetColor || ""}
+        hasBackgroundBlur={hasBlur}
+        onToggleBackgroundBlur={() =>
+          void updateSettings(instance.id, { backgroundBlur: !hasBlur })
+        }
         onToggleEditMode={effectiveToggle}
         onSelectColor={(color) => void updateSettings(instance.id, { widgetColor: color })}
         onOpenSettings={() => void openSettingsWindow(instance.id)}

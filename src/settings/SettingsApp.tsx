@@ -688,6 +688,35 @@ export function SettingsApp() {
                     />
                   </div>
 
+                  {/* Background Blur Toggle */}
+                  <div className="flex items-center justify-between border-t border-line/60 pt-3">
+                    <div>
+                      <div className="font-medium text-fg">Background Blur</div>
+                      <div className="text-[11px] text-fg-muted">
+                        Add a frosted glass blur effect to widget background
+                      </div>
+                    </div>
+                    <Toggle
+                      checked={Boolean(selectedWidget.settings.backgroundBlur)}
+                      onChange={() => {
+                        const nextVal = !selectedWidget.settings.backgroundBlur;
+                        setConfig((prev) => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            widgets: prev.widgets.map((w) =>
+                              w.id === selectedWidget.id
+                                ? { ...w, settings: { ...w.settings, backgroundBlur: nextVal } }
+                                : w,
+                            ),
+                          };
+                        });
+                        void updateSettings(selectedWidget.id, { backgroundBlur: nextVal });
+                      }}
+                      ariaLabel="Background blur"
+                    />
+                  </div>
+
                   {/* Widget Accent Color */}
                   <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
                     <div className="flex items-center justify-between">
