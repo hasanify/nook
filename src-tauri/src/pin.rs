@@ -1,6 +1,5 @@
 use tracing::info;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
-use windows::Win32::Graphics::Gdi::{CreateRoundRectRgn, SetWindowRgn};
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
     DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
@@ -149,21 +148,7 @@ pub fn disable_system_menu(hwnd: HWND) {
     }
 }
 
-/// Applies a rounded region to the HWND so no pixels or DWM effects spill outside the corner radius.
-pub fn apply_rounded_region(hwnd: HWND, w: i32, h: i32, radius: i32) {
-    if w <= 0 || h <= 0 {
-        return;
-    }
-    unsafe {
-        let d = radius * 2;
-        let rgn = CreateRoundRectRgn(0, 0, w + 1, h + 1, d, d);
-        if !rgn.is_invalid() {
-            let _ = SetWindowRgn(hwnd, Some(rgn), true);
-        }
-    }
-}
-
-/// Applies screen-space rect to the window, enforcing safe z-order and rounded corner clipping.
+/// Applies screen-space rect to the window, enforcing safe z-order.
 pub fn set_bounds_screen(
     hwnd: HWND,
     screen_rect: RECT,
@@ -190,8 +175,6 @@ pub fn set_bounds_screen(
             SWP_NOACTIVATE | SWP_FRAMECHANGED,
         )
         .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
-
-        apply_rounded_region(hwnd, w, h, 16);
 
         Ok(())
     }

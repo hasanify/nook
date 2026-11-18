@@ -1,7 +1,5 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useRef, useEffect } from "react";
 import type { Rect } from "../core/types";
-
-const appWindow = getCurrentWindow();
 
 interface EditOverlayProps {
   id: string;
@@ -26,6 +24,9 @@ export function EditOverlay({
   title,
   editMode,
   resizable = true,
+  minSize = { w: 200, h: 160 },
+  currentBounds,
+  onBoundsChange,
   onToggleEditMode,
   headerSlot,
   headerActions,
@@ -35,37 +36,187 @@ export function EditOverlay({
   onResetToDefault,
   onResetToFit,
 }: EditOverlayProps) {
-  // Handle Native Dragging (only when editMode is active)
-  const handleDragStart = async (e: React.PointerEvent<HTMLDivElement>) => {
+  const isDragging = useRef(false);
+  const isResizing = useRef(false);
+
+  const activeBoundsRef = useRef<Rect>(currentBounds);
+  const rafId = useRef<number | null>(null);
+  const pendingBounds = useRef<Rect | null>(null);
+
+  useEffect(() => {
+    activeBoundsRef.current = currentBounds;
+  }, [currentBounds]);
+
+  useEffect(() => {
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
+
+  const scheduleBoundsUpdate = (bounds: Rect) => {
+    pendingBounds.current = bounds;
+    if (rafId.current === null) {
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        if (pendingBounds.current && onBoundsChange) {
+          activeBoundsRef.current = pendingBounds.current;
+          onBoundsChange(pendingBounds.current, false);
+        }
+      });
+    }
+  };
+
+  // Handle Dragging
+  const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!editMode || e.button !== 0) return;
     const target = e.target as HTMLElement;
     if (target.closest("button") || target.closest("input") || target.closest("select")) {
       return;
     }
+
+    const currentTarget = e.currentTarget;
     try {
-      await appWindow.startDragging();
+      currentTarget.setPointerCapture(e.pointerId);
     } catch {
-      // Ignore if native dragging cannot be started
+      // Ignore
     }
+
+    isDragging.current = true;
+    const startX = e.screenX;
+    const startY = e.screenY;
+    const origX = activeBoundsRef.current.x;
+    const origY = activeBoundsRef.current.y;
+    const origW = activeBoundsRef.current.w;
+    const origH = activeBoundsRef.current.h;
+
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!isDragging.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
+      const deltaX = ev.screenX - startX;
+      const deltaY = ev.screenY - startY;
+      const nextBounds: Rect = {
+        x: origX + deltaX,
+        y: origY + deltaY,
+        w: origW,
+        h: origH,
+      };
+      scheduleBoundsUpdate(nextBounds);
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("mouseup", onPointerUp);
+      try {
+        if (currentTarget.hasPointerCapture(e.pointerId)) {
+          currentTarget.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
+      onBoundsChange?.(finalBounds, true);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("mouseup", onPointerUp);
   };
 
-  // Handle Native Resizing (only when editMode is active)
-  const handleResizeStart = async (e: React.PointerEvent<HTMLDivElement>) => {
+  // Handle Resizing
+  const handleResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!editMode || e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
+
+    const target = e.currentTarget;
     try {
-      await appWindow.startResizeDragging("SouthEast");
+      target.setPointerCapture(e.pointerId);
     } catch {
-      // Ignore if native resizing cannot be started
+      // Ignore
     }
+
+    isResizing.current = true;
+    const startX = e.screenX;
+    const startY = e.screenY;
+    const origX = activeBoundsRef.current.x;
+    const origY = activeBoundsRef.current.y;
+    const origW = activeBoundsRef.current.w;
+    const origH = activeBoundsRef.current.h;
+
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!isResizing.current) return;
+      if (ev.buttons === 0) {
+        cleanup();
+        return;
+      }
+      const deltaW = ev.screenX - startX;
+      const deltaH = ev.screenY - startY;
+      const minW = minSize?.w ?? 200;
+      const minH = minSize?.h ?? 160;
+      const nextW = Math.max(minW, origW + deltaW);
+      const nextH = Math.max(minH, origH + deltaH);
+
+      const nextBounds: Rect = {
+        x: origX,
+        y: origY,
+        w: nextW,
+        h: nextH,
+      };
+      scheduleBoundsUpdate(nextBounds);
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("mouseup", onPointerUp);
+      try {
+        if (target.hasPointerCapture(e.pointerId)) {
+          target.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+
+      if (!isResizing.current) return;
+      isResizing.current = false;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      const finalBounds = pendingBounds.current ?? activeBoundsRef.current;
+      onBoundsChange?.(finalBounds, true);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("mouseup", onPointerUp);
   };
 
   return (
     <>
       {/* Top Header / Drag bar */}
       <div
-        {...(editMode ? { "data-tauri-drag-region": "" } : {})}
         onContextMenu={onContextMenu}
         style={
           widgetColor
@@ -77,28 +228,20 @@ export function EditOverlay({
               }
             : undefined
         }
-        className={`flex h-8 items-center justify-between border-b px-3 text-xs transition-colors select-none ${
+        className={`flex h-8 touch-none items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
             : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
         }`}
         onPointerDown={editMode ? handleDragStart : undefined}
-        onDoubleClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
       >
         <div
-          {...(editMode ? { "data-tauri-drag-region": "" } : {})}
           className={`flex min-w-0 flex-1 items-center gap-1.5 font-medium ${
             editMode ? "pointer-events-none" : ""
           }`}
         >
           {headerSlot}
-          <span
-            {...(editMode ? { "data-tauri-drag-region": "" } : {})}
-            className="truncate text-[11px] font-semibold tracking-tight text-fg/80"
-          >
+          <span className="truncate text-[11px] font-semibold tracking-tight text-fg/80">
             {title}
           </span>
         </div>
@@ -112,7 +255,6 @@ export function EditOverlay({
               {resizable && onResetToFit && (
                 <button
                   type="button"
-                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
                     onResetToFit();
@@ -126,7 +268,6 @@ export function EditOverlay({
               {resizable && onResetToDefault && (
                 <button
                   type="button"
-                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
                     onResetToDefault();
@@ -140,7 +281,6 @@ export function EditOverlay({
               <div className="mx-0.5 h-3 w-px bg-line/60" />
               <button
                 type="button"
-                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleEditMode();

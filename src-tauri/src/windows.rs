@@ -33,12 +33,11 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
         .maximizable(false)
         .decorations(false)
         .skip_taskbar(true)
-        .resizable(true)
+        .resizable(false)
         .shadow(false)
         .focused(false)
         .visible(false)
         .transparent(true)
-        .no_redirection_bitmap(true)
         .build()
         .map_err(|e| format!("Failed to build webview window '{}': {}", label, e))?;
 
@@ -75,35 +74,6 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     };
 
     pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
-
-    let has_blur = instance
-        .settings
-        .get("backgroundBlur")
-        .and_then(|v| v.as_bool())
-        .unwrap_or(false)
-        || app
-            .state::<AppState>()
-            .config
-            .get_config()
-            .app
-            .widget_preset
-            == "glass"
-        || app
-            .state::<AppState>()
-            .config
-            .get_config()
-            .app
-            .widget_preset
-            == "ghost";
-
-    if has_blur {
-        let _ = window.set_effects(
-            tauri::window::EffectsBuilder::new()
-                .effect(tauri::window::Effect::Acrylic)
-                .state(tauri::window::EffectState::Active)
-                .build(),
-        );
-    }
 
     window
         .show()
@@ -347,37 +317,18 @@ pub fn update_widget_geometry(
 pub fn sync_widget_effects(app: &AppHandle, widget_id: Option<&str>) {
     let state = app.state::<AppState>();
     let cfg = state.config.get_config();
-    let global_preset = &cfg.app.widget_preset;
 
-    let targets: Vec<(String, bool)> = cfg
+    let targets: Vec<String> = cfg
         .widgets
         .iter()
         .filter(|w| widget_id.is_none() || widget_id == Some(&w.id))
-        .map(|w| {
-            let blur = w
-                .settings
-                .get("backgroundBlur")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false)
-                || global_preset == "glass"
-                || global_preset == "ghost";
-            (w.id.clone(), blur)
-        })
+        .map(|w| w.id.clone())
         .collect();
 
-    for (id, has_blur) in targets {
+    for id in targets {
         let label = format!("widget-{}", id);
         if let Some(window) = app.get_webview_window(&label) {
-            if has_blur {
-                let _ = window.set_effects(
-                    tauri::window::EffectsBuilder::new()
-                        .effect(tauri::window::Effect::Acrylic)
-                        .state(tauri::window::EffectState::Active)
-                        .build(),
-                );
-            } else {
-                let _ = window.set_effects(None);
-            }
+            let _ = window.set_effects(None);
         }
     }
 }
