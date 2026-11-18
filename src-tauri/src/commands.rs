@@ -106,20 +106,7 @@ pub fn set_edit_mode(app: AppHandle, on: bool) -> Result<(), String> {
 
 #[tauri::command]
 pub fn set_opacity(app: AppHandle, id: String, value: f32) -> Result<(), String> {
-    windows::set_widget_opacity(&app, &id, value)?;
-
-    let state = app.state::<AppState>();
-    state.config.update_config(|cfg| {
-        if let Some(target) = cfg.widgets.iter_mut().find(|w| w.id == id) {
-            target.opacity = value;
-        }
-    });
-
-    let _ = app.emit(
-        "config-changed",
-        serde_json::json!({ "ids": [id], "app": false }),
-    );
-    Ok(())
+    windows::set_widget_opacity(&app, &id, value)
 }
 
 #[tauri::command]

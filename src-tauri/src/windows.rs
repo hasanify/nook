@@ -304,13 +304,18 @@ pub fn update_widget_geometry(
 }
 
 pub fn set_widget_opacity(app: &AppHandle, id: &str, opacity: f32) -> Result<(), String> {
-    let label = format!("widget-{}", id);
-    if let Some(window) = app.get_webview_window(&label) {
-        if let Ok(raw) = window.hwnd() {
-            let hwnd = HWND(raw.0);
-            pin::set_opacity(hwnd, opacity)?;
+    let state = app.state::<AppState>();
+    state.config.update_config(|cfg| {
+        if let Some(target) = cfg.widgets.iter_mut().find(|w| w.id == id) {
+            target.opacity = opacity.clamp(0.1, 1.0);
         }
-    }
+    });
+
+    let _ = app.emit(
+        "config-changed",
+        serde_json::json!({ "ids": [id], "app": false }),
+    );
+
     Ok(())
 }
 

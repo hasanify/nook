@@ -5,6 +5,10 @@ import { setBounds, removeWidget, openSettingsWindow, updateSettings } from "../
 import { useEditMode } from "../core/use-edit-mode";
 import type { WidgetInstance, Rect } from "../core/types";
 
+function rectsEqual(a: Rect, b: Rect): boolean {
+  return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
+}
+
 interface WidgetShellProps {
   instance: WidgetInstance;
   editMode?: boolean;
@@ -35,11 +39,12 @@ export function WidgetShell({
   const effectiveToggle =
     propToggle && propToggle.toString() !== "() => {}" ? propToggle : hookToggleEditMode;
 
+  const [isInteracting, setIsInteracting] = useState(false);
   const [prevInstanceRect, setPrevInstanceRect] = useState(instance.rect);
   const [localBounds, setLocalBounds] = useState<Rect>(instance.rect);
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
-  if (prevInstanceRect !== instance.rect) {
+  if (!isInteracting && !rectsEqual(prevInstanceRect, instance.rect)) {
     setPrevInstanceRect(instance.rect);
     setLocalBounds(instance.rect);
   }
@@ -87,9 +92,16 @@ export function WidgetShell({
   };
 
   const handleBoundsChange = (bounds: Rect, commit: boolean) => {
+    setIsInteracting(!commit);
     setLocalBounds(bounds);
+    if (commit) {
+      setPrevInstanceRect(bounds);
+    }
     sendBounds(bounds, commit);
   };
+
+  const widgetOpacity =
+    typeof instance.opacity === "number" ? Math.max(0.1, Math.min(1.0, instance.opacity)) : 0.95;
 
   const widgetColor =
     typeof instance.settings.widgetColor === "string" && instance.settings.widgetColor
@@ -115,8 +127,11 @@ export function WidgetShell({
   return (
     <div
       onContextMenu={handleContextMenu}
-      style={colorStyle}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-all duration-200 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
+      style={{
+        ...colorStyle,
+        opacity: widgetOpacity,
+      }}
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent ${
         effectiveEditMode
           ? "border-accent-500/80 shadow-glow ring-2 ring-accent-500/25"
           : "border-line/70"
@@ -138,7 +153,7 @@ export function WidgetShell({
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto rounded-b-2xl p-3 pb-3.5 text-sm select-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto p-3 pb-3.5 text-sm select-auto">
         {children}
       </div>
 

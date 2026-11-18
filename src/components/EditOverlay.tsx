@@ -81,10 +81,6 @@ export function EditOverlay({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isDragging.current) return;
-      if (ev.buttons === 0) {
-        cleanup();
-        return;
-      }
       const deltaX = ev.screenX - startX;
       const deltaY = ev.screenY - startY;
       const nextBounds: Rect = {
@@ -97,10 +93,10 @@ export function EditOverlay({
     };
 
     const cleanup = () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      window.removeEventListener("mouseup", onPointerUp);
+      window.removeEventListener("pointermove", onPointerMove, { capture: true });
+      window.removeEventListener("pointerup", onPointerUp, { capture: true });
+      window.removeEventListener("pointercancel", onPointerUp, { capture: true });
+      window.removeEventListener("mouseup", onPointerUp, { capture: true });
       try {
         if (target.hasPointerCapture(e.pointerId)) {
           target.releasePointerCapture(e.pointerId);
@@ -121,10 +117,10 @@ export function EditOverlay({
       cleanup();
     };
 
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-    window.addEventListener("mouseup", onPointerUp);
+    window.addEventListener("pointermove", onPointerMove, { capture: true });
+    window.addEventListener("pointerup", onPointerUp, { capture: true });
+    window.addEventListener("pointercancel", onPointerUp, { capture: true });
+    window.addEventListener("mouseup", onPointerUp, { capture: true });
   };
 
   // Handle Resizing
@@ -150,10 +146,6 @@ export function EditOverlay({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isResizing.current) return;
-      if (ev.buttons === 0) {
-        cleanup();
-        return;
-      }
       const deltaW = ev.screenX - startX;
       const deltaH = ev.screenY - startY;
       const nextW = Math.max(minSize.w, origW + deltaW);
@@ -169,10 +161,10 @@ export function EditOverlay({
     };
 
     const cleanup = () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      window.removeEventListener("mouseup", onPointerUp);
+      window.removeEventListener("pointermove", onPointerMove, { capture: true });
+      window.removeEventListener("pointerup", onPointerUp, { capture: true });
+      window.removeEventListener("pointercancel", onPointerUp, { capture: true });
+      window.removeEventListener("mouseup", onPointerUp, { capture: true });
       try {
         if (target.hasPointerCapture(e.pointerId)) {
           target.releasePointerCapture(e.pointerId);
@@ -193,10 +185,10 @@ export function EditOverlay({
       cleanup();
     };
 
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-    window.addEventListener("mouseup", onPointerUp);
+    window.addEventListener("pointermove", onPointerMove, { capture: true });
+    window.addEventListener("pointerup", onPointerUp, { capture: true });
+    window.addEventListener("pointercancel", onPointerUp, { capture: true });
+    window.addEventListener("mouseup", onPointerUp, { capture: true });
   };
 
   return (

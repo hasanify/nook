@@ -45,6 +45,8 @@ export function SettingsApp() {
   const [vercelInput, setVercelInput] = useState("");
   const [widgetToAdd, setWidgetToAdd] = useState("notes");
   const hasShownWindowRef = useRef(false);
+  const opacityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSlidingOpacityRef = useRef(false);
 
   const [appVersion, setAppVersion] = useState<string>("");
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -69,11 +71,23 @@ export function SettingsApp() {
   const fetchConfig = useCallback(() => {
     getAppConfig()
       .then((cfg) => {
-        setConfig(cfg);
+        setConfig((prev) => {
+          if (!prev || !isSlidingOpacityRef.current) return cfg;
+          return {
+            ...cfg,
+            widgets: cfg.widgets.map((w) => {
+              if (w.id === selectedWidgetId) {
+                const cur = prev.widgets.find((p) => p.id === w.id);
+                return cur ? { ...w, opacity: cur.opacity } : w;
+              }
+              return w;
+            }),
+          };
+        });
         setSelectedWidgetId((prev) => prev ?? cfg.widgets[0]?.id ?? null);
       })
       .catch(() => {});
-  }, []);
+  }, [selectedWidgetId]);
 
   useEffect(() => {
     fetchConfig();
@@ -115,6 +129,7 @@ export function SettingsApp() {
       if (unlisten) unlisten();
       if (unlistenProgress) unlistenProgress();
       if (unlistenFocus) unlistenFocus();
+      if (opacityDebounceRef.current) clearTimeout(opacityDebounceRef.current);
     };
   }, [fetchConfig, refreshAccountStatus]);
 
@@ -372,8 +387,8 @@ export function SettingsApp() {
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden text-xs">
         {/* GENERAL TAB */}
         {activeTab === "general" && (
-          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 pt-5 pb-8">
-            <div className="flex w-full flex-col gap-6 pb-8">
+          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
+            <div className="my-3 flex w-full flex-col gap-5 pb-4">
               {/* Appearance / Theme */}
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <span className="font-semibold text-fg">Appearance</span>
@@ -518,9 +533,9 @@ export function SettingsApp() {
 
         {/* WIDGETS TAB */}
         {activeTab === "widgets" && (
-          <div className="flex min-h-0 flex-1 gap-5 overflow-hidden px-6 pt-4 pb-4">
+          <div className="flex min-h-0 flex-1 gap-5 overflow-hidden px-6 py-0">
             {/* Left Column: Widget List */}
-            <div className="flex w-52 shrink-0 flex-col gap-2.5 border-r border-line/60 pr-4">
+            <div className="my-3 flex w-52 shrink-0 flex-col gap-2.5 border-r border-line/60 pr-4">
               <div className="flex items-center justify-between font-medium text-fg">
                 <span>Active Widgets</span>
                 <span className="font-mono text-[11px] text-fg-muted">
@@ -602,9 +617,9 @@ export function SettingsApp() {
             </div>
 
             {/* Right Column: Widget Inspector */}
-            <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none pr-2 pl-2">
+            <div className="my-3 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none pr-2 pl-2">
               {selectedWidget ? (
-                <div className="flex w-full flex-col gap-5 pb-12">
+                <div className="flex w-full flex-col gap-5 pb-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-sm font-semibold text-fg">
@@ -646,6 +661,7 @@ export function SettingsApp() {
                       value={selectedWidget.opacity}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        isSlidingOpacityRef.current = true;
                         setConfig((prev) => {
                           if (!prev) return prev;
                           return {
@@ -655,7 +671,13 @@ export function SettingsApp() {
                             ),
                           };
                         });
-                        void setOpacity(selectedWidget.id, val);
+                        if (opacityDebounceRef.current) {
+                          clearTimeout(opacityDebounceRef.current);
+                        }
+                        opacityDebounceRef.current = setTimeout(() => {
+                          isSlidingOpacityRef.current = false;
+                          void setOpacity(selectedWidget.id, val);
+                        }, 50);
                       }}
                       className="cursor-pointer accent-accent-500"
                     />
@@ -766,8 +788,8 @@ export function SettingsApp() {
 
         {/* ACCOUNTS TAB */}
         {activeTab === "accounts" && (
-          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 pt-5 pb-8">
-            <div className="flex w-full flex-col gap-6 pb-8">
+          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
+            <div className="my-3 flex w-full flex-col gap-5 pb-4">
               <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
                 <svg
                   className="h-4 w-4 shrink-0 text-accent-500"
@@ -915,8 +937,8 @@ export function SettingsApp() {
 
         {/* ABOUT TAB */}
         {activeTab === "about" && (
-          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 pt-5 pb-8">
-            <div className="flex w-full flex-col gap-6 pb-8">
+          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
+            <div className="my-3 flex w-full flex-col gap-5 pb-4">
               {/* Hero Card */}
               <div className="flex items-center gap-5 rounded-2xl border border-line/70 bg-gradient-to-br from-surface-raised/80 via-surface-raised/40 to-surface/20 p-6 backdrop-blur-xs">
                 <img
