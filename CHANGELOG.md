@@ -1,3 +1,9 @@
+# [0.13.0](https://github.com/hasanify/nook/compare/v0.12.0...v0.13.0) (2026-11-18)
+
+### Features
+
+- **widgets:** native OS drag and resize, background blur toggle, and fix corner transparency ([09245e8](https://github.com/hasanify/nook/commit/09245e89d87d3ff84457dc37418c8abd8e275d17))
+
 # [0.12.0](https://github.com/hasanify/nook/compare/v0.11.6...v0.12.0) (2026-11-18)
 
 ### Features
