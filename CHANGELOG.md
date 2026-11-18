@@ -1,3 +1,9 @@
+## [0.11.6](https://github.com/hasanify/nook/compare/v0.11.5...v0.11.6) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** fix drag hiding behind wallpaper, smooth resizing, enable no_redirection_bitmap for corner transparency, and fix opacity race condition ([388fbc5](https://github.com/hasanify/nook/commit/388fbc57e6572dda173190020adb4f9a6cddee6c))
+
 ## [0.11.5](https://github.com/hasanify/nook/compare/v0.11.4...v0.11.5) (2026-11-18)
 
 ### Bug Fixes
