@@ -104,7 +104,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
         </form>
 
         {/* Task List */}
-        <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
+        <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1 pb-2">
           {displayedTodos.length === 0 ? (
             <div className="flex flex-1 items-center justify-center py-6 text-xs text-fg-muted italic">
               {todos.length === 0 ? "No tasks yet. Type above to add." : "All tasks completed!"}

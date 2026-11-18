@@ -318,7 +318,7 @@ export function TimerWidget({ instance, editMode, patchState }: WidgetProps) {
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pb-2">
           {status === "running" ? (
             <button
               type="button"

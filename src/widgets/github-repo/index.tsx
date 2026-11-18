@@ -406,7 +406,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
             <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
               Commits
             </span>
-            <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
+            <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1 pb-2">
               {data?.commits && data.commits.length > 0 ? (
                 data.commits.map((c) => (
                   <button

@@ -211,7 +211,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
         <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
           Deployments
         </span>
-        <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1">
+        <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1 pb-2">
           {data?.deployments && data.deployments.length > 0 ? (
             data.deployments.map((dep) => {
               const status = mapVercelState(dep.state);

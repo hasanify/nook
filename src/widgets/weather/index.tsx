@@ -242,7 +242,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
             </div>
 
             {/* Atmosphere Details Pill */}
-            <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line/40 pt-2 text-[11px]">
+            <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line/40 pt-2 pb-2 text-[11px]">
               <div className="flex items-center gap-1.5 text-fg-muted">
                 <svg
                   className="h-3 w-3"
