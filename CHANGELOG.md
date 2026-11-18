@@ -1,3 +1,11 @@
+## [0.19.3](https://github.com/hasanify/nook/compare/v0.19.2...v0.19.3) (2026-11-18)
+
+### Bug Fixes
+
+- **docs:** close anchor tag in releases footer ([3d23943](https://github.com/hasanify/nook/commit/3d239438b25ad08949ade7001eca7ae6598d365e))
+- **weather:** serialize weather fields in camelCase and display wind unit ([7a712a1](https://github.com/hasanify/nook/commit/7a712a1d129700c8f56ffaf18662e722b27d5809))
+- **widgets:** restore native moving, eliminate corner spill, and smooth resize ([97eceb4](https://github.com/hasanify/nook/commit/97eceb427c8e0071f682259e235c4249d62da3ab))
+
 ## [0.19.2](https://github.com/hasanify/nook/compare/v0.19.1...v0.19.2) (2026-11-18)
 
 ### Bug Fixes
