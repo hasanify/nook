@@ -1,3 +1,9 @@
+# [0.15.0](https://github.com/hasanify/nook/compare/v0.14.0...v0.15.0) (2026-11-18)
+
+### Features
+
+- **appearance:** add appearance tab with unified widget style presets and theme modes ([c6059de](https://github.com/hasanify/nook/commit/c6059deb318b8b0666459dbcfd5316d0a8bf1922))
+
 # [0.14.0](https://github.com/hasanify/nook/compare/v0.13.0...v0.14.0) (2026-11-18)
 
 ### Features
