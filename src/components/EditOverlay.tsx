@@ -16,7 +16,6 @@ interface EditOverlayProps {
   widgetColor?: string | undefined;
   onContextMenu?: ((e: React.MouseEvent) => void) | undefined;
   headerClass?: string | undefined;
-  hasBlur?: boolean | undefined;
   onResetToDefault?: (() => void) | undefined;
   onResetToFit?: (() => void) | undefined;
 }
@@ -34,7 +33,6 @@ export function EditOverlay({
   widgetColor,
   onContextMenu,
   headerClass,
-  hasBlur,
   onResetToDefault,
   onResetToFit,
 }: EditOverlayProps) {
@@ -245,9 +243,7 @@ export function EditOverlay({
             ? {
                 backgroundColor: editMode
                   ? `color-mix(in srgb, ${widgetColor} 25%, var(--surface-raised))`
-                  : hasBlur
-                    ? `color-mix(in srgb, ${widgetColor} 22%, color-mix(in srgb, var(--surface-raised) 35%, transparent))`
-                    : `color-mix(in srgb, ${widgetColor} 18%, var(--surface-raised))`,
+                  : `color-mix(in srgb, ${widgetColor} 18%, var(--surface-raised))`,
                 borderBottomColor: `color-mix(in srgb, ${widgetColor} 35%, var(--line))`,
               }
             : undefined

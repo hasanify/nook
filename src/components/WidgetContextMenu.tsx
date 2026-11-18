@@ -21,8 +21,6 @@ interface WidgetContextMenuProps {
   isEditMode: boolean;
   currentColor?: string | undefined;
   onToggleEditMode: () => void;
-  hasBackgroundBlur?: boolean | undefined;
-  onToggleBackgroundBlur?: (() => void) | undefined;
   onSelectColor?: ((color: string) => void) | undefined;
   onResetToDefault?: (() => void) | undefined;
   onResetToFit?: (() => void) | undefined;
@@ -36,8 +34,6 @@ export function WidgetContextMenu({
   position,
   isEditMode,
   currentColor,
-  hasBackgroundBlur,
-  onToggleBackgroundBlur,
   onToggleEditMode,
   onSelectColor,
   onResetToDefault,
@@ -289,41 +285,6 @@ export function WidgetContextMenu({
             })()}
           </div>
         </div>
-      )}
-
-      {/* Background Blur Toggle */}
-      {onToggleBackgroundBlur && (
-        <button
-          type="button"
-          onClick={() => {
-            onClose();
-            onToggleBackgroundBlur();
-          }}
-          className="flex w-full cursor-pointer items-center justify-between border-t border-line/40 px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
-        >
-          <div className="flex items-center gap-2">
-            <svg
-              className="h-3.5 w-3.5 shrink-0 text-fg-muted"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
-            </svg>
-            <span>Background Blur</span>
-          </div>
-          <span
-            className={`font-mono text-[9px] font-semibold tracking-wider uppercase ${
-              hasBackgroundBlur ? "text-accent-500" : "text-fg-muted/60"
-            }`}
-          >
-            {hasBackgroundBlur ? "On" : "Off"}
-          </span>
-        </button>
       )}
 
       {/* Settings */}

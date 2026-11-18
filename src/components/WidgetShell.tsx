@@ -123,10 +123,6 @@ export function WidgetShell({
 
   const { preset: globalPresetId } = useTheme();
   const preset = getWidgetPreset(globalPresetId);
-  const hasBlur = Boolean(instance.settings.backgroundBlur) || preset.hasBlur;
-
-  const blurStrength =
-    typeof instance.settings.blurStrength === "number" ? instance.settings.blurStrength : 20;
 
   const colorStyle: React.CSSProperties = widgetColor
     ? ({
@@ -137,20 +133,10 @@ export function WidgetShell({
         borderColor: effectiveEditMode
           ? widgetColor
           : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
-        backgroundColor: hasBlur
-          ? `color-mix(in srgb, ${widgetColor} 20%, color-mix(in srgb, var(--surface) 35%, transparent))`
-          : `color-mix(in srgb, ${widgetColor} 16%, var(--surface))`,
+        backgroundColor: `color-mix(in srgb, ${widgetColor} 16%, var(--surface))`,
         boxShadow: undefined,
-        backdropFilter: hasBlur ? `blur(${blurStrength}px)` : undefined,
-        WebkitBackdropFilter: hasBlur ? `blur(${blurStrength}px)` : undefined,
       } as React.CSSProperties)
-    : hasBlur
-      ? ({
-          backgroundColor: "color-mix(in srgb, var(--surface) 40%, transparent)",
-          backdropFilter: `blur(${blurStrength}px)`,
-          WebkitBackdropFilter: `blur(${blurStrength}px)`,
-        } as React.CSSProperties)
-      : {};
+    : {};
 
   return (
     <div
@@ -180,7 +166,6 @@ export function WidgetShell({
         widgetColor={widgetColor}
         onContextMenu={handleContextMenu}
         headerClass={preset.headerClass}
-        hasBlur={hasBlur}
         onResetToDefault={defaultSize ? handleResetToDefault : undefined}
         onResetToFit={handleResetToFit}
       />

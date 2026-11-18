@@ -5,7 +5,6 @@ export interface WidgetPreset {
   description: string;
   containerClass: string;
   headerClass: string;
-  hasBlur: boolean;
   highlightClass: string;
   previewBg: string;
   previewBorder: string;
@@ -19,7 +18,6 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     description: "Solid surface, refined hairline borders, and subtle elevation.",
     containerClass: "rounded-2xl border border-line/70 bg-surface ring-1 ring-inset ring-white/10",
     headerClass: "border-b border-line/40 bg-surface-raised/40",
-    hasBlur: false,
     highlightClass: "before:via-white/10",
     previewBg: "bg-surface",
     previewBorder: "border-line/70",
@@ -27,14 +25,13 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
   {
     id: "glass",
     name: "Frosted Glass",
-    tagline: "Mica & Aero Blur",
-    description: "Translucent frosted glass with real-time blur and luminous specular edges.",
+    tagline: "Refined Translucent",
+    description: "Translucent glass card surface with luminous specular edges.",
     containerClass:
-      "rounded-2xl border border-white/20 bg-surface/50 backdrop-blur-xl ring-1 ring-inset ring-white/20",
-    headerClass: "border-b border-white/10 bg-surface-raised/30 backdrop-blur-md",
-    hasBlur: true,
+      "rounded-2xl border border-white/20 bg-surface/75 ring-1 ring-inset ring-white/20",
+    headerClass: "border-b border-white/10 bg-surface-raised/50",
     highlightClass: "before:via-white/30",
-    previewBg: "bg-surface/60 backdrop-blur-md",
+    previewBg: "bg-surface/75",
     previewBorder: "border-white/25",
   },
   {
@@ -43,11 +40,10 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Ultra-Sheer Float",
     description: "Whisper-thin translucent look that floats naturally on your desktop wallpaper.",
     containerClass:
-      "rounded-2xl border border-line/30 bg-surface/35 backdrop-blur-md ring-1 ring-inset ring-line/20",
-    headerClass: "border-b border-line/20 bg-surface-raised/20",
-    hasBlur: true,
+      "rounded-2xl border border-line/30 bg-surface/60 ring-1 ring-inset ring-line/20",
+    headerClass: "border-b border-line/20 bg-surface-raised/40",
     highlightClass: "before:via-transparent",
-    previewBg: "bg-surface/30 backdrop-blur-sm",
+    previewBg: "bg-surface/50",
     previewBorder: "border-line/30",
   },
   {
@@ -58,7 +54,6 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     containerClass:
       "rounded-2xl border border-accent-500/50 bg-neutral-950/90 ring-1 ring-inset ring-accent-500/30",
     headerClass: "border-b border-accent-500/30 bg-neutral-900/60",
-    hasBlur: false,
     highlightClass: "before:via-accent-500/40",
     previewBg: "bg-neutral-950",
     previewBorder: "border-accent-500/50",
@@ -71,7 +66,6 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     containerClass:
       "rounded-3xl border border-line/80 bg-surface-raised ring-1 ring-inset ring-line/40",
     headerClass: "border-b border-line/40 bg-surface/50",
-    hasBlur: false,
     highlightClass: "before:via-transparent",
     previewBg: "bg-surface-raised",
     previewBorder: "border-line/80",
@@ -83,7 +77,6 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     description: "Sharp compact corners with high-contrast outlines for dense desktop setups.",
     containerClass: "rounded-lg border border-line bg-surface ring-1 ring-inset ring-line/30",
     headerClass: "border-b border-line bg-surface-raised/60",
-    hasBlur: false,
     highlightClass: "before:via-white/10",
     previewBg: "bg-surface",
     previewBorder: "border-line",
