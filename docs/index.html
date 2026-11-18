@@ -362,6 +362,9 @@
         padding: 12px 16px;
         overflow-x: auto;
         color: var(--text);
+        white-space: pre;
+        line-height: 1.6;
+        margin: 0;
       }
 
       .shortcut-list {
@@ -786,9 +789,10 @@
 
             <div style="border-top: 1px solid var(--border); padding-top: 16px">
               <div style="font-weight: 600; margin-bottom: 8px">Build from source</div>
-              <div class="code-block">
-                git clone https://github.com/hasanify/nook.git cd nook npm install npm run tauri dev
-              </div>
+              <pre class="code-block"><code>git clone https://github.com/hasanify/nook.git
+cd nook
+npm install
+npm run tauri dev</code></pre>
             </div>
           </div>
         </div>
