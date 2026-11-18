@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { StatusDot } from "../../components/StatusDot";
 import { Banner } from "../../components/Banner";
@@ -75,8 +76,11 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
 
   const handleOpenLink = (url: string) => {
     if (url) {
-      const fullUrl = url.startsWith("http") ? url : `https://${url}`;
-      void openUrl(fullUrl);
+      const fullUrl =
+        url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+      openUrl(fullUrl).catch(() => {
+        window.open(fullUrl, "_blank");
+      });
     }
   };
 
@@ -124,9 +128,18 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
     return null;
   })();
 
-  const primaryDomain =
-    data?.meta?.domain ||
-    (latestDeployment?.url ? latestDeployment.url.replace(/^https?:\/\//, "") : undefined);
+  const primaryDomain = useMemo(() => {
+    if (data?.meta?.domain) return data.meta.domain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const firstDomain = data?.meta?.domains?.[0];
+    if (firstDomain) {
+      return firstDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    }
+    const prodDep = data?.deployments?.find((d) => d.target === "production");
+    if (prodDep?.url) return prodDep.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const firstDepUrl = data?.deployments?.[0]?.url;
+    if (firstDepUrl) return firstDepUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    return undefined;
+  }, [data]);
 
   return (
     <WidgetShell
@@ -147,6 +160,34 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
           />
         </div>
       }
+      headerActions={
+        primaryDomain ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenLink(primaryDomain);
+            }}
+            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised hover:text-accent-500"
+            title={`Open https://${primaryDomain}`}
+            aria-label={`Open https://${primaryDomain}`}
+          >
+            <svg
+              className="h-3 w-3"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </button>
+        ) : undefined
+      }
       banner={
         bannerInfo ? (
           <Banner
@@ -159,53 +200,71 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
       }
     >
       <div className="flex h-full flex-col gap-2 overflow-hidden select-none">
-        {/* Meta Bar: Domain link, framework, git repo */}
-        {((showDomain && primaryDomain) ||
-          (showFramework && (data?.meta?.framework || data?.meta?.git_repo))) && (
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-line/40 pb-2 text-[11px]">
-            {showDomain && primaryDomain && (
-              <button
-                type="button"
-                onClick={() => handleOpenLink(primaryDomain)}
-                className="group flex max-w-[200px] items-center gap-1 truncate rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
-                title={`Open ${primaryDomain}`}
-              >
+        {/* Primary Deployment Domain Card */}
+        {showDomain && primaryDomain && (
+          <div className="flex items-center justify-between rounded-lg border border-line/60 bg-surface-raised/60 px-2.5 py-1.5 transition-colors hover:border-accent-500/40 hover:bg-surface-raised">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-accent-500/10 text-accent-500">
                 <svg
-                  className="h-3 w-3 shrink-0 text-accent-500"
+                  className="h-3 w-3"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <circle cx="12" cy="12" r="10" />
                   <line x1="2" y1="12" x2="22" y2="12" />
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
-                <span className="truncate font-mono text-[10px] text-fg group-hover:text-accent-500">
-                  {primaryDomain}
+              </div>
+              <div className="flex min-w-0 flex-col">
+                <span className="text-[9px] font-semibold tracking-wider text-fg-muted uppercase">
+                  Primary Domain
                 </span>
-              </button>
-            )}
-
-            {showFramework && data?.meta?.framework && (
-              <span className="rounded border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
-                {data.meta.framework}
-              </span>
-            )}
-
-            {showFramework && data?.meta?.git_repo && (
-              <button
-                type="button"
-                onClick={() => handleOpenLink(`https://github.com/${data.meta!.git_repo}`)}
-                className="group flex max-w-[140px] items-center gap-1 truncate rounded-md border border-line/50 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
-                title={`GitHub repo: ${data.meta.git_repo}`}
-              >
-                <svg className="h-2.5 w-2.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                </svg>
-                <span className="truncate font-mono text-[9px]">{data.meta.git_repo}</span>
-              </button>
-            )}
+                <button
+                  type="button"
+                  onClick={() => handleOpenLink(primaryDomain)}
+                  className="group flex cursor-pointer items-center gap-1 text-left font-mono text-[11px] font-medium text-fg transition-colors hover:text-accent-500"
+                  title={`Open https://${primaryDomain}`}
+                >
+                  <span className="truncate">{primaryDomain}</span>
+                  <svg
+                    className="h-2.5 w-2.5 opacity-60 transition-opacity group-hover:opacity-100"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              {showFramework && data?.meta?.framework && (
+                <span className="rounded border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                  {data.meta.framework}
+                </span>
+              )}
+              {showFramework && data?.meta?.git_repo && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenLink(`https://github.com/${data.meta!.git_repo}`)}
+                  className="flex cursor-pointer items-center gap-1 rounded border border-line/50 bg-surface px-1.5 py-0.5 text-fg-muted transition-colors hover:border-accent-500/50 hover:text-accent-500"
+                  title={`Open GitHub: ${data.meta.git_repo}`}
+                >
+                  <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -222,7 +281,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                   key={dep.id}
                   type="button"
                   onClick={() => handleOpenLink(dep.url)}
-                  className="group flex flex-col rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                  className="group flex cursor-pointer flex-col rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
                 >
                   <div className="flex items-center justify-between gap-1.5">
                     <div className="flex min-w-0 items-center gap-1.5">

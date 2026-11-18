@@ -139,7 +139,11 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
 
   const handleOpenLink = (url: string) => {
     if (url) {
-      void openUrl(url);
+      const fullUrl =
+        url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+      openUrl(fullUrl).catch(() => {
+        window.open(fullUrl, "_blank");
+      });
     }
   };
 
@@ -225,10 +229,34 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
+                handleOpenLink(`https://github.com/${repo}`);
+              }}
+              className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised/80 hover:text-accent-500"
+              title={`Open ${repo} on GitHub`}
+              aria-label={`Open ${repo} on GitHub`}
+            >
+              <svg
+                className="h-3 w-3"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
                 void handleManualRefresh();
               }}
               disabled={isRefreshing}
-              className="flex h-5 w-5 items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised/80 hover:text-fg disabled:opacity-50"
+              className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised/80 hover:text-fg disabled:opacity-50"
               title={isRefreshing ? "Refreshing..." : "Refresh repository data"}
               aria-label="Refresh repository data"
             >
@@ -270,7 +298,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/stargazers`)}
-                className="group flex items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="GitHub Stars"
               >
                 <svg className="text-amber-500 h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
@@ -286,7 +314,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/network/members`)}
-                className="group flex items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="Forks"
               >
                 <svg
@@ -312,7 +340,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/issues`)}
-                className="group flex items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="Open Issues"
               >
                 <svg
@@ -335,7 +363,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(data.latest_release!.url)}
-                className="group flex max-w-[140px] items-center gap-1 truncate rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 font-medium text-accent-500 transition-colors hover:bg-accent-500/20"
+                className="group flex max-w-[140px] cursor-pointer items-center gap-1 truncate rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 font-medium text-accent-500 transition-colors hover:bg-accent-500/20"
                 title={`Latest Release: ${data.latest_release.name || data.latest_release.tag_name}`}
               >
                 <svg
@@ -378,7 +406,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                     key={run.id}
                     type="button"
                     onClick={() => handleOpenLink(run.url)}
-                    className="group flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                    className="group flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-xs transition-colors hover:bg-surface-raised/80"
                   >
                     <div className="flex min-w-0 items-center gap-1.5">
                       <StatusDot status={s} />
@@ -414,7 +442,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                     key={c.sha}
                     type="button"
                     onClick={() => handleOpenLink(c.url)}
-                    className="group flex flex-col rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                    className="group flex cursor-pointer flex-col rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-medium text-fg group-hover:text-accent-500">
