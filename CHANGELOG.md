@@ -1,3 +1,9 @@
+## [0.11.4](https://github.com/hasanify/nook/compare/v0.11.3...v0.11.4) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** resolve corner transparency, smooth drag and resize, persist opacity, and clean settings padding ([2998398](https://github.com/hasanify/nook/commit/2998398653ed8b2a9efc65a55737b2335ca4e098))
+
 ## [0.11.3](https://github.com/hasanify/nook/compare/v0.11.2...v0.11.3) (2026-11-18)
 
 ### Bug Fixes
