@@ -104,6 +104,24 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
             }
         }
 
+        use windows::Win32::Graphics::Dwm::{
+            DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_WINDOW_CORNER_PREFERENCE,
+        };
+        let pref: u32 = 2; // DWMWCP_ROUND
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_WINDOW_CORNER_PREFERENCE,
+            &pref as *const _ as *const _,
+            std::mem::size_of::<u32>() as u32,
+        );
+        let border_color: u32 = 0xFFFFFFFE; // DWMWA_COLOR_NONE
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_BORDER_COLOR,
+            &border_color as *const _ as *const _,
+            std::mem::size_of::<u32>() as u32,
+        );
+
         SetWindowPos(
             hwnd,
             Some(HWND_NOTOPMOST),
@@ -150,6 +168,24 @@ pub fn detach_to_topmost(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, Strin
 
         // Clear owner when detached to topmost
         let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, 0);
+
+        use windows::Win32::Graphics::Dwm::{
+            DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_WINDOW_CORNER_PREFERENCE,
+        };
+        let pref: u32 = 2; // DWMWCP_ROUND
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_WINDOW_CORNER_PREFERENCE,
+            &pref as *const _ as *const _,
+            std::mem::size_of::<u32>() as u32,
+        );
+        let border_color: u32 = 0xFFFFFFFE; // DWMWA_COLOR_NONE
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_BORDER_COLOR,
+            &border_color as *const _ as *const _,
+            std::mem::size_of::<u32>() as u32,
+        );
 
         SetWindowPos(
             hwnd,

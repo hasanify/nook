@@ -75,8 +75,27 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
 
     pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
 
-    // Ensure widget windows maintain pure DirectComposition transparent composition without OS rectangular artifacts
-    let _ = window.set_effects(None);
+    let has_blur = instance
+        .settings
+        .get("backgroundBlur")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "glass"
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "ghost";
+
+    apply_widget_effects(&window, has_blur);
 
     window
         .show()
@@ -327,21 +346,126 @@ pub fn update_widget_geometry(
     Ok(())
 }
 
+pub fn apply_widget_effects(window: &tauri::WebviewWindow, has_blur: bool) {
+    if has_blur {
+        let _ = window.set_effects(
+            tauri::window::EffectsBuilder::new()
+                .effect(tauri::window::Effect::Acrylic)
+                .state(tauri::window::EffectState::Active)
+                .build(),
+        );
+
+        #[cfg(windows)]
+        unsafe {
+            if let Ok(raw_hwnd) = window.hwnd() {
+                use windows::Win32::Graphics::Dwm::{
+                    DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_WINDOW_CORNER_PREFERENCE,
+                };
+                use windows::Win32::UI::WindowsAndMessaging::{
+                    SetWindowPos, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+                    SWP_NOZORDER,
+                };
+
+                let hwnd = HWND(raw_hwnd.0);
+
+                let pref: u32 = 2; // DWMWCP_ROUND (round window corners natively)
+                let _ = DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_WINDOW_CORNER_PREFERENCE,
+                    &pref as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+
+                let border_color: u32 = 0xFFFFFFFE; // DWMWA_COLOR_NONE (suppresses outer 1px border)
+                let _ = DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_BORDER_COLOR,
+                    &border_color as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+
+                let _ = SetWindowPos(
+                    hwnd,
+                    None,
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                );
+            }
+        }
+    } else {
+        let _ = window.set_effects(None);
+
+        #[cfg(windows)]
+        unsafe {
+            if let Ok(raw_hwnd) = window.hwnd() {
+                use windows::Win32::Graphics::Dwm::{
+                    DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_WINDOW_CORNER_PREFERENCE,
+                };
+                use windows::Win32::UI::WindowsAndMessaging::{
+                    SetWindowPos, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+                    SWP_NOZORDER,
+                };
+
+                let hwnd = HWND(raw_hwnd.0);
+
+                let pref: u32 = 2;
+                let _ = DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_WINDOW_CORNER_PREFERENCE,
+                    &pref as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+
+                let border_color: u32 = 0xFFFFFFFE;
+                let _ = DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_BORDER_COLOR,
+                    &border_color as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+
+                let _ = SetWindowPos(
+                    hwnd,
+                    None,
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                );
+            }
+        }
+    }
+}
+
 pub fn sync_widget_effects(app: &AppHandle, widget_id: Option<&str>) {
     let state = app.state::<AppState>();
     let cfg = state.config.get_config();
+    let global_preset = &cfg.app.widget_preset;
 
-    let targets: Vec<String> = cfg
+    let targets: Vec<(String, bool)> = cfg
         .widgets
         .iter()
         .filter(|w| widget_id.is_none() || widget_id == Some(&w.id))
-        .map(|w| w.id.clone())
+        .map(|w| {
+            let blur = w
+                .settings
+                .get("backgroundBlur")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false)
+                || global_preset == "glass"
+                || global_preset == "ghost";
+            (w.id.clone(), blur)
+        })
         .collect();
 
-    for id in targets {
+    for (id, has_blur) in targets {
         let label = format!("widget-{}", id);
         if let Some(window) = app.get_webview_window(&label) {
-            let _ = window.set_effects(None);
+            apply_widget_effects(&window, has_blur);
         }
     }
 }
