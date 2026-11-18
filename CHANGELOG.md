@@ -1,3 +1,9 @@
+## [0.19.10](https://github.com/hasanify/nook/compare/v0.19.9...v0.19.10) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** anchor desktop ownership to SHELLDLL_DefView and enable frosted glass translucency when blur is enabled ([2e5005d](https://github.com/hasanify/nook/commit/2e5005d2bec28b18e16c0d64a986129a59df464e))
+
 ## [0.19.9](https://github.com/hasanify/nook/compare/v0.19.8...v0.19.9) (2026-11-18)
 
 ## [0.19.8](https://github.com/hasanify/nook/compare/v0.19.7...v0.19.8) (2026-11-18)
