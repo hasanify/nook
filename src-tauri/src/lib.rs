@@ -93,18 +93,20 @@ pub fn run() {
             // Register global edit mode hotkey Ctrl+Alt+E
             #[cfg(desktop)]
             {
-                use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+                use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
                 if let Ok(shortcut) = "Ctrl+Alt+E".parse::<Shortcut>() {
                     let h = handle.clone();
                     let _ = app
                         .global_shortcut()
-                        .on_shortcut(shortcut, move |_app, _sc, _ev| {
-                            let state = h.state::<AppState>();
-                            let current = state.is_edit_mode();
-                            let new_val = !current;
-                            state.set_edit_mode(new_val);
-                            info!("Global shortcut toggled edit mode: {}", new_val);
-                            let _ = h.emit("edit-mode", serde_json::json!({ "on": new_val }));
+                        .on_shortcut(shortcut, move |_app, _sc, ev| {
+                            if ev.state() == ShortcutState::Pressed {
+                                let state = h.state::<AppState>();
+                                let current = state.is_edit_mode();
+                                let new_val = !current;
+                                state.set_edit_mode(new_val);
+                                info!("Global shortcut toggled edit mode: {}", new_val);
+                                let _ = h.emit("edit-mode", serde_json::json!({ "on": new_val }));
+                            }
                         });
                 }
             }

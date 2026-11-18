@@ -47,6 +47,7 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     let hwnd = HWND(raw_hwnd.0);
 
     pin::disable_system_menu(hwnd);
+    apply_window_corners(hwnd);
 
     let strategy = if instance.always_on_top {
         pin::detach_to_topmost(hwnd, instance.opacity)?
@@ -74,6 +75,35 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     };
 
     pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
+
+    let has_blur = instance
+        .settings
+        .get("backgroundBlur")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "glass"
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "ghost";
+
+    if has_blur {
+        let _ = window.set_effects(
+            tauri::window::EffectsBuilder::new()
+                .effect(tauri::window::Effect::Acrylic)
+                .state(tauri::window::EffectState::Active)
+                .build(),
+        );
+    }
 
     window
         .show()
@@ -317,18 +347,37 @@ pub fn update_widget_geometry(
 pub fn sync_widget_effects(app: &AppHandle, widget_id: Option<&str>) {
     let state = app.state::<AppState>();
     let cfg = state.config.get_config();
+    let global_preset = &cfg.app.widget_preset;
 
-    let targets: Vec<String> = cfg
+    let targets: Vec<(String, bool)> = cfg
         .widgets
         .iter()
         .filter(|w| widget_id.is_none() || widget_id == Some(&w.id))
-        .map(|w| w.id.clone())
+        .map(|w| {
+            let blur = w
+                .settings
+                .get("backgroundBlur")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false)
+                || global_preset == "glass"
+                || global_preset == "ghost";
+            (w.id.clone(), blur)
+        })
         .collect();
 
-    for id in targets {
+    for (id, has_blur) in targets {
         let label = format!("widget-{}", id);
         if let Some(window) = app.get_webview_window(&label) {
-            let _ = window.set_effects(None);
+            if has_blur {
+                let _ = window.set_effects(
+                    tauri::window::EffectsBuilder::new()
+                        .effect(tauri::window::Effect::Acrylic)
+                        .state(tauri::window::EffectState::Active)
+                        .build(),
+                );
+            } else {
+                let _ = window.set_effects(None);
+            }
         }
     }
 }
@@ -521,45 +570,46 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
     Ok(())
 }
 
+pub fn apply_window_corners(hwnd: HWND) {
+    #[cfg(windows)]
+    unsafe {
+        use windows::Win32::Graphics::Dwm::{
+            DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE,
+        };
+        let pref: u32 = 2; // DWMWCP_ROUND (rounds corners to 16px radius)
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_WINDOW_CORNER_PREFERENCE,
+            &pref as *const _ as *const _,
+            std::mem::size_of::<u32>() as u32,
+        );
+    }
+}
+
 pub fn show_context_menu_window(
     app: &AppHandle,
     widget_id: &str,
-    screen_x: Option<i32>,
-    screen_y: Option<i32>,
+    _screen_x: Option<i32>,
+    _screen_y: Option<i32>,
 ) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
     const MENU_W: f64 = 180.0;
     const MENU_H: f64 = 320.0;
 
-    let (mut x, mut y) = match (screen_x, screen_y) {
-        (Some(sx), Some(sy)) => (sx, sy),
-        _ => {
-            #[cfg(windows)]
-            unsafe {
-                use windows::Win32::Foundation::POINT;
-                use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
-                let mut pt = POINT::default();
-                let _ = GetCursorPos(&mut pt);
-                (pt.x, pt.y)
-            }
-            #[cfg(not(windows))]
-            (100, 100)
-        }
+    #[cfg(windows)]
+    let (phys_x, phys_y) = unsafe {
+        use windows::Win32::Foundation::POINT;
+        use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+        let mut pt = POINT::default();
+        let _ = GetCursorPos(&mut pt);
+        (pt.x, pt.y)
     };
-
-    let (work_left, work_top, work_w, work_h) = get_primary_work_area();
-    if x + MENU_W as i32 > work_left + work_w {
-        x = (x - MENU_W as i32).max(work_left);
-    }
-    if y + MENU_H as i32 > work_top + work_h {
-        y = (y - MENU_H as i32).max(work_top);
-    }
-    x = x.max(work_left);
-    y = y.max(work_top);
+    #[cfg(not(windows))]
+    let (phys_x, phys_y) = (100, 100);
 
     if let Some(window) = app.get_webview_window(LABEL) {
-        let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition::new(
-            x as f64, y as f64,
+        let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+            phys_x, phys_y,
         )));
         let _ = window.emit(
             "context-menu-open",
@@ -567,6 +617,13 @@ pub fn show_context_menu_window(
         );
         let _ = window.show();
         let _ = window.set_focus();
+        #[cfg(windows)]
+        unsafe {
+            if let Ok(raw_hwnd) = window.hwnd() {
+                use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
+                let _ = SetForegroundWindow(HWND(raw_hwnd.0));
+            }
+        }
         return Ok(());
     }
 
@@ -583,7 +640,7 @@ pub fn show_context_menu_window(
         .maximizable(false)
         .shadow(false)
         .inner_size(MENU_W, MENU_H)
-        .position(x as f64, y as f64)
+        .position(phys_x as f64, phys_y as f64)
         .visible(false)
         .focused(true)
         .build()
@@ -591,17 +648,21 @@ pub fn show_context_menu_window(
 
     if let Ok(raw_hwnd) = window.hwnd() {
         pin::disable_system_menu(HWND(raw_hwnd.0));
+        apply_window_corners(HWND(raw_hwnd.0));
     }
 
-    let w_clone = window.clone();
-    window.on_window_event(move |event| {
-        if let tauri::WindowEvent::Focused(false) = event {
-            let _ = w_clone.hide();
-        }
-    });
-
+    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+        phys_x, phys_y,
+    )));
     let _ = window.show();
     let _ = window.set_focus();
+    #[cfg(windows)]
+    unsafe {
+        if let Ok(raw_hwnd) = window.hwnd() {
+            use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
+            let _ = SetForegroundWindow(HWND(raw_hwnd.0));
+        }
+    }
 
     Ok(())
 }

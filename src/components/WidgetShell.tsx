@@ -140,9 +140,7 @@ export function WidgetShell({
         backgroundColor: hasBlur
           ? `color-mix(in srgb, ${widgetColor} 25%, color-mix(in srgb, var(--surface) 35%, transparent))`
           : `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
-        boxShadow: effectiveEditMode
-          ? `0 0 24px -2px color-mix(in srgb, ${widgetColor} 40%, transparent)`
-          : undefined,
+        boxShadow: undefined,
         backdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
         WebkitBackdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
       } as React.CSSProperties)
@@ -160,10 +158,10 @@ export function WidgetShell({
         ...colorStyle,
         opacity: widgetOpacity,
       }}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl transition-[border-color,box-shadow,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl transition-[border-color,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
         preset.highlightClass
       } before:to-transparent ${preset.containerClass} ${
-        effectiveEditMode ? "!border-accent-500/80 shadow-glow ring-2 ring-accent-500/25" : ""
+        effectiveEditMode ? "!border-accent-500/80 ring-2 ring-accent-500/80 ring-inset" : ""
       }`}
     >
       <EditOverlay

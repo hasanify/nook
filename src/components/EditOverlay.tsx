@@ -228,7 +228,7 @@ export function EditOverlay({
               }
             : undefined
         }
-        className={`flex h-8 touch-none items-center justify-between border-b px-3 text-xs transition-colors select-none ${
+        className={`flex h-8 touch-none items-center justify-between rounded-t-2xl border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
             : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`

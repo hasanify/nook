@@ -13,10 +13,15 @@ export function ContextMenuApp() {
   });
 
   const isPickingColorRef = useRef(false);
+  const openTimeRef = useRef(0);
+  const hasFocusedRef = useRef(false);
 
   useEffect(() => {
+    openTimeRef.current = Date.now();
+    hasFocusedRef.current = false;
+
     let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
-    const INACTIVITY_DELAY_MS = 3500; // Auto-close after 3.5s of no cursor activity
+    const INACTIVITY_DELAY_MS = 6000; // 6 seconds without cursor activity
 
     const resetInactivityTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
@@ -26,15 +31,25 @@ export function ContextMenuApp() {
       }, INACTIVITY_DELAY_MS);
     };
 
-    // Start timer on initial show
-    resetInactivityTimer();
-
     const unlistenPromise = listen<{ widgetId: string }>("context-menu-open", (event) => {
       if (event.payload?.widgetId) {
         setWidgetId(event.payload.widgetId);
       }
+      openTimeRef.current = Date.now();
+      hasFocusedRef.current = false;
       resetInactivityTimer();
     });
+
+    const handleFocus = () => {
+      hasFocusedRef.current = true;
+    };
+
+    const handleBlur = () => {
+      if (isPickingColorRef.current) return;
+      // Protect from immediate blur right after open (focus transition)
+      if (Date.now() - openTimeRef.current < 500) return;
+      void hideContextMenu();
+    };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -44,29 +59,26 @@ export function ContextMenuApp() {
       }
     };
 
-    const handleBlur = () => {
-      if (isPickingColorRef.current) return;
-      void hideContextMenu();
-    };
-
     const handleActivity = () => {
       resetInactivityTimer();
     };
 
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
     window.addEventListener("pointermove", handleActivity, { passive: true });
     window.addEventListener("mousemove", handleActivity, { passive: true });
     window.addEventListener("pointerdown", handleActivity, { passive: true });
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("blur", handleBlur);
 
     return () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       void unlistenPromise.then((unlisten) => unlisten());
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
       window.removeEventListener("pointermove", handleActivity);
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("pointerdown", handleActivity);
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("blur", handleBlur);
     };
   }, []);
 
@@ -102,7 +114,13 @@ export function ContextMenuApp() {
   }, [instance, manifest, handleClose]);
 
   if (!instance) {
-    return null;
+    return (
+      <div className="flex h-full w-full items-start justify-start p-1.5 select-none">
+        <div className="flex w-full flex-col rounded-xl border border-line/80 bg-surface/95 p-3 text-xs text-fg-muted shadow-card backdrop-blur-md select-none">
+          Loading menu...
+        </div>
+      </div>
+    );
   }
 
   const widgetColor =
