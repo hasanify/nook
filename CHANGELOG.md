@@ -1,3 +1,9 @@
+## [0.15.6](https://github.com/hasanify/nook/compare/v0.15.5...v0.15.6) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** eliminate acrylic background artifact, restore pointer-capture drag and resize, and remove native resize cursor ([af51ebe](https://github.com/hasanify/nook/commit/af51ebed701fa04700abdfa2e3115af21e3ad40a))
+
 ## [0.15.5](https://github.com/hasanify/nook/compare/v0.15.4...v0.15.5) (2026-11-18)
 
 ### Bug Fixes
