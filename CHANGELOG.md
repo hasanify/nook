@@ -1,3 +1,13 @@
+# [0.18.0](https://github.com/hasanify/nook/compare/v0.17.0...v0.18.0) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** fix right-click context menu, DWM acrylic blur, corner spilling, and shortcut toggle ([fdff644](https://github.com/hasanify/nook/commit/fdff64494804003f0a50cff7597b1077f3380298))
+
+### Features
+
+- **settings:** move appearance tab to the left of about tab ([19a0986](https://github.com/hasanify/nook/commit/19a0986af0cc9636b2e3169c369739ffd8903e40))
+
 # [0.17.0](https://github.com/hasanify/nook/compare/v0.16.0...v0.17.0) (2026-11-18)
 
 ### Features
