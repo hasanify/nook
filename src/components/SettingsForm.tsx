@@ -116,7 +116,7 @@ function VercelProjectInput({
                 onChange(p.name);
                 setIsOpen(false);
               }}
-              className="group flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface hover:text-accent-500"
+              className="group flex w-full cursor-pointer items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface hover:text-accent-500"
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate font-medium text-fg group-hover:text-accent-500">
@@ -210,7 +210,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 id={`field-${field.key}`}
                 value={String(val ?? "")}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
               >
                 {field.options?.map((opt) => (
                   <option key={opt.value} value={opt.value}>

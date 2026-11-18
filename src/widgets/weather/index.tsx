@@ -188,6 +188,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
       }
       resizable={manifest.resizable}
       minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
       headerSlot={
         <svg
           className="h-3.5 w-3.5 text-fg-muted"

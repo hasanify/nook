@@ -7,16 +7,19 @@ interface EditOverlayProps {
   id: string;
   title: string;
   editMode: boolean;
-  resizable?: boolean;
-  minSize?: { w: number; h: number };
+  resizable?: boolean | undefined;
+  minSize?: { w: number; h: number } | undefined;
+  defaultSize?: { w: number; h: number } | undefined;
   currentBounds: Rect;
-  onBoundsChange?: (bounds: Rect, commit: boolean) => void;
+  onBoundsChange?: ((bounds: Rect, commit: boolean) => void) | undefined;
   onToggleEditMode: () => void;
-  headerSlot?: React.ReactNode;
-  headerActions?: React.ReactNode;
+  headerSlot?: React.ReactNode | undefined;
+  headerActions?: React.ReactNode | undefined;
   widgetColor?: string | undefined;
-  onContextMenu?: (e: React.MouseEvent) => void;
-  headerClass?: string;
+  onContextMenu?: ((e: React.MouseEvent) => void) | undefined;
+  headerClass?: string | undefined;
+  onResetToDefault?: (() => void) | undefined;
+  onResetToFit?: (() => void) | undefined;
 }
 
 export function EditOverlay({
@@ -29,10 +32,12 @@ export function EditOverlay({
   widgetColor,
   onContextMenu,
   headerClass,
+  onResetToDefault,
+  onResetToFit,
 }: EditOverlayProps) {
-  // Handle Native Dragging
+  // Handle Native Dragging (only when editMode is active)
   const handleDragStart = async (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (!editMode || e.button !== 0) return;
     const target = e.target as HTMLElement;
     if (target.closest("button") || target.closest("input") || target.closest("select")) {
       return;
@@ -44,9 +49,9 @@ export function EditOverlay({
     }
   };
 
-  // Handle Native Resizing
+  // Handle Native Resizing (only when editMode is active)
   const handleResizeStart = async (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (!editMode || e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
     try {
@@ -60,7 +65,7 @@ export function EditOverlay({
     <>
       {/* Top Header / Drag bar */}
       <div
-        data-tauri-drag-region
+        {...(editMode ? { "data-tauri-drag-region": "" } : {})}
         onContextMenu={onContextMenu}
         style={
           widgetColor
@@ -75,28 +80,59 @@ export function EditOverlay({
         className={`flex h-8 touch-none items-center justify-between border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : `cursor-grab text-fg-muted hover:bg-surface-raised/60 active:cursor-grabbing ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
+            : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
         }`}
-        onPointerDown={handleDragStart}
+        onPointerDown={editMode ? handleDragStart : undefined}
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
-        <div className="pointer-events-none flex min-w-0 flex-1 items-center gap-1.5 font-medium">
+        <div
+          {...(editMode ? { "data-tauri-drag-region": "" } : {})}
+          className="flex min-w-0 flex-1 items-center gap-1.5 font-medium"
+        >
           {headerSlot}
-          <span className="truncate text-[11px] font-semibold tracking-tight text-fg/80">
+          <span
+            {...(editMode ? { "data-tauri-drag-region": "" } : {})}
+            className="truncate text-[11px] font-semibold tracking-tight text-fg/80"
+          >
             {title}
           </span>
         </div>
-        <div className="pointer-events-auto flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           {editMode ? (
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 font-mono text-[9px] font-semibold tracking-wider text-accent-500 uppercase">
-                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="8" cy="8" r="2" />
-                  <circle cx="16" cy="8" r="2" />
-                  <circle cx="8" cy="16" r="2" />
-                  <circle cx="16" cy="16" r="2" />
-                </svg>
-                Drag
-              </span>
+            <div className="flex items-center gap-1.5">
+              {/* Fit & Default quick resize buttons */}
+              {resizable && onResetToFit && (
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onResetToFit();
+                  }}
+                  className="cursor-pointer rounded px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                  title="Fit to minimum compact size"
+                >
+                  Fit
+                </button>
+              )}
+              {resizable && onResetToDefault && (
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onResetToDefault();
+                  }}
+                  className="cursor-pointer rounded px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                  title="Reset to default manifest size"
+                >
+                  Default
+                </button>
+              )}
+              <div className="mx-0.5 h-3 w-px bg-line/60" />
               <button
                 type="button"
                 onPointerDown={(e) => e.stopPropagation()}
@@ -115,14 +151,10 @@ export function EditOverlay({
         </div>
       </div>
 
-      {/* Resize Grip Corner (Visible when in Edit Mode and Resizable) */}
-      {resizable && (
+      {/* Resize Grip Corner (ONLY rendered when in Edit Mode and Resizable) */}
+      {editMode && resizable && (
         <div
-          className={`absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-2xl p-1.5 transition-transform select-none hover:scale-110 active:scale-95 ${
-            editMode
-              ? "text-accent-500 opacity-100"
-              : "text-fg-muted/30 opacity-40 hover:opacity-100"
-          }`}
+          className="absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-2xl p-1.5 text-accent-500 transition-transform select-none hover:scale-110 active:scale-95"
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >

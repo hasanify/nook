@@ -74,6 +74,8 @@ pub fn remove_widget(app: AppHandle, id: String) -> Result<(), String> {
         "config-changed",
         serde_json::json!({ "ids": [id], "app": false }),
     );
+
+    windows::sync_widget_effects(&app, Some(&id));
     Ok(())
 }
 
@@ -124,6 +126,8 @@ pub fn set_always_on_top(app: AppHandle, id: String, on: bool) -> Result<(), Str
         "config-changed",
         serde_json::json!({ "ids": [id], "app": false }),
     );
+
+    windows::sync_widget_effects(&app, Some(&id));
     Ok(())
 }
 
@@ -163,6 +167,8 @@ pub fn update_settings(
         "config-changed",
         serde_json::json!({ "ids": [id], "app": false }),
     );
+
+    windows::sync_widget_effects(&app, Some(&id));
 
     let app_clone = app.clone();
     let id_clone = id.clone();
@@ -207,6 +213,8 @@ pub fn update_app_config(
         "config-changed",
         serde_json::json!({ "ids": [], "app": true }),
     );
+
+    windows::sync_widget_effects(&app, None);
     Ok(())
 }
 

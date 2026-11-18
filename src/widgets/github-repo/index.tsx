@@ -201,6 +201,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
       title={repo || manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
       headerSlot={
         <div className="flex items-center gap-1.5">
           <svg className="h-3.5 w-3.5 text-fg-muted" viewBox="0 0 24 24" fill="currentColor">

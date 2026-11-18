@@ -370,6 +370,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
       title={manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
       headerSlot={
         mode === "pomodoro" ? (
           <span className="font-mono text-[9px] font-semibold tracking-wider text-accent-500 uppercase">

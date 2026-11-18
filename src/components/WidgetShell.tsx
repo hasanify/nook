@@ -13,14 +13,15 @@ function rectsEqual(a: Rect, b: Rect): boolean {
 
 interface WidgetShellProps {
   instance: WidgetInstance;
-  editMode?: boolean;
-  onToggleEditMode?: () => void;
+  editMode?: boolean | undefined;
+  onToggleEditMode?: (() => void) | undefined;
   title: string;
-  headerSlot?: React.ReactNode;
-  headerActions?: React.ReactNode;
-  banner?: React.ReactNode;
-  resizable?: boolean;
-  minSize?: { w: number; h: number };
+  headerSlot?: React.ReactNode | undefined;
+  headerActions?: React.ReactNode | undefined;
+  banner?: React.ReactNode | undefined;
+  resizable?: boolean | undefined;
+  minSize?: { w: number; h: number } | undefined;
+  defaultSize?: { w: number; h: number } | undefined;
   children: React.ReactNode;
 }
 
@@ -34,6 +35,7 @@ export function WidgetShell({
   banner,
   resizable = true,
   minSize = { w: 200, h: 160 },
+  defaultSize,
   children,
 }: WidgetShellProps) {
   const { editMode: hookEditMode, toggleEditMode: hookToggleEditMode } = useEditMode();
@@ -102,6 +104,17 @@ export function WidgetShell({
     sendBounds(bounds, commit);
   };
 
+  const handleResetToDefault = () => {
+    if (!defaultSize) return;
+    handleBoundsChange({ ...localBounds, w: defaultSize.w, h: defaultSize.h }, true);
+  };
+
+  const handleResetToFit = () => {
+    const targetW = minSize?.w ?? 200;
+    const targetH = minSize?.h ?? 160;
+    handleBoundsChange({ ...localBounds, w: targetW, h: targetH }, true);
+  };
+
   const widgetOpacity =
     typeof instance.opacity === "number" ? Math.max(0.1, Math.min(1.0, instance.opacity)) : 0.95;
 
@@ -124,7 +137,7 @@ export function WidgetShell({
           ? widgetColor
           : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
         backgroundColor: hasBlur
-          ? `color-mix(in srgb, ${widgetColor} 20%, color-mix(in srgb, var(--surface) 60%, transparent))`
+          ? `color-mix(in srgb, ${widgetColor} 25%, color-mix(in srgb, var(--surface) 35%, transparent))`
           : `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
         boxShadow: effectiveEditMode
           ? `0 0 24px -2px color-mix(in srgb, ${widgetColor} 40%, transparent)`
@@ -132,7 +145,7 @@ export function WidgetShell({
       } as React.CSSProperties)
     : hasBlur
       ? ({
-          backgroundColor: "color-mix(in srgb, var(--surface) 65%, transparent)",
+          backgroundColor: "color-mix(in srgb, var(--surface) 35%, transparent)",
         } as React.CSSProperties)
       : {};
 
@@ -154,6 +167,7 @@ export function WidgetShell({
         editMode={effectiveEditMode}
         resizable={resizable}
         minSize={minSize}
+        defaultSize={defaultSize}
         currentBounds={localBounds}
         onBoundsChange={handleBoundsChange}
         onToggleEditMode={effectiveToggle}
@@ -162,6 +176,8 @@ export function WidgetShell({
         widgetColor={widgetColor}
         onContextMenu={handleContextMenu}
         headerClass={preset.headerClass}
+        onResetToDefault={defaultSize ? handleResetToDefault : undefined}
+        onResetToFit={handleResetToFit}
       />
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
@@ -181,6 +197,8 @@ export function WidgetShell({
         }
         onToggleEditMode={effectiveToggle}
         onSelectColor={(color) => void updateSettings(instance.id, { widgetColor: color })}
+        onResetToDefault={defaultSize ? handleResetToDefault : undefined}
+        onResetToFit={handleResetToFit}
         onOpenSettings={() => void openSettingsWindow(instance.id)}
         onDelete={() => void removeWidget(instance.id)}
         onClose={() => setContextMenuPos(null)}

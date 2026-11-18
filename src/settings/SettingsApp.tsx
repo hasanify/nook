@@ -1057,17 +1057,15 @@ export function SettingsApp() {
                       GitHub Personal Access Token
                     </label>
                   </div>
-                  <div
-                    className={`flex items-center gap-1.5 text-xs font-medium ${
-                      githubConfigured ? "text-ok" : "text-fg-muted/60"
-                    }`}
-                  >
+                  <div className="flex items-center gap-1.5 text-xs font-medium">
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        githubConfigured ? "bg-ok" : "bg-fg-muted/40"
+                      className={`h-2 w-2 rounded-full ${
+                        githubConfigured ? "bg-ok" : "bg-fg-muted/30"
                       }`}
                     />
-                    <span>{githubConfigured ? "Configured" : "Not configured"}</span>
+                    <span className={githubConfigured ? "text-ok" : "text-fg-muted/60"}>
+                      {githubConfigured ? "Active" : "Not set"}
+                    </span>
                   </div>
                 </div>
                 <p className="text-[11px] text-fg-muted">
@@ -1117,17 +1115,15 @@ export function SettingsApp() {
                       Vercel API Token
                     </label>
                   </div>
-                  <div
-                    className={`flex items-center gap-1.5 text-xs font-medium ${
-                      vercelConfigured ? "text-ok" : "text-fg-muted/60"
-                    }`}
-                  >
+                  <div className="flex items-center gap-1.5 text-xs font-medium">
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        vercelConfigured ? "bg-ok" : "bg-fg-muted/40"
+                      className={`h-2 w-2 rounded-full ${
+                        vercelConfigured ? "bg-ok" : "bg-fg-muted/30"
                       }`}
                     />
-                    <span>{vercelConfigured ? "Configured" : "Not configured"}</span>
+                    <span className={vercelConfigured ? "text-ok" : "text-fg-muted/60"}>
+                      {vercelConfigured ? "Active" : "Not set"}
+                    </span>
                   </div>
                 </div>
                 <p className="text-[11px] text-fg-muted">

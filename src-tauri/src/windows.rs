@@ -17,9 +17,20 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     let url_str = format!("index.html?w={}", instance.id);
     let url = WebviewUrl::App(url_str.into());
 
+    let (min_w, min_h) = {
+        let reg = crate::registry::ManifestRegistry::new();
+        if let Some(m) = reg.get(&instance.kind) {
+            (m.min_size.w as f64, m.min_size.h as f64)
+        } else {
+            (200.0, 160.0)
+        }
+    };
+
     let window = WebviewWindowBuilder::new(app, &label, url)
         .title(format!("Nook Widget ({})", instance.kind))
         .inner_size(instance.rect.w as f64, instance.rect.h as f64)
+        .min_inner_size(min_w, min_h)
+        .maximizable(false)
         .decorations(false)
         .skip_taskbar(true)
         .resizable(true)
@@ -64,6 +75,35 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
     };
 
     pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
+
+    let has_blur = instance
+        .settings
+        .get("backgroundBlur")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "glass"
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "ghost";
+
+    if has_blur {
+        let _ = window.set_effects(
+            tauri::window::EffectsBuilder::new()
+                .effect(tauri::window::Effect::Acrylic)
+                .state(tauri::window::EffectState::Active)
+                .build(),
+        );
+    }
 
     window
         .show()
@@ -304,6 +344,44 @@ pub fn update_widget_geometry(
     Ok(())
 }
 
+pub fn sync_widget_effects(app: &AppHandle, widget_id: Option<&str>) {
+    let state = app.state::<AppState>();
+    let cfg = state.config.get_config();
+    let global_preset = &cfg.app.widget_preset;
+
+    let targets: Vec<(String, bool)> = cfg
+        .widgets
+        .iter()
+        .filter(|w| widget_id.is_none() || widget_id == Some(&w.id))
+        .map(|w| {
+            let blur = w
+                .settings
+                .get("backgroundBlur")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false)
+                || global_preset == "glass"
+                || global_preset == "ghost";
+            (w.id.clone(), blur)
+        })
+        .collect();
+
+    for (id, has_blur) in targets {
+        let label = format!("widget-{}", id);
+        if let Some(window) = app.get_webview_window(&label) {
+            if has_blur {
+                let _ = window.set_effects(
+                    tauri::window::EffectsBuilder::new()
+                        .effect(tauri::window::Effect::Acrylic)
+                        .state(tauri::window::EffectState::Active)
+                        .build(),
+                );
+            } else {
+                let _ = window.set_effects(None);
+            }
+        }
+    }
+}
+
 pub fn handle_widget_move_end(app: &AppHandle, hwnd: HWND) {
     let windows = app.webview_windows();
     let target = windows
@@ -317,12 +395,67 @@ pub fn handle_widget_move_end(app: &AppHandle, hwnd: HWND) {
             unsafe {
                 if windows::Win32::UI::WindowsAndMessaging::GetWindowRect(hwnd, &mut rc).is_ok() {
                     let scale = window.scale_factor().unwrap_or(1.0);
-                    let x = (rc.left as f64 / scale).round() as i32;
-                    let y = (rc.top as f64 / scale).round() as i32;
-                    let w = ((rc.right - rc.left) as f64 / scale).round() as i32;
-                    let h = ((rc.bottom - rc.top) as f64 / scale).round() as i32;
+                    let mut x = (rc.left as f64 / scale).round() as i32;
+                    let mut y = (rc.top as f64 / scale).round() as i32;
+                    let mut w = ((rc.right - rc.left) as f64 / scale).round() as i32;
+                    let mut h = ((rc.bottom - rc.top) as f64 / scale).round() as i32;
 
                     let state = app.state::<AppState>();
+                    let (min_w, min_h) = {
+                        let reg = crate::registry::ManifestRegistry::new();
+                        let kind = state
+                            .config
+                            .get_config()
+                            .widgets
+                            .iter()
+                            .find(|w| w.id == id)
+                            .map(|w| w.kind.clone());
+                        if let Some(k) = kind {
+                            if let Some(m) = reg.get(&k) {
+                                (m.min_size.w, m.min_size.h)
+                            } else {
+                                (200, 160)
+                            }
+                        } else {
+                            (200, 160)
+                        }
+                    };
+
+                    let grid_snap = state.config.get_config().app.grid_snap;
+                    if grid_snap > 0 {
+                        x = snap_to_grid(x, grid_snap);
+                        y = snap_to_grid(y, grid_snap);
+                        w = snap_to_grid(w, grid_snap);
+                        h = snap_to_grid(h, grid_snap);
+                    }
+                    w = w.max(min_w);
+                    h = h.max(min_h);
+
+                    let phys_x = (x as f64 * scale).round() as i32;
+                    let phys_y = (y as f64 * scale).round() as i32;
+                    let phys_w = (w as f64 * scale).round() as i32;
+                    let phys_h = (h as f64 * scale).round() as i32;
+                    let rect = RECT {
+                        left: phys_x,
+                        top: phys_y,
+                        right: phys_x + phys_w,
+                        bottom: phys_y + phys_h,
+                    };
+                    let strategy = if state
+                        .config
+                        .get_config()
+                        .widgets
+                        .iter()
+                        .find(|w| w.id == id)
+                        .map(|w| w.always_on_top)
+                        .unwrap_or(false)
+                    {
+                        PinStrategy::Topmost
+                    } else {
+                        PinStrategy::BottomToplevel
+                    };
+                    let _ = pin::set_bounds_screen(hwnd, rect, strategy);
+
                     let id_str = id.to_string();
                     state.config.update_config(|cfg| {
                         if let Some(w_item) =

@@ -19,12 +19,14 @@ interface WidgetContextMenuProps {
   isOpen: boolean;
   position: ContextMenuPosition;
   isEditMode: boolean;
-  currentColor?: string;
+  currentColor?: string | undefined;
   onToggleEditMode: () => void;
-  hasBackgroundBlur?: boolean;
-  onToggleBackgroundBlur?: () => void;
-  onSelectColor?: (color: string) => void;
-  onOpenSettings?: () => void;
+  hasBackgroundBlur?: boolean | undefined;
+  onToggleBackgroundBlur?: (() => void) | undefined;
+  onSelectColor?: ((color: string) => void) | undefined;
+  onResetToDefault?: (() => void) | undefined;
+  onResetToFit?: (() => void) | undefined;
+  onOpenSettings?: (() => void) | undefined;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -38,19 +40,30 @@ export function WidgetContextMenu({
   onToggleBackgroundBlur,
   onToggleEditMode,
   onSelectColor,
+  onResetToDefault,
+  onResetToFit,
   onOpenSettings,
   onDelete,
   onClose,
 }: WidgetContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [coords, setCoords] = useState<{ x: number; y: number }>(position);
+  const [coords, setCoords] = useState<{ x: number; y: number }>(() => ({
+    x: Math.max(
+      6,
+      Math.min(position.x, (typeof window !== "undefined" ? window.innerWidth : 300) - 160),
+    ),
+    y: Math.max(
+      6,
+      Math.min(position.y, (typeof window !== "undefined" ? window.innerHeight : 300) - 200),
+    ),
+  }));
 
   // Position adjustment to avoid viewport overflow
   useLayoutEffect(() => {
     if (!isOpen || !menuRef.current) return;
     const el = menuRef.current;
     const rect = el.getBoundingClientRect();
-    const pad = 8;
+    const pad = 6;
 
     let adjX = position.x;
     let adjY = position.y;
@@ -98,7 +111,7 @@ export function WidgetContextMenu({
     <div
       ref={menuRef}
       style={{ left: `${coords.x}px`, top: `${coords.y}px` }}
-      className="fixed z-50 flex min-w-[160px] animate-appear flex-col rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
+      className="fixed z-50 flex max-w-[calc(100vw-12px)] min-w-[144px] animate-appear flex-col rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -149,13 +162,73 @@ export function WidgetContextMenu({
         )}
       </button>
 
+      {/* Quick Size Reset options */}
+      {(onResetToFit || onResetToDefault) && (
+        <div className="flex flex-col gap-0.5 border-t border-line/40 pt-1">
+          {onResetToFit && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onResetToFit();
+              }}
+              className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className="h-3.5 w-3.5 shrink-0 text-fg-muted"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 14h6m0 0v6m0-6L3 21" />
+                  <path d="M20 10h-6m0 0V4m0 6l7-7" />
+                </svg>
+                <span>Fit Size</span>
+              </div>
+              <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
+            </button>
+          )}
+          {onResetToDefault && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onResetToDefault();
+              }}
+              className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className="h-3.5 w-3.5 shrink-0 text-fg-muted"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                <span>Reset Default</span>
+              </div>
+              <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Quick Color Swatches */}
       {onSelectColor && (
         <div className="flex flex-col gap-1 border-t border-line/40 px-2.5 py-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-medium text-fg-muted">Color</span>
           </div>
-          <div className="flex items-center gap-1.5 pt-0.5">
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             {WIDGET_COLOR_OPTIONS.map((c) => {
               const active = (currentColor || "") === c.value;
               return (

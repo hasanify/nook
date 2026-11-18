@@ -70,6 +70,7 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
       title={manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
       headerSlot={
         <svg
           className="h-3 w-3 shrink-0 text-fg-muted"

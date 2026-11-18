@@ -135,6 +135,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
       title={projectId || manifest.name}
       resizable={manifest.resizable}
       minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
       headerSlot={
         <div className="flex items-center gap-1.5">
           <svg className="h-3 w-3 text-fg-muted" viewBox="0 0 76 65" fill="currentColor">

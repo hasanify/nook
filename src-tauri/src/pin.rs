@@ -3,11 +3,11 @@ use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
     DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
-    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HWND_BOTTOM, HWND_TOPMOST,
+    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HWND_NOTOPMOST, HWND_TOPMOST,
     MF_BYPOSITION, SC_KEYMENU, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-    SWP_NOZORDER, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_SYSCOMMAND, WM_SYSKEYDOWN, WS_CHILD,
-    WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW,
-    WS_POPUP, WS_SYSMENU,
+    SWP_NOZORDER, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCLBUTTONDBLCLK, WM_SYSCOMMAND, WM_SYSKEYDOWN,
+    WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
+    WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -28,9 +28,9 @@ pub fn set_opacity(_hwnd: HWND, _opacity: f32) -> Result<(), String> {
     Ok(())
 }
 
-/// Sets widget as a top-level tool window pinned at `HWND_BOTTOM`.
+/// Sets widget as a top-level tool window pinned at the desktop normal level.
 pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
-    // SAFETY: Setting top-level tool window at HWND_BOTTOM
+    // SAFETY: Setting top-level tool window at HWND_NOTOPMOST
     unsafe {
         let _ = SetParent(hwnd, None);
 
@@ -42,13 +42,13 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
         SetWindowLongPtrW(hwnd, GWL_STYLE, style);
 
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
-        ex_style = (ex_style | WS_EX_TOOLWINDOW.0 as isize | WS_EX_NOACTIVATE.0 as isize)
-            & !(WS_EX_APPWINDOW.0 as isize);
+        ex_style = (ex_style | WS_EX_TOOLWINDOW.0 as isize)
+            & !(WS_EX_APPWINDOW.0 as isize | WS_EX_NOACTIVATE.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
 
         SetWindowPos(
             hwnd,
-            Some(HWND_BOTTOM),
+            Some(HWND_NOTOPMOST),
             0,
             0,
             0,
@@ -112,6 +112,7 @@ pub unsafe extern "system" fn widget_subclass_proc(
     match msg {
         WM_SYSCOMMAND if (wparam.0 & 0xFFF0) == SC_KEYMENU as usize => return LRESULT(0),
         WM_SYSKEYDOWN if wparam.0 == 0x20 => return LRESULT(0),
+        WM_NCLBUTTONDBLCLK => return LRESULT(0),
         WM_EXITSIZEMOVE => {
             if let Some(app) = crate::get_app_handle() {
                 crate::windows::handle_widget_move_end(app, hwnd);
