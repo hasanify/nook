@@ -1,3 +1,9 @@
+## [0.19.11](https://github.com/hasanify/nook/compare/v0.19.10...v0.19.11) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** enable native DWM acrylic backdrop for background blur with border suppression and clean corner rounding ([2dcab0f](https://github.com/hasanify/nook/commit/2dcab0fe0d48de7161cf873ae1c78a5f0eca5a0c))
+
 ## [0.19.10](https://github.com/hasanify/nook/compare/v0.19.9...v0.19.10) (2026-11-18)
 
 ### Bug Fixes
