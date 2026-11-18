@@ -1,14 +1,16 @@
 use tracing::info;
+use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
 use windows::Win32::UI::WindowsAndMessaging::{
-    DeleteMenu, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow, SetParent,
-    SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT,
-    HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, HWND_NOTOPMOST, HWND_TOPMOST,
-    MF_BYPOSITION, SC_KEYMENU, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-    SWP_NOZORDER, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SYSCOMMAND,
-    WM_SYSKEYDOWN, WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
-    WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
+    DeleteMenu, FindWindowW, GetMenuItemCount, GetSystemMenu, GetWindowLongPtrW, IsWindow,
+    SetParent, SetWindowLongPtrW, SetWindowPos, GWLP_HWNDPARENT, GWL_EXSTYLE, GWL_STYLE, HTBOTTOM,
+    HTBOTTOMLEFT, HTBOTTOMRIGHT, HTCLIENT, HTLEFT, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT,
+    HWND_NOTOPMOST, HWND_TOPMOST, MF_BYPOSITION, SC_KEYMENU, SC_MINIMIZE, SWP_FRAMECHANGED,
+    SWP_HIDEWINDOW, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS,
+    WM_EXITSIZEMOVE, WM_NCDESTROY, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_SHOWWINDOW, WM_SYSCOMMAND,
+    WM_SYSKEYDOWN, WM_WINDOWPOSCHANGING, WS_CHILD, WS_CLIPCHILDREN, WS_CLIPSIBLINGS,
+    WS_EX_APPWINDOW, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_POPUP, WS_SYSMENU,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,6 +49,12 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
             & !(WS_EX_APPWINDOW.0 as isize | WS_EX_NOACTIVATE.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
 
+        // Make Progman the owner of the window so Explorer's ToggleDesktop (Win+D) treats it as part of the desktop
+        let progman = FindWindowW(w!("Progman"), None).unwrap_or_default();
+        if !progman.is_invalid() {
+            let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, progman.0 as isize);
+        }
+
         SetWindowPos(
             hwnd,
             Some(HWND_NOTOPMOST),
@@ -58,7 +66,10 @@ pub fn attach_bottom(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, String> {
         )
         .map_err(|e| format!("SetWindowPos to bottom failed: {}", e))?;
 
-        info!("Set widget HWND {:?} to BottomToplevel", hwnd);
+        info!(
+            "Set widget HWND {:?} to BottomToplevel (owned by Progman)",
+            hwnd
+        );
         Ok(PinStrategy::BottomToplevel)
     }
 }
@@ -79,6 +90,9 @@ pub fn detach_to_topmost(hwnd: HWND, _opacity: f32) -> Result<PinStrategy, Strin
         let mut ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
         ex_style = (ex_style | WS_EX_TOOLWINDOW.0 as isize) & !(WS_EX_APPWINDOW.0 as isize);
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex_style);
+
+        // Clear owner when detached to topmost
+        let _ = SetWindowLongPtrW(hwnd, GWLP_HWNDPARENT, 0);
 
         SetWindowPos(
             hwnd,
@@ -111,9 +125,21 @@ pub unsafe extern "system" fn widget_subclass_proc(
     _ref_data: usize,
 ) -> LRESULT {
     match msg {
-        WM_SYSCOMMAND if (wparam.0 & 0xFFF0) == SC_KEYMENU as usize => return LRESULT(0),
+        // Intercept Alt+Space system menu and minimize requests
+        WM_SYSCOMMAND => {
+            let cmd = wparam.0 & 0xFFF0;
+            if cmd == SC_KEYMENU as usize || cmd == SC_MINIMIZE as usize {
+                return LRESULT(0);
+            }
+        }
         WM_SYSKEYDOWN if wparam.0 == 0x20 => return LRESULT(0),
         WM_NCLBUTTONDBLCLK => return LRESULT(0),
+        // Prevent Explorer's ToggleDesktop (Win+D) from hiding the window
+        WM_WINDOWPOSCHANGING if lparam.0 != 0 => {
+            let wp = &mut *(lparam.0 as *mut WINDOWPOS);
+            wp.flags.0 &= !SWP_HIDEWINDOW.0;
+        }
+        WM_SHOWWINDOW if wparam.0 == 0 && lparam.0 != 0 => return LRESULT(0),
         WM_NCHITTEST => {
             let hit = DefSubclassProc(hwnd, msg, wparam, lparam);
             match hit.0 as u32 {
@@ -148,11 +174,11 @@ pub fn disable_system_menu(hwnd: HWND) {
     }
 }
 
-/// Applies screen-space rect to the window, enforcing safe z-order.
+/// Applies screen-space rect to the window, enforcing safe z-order without re-layout stalls.
 pub fn set_bounds_screen(
     hwnd: HWND,
     screen_rect: RECT,
-    strategy: PinStrategy,
+    _strategy: PinStrategy,
 ) -> Result<(), String> {
     unsafe {
         let x = screen_rect.left;
@@ -160,18 +186,8 @@ pub fn set_bounds_screen(
         let w = screen_rect.right - screen_rect.left;
         let h = screen_rect.bottom - screen_rect.top;
 
-        let insert_after = match strategy {
-            PinStrategy::Topmost => Some(HWND_TOPMOST),
-            _ => None,
-        };
-
-        let flags = if insert_after.is_some() {
-            SWP_NOACTIVATE
-        } else {
-            SWP_NOACTIVATE | SWP_NOZORDER
-        };
-
-        SetWindowPos(hwnd, insert_after, x, y, w, h, flags)
+        // Never disturb z-order during drag/resize bounds updates
+        SetWindowPos(hwnd, None, x, y, w, h, SWP_NOACTIVATE | SWP_NOZORDER)
             .map_err(|e| format!("SetWindowPos bounds failed: {}", e))?;
 
         Ok(())

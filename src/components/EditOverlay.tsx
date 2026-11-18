@@ -154,12 +154,9 @@ export function EditOverlay({
     e.preventDefault();
     e.stopPropagation();
 
-    const target = e.currentTarget;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {
-      // Ignore
-    }
+    // Enforce resize cursor and disable text selection globally during resize drag
+    document.body.style.cursor = "se-resize";
+    document.body.style.userSelect = "none";
 
     isResizing.current = true;
     const startX = e.screenX;
@@ -175,12 +172,12 @@ export function EditOverlay({
         cleanup();
         return;
       }
-      const deltaW = ev.screenX - startX;
-      const deltaH = ev.screenY - startY;
+      const deltaX = ev.screenX - startX;
+      const deltaY = ev.screenY - startY;
       const minW = minSize?.w ?? 200;
       const minH = minSize?.h ?? 160;
-      const nextW = Math.max(minW, origW + deltaW);
-      const nextH = Math.max(minH, origH + deltaH);
+      const nextW = Math.max(minW, origW + deltaX);
+      const nextH = Math.max(minH, origH + deltaY);
 
       const nextBounds: Rect = {
         x: origX,
@@ -196,11 +193,9 @@ export function EditOverlay({
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("mouseup", onPointerUp);
-      try {
-        if (target.hasPointerCapture(e.pointerId)) {
-          target.releasePointerCapture(e.pointerId);
-        }
-      } catch {}
+
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
 
       if (!isResizing.current) return;
       isResizing.current = false;

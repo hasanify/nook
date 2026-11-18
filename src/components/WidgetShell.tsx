@@ -138,7 +138,7 @@ export function WidgetShell({
           ? widgetColor
           : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
         backgroundColor: hasBlur
-          ? `color-mix(in srgb, ${widgetColor} 25%, color-mix(in srgb, var(--surface) 35%, transparent))`
+          ? `color-mix(in srgb, ${widgetColor} 25%, color-mix(in srgb, var(--surface) 25%, transparent))`
           : `color-mix(in srgb, ${widgetColor} 14%, var(--surface))`,
         boxShadow: undefined,
         backdropFilter: hasBlur ? `blur(${blurStrength}px) saturate(150%)` : undefined,
@@ -146,7 +146,7 @@ export function WidgetShell({
       } as React.CSSProperties)
     : hasBlur
       ? ({
-          backgroundColor: "color-mix(in srgb, var(--surface) 35%, transparent)",
+          backgroundColor: "color-mix(in srgb, var(--surface) 25%, transparent)",
           backdropFilter: `blur(${blurStrength}px) saturate(150%)`,
           WebkitBackdropFilter: `blur(${blurStrength}px) saturate(150%)`,
         } as React.CSSProperties)

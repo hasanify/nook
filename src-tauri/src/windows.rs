@@ -75,8 +75,27 @@ pub fn spawn_widget(app: &AppHandle, instance: &WidgetInstance) -> Result<(), St
 
     pin::set_bounds_screen(hwnd, screen_rect, strategy)?;
 
-    // Ensure widget windows maintain pure DirectComposition transparent composition without OS rectangular artifacts
-    let _ = window.set_effects(None);
+    let has_blur = instance
+        .settings
+        .get("backgroundBlur")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "glass"
+        || app
+            .state::<AppState>()
+            .config
+            .get_config()
+            .app
+            .widget_preset
+            == "ghost";
+
+    apply_desktop_blur(hwnd, has_blur);
 
     window
         .show()
@@ -330,21 +349,114 @@ pub fn update_widget_geometry(
 pub fn sync_widget_effects(app: &AppHandle, widget_id: Option<&str>) {
     let state = app.state::<AppState>();
     let cfg = state.config.get_config();
+    let global_preset = &cfg.app.widget_preset;
 
-    let targets: Vec<String> = cfg
+    let targets: Vec<(String, bool)> = cfg
         .widgets
         .iter()
         .filter(|w| widget_id.is_none() || widget_id == Some(&w.id))
-        .map(|w| w.id.clone())
+        .map(|w| {
+            let blur = w
+                .settings
+                .get("backgroundBlur")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false)
+                || global_preset == "glass"
+                || global_preset == "ghost";
+            (w.id.clone(), blur)
+        })
         .collect();
 
-    for id in targets {
+    for (id, has_blur) in targets {
         let label = format!("widget-{}", id);
         if let Some(window) = app.get_webview_window(&label) {
-            let _ = window.set_effects(None);
+            if let Ok(raw_hwnd) = window.hwnd() {
+                apply_desktop_blur(HWND(raw_hwnd.0), has_blur);
+            }
         }
     }
 }
+
+#[cfg(windows)]
+#[allow(clippy::upper_case_acronyms)]
+#[repr(C)]
+struct ACCENT_POLICY {
+    accent_state: u32,
+    accent_flags: u32,
+    gradient_color: u32,
+    animation_id: u32,
+}
+
+#[cfg(windows)]
+#[allow(clippy::upper_case_acronyms)]
+#[repr(C)]
+struct WINDOWCOMPOSITIONATTRIBDATA {
+    attrib: u32,
+    pv_data: *mut std::ffi::c_void,
+    cb_data: usize,
+}
+
+#[cfg(windows)]
+pub fn apply_desktop_blur(hwnd: HWND, enable: bool) {
+    unsafe {
+        use windows::core::s;
+        use windows::Win32::Graphics::Dwm::{
+            DwmEnableBlurBehindWindow, DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE,
+            DWM_BB_ENABLE, DWM_BLURBEHIND,
+        };
+        use windows::Win32::Graphics::Gdi::HRGN;
+        use windows::Win32::System::LibraryLoader::{GetProcAddress, LoadLibraryA};
+
+        // Clip window corners to standard rounded rectangle on Windows 11
+        let corner_pref: u32 = 2; // DWMWCP_ROUND
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_WINDOW_CORNER_PREFERENCE,
+            &corner_pref as *const _ as *const _,
+            std::mem::size_of::<u32>() as u32,
+        );
+
+        // 1. DWM blur behind
+        let bb = DWM_BLURBEHIND {
+            dwFlags: DWM_BB_ENABLE,
+            fEnable: enable.into(),
+            hRgnBlur: HRGN::default(),
+            fTransitionOnMaximized: false.into(),
+        };
+        let _ = DwmEnableBlurBehindWindow(hwnd, &bb);
+
+        // 2. SetWindowCompositionAttribute (supports Windows 10 & Windows 11)
+        type SetWindowCompositionAttributeFn = unsafe extern "system" fn(
+            HWND,
+            *mut WINDOWCOMPOSITIONATTRIBDATA,
+        )
+            -> windows::core::BOOL;
+
+        if let Ok(user32) = LoadLibraryA(s!("user32.dll")) {
+            if let Some(proc) = GetProcAddress(user32, s!("SetWindowCompositionAttribute")) {
+                let set_wca: SetWindowCompositionAttributeFn = std::mem::transmute(proc);
+
+                let mut policy = ACCENT_POLICY {
+                    accent_state: if enable { 3 } else { 0 }, // 3 = ACCENT_ENABLE_BLURBEHIND, 0 = ACCENT_DISABLED
+                    accent_flags: if enable { 2 } else { 0 },
+                    gradient_color: 0,
+                    animation_id: 0,
+                };
+
+                let mut data = WINDOWCOMPOSITIONATTRIBDATA {
+                    attrib: 0x13, // WCA_ACCENT_POLICY
+                    pv_data: &mut policy as *mut _ as *mut std::ffi::c_void,
+                    cb_data: std::mem::size_of::<ACCENT_POLICY>(),
+                };
+
+                let _ = set_wca(hwnd, &mut data);
+            }
+        }
+    }
+}
+
+#[cfg(not(windows))]
+pub fn apply_desktop_blur(_hwnd: HWND, _enable: bool) {}
 
 pub fn handle_widget_move_end(app: &AppHandle, hwnd: HWND) {
     let windows = app.webview_windows();
