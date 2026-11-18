@@ -1199,38 +1199,22 @@ export function SettingsApp() {
         {activeTab === "about" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex w-full flex-col gap-5 pb-4">
-              {/* Hero Card */}
-              <div className="flex items-center gap-5 rounded-2xl border border-line/70 bg-gradient-to-br from-surface-raised/80 via-surface-raised/40 to-surface/20 p-6 backdrop-blur-xs">
+              {/* Hero Section */}
+              <div className="flex items-center gap-5 px-1 py-2">
                 <img
                   src="/icon.png"
                   alt="Nook"
-                  width={64}
-                  height={64}
-                  className="h-16 w-16 shrink-0 rounded-2xl object-cover shadow-sm"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 shrink-0 rounded-2xl object-cover"
                 />
                 <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-2.5">
-                    <h2 className="text-lg font-bold tracking-tight text-fg">Nook</h2>
-                    {appVersion && (
-                      <span className="rounded-full border border-line/80 bg-surface px-2.5 py-0.5 font-mono text-[11px] font-medium text-fg-muted shadow-xs">
-                        v{appVersion}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-fg-muted">
-                    Lightweight, distraction-free desktop widgets pinned directly to your Windows
-                    desktop.
+                  <h2 className="text-xl font-bold tracking-tight text-fg">Nook</h2>
+                  <p className="text-xs leading-relaxed text-fg-muted">
+                    Lightweight, distraction-free desktop widgets
+                    <br />
+                    pinned directly to your Windows desktop.
                   </p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {["Tauri v2", "Rust", "React", "TypeScript", "Tailwind v4"].map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-md border border-line/50 bg-surface/60 px-2 py-0.5 font-mono text-[10px] text-fg-muted"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
 
