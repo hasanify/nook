@@ -1,3 +1,9 @@
+## [0.11.5](https://github.com/hasanify/nook/compare/v0.11.4...v0.11.5) (2026-11-18)
+
+### Bug Fixes
+
+- **widgets:** align notes title left, silent autosave, and remove widget bottom padding ([53f882c](https://github.com/hasanify/nook/commit/53f882c0fe1991a8318027362a63af4914beeb08))
+
 ## [0.11.4](https://github.com/hasanify/nook/compare/v0.11.3...v0.11.4) (2026-11-18)
 
 ### Bug Fixes
