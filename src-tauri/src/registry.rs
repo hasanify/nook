@@ -136,6 +136,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let port_sentinel_json = include_str!("../../src/widgets/port-sentinel/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(port_sentinel_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

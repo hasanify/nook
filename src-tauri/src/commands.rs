@@ -571,3 +571,121 @@ pub async fn list_vercel_projects(
     let client = reqwest::Client::new();
     crate::providers::vercel::list_projects(&client, token.as_deref()).await
 }
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct PortInfo {
+    pub port: u16,
+    pub pid: u32,
+    pub process_name: String,
+    pub protocol: String,
+}
+
+#[tauri::command]
+pub async fn get_listening_ports() -> Result<Vec<PortInfo>, String> {
+    tokio::task::spawn_blocking(|| {
+        use std::collections::HashMap;
+        #[cfg(windows)]
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+
+        let mut pid_to_name: HashMap<u32, String> = HashMap::new();
+
+        let mut tasklist_cmd = Command::new("tasklist");
+        tasklist_cmd.args(["/FO", "CSV", "/NH"]);
+        #[cfg(windows)]
+        tasklist_cmd.creation_flags(0x08000000);
+
+        if let Ok(output) = tasklist_cmd.output() {
+            let text = String::from_utf8_lossy(&output.stdout);
+            for line in text.lines() {
+                let parts: Vec<&str> = line.split(',').collect();
+                if parts.len() >= 2 {
+                    let name = parts[0].trim().trim_matches('"');
+                    let pid_str = parts[1].trim().trim_matches('"');
+                    if let Ok(pid) = pid_str.parse::<u32>() {
+                        pid_to_name.insert(pid, name.to_string());
+                    }
+                }
+            }
+        }
+
+        let mut netstat_cmd = Command::new("netstat");
+        netstat_cmd.args(["-ano", "-p", "tcp"]);
+        #[cfg(windows)]
+        netstat_cmd.creation_flags(0x08000000);
+
+        let mut ports: Vec<PortInfo> = Vec::new();
+        let mut seen_ports: std::collections::HashSet<u16> = std::collections::HashSet::new();
+
+        if let Ok(output) = netstat_cmd.output() {
+            let text = String::from_utf8_lossy(&output.stdout);
+            for line in text.lines() {
+                let trimmed = line.trim();
+                if trimmed.contains("LISTENING") {
+                    let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                    if parts.len() >= 5 {
+                        let local_addr = parts[1];
+                        let pid_str = parts[parts.len() - 1];
+                        if let (Some(colon_idx), Ok(pid)) =
+                            (local_addr.rfind(':'), pid_str.parse::<u32>())
+                        {
+                            let port_str = &local_addr[colon_idx + 1..];
+                            if let Ok(port) = port_str.parse::<u16>() {
+                                if !seen_ports.contains(&port) {
+                                    seen_ports.insert(port);
+                                    let process_name = pid_to_name
+                                        .get(&pid)
+                                        .cloned()
+                                        .unwrap_or_else(|| format!("PID: {}", pid));
+                                    ports.push(PortInfo {
+                                        port,
+                                        pid,
+                                        process_name,
+                                        protocol: "TCP".to_string(),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ports.sort_by_key(|p| p.port);
+        Ok(ports)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn kill_port_process(pid: u32) -> Result<(), String> {
+    if pid <= 4 {
+        return Err("Cannot terminate core system process".to_string());
+    }
+    tokio::task::spawn_blocking(move || {
+        #[cfg(windows)]
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+
+        let mut cmd = Command::new("taskkill");
+        cmd.args(["/F", "/PID", &pid.to_string()]);
+        #[cfg(windows)]
+        cmd.creation_flags(0x08000000);
+
+        let output = cmd
+            .output()
+            .map_err(|e| format!("Failed to execute taskkill: {}", e))?;
+        if !output.status.success() {
+            let err_text = String::from_utf8_lossy(&output.stderr);
+            return Err(if err_text.trim().is_empty() {
+                format!("Failed to kill process {}", pid)
+            } else {
+                err_text.trim().to_string()
+            });
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}

@@ -154,6 +154,21 @@ export async function listVercelProjects(): Promise<VercelProjectSummary[]> {
   return invoke<VercelProjectSummary[]>("list_vercel_projects");
 }
 
+export interface PortInfo {
+  port: number;
+  pid: number;
+  process_name: string;
+  protocol: string;
+}
+
+export async function getListeningPorts(): Promise<PortInfo[]> {
+  return invoke<PortInfo[]>("get_listening_ports");
+}
+
+export async function killPortProcess(pid: number): Promise<void> {
+  return invoke<void>("kill_port_process", { pid });
+}
+
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
 ): Promise<import("./types").ProviderPayload<T> | null> {

@@ -1,0 +1,30 @@
+{
+  "id": "port-sentinel",
+  "name": "Port Sentinel",
+  "description": "Active port radar with one-click Process Kill",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 280 },
+  "minSize": { "w": 260, "h": 220 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "devPortsOnly",
+      "label": "Filter to Dev Ports (3000, 5173, 8080, etc.)",
+      "type": "boolean",
+      "defaultValue": false
+    },
+    {
+      "key": "refreshInterval",
+      "label": "Auto-refresh Interval",
+      "type": "select",
+      "defaultValue": "5",
+      "options": [
+        { "label": "Manual Only", "value": "0" },
+        { "label": "Every 3 seconds", "value": "3" },
+        { "label": "Every 5 seconds", "value": "5" },
+        { "label": "Every 10 seconds", "value": "10" }
+      ]
+    }
+  ]
+}
