@@ -16,6 +16,7 @@ import aiStoicModule from "./ai-stoic";
 import aiStretchModule from "./ai-stretch";
 import aiJournalPromptModule from "./ai-journal-prompt";
 import aiUnstuckModule from "./ai-unstuck";
+import aiVocabModule from "./ai-vocab";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -34,6 +35,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "ai-stretch": aiStretchModule,
   "ai-journal-prompt": aiJournalPromptModule,
   "ai-unstuck": aiUnstuckModule,
+  "ai-vocab": aiVocabModule,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {

@@ -131,6 +131,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let ai_vocab_json = include_str!("../../src/widgets/ai-vocab/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(ai_vocab_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 
