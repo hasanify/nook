@@ -1,0 +1,11 @@
+{
+  "id": "habits",
+  "name": "Habits Tracker",
+  "description": "7-day visual habit streak tracker with weekly completion grid and streak counter",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 340, "h": 260 },
+  "minSize": { "w": 280, "h": 200 },
+  "resizable": true,
+  "settingsSchema": []
+}

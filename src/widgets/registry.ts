@@ -24,6 +24,7 @@ import systemVitalsModule from "./system-vitals";
 import nowPlayingModule from "./now-playing";
 import batteryMonitorModule from "./battery-monitor";
 import worldClockModule from "./world-clock";
+import habitsModule from "./habits";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -50,6 +51,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "now-playing": nowPlayingModule,
   "battery-monitor": batteryMonitorModule,
   "world-clock": worldClockModule,
+  habits: habitsModule,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {
