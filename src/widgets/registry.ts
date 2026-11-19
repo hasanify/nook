@@ -21,6 +21,7 @@ import portSentinelModule from "./port-sentinel";
 import apiHealthModule from "./api-health";
 import githubPrsModule from "./github-prs";
 import systemVitalsModule from "./system-vitals";
+import nowPlayingModule from "./now-playing";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -44,6 +45,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "api-health": apiHealthModule,
   "github-prs": githubPrsModule,
   "system-vitals": systemVitalsModule,
+  "now-playing": nowPlayingModule,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {

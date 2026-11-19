@@ -1,0 +1,23 @@
+{
+  "id": "now-playing",
+  "name": "Now Playing",
+  "description": "Windows Media Session controller with album art & quick transport keys",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 200 },
+  "minSize": { "w": 260, "h": 170 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "refreshInterval",
+      "label": "Radar Interval",
+      "type": "select",
+      "defaultValue": "3",
+      "options": [
+        { "label": "Fast (2s)", "value": "2" },
+        { "label": "Normal (3s)", "value": "3" },
+        { "label": "Relaxed (5s)", "value": "5" }
+      ]
+    }
+  ]
+}

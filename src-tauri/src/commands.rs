@@ -895,3 +895,148 @@ pub async fn get_system_vitals() -> Result<SystemVitals, String> {
     .await
     .map_err(|e| e.to_string())?
 }
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct MediaStatus {
+    pub title: String,
+    pub artist: String,
+    pub player: String,
+    pub is_playing: bool,
+}
+
+#[tauri::command]
+pub async fn send_media_command(action: String) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        extern "system" {
+            fn keybd_event(b_vk: u8, b_scan: u8, dw_flags: u32, dw_extra_info: usize);
+        }
+        const KEYEVENTF_KEYUP: u32 = 0x0002;
+        let vk: u8 = match action.as_str() {
+            "play_pause" => 0xB3,
+            "next" => 0xB0,
+            "previous" => 0xB1,
+            "volume_up" => 0xAF,
+            "volume_down" => 0xAE,
+            "mute" => 0xAD,
+            _ => return Err(format!("Unsupported media action: {}", action)),
+        };
+        unsafe {
+            keybd_event(vk, 0, 0, 0);
+            keybd_event(vk, 0, KEYEVENTF_KEYUP, 0);
+        }
+        Ok(())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = action;
+        Ok(())
+    }
+}
+
+#[tauri::command]
+pub async fn get_media_status() -> Result<MediaStatus, String> {
+    #[cfg(windows)]
+    {
+        unsafe extern "system" fn enum_callback(hwnd: isize, lparam: isize) -> i32 {
+            extern "system" {
+                fn IsWindowVisible(hwnd: isize) -> i32;
+                fn GetWindowTextLengthW(hwnd: isize) -> i32;
+                fn GetWindowTextW(hwnd: isize, lp_string: *mut u16, n_max_count: i32) -> i32;
+            }
+            if IsWindowVisible(hwnd) == 0 {
+                return 1;
+            }
+            let len = GetWindowTextLengthW(hwnd);
+            if !(1..=300).contains(&len) {
+                return 1;
+            }
+            let mut buf: Vec<u16> = vec![0; (len + 1) as usize];
+            let copied = GetWindowTextW(hwnd, buf.as_mut_ptr(), len + 1);
+            if copied > 0 {
+                let title_str = String::from_utf16_lossy(&buf[..copied as usize]);
+                let lower = title_str.to_lowercase();
+                // Filter common non-music apps
+                let is_ignored = lower.contains("visual studio")
+                    || lower.contains("powershell")
+                    || lower.contains("cmd.exe")
+                    || lower.contains("nook")
+                    || lower.contains("task manager");
+
+                if !is_ignored {
+                    if (lower.contains("spotify")
+                        || lower.contains("music")
+                        || lower.contains("vlc"))
+                        && title_str.contains(" - ")
+                    {
+                        let parts: Vec<&str> = title_str.splitn(2, " - ").collect();
+                        if parts.len() == 2 {
+                            let slot = lparam as *mut Option<MediaStatus>;
+                            if let Some(out) = slot.as_mut() {
+                                if out.is_none() {
+                                    *out = Some(MediaStatus {
+                                        artist: parts[0].trim().to_string(),
+                                        title: parts[1].trim().to_string(),
+                                        player: if lower.contains("spotify") {
+                                            "Spotify".to_string()
+                                        } else {
+                                            "Media Player".to_string()
+                                        },
+                                        is_playing: true,
+                                    });
+                                    return 0;
+                                }
+                            }
+                        }
+                    } else if lower.ends_with(" - youtube") || lower.ends_with(" - youtube music") {
+                        let clean = title_str
+                            .trim_end_matches(" - YouTube")
+                            .trim_end_matches(" - YouTube Music")
+                            .trim();
+                        let slot = lparam as *mut Option<MediaStatus>;
+                        if let Some(out) = slot.as_mut() {
+                            if out.is_none() {
+                                *out = Some(MediaStatus {
+                                    artist: "YouTube".to_string(),
+                                    title: clean.to_string(),
+                                    player: "Browser".to_string(),
+                                    is_playing: true,
+                                });
+                                return 0;
+                            }
+                        }
+                    }
+                }
+            }
+            1
+        }
+
+        extern "system" {
+            fn EnumWindows(
+                lp_enum_func: unsafe extern "system" fn(isize, isize) -> i32,
+                lparam: isize,
+            ) -> i32;
+        }
+
+        let mut detected: Option<MediaStatus> = None;
+        unsafe {
+            EnumWindows(enum_callback, &mut detected as *mut _ as isize);
+        }
+
+        Ok(detected.unwrap_or(MediaStatus {
+            title: "No Active Track".to_string(),
+            artist: "Ready to control".to_string(),
+            player: "Windows Media".to_string(),
+            is_playing: false,
+        }))
+    }
+    #[cfg(not(windows))]
+    {
+        Ok(MediaStatus {
+            title: "No Active Track".to_string(),
+            artist: "Ready to control".to_string(),
+            player: "Desktop Media".to_string(),
+            is_playing: false,
+        })
+    }
+}

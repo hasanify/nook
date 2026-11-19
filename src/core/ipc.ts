@@ -194,6 +194,21 @@ export async function getSystemVitals(): Promise<SystemVitals> {
   return invoke<SystemVitals>("get_system_vitals");
 }
 
+export interface MediaStatus {
+  title: string;
+  artist: string;
+  player: string;
+  is_playing: boolean;
+}
+
+export async function sendMediaCommand(action: string): Promise<void> {
+  return invoke<void>("send_media_command", { action });
+}
+
+export async function getMediaStatus(): Promise<MediaStatus> {
+  return invoke<MediaStatus>("get_media_status");
+}
+
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
 ): Promise<import("./types").ProviderPayload<T> | null> {
