@@ -115,6 +115,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let ai_stretch_json = include_str!("../../src/widgets/ai-stretch/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(ai_stretch_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

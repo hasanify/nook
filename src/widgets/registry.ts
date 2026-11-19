@@ -13,6 +13,7 @@ import aiEli5Module from "./ai-eli5";
 import aiBookNuggetModule from "./ai-book-nugget";
 import aiHistoryModule from "./ai-history";
 import aiStoicModule from "./ai-stoic";
+import aiStretchModule from "./ai-stretch";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -28,6 +29,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "ai-book-nugget": aiBookNuggetModule,
   "ai-history": aiHistoryModule,
   "ai-stoic": aiStoicModule,
+  "ai-stretch": aiStretchModule,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {

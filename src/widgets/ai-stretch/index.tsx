@@ -1,0 +1,271 @@
+import { useState, useCallback, useRef, useEffect } from "react";
+import { WidgetShell } from "../../components/WidgetShell";
+import { Banner } from "../../components/Banner";
+import { callAI } from "../../core/ai";
+import manifestJson from "./manifest.json";
+import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
+
+const manifest = manifestJson as Manifest;
+
+const SYSTEM_PROMPT = `Provide 1 discreet 45-second physical stretch or eye exercise for desk workers.
+Format exactly:
+NAME: <Stretch Name>
+HOW: <Step 1 (max 12 words)>. <Step 2 (max 12 words)>.
+TIME: <Duration in seconds>`;
+
+interface StretchItem {
+  name: string;
+  how: string;
+  time: number;
+}
+
+const DEFAULT_SAMPLE: StretchItem = {
+  name: "Seated Neck & Trapezius Release",
+  how: "Drop right ear gently to shoulder without hunching. Hold twenty seconds then switch sides smoothly.",
+  time: 45,
+};
+
+const FOCUS_QUERIES = [
+  "neck and shoulder tension relief",
+  "20-20-20 eye strain reset",
+  "wrist and forearm keyboard stretch",
+  "seated thoracic spine twist",
+  "chest opener and shoulder roll",
+];
+
+function parseStretchOutput(raw: string): StretchItem {
+  const nameMatch = raw.match(/NAME:\s*([\s\S]*?)(?=\nHOW:|$)/i);
+  const howMatch = raw.match(/HOW:\s*([\s\S]*?)(?=\nTIME:|$)/i);
+  const timeMatch = raw.match(/TIME:\s*(\d+)/i);
+
+  return {
+    name: nameMatch?.[1]?.trim() || DEFAULT_SAMPLE.name,
+    how: howMatch?.[1]?.trim() || DEFAULT_SAMPLE.how,
+    time: timeMatch ? parseInt(timeMatch[1] ?? "45", 10) : 45,
+  };
+}
+
+export function AiStretchWidget({ instance, editMode, patchState }: WidgetProps) {
+  const savedStretch = instance.state.stretch as StretchItem | undefined;
+
+  const [stretch, setStretch] = useState<StretchItem>(savedStretch || DEFAULT_SAMPLE);
+  const [secondsLeft, setSecondsLeft] = useState(stretch.time || 45);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const model = typeof instance.settings.model === "string" ? instance.settings.model : undefined;
+  const endpoint =
+    typeof instance.settings.endpoint === "string" ? instance.settings.endpoint : undefined;
+  const apiKey =
+    typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
+  const focusArea =
+    typeof instance.settings.focusArea === "string" ? instance.settings.focusArea : "all";
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const handleFetch = useCallback(async () => {
+    setLoading(true);
+    setErrorBanner(null);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setTimerRunning(false);
+
+    const query =
+      focusArea === "all"
+        ? FOCUS_QUERIES[Math.floor(Math.random() * FOCUS_QUERIES.length)]
+        : `desk stretch for ${focusArea}`;
+
+    try {
+      const output = await callAI({
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt: `Target: ${query}`,
+        maxTokens: 50,
+        model,
+        endpoint,
+        apiKey,
+      });
+
+      const parsed = parseStretchOutput(output);
+      setStretch(parsed);
+      setSecondsLeft(parsed.time || 45);
+      patchState({ stretch: parsed });
+    } catch (err) {
+      setErrorBanner(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [focusArea, model, endpoint, apiKey, patchState]);
+
+  const toggleTimer = () => {
+    if (timerRunning) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = null;
+      setTimerRunning(false);
+    } else {
+      if (secondsLeft <= 0) {
+        setSecondsLeft(stretch.time || 45);
+      }
+      setTimerRunning(true);
+      timerRef.current = setInterval(() => {
+        setSecondsLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            timerRef.current = null;
+            setTimerRunning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+  };
+
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    setTimerRunning(false);
+    setSecondsLeft(stretch.time || 45);
+  };
+
+  // Split into steps if periods exist
+  const steps = stretch.how
+    .split(/\.\s+/)
+    .map((s) => s.trim().replace(/\.$/, ""))
+    .filter(Boolean);
+
+  return (
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title={manifest.name}
+      resizable={manifest.resizable}
+      minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
+      headerSlot={
+        <svg
+          className="h-3 w-3 shrink-0 text-ok"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M18 20V10" />
+          <path d="M12 20V4" />
+          <path d="M6 20v-6" />
+        </svg>
+      }
+      headerActions={
+        <button
+          type="button"
+          onClick={() => void handleFetch()}
+          disabled={loading}
+          title="New stretch"
+          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+        >
+          <svg
+            className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+        </button>
+      }
+      banner={
+        errorBanner ? (
+          <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
+        ) : undefined
+      }
+    >
+      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-2 p-1">
+        {/* Name and Timer Bar */}
+        <div className="flex items-center justify-between">
+          <span className="truncate rounded-md bg-ok/10 px-2 py-0.5 text-[10px] font-semibold text-ok">
+            {stretch.name}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`font-mono text-xs font-bold ${
+                secondsLeft === 0 ? "text-ok" : "text-fg-muted"
+              }`}
+            >
+              {secondsLeft === 0 ? "DONE!" : `${secondsLeft}s`}
+            </span>
+            <button
+              type="button"
+              onClick={toggleTimer}
+              className={`cursor-pointer rounded px-2 py-0.5 text-[10px] font-medium text-white transition-colors ${
+                timerRunning ? "bg-amber-500 hover:bg-amber-600" : "bg-ok hover:bg-ok/90"
+              }`}
+            >
+              {timerRunning ? "Pause" : secondsLeft === 0 ? "Restart" : "Start"}
+            </button>
+            {secondsLeft < (stretch.time || 45) && (
+              <button
+                type="button"
+                onClick={resetTimer}
+                className="cursor-pointer text-[10px] text-fg-muted hover:text-fg"
+              >
+                ↺
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 2 Step Execution */}
+        <div className="flex flex-1 flex-col justify-center gap-1.5 select-text">
+          {loading ? (
+            <p className="text-xs text-fg-muted italic">Consulting wellness coach…</p>
+          ) : (
+            steps.map((step, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-2 rounded-lg border border-line bg-surface-raised/40 p-2"
+              >
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-surface text-[9px] font-bold text-accent-500 shadow-2xs">
+                  {idx + 1}
+                </span>
+                <p className="text-xs leading-relaxed text-fg">{step}.</p>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+          <span>~15 in / ~35 out tokens</span>
+          <span>45-sec micro-break</span>
+        </div>
+      </div>
+    </WidgetShell>
+  );
+}
+
+const aiStretchModule: WidgetModule = {
+  manifest,
+  component: AiStretchWidget,
+  defaultSettings: {
+    focusArea: "all",
+    model: "gpt-4o-mini",
+  },
+  defaultState: {
+    stretch: DEFAULT_SAMPLE,
+  },
+};
+
+export default aiStretchModule;

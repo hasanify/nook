@@ -1,0 +1,44 @@
+{
+  "id": "ai-stretch",
+  "name": "Desk Stretch",
+  "description": "Discreet 45-second desk ergonomic stretches and eye relaxation exercises",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 220 },
+  "minSize": { "w": 240, "h": 180 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "focusArea",
+      "label": "Focus Area",
+      "type": "select",
+      "defaultValue": "all",
+      "options": [
+        { "label": "All Stretches", "value": "all" },
+        { "label": "Neck & Shoulders", "value": "neck" },
+        { "label": "Eyes & Vision (20-20-20)", "value": "eyes" },
+        { "label": "Wrists & Hands", "value": "wrists" },
+        { "label": "Spine & Posture", "value": "spine" }
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "text",
+      "placeholder": "gpt-4o-mini",
+      "defaultValue": "gpt-4o-mini"
+    },
+    {
+      "key": "endpoint",
+      "label": "Custom API Endpoint",
+      "type": "text",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "key": "apiKey",
+      "label": "API Key Override",
+      "type": "text",
+      "placeholder": "Optional widget-specific key"
+    }
+  ]
+}
