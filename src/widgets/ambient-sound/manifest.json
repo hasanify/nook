@@ -1,0 +1,11 @@
+{
+  "id": "ambient-sound",
+  "name": "Ambient Sound",
+  "description": "Offline synthesized white noise, pink noise, deep brown rumble, and rain generator",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 220 },
+  "minSize": { "w": 260, "h": 170 },
+  "resizable": true,
+  "settingsSchema": []
+}
