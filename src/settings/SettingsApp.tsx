@@ -704,7 +704,7 @@ export function SettingsApp() {
         {activeTab === "widgets" && (
           <div className="flex min-h-0 flex-1 gap-5 overflow-hidden px-6 py-0">
             {/* Left Column: Widget List */}
-            <div className="my-3 flex w-52 shrink-0 flex-col gap-2.5 border-r border-line/60 pr-4">
+            <div className="my-3 flex w-56 shrink-0 flex-col gap-2.5 border-r border-line/60 pr-4">
               <div className="flex items-center justify-between font-medium text-fg">
                 <span>Active Widgets</span>
                 <span className="font-mono text-[11px] text-fg-muted">
@@ -758,11 +758,11 @@ export function SettingsApp() {
               {/* Add Widget */}
               <div className="mt-auto flex shrink-0 flex-col gap-1.5 border-t border-line/60 pt-3 pb-2">
                 <span className="text-[11px] font-medium text-fg-muted">Add new widget:</span>
-                <div className="flex gap-1.5">
+                <div className="flex items-center gap-1.5">
                   <select
                     value={widgetToAdd}
                     onChange={(e) => setWidgetToAdd(e.target.value)}
-                    className="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                    className="h-8 min-w-0 flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                   >
                     {Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => (
                       <option key={kind} value={kind}>
@@ -777,9 +777,21 @@ export function SettingsApp() {
                         void handleAddWidget(widgetToAdd);
                       }
                     }}
-                    className="flex cursor-pointer items-center gap-1 rounded-lg bg-accent-500 px-3 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-lg bg-accent-500 px-2.5 text-xs font-semibold whitespace-nowrap text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <span>+ Add</span>
+                    <svg
+                      className="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>Add</span>
                   </button>
                 </div>
               </div>
