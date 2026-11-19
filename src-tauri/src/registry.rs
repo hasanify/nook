@@ -161,6 +161,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let battery_monitor_json = include_str!("../../src/widgets/battery-monitor/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(battery_monitor_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

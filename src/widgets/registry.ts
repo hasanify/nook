@@ -22,6 +22,7 @@ import apiHealthModule from "./api-health";
 import githubPrsModule from "./github-prs";
 import systemVitalsModule from "./system-vitals";
 import nowPlayingModule from "./now-playing";
+import batteryMonitorModule from "./battery-monitor";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -46,6 +47,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "github-prs": githubPrsModule,
   "system-vitals": systemVitalsModule,
   "now-playing": nowPlayingModule,
+  "battery-monitor": batteryMonitorModule,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {

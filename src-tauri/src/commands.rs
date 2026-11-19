@@ -1040,3 +1040,83 @@ pub async fn get_media_status() -> Result<MediaStatus, String> {
         })
     }
 }
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct BatteryStatus {
+    pub has_battery: bool,
+    pub is_charging: bool,
+    pub is_ac_plugged: bool,
+    pub percent: u8,
+    pub time_remaining_seconds: Option<u32>,
+    pub battery_saver: bool,
+}
+
+#[tauri::command]
+pub async fn get_battery_status() -> Result<BatteryStatus, String> {
+    #[cfg(windows)]
+    {
+        #[allow(non_snake_case)]
+        #[repr(C)]
+        struct SystemPowerStatus {
+            ac_line_status: u8,
+            battery_flag: u8,
+            battery_life_percent: u8,
+            system_status_flag: u8,
+            battery_life_time: u32,
+            battery_full_life_time: u32,
+        }
+
+        extern "system" {
+            fn GetSystemPowerStatus(lp_system_power_status: *mut SystemPowerStatus) -> i32;
+        }
+
+        let mut status = SystemPowerStatus {
+            ac_line_status: 255,
+            battery_flag: 255,
+            battery_life_percent: 255,
+            system_status_flag: 0,
+            battery_life_time: 0xFFFFFFFF,
+            battery_full_life_time: 0xFFFFFFFF,
+        };
+
+        let ok = unsafe { GetSystemPowerStatus(&mut status) };
+        if ok == 0 {
+            return Err("Failed to query GetSystemPowerStatus".to_string());
+        }
+
+        let has_battery = (status.battery_flag & 128) == 0 && status.battery_life_percent != 255;
+        let is_charging = (status.battery_flag & 8) != 0;
+        let is_ac_plugged = status.ac_line_status == 1;
+        let percent = if has_battery {
+            status.battery_life_percent
+        } else {
+            100
+        };
+        let time_remaining_seconds = if status.battery_life_time != 0xFFFFFFFF {
+            Some(status.battery_life_time)
+        } else {
+            None
+        };
+        let battery_saver = status.system_status_flag == 1;
+
+        Ok(BatteryStatus {
+            has_battery,
+            is_charging,
+            is_ac_plugged,
+            percent,
+            time_remaining_seconds,
+            battery_saver,
+        })
+    }
+    #[cfg(not(windows))]
+    {
+        Ok(BatteryStatus {
+            has_battery: true,
+            is_charging: true,
+            is_ac_plugged: true,
+            percent: 95,
+            time_remaining_seconds: None,
+            battery_saver: false,
+        })
+    }
+}

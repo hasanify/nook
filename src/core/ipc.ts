@@ -209,6 +209,19 @@ export async function getMediaStatus(): Promise<MediaStatus> {
   return invoke<MediaStatus>("get_media_status");
 }
 
+export interface BatteryStatus {
+  has_battery: boolean;
+  is_charging: boolean;
+  is_ac_plugged: boolean;
+  percent: number;
+  time_remaining_seconds?: number | null;
+  battery_saver: boolean;
+}
+
+export async function getBatteryStatus(): Promise<BatteryStatus> {
+  return invoke<BatteryStatus>("get_battery_status");
+}
+
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
 ): Promise<import("./types").ProviderPayload<T> | null> {

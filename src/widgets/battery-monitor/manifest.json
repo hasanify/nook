@@ -1,0 +1,23 @@
+{
+  "id": "battery-monitor",
+  "name": "Battery Monitor",
+  "description": "Laptop and handheld power rate, charging state, and battery health radar",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 180 },
+  "minSize": { "w": 220, "h": 150 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "refreshInterval",
+      "label": "Polling Interval",
+      "type": "select",
+      "defaultValue": "5",
+      "options": [
+        { "label": "Fast (5s)", "value": "5" },
+        { "label": "Normal (10s)", "value": "10" },
+        { "label": "Eco (30s)", "value": "30" }
+      ]
+    }
+  ]
+}
