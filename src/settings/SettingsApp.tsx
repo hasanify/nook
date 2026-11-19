@@ -44,8 +44,10 @@ export function SettingsApp() {
   const [autostartEnabled, setAutostartEnabled] = useState(false);
   const [githubConfigured, setGithubConfigured] = useState(false);
   const [vercelConfigured, setVercelConfigured] = useState(false);
+  const [aiConfigured, setAiConfigured] = useState(false);
   const [githubInput, setGithubInput] = useState("");
   const [vercelInput, setVercelInput] = useState("");
+  const [aiInput, setAiInput] = useState("");
   const [widgetToAdd, setWidgetToAdd] = useState("notes");
   const hasShownWindowRef = useRef(false);
   const opacityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -67,6 +69,16 @@ export function SettingsApp() {
       .catch(() => {});
     hasAccountToken("vercel")
       .then((has) => setVercelConfigured(has))
+      .catch(() => {});
+    hasAccountToken("ai")
+      .then(async (has) => {
+        if (has) {
+          setAiConfigured(true);
+        } else {
+          const hasOpenAi = await hasAccountToken("openai").catch(() => false);
+          setAiConfigured(hasOpenAi);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -205,6 +217,19 @@ export function SettingsApp() {
 
   const handleClearVercelToken = async () => {
     await clearAccountToken("vercel");
+    refreshAccountStatus();
+  };
+
+  const handleSaveAiToken = async () => {
+    if (!aiInput.trim()) return;
+    await saveAccountToken("ai", aiInput.trim());
+    setAiInput("");
+    refreshAccountStatus();
+  };
+
+  const handleClearAiToken = async () => {
+    await clearAccountToken("ai");
+    await clearAccountToken("openai");
     refreshAccountStatus();
   };
 
@@ -1124,6 +1149,72 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void handleClearVercelToken()}
+                      className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* AI / OpenAI Token */}
+              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="h-3.5 w-3.5 text-accent-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                    <label htmlFor="ai-token-input" className="font-semibold text-fg">
+                      AI / OpenAI API Key
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-medium">
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        aiConfigured ? "bg-ok" : "bg-fg-muted/30"
+                      }`}
+                    />
+                    <span className={aiConfigured ? "text-ok" : "text-fg-muted/60"}>
+                      {aiConfigured ? "Active" : "Not set"}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-fg-muted">
+                  Powers AI widgets (OpenAI, OpenRouter, Groq, or compatible endpoints).
+                </p>
+                <div className="flex gap-2 pt-1">
+                  <input
+                    id="ai-token-input"
+                    type="password"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    value={aiInput}
+                    onChange={(e) => setAiInput(e.target.value)}
+                    placeholder="sk-••••••••••••••••••••••••"
+                    className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void handleSaveAiToken()}
+                    className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                  {aiConfigured && (
+                    <button
+                      type="button"
+                      onClick={() => void handleClearAiToken()}
                       className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
                     >
                       Clear

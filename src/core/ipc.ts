@@ -136,6 +136,10 @@ export async function clearAccountToken(provider: string): Promise<void> {
   return invoke<void>("clear_account_token", { provider });
 }
 
+export async function getAccountToken(provider: string): Promise<string | null> {
+  return invoke<string | null>("get_account_token", { provider });
+}
+
 export async function hasAccountToken(provider: string): Promise<boolean> {
   return invoke<boolean>("has_account_token", { provider });
 }

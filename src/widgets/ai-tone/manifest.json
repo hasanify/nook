@@ -1,0 +1,31 @@
+{
+  "id": "ai-tone",
+  "name": "Tone Mirror",
+  "description": "Rewrite drafts into Professional, Concise, and Warm phrasing",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 360 },
+  "minSize": { "w": 280, "h": 300 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "text",
+      "placeholder": "gpt-4o-mini",
+      "defaultValue": "gpt-4o-mini"
+    },
+    {
+      "key": "endpoint",
+      "label": "Custom API Endpoint",
+      "type": "text",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "key": "apiKey",
+      "label": "API Key Override",
+      "type": "text",
+      "placeholder": "Optional widget-specific key"
+    }
+  ]
+}

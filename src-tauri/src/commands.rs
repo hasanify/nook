@@ -288,6 +288,11 @@ pub fn clear_account_token(provider: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn get_account_token(provider: String) -> Option<String> {
+    crate::secrets::get_secret(&provider)
+}
+
+#[tauri::command]
 pub fn has_account_token(provider: String) -> bool {
     crate::secrets::has_secret(&provider)
 }

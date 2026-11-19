@@ -140,6 +140,7 @@ pub fn run() {
             commands::timer_schedule,
             commands::timer_cancel,
             commands::save_account_token,
+            commands::get_account_token,
             commands::clear_account_token,
             commands::has_account_token,
             commands::get_provider_snapshot,
