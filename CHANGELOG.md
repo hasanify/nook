@@ -1,3 +1,9 @@
+# [0.22.0](https://github.com/hasanify/nook/compare/v0.21.0...v0.22.0) (2026-11-19)
+
+### Features
+
+- **settings:** add multi-provider ai keys, auto-endpoint detection, and fix add button ui ([96d99ae](https://github.com/hasanify/nook/commit/96d99aebd2e091d7f1a8130971796b2b4d42f28f))
+
 # [0.21.0](https://github.com/hasanify/nook/compare/v0.20.0...v0.21.0) (2026-11-19)
 
 ### Bug Fixes
