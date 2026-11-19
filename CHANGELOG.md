@@ -1,3 +1,22 @@
+# [0.21.0](https://github.com/hasanify/nook/compare/v0.20.0...v0.21.0) (2026-11-19)
+
+### Bug Fixes
+
+- **settings:** prevent add widget button text wrapping and align controls ([03eee2c](https://github.com/hasanify/nook/commit/03eee2ca3d3dd0cd20128cc7bd8ca15423d0e7b2))
+
+### Features
+
+- **widgets:** add ambient-sound widget ([68cb17a](https://github.com/hasanify/nook/commit/68cb17ad009319a93a5b5a73eb09d4fa07689cb2))
+- **widgets:** add api-health widget ([0843527](https://github.com/hasanify/nook/commit/0843527c32b502821876654f4ca56af1a239e17a))
+- **widgets:** add battery-monitor widget ([b6b5dc8](https://github.com/hasanify/nook/commit/b6b5dc8d8283ac007fd882bba66ead2c0501998f))
+- **widgets:** add github-prs widget ([7d91b41](https://github.com/hasanify/nook/commit/7d91b41cc3a6f35b24dc4e92ab66c76cc5512ed1))
+- **widgets:** add habits widget ([dd35519](https://github.com/hasanify/nook/commit/dd3551985c604c6a3de07631461715c178d871b9))
+- **widgets:** add news-feed widget ([b8da801](https://github.com/hasanify/nook/commit/b8da801574918532263fb51d7b06469727dc92c6))
+- **widgets:** add now-playing widget ([fdfc617](https://github.com/hasanify/nook/commit/fdfc617088492f1dbd60736065131446037e3a96))
+- **widgets:** add port-sentinel widget ([3f33038](https://github.com/hasanify/nook/commit/3f33038982c52827ba1935132651ccb6d5b6a54e))
+- **widgets:** add system-vitals widget ([7c2b85d](https://github.com/hasanify/nook/commit/7c2b85dd2a5d4690de7537382a20ef889466106f))
+- **widgets:** add world-clock widget ([56f7e5b](https://github.com/hasanify/nook/commit/56f7e5b06bf8181971f08d1dd471d6adaadf631e))
+
 # [0.20.0](https://github.com/hasanify/nook/compare/v0.19.13...v0.20.0) (2026-11-19)
 
 ### Features
