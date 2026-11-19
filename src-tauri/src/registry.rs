@@ -100,6 +100,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let ai_book_nugget_json = include_str!("../../src/widgets/ai-book-nugget/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(ai_book_nugget_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

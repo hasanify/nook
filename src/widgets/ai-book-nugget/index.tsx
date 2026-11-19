@@ -1,0 +1,263 @@
+import { useState, useCallback } from "react";
+import { WidgetShell } from "../../components/WidgetShell";
+import { Banner } from "../../components/Banner";
+import { callAI } from "../../core/ai";
+import manifestJson from "./manifest.json";
+import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
+
+const manifest = manifestJson as Manifest;
+
+const SYSTEM_PROMPT = `Extract 1 actionable idea from the book/topic.
+Format exactly:
+BOOK: <Title by Author>
+CORE: <Key takeaway in 1 sentence, max 20 words>
+APPLY: <How to use it today in 1 sentence, max 15 words>`;
+
+interface BookNugget {
+  book: string;
+  core: string;
+  apply: string;
+}
+
+const CURATED_BOOKS = [
+  "Atomic Habits by James Clear",
+  "Thinking, Fast and Slow by Daniel Kahneman",
+  "Deep Work by Cal Newport",
+  "The Psychology of Money by Morgan Housel",
+  "Essentialism by Greg McKeown",
+  "Antifragile by Nassim Nicholas Taleb",
+  "Zero to One by Peter Thiel",
+  "High Output Management by Andy Grove",
+  "Principles by Ray Dalio",
+  "Man's Search for Meaning by Viktor Frankl",
+];
+
+const DEFAULT_SAMPLE: BookNugget = {
+  book: "Atomic Habits by James Clear",
+  core: "Small 1% daily improvements compound into massive long-term personal and professional transformations.",
+  apply: "Anchor one 2-minute micro-habit directly to your existing morning coffee routine.",
+};
+
+function parseBookOutput(raw: string): BookNugget {
+  const bookMatch = raw.match(/BOOK:\s*([\s\S]*?)(?=\nCORE:|$)/i);
+  const coreMatch = raw.match(/CORE:\s*([\s\S]*?)(?=\nAPPLY:|$)/i);
+  const applyMatch = raw.match(/APPLY:\s*([\s\S]*?)$/i);
+
+  return {
+    book: bookMatch?.[1]?.trim() || "Non-Fiction Framework",
+    core: coreMatch?.[1]?.trim() || "",
+    apply: applyMatch?.[1]?.trim() || "",
+  };
+}
+
+export function AiBookNuggetWidget({ instance, editMode, patchState }: WidgetProps) {
+  const savedNugget = instance.state.nugget as BookNugget | undefined;
+
+  const [nugget, setNugget] = useState<BookNugget>(savedNugget || DEFAULT_SAMPLE);
+  const [loading, setLoading] = useState(false);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [inputVal, setInputVal] = useState("");
+
+  const model = typeof instance.settings.model === "string" ? instance.settings.model : undefined;
+  const endpoint =
+    typeof instance.settings.endpoint === "string" ? instance.settings.endpoint : undefined;
+  const apiKey =
+    typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
+
+  const handleFetch = useCallback(
+    async (targetBook: string) => {
+      const cleanBook = targetBook.trim();
+      if (!cleanBook) return;
+
+      setLoading(true);
+      setErrorBanner(null);
+
+      try {
+        const output = await callAI({
+          systemPrompt: SYSTEM_PROMPT,
+          userPrompt: cleanBook,
+          maxTokens: 65,
+          model,
+          endpoint,
+          apiKey,
+        });
+
+        const parsed = parseBookOutput(output);
+        setNugget(parsed);
+        patchState({ nugget: parsed });
+        setShowInput(false);
+      } catch (err) {
+        setErrorBanner(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [model, endpoint, apiKey, patchState],
+  );
+
+  const handleShuffle = () => {
+    const candidates = CURATED_BOOKS.filter(
+      (b) => !b.toLowerCase().includes(nugget.book.toLowerCase().split(" ")[0] ?? ""),
+    );
+    const next = candidates[Math.floor(Math.random() * candidates.length)] ?? "Essentialism";
+    void handleFetch(next);
+  };
+
+  const handleCopy = () => {
+    void navigator.clipboard.writeText(
+      `📖 ${nugget.book}\n• Core: ${nugget.core}\n• Apply: ${nugget.apply}`,
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title={manifest.name}
+      resizable={manifest.resizable}
+      minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
+      headerSlot={
+        <svg
+          className="h-3 w-3 shrink-0 text-accent-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      }
+      headerActions={
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={handleShuffle}
+            disabled={loading}
+            title="Next book nugget"
+            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          >
+            <svg
+              className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </button>
+        </div>
+      }
+      banner={
+        errorBanner ? (
+          <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
+        ) : undefined
+      }
+    >
+      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-2 p-1">
+        {/* Book Header Tag */}
+        <div className="flex items-center justify-between">
+          <span className="truncate rounded-md bg-accent-500/10 px-2 py-0.5 text-[10px] font-medium text-accent-500">
+            {nugget.book}
+          </span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="shrink-0 cursor-pointer text-[10px] text-fg-muted hover:text-fg"
+          >
+            {copied ? "✓ Copied" : "Copy"}
+          </button>
+        </div>
+
+        {/* Content sections */}
+        <div className="flex flex-1 flex-col justify-center gap-2 select-text">
+          <div className="flex flex-col gap-0.5 rounded-lg border border-line bg-surface-raised/40 p-2">
+            <span className="font-mono text-[9px] font-semibold text-fg-muted">CORE MODEL</span>
+            <p className="text-xs leading-relaxed text-fg">
+              {loading ? (
+                <span className="text-fg-muted italic">Extracting capsule…</span>
+              ) : (
+                nugget.core
+              )}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-0.5 rounded-lg border border-line bg-surface-raised/40 p-2">
+            <span className="font-mono text-[9px] font-semibold text-ok">HOW TO APPLY TODAY</span>
+            <p className="text-xs leading-relaxed text-fg">
+              {loading ? <span className="text-fg-muted italic">…</span> : nugget.apply}
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-line/40 pt-1.5">
+          {showInput ? (
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                autoFocus
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && inputVal.trim()) {
+                    void handleFetch(inputVal.trim());
+                  } else if (e.key === "Escape") {
+                    setShowInput(false);
+                  }
+                }}
+                placeholder="Enter book title or author… (Enter)"
+                className="flex-1 rounded-md border border-line bg-surface-raised/40 px-2 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (inputVal.trim()) void handleFetch(inputVal.trim());
+                }}
+                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-[10px] font-medium text-white"
+              >
+                Go
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between text-[10px] text-fg-muted">
+              <span>~20 in / ~45 out tokens</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setInputVal("");
+                  setShowInput(true);
+                }}
+                className="cursor-pointer text-accent-500 hover:underline"
+              >
+                Search book
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </WidgetShell>
+  );
+}
+
+const aiBookNuggetModule: WidgetModule = {
+  manifest,
+  component: AiBookNuggetWidget,
+  defaultSettings: {
+    model: "gpt-4o-mini",
+  },
+  defaultState: {
+    nugget: DEFAULT_SAMPLE,
+  },
+};
+
+export default aiBookNuggetModule;
