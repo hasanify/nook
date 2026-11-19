@@ -1,0 +1,35 @@
+{
+  "id": "news-feed",
+  "name": "Tech News Feed",
+  "description": "Hacker News top stories, upvotes, comments, and one-click browser links",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 340, "h": 280 },
+  "minSize": { "w": 280, "h": 220 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "feedType",
+      "label": "Feed Category",
+      "type": "select",
+      "defaultValue": "top",
+      "options": [
+        { "label": "Top Stories", "value": "top" },
+        { "label": "Best Stories", "value": "best" },
+        { "label": "Newest Stories", "value": "new" },
+        { "label": "Show HN", "value": "show" }
+      ]
+    },
+    {
+      "key": "storyCount",
+      "label": "Stories to Show",
+      "type": "select",
+      "defaultValue": "5",
+      "options": [
+        { "label": "5 Stories", "value": "5" },
+        { "label": "8 Stories", "value": "8" },
+        { "label": "10 Stories", "value": "10" }
+      ]
+    }
+  ]
+}

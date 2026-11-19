@@ -26,6 +26,7 @@ import batteryMonitorModule from "./battery-monitor";
 import worldClockModule from "./world-clock";
 import habitsModule from "./habits";
 import ambientSoundModule from "./ambient-sound";
+import newsFeedModule from "./news-feed";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -54,6 +55,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "world-clock": worldClockModule,
   habits: habitsModule,
   "ambient-sound": ambientSoundModule,
+  "news-feed": newsFeedModule,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {

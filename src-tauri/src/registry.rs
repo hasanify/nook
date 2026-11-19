@@ -181,6 +181,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let news_feed_json = include_str!("../../src/widgets/news-feed/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(news_feed_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 
