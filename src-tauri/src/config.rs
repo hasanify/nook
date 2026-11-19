@@ -60,6 +60,8 @@ pub struct AppSection {
     pub pin_strategy: String,
     #[serde(default = "default_widget_preset", alias = "widget_preset")]
     pub widget_preset: String,
+    #[serde(default, alias = "default_ai_provider")]
+    pub default_ai_provider: Option<String>,
 }
 
 fn default_widget_preset() -> String {
@@ -75,6 +77,7 @@ impl Default for AppSection {
             grid_snap: 8,
             pin_strategy: "auto".to_string(),
             widget_preset: "default".to_string(),
+            default_ai_provider: None,
         }
     }
 }

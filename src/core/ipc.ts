@@ -75,6 +75,7 @@ export async function updateAppConfig(patch: {
   gridSnap?: number;
   autostart?: boolean;
   widgetPreset?: string;
+  defaultAiProvider?: string;
 }): Promise<void> {
   return invoke<void>("update_app_config", {
     theme: patch.theme,
@@ -83,6 +84,8 @@ export async function updateAppConfig(patch: {
     autostart: patch.autostart,
     widgetPreset: patch.widgetPreset,
     widget_preset: patch.widgetPreset,
+    defaultAiProvider: patch.defaultAiProvider,
+    default_ai_provider: patch.defaultAiProvider,
   });
 }
 

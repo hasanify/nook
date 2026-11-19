@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useEditMode } from "../core/use-edit-mode";
 import {
   getAppConfig,
@@ -12,6 +12,7 @@ import {
   hasAccountToken,
   saveAccountToken,
   clearAccountToken,
+  getAccountToken,
   getAppVersion,
   checkForUpdates,
   installUpdate,
@@ -29,6 +30,98 @@ import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { AppConfig, WidgetInstance } from "../core/types";
 
+interface AIProviderItem {
+  id: string;
+  name: string;
+  placeholder: string;
+  desc: string;
+  defaultModel: string;
+  icon: React.ReactNode;
+}
+
+const AI_PROVIDER_LIST: AIProviderItem[] = [
+  {
+    id: "openai",
+    name: "OpenAI",
+    placeholder: "sk-proj-••••••••••••••••••••••••",
+    desc: "Powers GPT-4o, GPT-4o-mini, and OpenAI models.",
+    defaultModel: "gpt-4o-mini",
+    icon: (
+      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22.28 9.82a5.98 5.98 0 0 0-.51-4.91 6.05 6.05 0 0 0-6.51-2.9 6.07 6.07 0 0 0-10.28 2.17 5.98 5.98 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9 5.98 5.98 0 0 0 4.5 2 6.06 6.06 0 0 0 5.77-4.2 5.99 5.99 0 0 0 4-2.9 6.06 6.06 0 0 0-.74-7.07zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.8.8 0 0 0 .39-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.59a4.5 4.5 0 0 1-4.49 4.49zm-9.66-4.12a4.47 4.47 0 0 1-.54-3.02l.14.09 4.79 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.65zM2.34 7.9a4.49 4.49 0 0 1 2.37-1.98V11.6a.77.77 0 0 0 .38.68l5.82 3.35-2.02 1.17a.08.08 0 0 1-.07 0l-4.83-2.79A4.5 4.5 0 0 1 2.34 7.87zm16.6 3.86L13.1 8.36 15.12 7.2a.08.08 0 0 1 .07 0l4.83 2.8a4.5 4.5 0 0 1-.68 8.1v-5.68a.79.79 0 0 0-.4-.66zm2.01-3.03l-.14-.08-4.78-2.78a.78.78 0 0 0-.78 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.79 2.76a.8.8 0 0 0-.39.68zm1.1-2.36l2.6-1.5 2.6 1.5v3l-2.6 1.5-2.6-1.5Z" />
+      </svg>
+    ),
+  },
+  {
+    id: "openrouter",
+    name: "OpenRouter",
+    placeholder: "sk-or-v1-••••••••••••••••••••••••",
+    desc: "Single unified API to 100+ AI models (Claude, Llama, DeepSeek, Gemini).",
+    defaultModel: "openai/gpt-4o-mini",
+    icon: (
+      <svg
+        className="h-4 w-4 text-accent-500"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
+    id: "gemini",
+    name: "Google Gemini",
+    placeholder: "AIzaSy••••••••••••••••••••••••",
+    desc: "Generous free tier powering ultra-fast Gemini 2.0 Flash.",
+    defaultModel: "gemini-2.0-flash",
+    icon: (
+      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+      </svg>
+    ),
+  },
+  {
+    id: "anthropic",
+    name: "Anthropic Claude",
+    placeholder: "sk-ant-api••••••••••••••••••••••••",
+    desc: "Direct access to Claude 3.5 Sonnet and Claude 3.5 Haiku.",
+    defaultModel: "claude-3-5-haiku-20241022",
+    icon: (
+      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13.8 2.4L7.4 21.6h2.9l1.4-4.2h5.7l1.4 4.2h2.9L15.3 2.4h-1.5zm-.6 5.8l2 6.1h-4l2-6.1z" />
+      </svg>
+    ),
+  },
+  {
+    id: "bedrock",
+    name: "AWS Bedrock",
+    placeholder: "Bedrock API key or Bearer token...",
+    desc: "AWS Bedrock runtime or custom OpenAI-compatible gateway.",
+    defaultModel: "anthropic.claude-3-5-haiku-20241022-v1:0",
+    icon: (
+      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+      </svg>
+    ),
+  },
+  {
+    id: "groq",
+    name: "Groq",
+    placeholder: "gsk_••••••••••••••••••••••••",
+    desc: "Near-instant LPU inference powering Llama 3.3 70B.",
+    defaultModel: "llama-3.3-70b-versatile",
+    icon: (
+      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+      </svg>
+    ),
+  },
+];
+
 export function SettingsApp() {
   const [activeTab, setActiveTab] = useState<
     "general" | "appearance" | "widgets" | "accounts" | "about"
@@ -44,10 +137,12 @@ export function SettingsApp() {
   const [autostartEnabled, setAutostartEnabled] = useState(false);
   const [githubConfigured, setGithubConfigured] = useState(false);
   const [vercelConfigured, setVercelConfigured] = useState(false);
-  const [aiConfigured, setAiConfigured] = useState(false);
+  const [aiTokensConfigured, setAiTokensConfigured] = useState<Record<string, boolean>>({});
   const [githubInput, setGithubInput] = useState("");
   const [vercelInput, setVercelInput] = useState("");
-  const [aiInput, setAiInput] = useState("");
+  const [aiInputs, setAiInputs] = useState<Record<string, string>>({});
+  const [bedrockEndpointInput, setBedrockEndpointInput] = useState("");
+  const [bedrockEndpointConfigured, setBedrockEndpointConfigured] = useState(false);
   const [widgetToAdd, setWidgetToAdd] = useState("notes");
   const hasShownWindowRef = useRef(false);
   const opacityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,17 +165,46 @@ export function SettingsApp() {
     hasAccountToken("vercel")
       .then((has) => setVercelConfigured(has))
       .catch(() => {});
-    hasAccountToken("ai")
-      .then(async (has) => {
-        if (has) {
-          setAiConfigured(true);
+
+    const aiKeys = ["openai", "openrouter", "gemini", "anthropic", "bedrock", "groq", "ai"];
+    Promise.all(aiKeys.map(async (k) => [k, await hasAccountToken(k).catch(() => false)] as const))
+      .then((pairs) => {
+        const map: Record<string, boolean> = {};
+        for (const [k, v] of pairs) {
+          map[k] = v;
+        }
+        setAiTokensConfigured(map);
+      })
+      .catch(() => {});
+
+    getAccountToken("bedrock_endpoint")
+      .then((ep) => {
+        if (ep) {
+          setBedrockEndpointInput(ep);
+          setBedrockEndpointConfigured(true);
         } else {
-          const hasOpenAi = await hasAccountToken("openai").catch(() => false);
-          setAiConfigured(hasOpenAi);
+          setBedrockEndpointConfigured(false);
         }
       })
       .catch(() => {});
   }, []);
+
+  const preferredAi = config?.app?.defaultAiProvider || "auto";
+  const activeAiProvider = useMemo(() => {
+    if (
+      preferredAi !== "auto" &&
+      (aiTokensConfigured[preferredAi] || (preferredAi === "openai" && aiTokensConfigured.ai))
+    ) {
+      return preferredAi;
+    }
+    const order = ["openai", "openrouter", "gemini", "anthropic", "groq", "bedrock"];
+    for (const key of order) {
+      if (aiTokensConfigured[key] || (key === "openai" && aiTokensConfigured.ai)) {
+        return key;
+      }
+    }
+    return null;
+  }, [preferredAi, aiTokensConfigured]);
 
   // Load config & autostart
   const fetchConfig = useCallback(() => {
@@ -220,17 +344,48 @@ export function SettingsApp() {
     refreshAccountStatus();
   };
 
-  const handleSaveAiToken = async () => {
-    if (!aiInput.trim()) return;
-    await saveAccountToken("ai", aiInput.trim());
-    setAiInput("");
+  const handleSaveAiProviderToken = async (provider: string) => {
+    const val = (aiInputs[provider] || "").trim();
+    if (!val) return;
+    await saveAccountToken(provider, val);
+    setAiInputs((prev) => ({ ...prev, [provider]: "" }));
     refreshAccountStatus();
   };
 
-  const handleClearAiToken = async () => {
-    await clearAccountToken("ai");
-    await clearAccountToken("openai");
+  const handleClearAiProviderToken = async (provider: string) => {
+    await clearAccountToken(provider);
+    if (provider === "openai") {
+      await clearAccountToken("ai");
+    }
     refreshAccountStatus();
+  };
+
+  const handleSaveBedrockEndpoint = async () => {
+    const val = bedrockEndpointInput.trim();
+    if (val) {
+      await saveAccountToken("bedrock_endpoint", val);
+      setBedrockEndpointConfigured(true);
+    } else {
+      await clearAccountToken("bedrock_endpoint");
+      setBedrockEndpointConfigured(false);
+    }
+    refreshAccountStatus();
+  };
+
+  const handleClearBedrockEndpoint = async () => {
+    await clearAccountToken("bedrock_endpoint");
+    setBedrockEndpointInput("");
+    setBedrockEndpointConfigured(false);
+    refreshAccountStatus();
+  };
+
+  const handlePreferredAiProviderChange = (provider: string) => {
+    if (!config) return;
+    setConfig({
+      ...config,
+      app: { ...config.app, defaultAiProvider: provider },
+    });
+    void updateAppConfig({ defaultAiProvider: provider });
   };
 
   const handleThemeChange = (theme: "system" | "light" | "dark") => {
@@ -1169,70 +1324,191 @@ export function SettingsApp() {
                 </div>
               </div>
 
-              {/* AI / OpenAI Token */}
+              {/* AI Header & Active Status Banner */}
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="h-3.5 w-3.5 text-accent-500"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
-                      <path d="M12 6v6l4 2" />
-                    </svg>
-                    <label htmlFor="ai-token-input" className="font-semibold text-fg">
-                      AI / OpenAI API Key
-                    </label>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-500/15 text-accent-500">
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-fg">AI Models & API Keys</h3>
+                      <p className="text-[11px] text-fg-muted">
+                        Powers all 10 desktop AI widgets. Nook auto-detects and connects to
+                        whichever provider is configured.
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-medium">
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        aiConfigured ? "bg-ok" : "bg-fg-muted/30"
-                      }`}
-                    />
-                    <span className={aiConfigured ? "text-ok" : "text-fg-muted/60"}>
-                      {aiConfigured ? "Active" : "Not set"}
-                    </span>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-fg-muted">Provider Priority:</span>
+                    <select
+                      value={config?.app?.defaultAiProvider || "auto"}
+                      onChange={(e) => handlePreferredAiProviderChange(e.target.value)}
+                      className="cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                    >
+                      <option value="auto">Auto-detect (Recommended)</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="anthropic">Anthropic Claude</option>
+                      <option value="bedrock">AWS Bedrock</option>
+                      <option value="groq">Groq</option>
+                    </select>
                   </div>
                 </div>
-                <p className="text-[11px] text-fg-muted">
-                  Powers AI widgets (OpenAI, OpenRouter, Groq, or compatible endpoints).
-                </p>
-                <div className="flex gap-2 pt-1">
-                  <input
-                    id="ai-token-input"
-                    type="password"
-                    autoComplete="new-password"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    value={aiInput}
-                    onChange={(e) => setAiInput(e.target.value)}
-                    placeholder="sk-••••••••••••••••••••••••"
-                    className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => void handleSaveAiToken()}
-                    className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Save
-                  </button>
-                  {aiConfigured && (
-                    <button
-                      type="button"
-                      onClick={() => void handleClearAiToken()}
-                      className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
-                    >
-                      Clear
-                    </button>
+
+                <div className="flex items-center gap-2 border-t border-line/40 pt-2 text-[11px]">
+                  <span className="text-fg-muted">Active Endpoint:</span>
+                  {activeAiProvider ? (
+                    <span className="flex items-center gap-1.5 font-semibold text-ok">
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-ok" />
+                      {AI_PROVIDER_LIST.find((p) => p.id === activeAiProvider)?.name ||
+                        activeAiProvider}
+                      {preferredAi === "auto" ? " (Auto-picked)" : " (Pinned)"}
+                    </span>
+                  ) : (
+                    <span className="text-amber-400 flex items-center gap-1.5">
+                      <span className="bg-amber-400 h-2 w-2 rounded-full" />
+                      None configured yet – add any API key below to activate
+                    </span>
                   )}
                 </div>
+              </div>
+
+              {/* Individual Provider Cards */}
+              <div className="grid grid-cols-1 gap-4">
+                {AI_PROVIDER_LIST.map((provider) => {
+                  const isConfigured = Boolean(
+                    aiTokensConfigured[provider.id] ||
+                    (provider.id === "openai" && aiTokensConfigured.ai),
+                  );
+                  const isCurrentActive = activeAiProvider === provider.id;
+
+                  return (
+                    <div
+                      key={provider.id}
+                      className={`flex flex-col gap-3 rounded-2xl border p-4.5 backdrop-blur-xs transition-all ${
+                        isCurrentActive
+                          ? "border-accent-500/60 bg-accent-500/5 shadow-xs"
+                          : "border-line/70 bg-surface-raised/40"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {provider.icon}
+                          <label
+                            htmlFor={`ai-input-${provider.id}`}
+                            className="text-xs font-semibold text-fg"
+                          >
+                            {provider.name}
+                          </label>
+                          {isCurrentActive && (
+                            <span className="py-0.2 rounded bg-accent-500/15 px-1.5 text-[9px] font-semibold text-accent-500 uppercase">
+                              Active
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 text-xs font-medium">
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              isConfigured ? "bg-ok" : "bg-fg-muted/30"
+                            }`}
+                          />
+                          <span className={isConfigured ? "text-ok" : "text-fg-muted/60"}>
+                            {isConfigured ? "Configured" : "Not set"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] text-fg-muted">{provider.desc}</p>
+
+                      <div className="flex gap-2 pt-0.5">
+                        <input
+                          id={`ai-input-${provider.id}`}
+                          type="password"
+                          autoComplete="new-password"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck={false}
+                          value={aiInputs[provider.id] || ""}
+                          onChange={(e) =>
+                            setAiInputs((prev) => ({
+                              ...prev,
+                              [provider.id]: e.target.value,
+                            }))
+                          }
+                          placeholder={provider.placeholder}
+                          className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => void handleSaveAiProviderToken(provider.id)}
+                          className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 text-xs font-medium text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Save
+                        </button>
+                        {isConfigured && (
+                          <button
+                            type="button"
+                            onClick={() => void handleClearAiProviderToken(provider.id)}
+                            className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Special custom endpoint for Bedrock */}
+                      {provider.id === "bedrock" && (
+                        <div className="flex flex-col gap-1.5 border-t border-line/30 pt-2">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <label
+                              htmlFor="bedrock-endpoint-input"
+                              className="font-medium text-fg-muted"
+                            >
+                              Custom Gateway / Endpoint (Optional)
+                            </label>
+                            <span className="font-mono text-[10px] text-fg-muted">
+                              {bedrockEndpointConfigured
+                                ? "Custom Endpoint Active"
+                                : "Default AWS Runtime"}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <input
+                              id="bedrock-endpoint-input"
+                              type="text"
+                              value={bedrockEndpointInput}
+                              onChange={(e) => setBedrockEndpointInput(e.target.value)}
+                              placeholder="https://your-bedrock-gateway.com/v1"
+                              className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => void handleSaveBedrockEndpoint()}
+                              className="cursor-pointer rounded-lg border border-line bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg transition-colors hover:border-accent-500"
+                            >
+                              Save Endpoint
+                            </button>
+                            {bedrockEndpointConfigured && (
+                              <button
+                                type="button"
+                                onClick={() => void handleClearBedrockEndpoint()}
+                                className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-error"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

@@ -192,6 +192,7 @@ pub fn update_app_config(
     grid_snap: Option<i32>,
     autostart: Option<bool>,
     widget_preset: Option<String>,
+    default_ai_provider: Option<String>,
 ) -> Result<(), String> {
     let state = app.state::<AppState>();
     state.config.update_config(|cfg| {
@@ -206,6 +207,13 @@ pub fn update_app_config(
         }
         if let Some(p) = widget_preset {
             cfg.app.widget_preset = p;
+        }
+        if let Some(ai) = default_ai_provider {
+            cfg.app.default_ai_provider = if ai.is_empty() || ai == "auto" {
+                None
+            } else {
+                Some(ai)
+            };
         }
     });
 

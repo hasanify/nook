@@ -33,6 +33,7 @@ export interface AppConfig {
     gridSnap: number;
     pinStrategy: string;
     widgetPreset?: string;
+    defaultAiProvider?: string;
   };
   widgets: WidgetInstance[];
 }
