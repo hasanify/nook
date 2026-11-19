@@ -1,0 +1,23 @@
+{
+  "id": "system-vitals",
+  "name": "System Vitals",
+  "description": "Real-time CPU, RAM, and Disk sparklines and health monitors",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 320, "h": 230 },
+  "minSize": { "w": 260, "h": 180 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "refreshInterval",
+      "label": "Polling Rate",
+      "type": "select",
+      "defaultValue": "2",
+      "options": [
+        { "label": "Fast (1s)", "value": "1" },
+        { "label": "Normal (2s)", "value": "2" },
+        { "label": "Relaxed (5s)", "value": "5" }
+      ]
+    }
+  ]
+}

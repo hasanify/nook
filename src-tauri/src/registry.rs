@@ -151,6 +151,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let system_vitals_json = include_str!("../../src/widgets/system-vitals/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(system_vitals_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

@@ -180,6 +180,20 @@ export async function pingEndpoint(url: string, method?: string): Promise<PingRe
   return invoke<PingResult>("ping_endpoint", { url, method });
 }
 
+export interface SystemVitals {
+  cpu_percent: number;
+  memory_used_bytes: number;
+  memory_total_bytes: number;
+  memory_percent: number;
+  disk_used_bytes: number;
+  disk_total_bytes: number;
+  disk_percent: number;
+}
+
+export async function getSystemVitals(): Promise<SystemVitals> {
+  return invoke<SystemVitals>("get_system_vitals");
+}
+
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
 ): Promise<import("./types").ProviderPayload<T> | null> {
