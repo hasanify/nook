@@ -151,6 +151,7 @@ pub fn run() {
             commands::list_vercel_projects,
             commands::get_listening_ports,
             commands::kill_port_process,
+            commands::ping_endpoint,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

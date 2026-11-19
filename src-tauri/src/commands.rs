@@ -689,3 +689,49 @@ pub async fn kill_port_process(pid: u32) -> Result<(), String> {
     .await
     .map_err(|e| e.to_string())?
 }
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct PingResult {
+    pub status: u16,
+    pub latency_ms: u64,
+    pub ok: bool,
+    pub error: Option<String>,
+}
+
+#[tauri::command]
+pub async fn ping_endpoint(url: String, method: Option<String>) -> Result<PingResult, String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(5))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let method_str = method.unwrap_or_else(|| "GET".to_string()).to_uppercase();
+    let req = match method_str.as_str() {
+        "HEAD" => client.head(&url),
+        _ => client.get(&url),
+    };
+
+    let start = std::time::Instant::now();
+    match req.send().await {
+        Ok(resp) => {
+            let latency_ms = start.elapsed().as_millis() as u64;
+            let status = resp.status().as_u16();
+            let ok = resp.status().is_success();
+            Ok(PingResult {
+                status,
+                latency_ms,
+                ok,
+                error: None,
+            })
+        }
+        Err(e) => {
+            let latency_ms = start.elapsed().as_millis() as u64;
+            Ok(PingResult {
+                status: 0,
+                latency_ms,
+                ok: false,
+                error: Some(e.to_string()),
+            })
+        }
+    }
+}

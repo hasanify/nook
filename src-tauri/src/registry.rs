@@ -141,6 +141,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let api_health_json = include_str!("../../src/widgets/api-health/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(api_health_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

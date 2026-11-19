@@ -1,0 +1,41 @@
+{
+  "id": "api-health",
+  "name": "API Health",
+  "description": "Custom endpoint HTTP and latency ping checker with uptime history",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 290, "h": 220 },
+  "minSize": { "w": 250, "h": 180 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "endpoint",
+      "label": "Endpoint URL",
+      "type": "text",
+      "placeholder": "https://api.github.com/zen",
+      "defaultValue": "https://api.github.com/zen"
+    },
+    {
+      "key": "method",
+      "label": "HTTP Method",
+      "type": "select",
+      "defaultValue": "GET",
+      "options": [
+        { "label": "GET", "value": "GET" },
+        { "label": "HEAD", "value": "HEAD" }
+      ]
+    },
+    {
+      "key": "interval",
+      "label": "Check Interval",
+      "type": "select",
+      "defaultValue": "10",
+      "options": [
+        { "label": "Every 5 seconds", "value": "5" },
+        { "label": "Every 10 seconds", "value": "10" },
+        { "label": "Every 30 seconds", "value": "30" },
+        { "label": "Every 60 seconds", "value": "60" }
+      ]
+    }
+  ]
+}

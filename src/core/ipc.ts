@@ -169,6 +169,17 @@ export async function killPortProcess(pid: number): Promise<void> {
   return invoke<void>("kill_port_process", { pid });
 }
 
+export interface PingResult {
+  status: number;
+  latency_ms: number;
+  ok: boolean;
+  error?: string | null;
+}
+
+export async function pingEndpoint(url: string, method?: string): Promise<PingResult> {
+  return invoke<PingResult>("ping_endpoint", { url, method });
+}
+
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
 ): Promise<import("./types").ProviderPayload<T> | null> {
