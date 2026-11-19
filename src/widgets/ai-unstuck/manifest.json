@@ -1,0 +1,31 @@
+{
+  "id": "ai-unstuck",
+  "name": "Task Breaker",
+  "description": "Breaks overwhelming tasks into 4 micro-actions taking under 5 minutes to overcome inertia",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 310, "h": 290 },
+  "minSize": { "w": 260, "h": 240 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "text",
+      "placeholder": "gpt-4o-mini",
+      "defaultValue": "gpt-4o-mini"
+    },
+    {
+      "key": "endpoint",
+      "label": "Custom API Endpoint",
+      "type": "text",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "key": "apiKey",
+      "label": "API Key Override",
+      "type": "text",
+      "placeholder": "Optional widget-specific key"
+    }
+  ]
+}
