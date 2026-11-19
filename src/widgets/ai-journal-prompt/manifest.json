@@ -1,0 +1,43 @@
+{
+  "id": "ai-journal-prompt",
+  "name": "Micro Journal",
+  "description": "Daily single thought-provoking reflection prompt with streak tracking",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 290, "h": 230 },
+  "minSize": { "w": 250, "h": 190 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "focus",
+      "label": "Prompt Focus",
+      "type": "select",
+      "defaultValue": "any",
+      "options": [
+        { "label": "Balanced (Any)", "value": "any" },
+        { "label": "Gratitude", "value": "gratitude" },
+        { "label": "Progress & Wins", "value": "progress" },
+        { "label": "Clarity & Mindfulness", "value": "clarity" }
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "text",
+      "placeholder": "gpt-4o-mini",
+      "defaultValue": "gpt-4o-mini"
+    },
+    {
+      "key": "endpoint",
+      "label": "Custom API Endpoint",
+      "type": "text",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "key": "apiKey",
+      "label": "API Key Override",
+      "type": "text",
+      "placeholder": "Optional widget-specific key"
+    }
+  ]
+}
