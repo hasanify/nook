@@ -1,0 +1,235 @@
+import { useState, useCallback } from "react";
+import { WidgetShell } from "../../components/WidgetShell";
+import { Banner } from "../../components/Banner";
+import { callAI } from "../../core/ai";
+import manifestJson from "./manifest.json";
+import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
+
+const manifest = manifestJson as Manifest;
+
+const SYSTEM_PROMPT = `Explain the topic to a 5-year-old using a vivid everyday analogy.
+Rules: Exactly 2 sentences. Max 45 words. Plain text only. No preamble.`;
+
+const CURIOSITY_TOPICS = [
+  "Quantum Computing",
+  "Why the sky is blue",
+  "Black holes",
+  "How airplanes stay in the air",
+  "How the internet works",
+  "Photosynthesis",
+  "How our brain stores memories",
+  "DNA and genetics",
+  "Gravity",
+  "Rainbows",
+  "Volcanoes",
+  "Artificial Intelligence",
+];
+
+const DEFAULT_SAMPLE = {
+  topic: "Quantum Computing",
+  explanation:
+    "Regular computers think like flipping light switches on or off, one room at a time. A quantum computer has magical switches that can explore all the rooms in the castle at once!",
+};
+
+export function AiEli5Widget({ instance, editMode, patchState }: WidgetProps) {
+  const savedTopic =
+    typeof instance.state.topic === "string" ? instance.state.topic : DEFAULT_SAMPLE.topic;
+  const savedExplanation =
+    typeof instance.state.explanation === "string"
+      ? instance.state.explanation
+      : DEFAULT_SAMPLE.explanation;
+
+  const [topic, setTopic] = useState(savedTopic);
+  const [explanation, setExplanation] = useState(savedExplanation);
+  const [loading, setLoading] = useState(false);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [inputVal, setInputVal] = useState("");
+
+  const model = typeof instance.settings.model === "string" ? instance.settings.model : undefined;
+  const endpoint =
+    typeof instance.settings.endpoint === "string" ? instance.settings.endpoint : undefined;
+  const apiKey =
+    typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
+
+  const handleExplain = useCallback(
+    async (targetTopic: string) => {
+      const cleanTopic = targetTopic.trim();
+      if (!cleanTopic) return;
+
+      setLoading(true);
+      setErrorBanner(null);
+
+      try {
+        const output = await callAI({
+          systemPrompt: SYSTEM_PROMPT,
+          userPrompt: cleanTopic,
+          maxTokens: 70,
+          model,
+          endpoint,
+          apiKey,
+        });
+
+        setTopic(cleanTopic);
+        setExplanation(output);
+        patchState({ topic: cleanTopic, explanation: output });
+        setShowInput(false);
+      } catch (err) {
+        setErrorBanner(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [model, endpoint, apiKey, patchState],
+  );
+
+  const handleShuffle = () => {
+    const candidates = CURIOSITY_TOPICS.filter((t) => t.toLowerCase() !== topic.toLowerCase());
+    const next = candidates[Math.floor(Math.random() * candidates.length)] ?? "Solar Panels";
+    void handleExplain(next);
+  };
+
+  const handleCopy = () => {
+    void navigator.clipboard.writeText(`ELI5: ${topic}\n${explanation}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title={manifest.name}
+      resizable={manifest.resizable}
+      minSize={manifest.minSize}
+      defaultSize={manifest.defaultSize}
+      headerSlot={
+        <svg
+          className="text-amber-500 h-3 w-3 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+        </svg>
+      }
+      headerActions={
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={handleShuffle}
+            disabled={loading}
+            title="Random wonder"
+            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          >
+            <svg
+              className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </button>
+        </div>
+      }
+      banner={
+        errorBanner ? (
+          <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
+        ) : undefined
+      }
+    >
+      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-2 p-1">
+        {/* Main Card Content */}
+        <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="rounded-full bg-accent-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-accent-500">
+              {topic}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="cursor-pointer text-[10px] text-fg-muted transition-colors hover:text-fg"
+            >
+              {copied ? "✓ Copied" : "Copy"}
+            </button>
+          </div>
+
+          <p className="text-xs leading-relaxed text-fg select-text">
+            {loading ? (
+              <span className="text-fg-muted italic">Consulting the wonder mirror…</span>
+            ) : (
+              explanation
+            )}
+          </p>
+        </div>
+
+        {/* Bottom Bar: Ask custom concept or toggle input */}
+        <div className="border-t border-line/40 pt-1.5">
+          {showInput ? (
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                autoFocus
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && inputVal.trim()) {
+                    void handleExplain(inputVal.trim());
+                  } else if (e.key === "Escape") {
+                    setShowInput(false);
+                  }
+                }}
+                placeholder="Type topic & press Enter…"
+                className="flex-1 rounded-md border border-line bg-surface-raised/40 px-2 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (inputVal.trim()) void handleExplain(inputVal.trim());
+                }}
+                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-[10px] font-medium text-white"
+              >
+                Go
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between text-[10px] text-fg-muted">
+              <span>2 sentences • max 45 words</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setInputVal(topic);
+                  setShowInput(true);
+                }}
+                className="cursor-pointer text-accent-500 hover:underline"
+              >
+                Ask custom
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </WidgetShell>
+  );
+}
+
+const aiEli5Module: WidgetModule = {
+  manifest,
+  component: AiEli5Widget,
+  defaultSettings: {
+    model: "gpt-4o-mini",
+  },
+  defaultState: {
+    topic: DEFAULT_SAMPLE.topic,
+    explanation: DEFAULT_SAMPLE.explanation,
+  },
+};
+
+export default aiEli5Module;

@@ -9,6 +9,7 @@ import todoModule from "./todo";
 import placeholderModule from "./placeholder";
 import aiToneModule from "./ai-tone";
 import aiReplyModule from "./ai-reply";
+import aiEli5Module from "./ai-eli5";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,
@@ -20,6 +21,7 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   "vercel-project": vercelProjectModule,
   "ai-tone": aiToneModule,
   "ai-reply": aiReplyModule,
+  "ai-eli5": aiEli5Module,
 };
 
 const ALL_MODULES: Record<string, WidgetModule> = {

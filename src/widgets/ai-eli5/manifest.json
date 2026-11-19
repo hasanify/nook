@@ -1,0 +1,37 @@
+{
+  "id": "ai-eli5",
+  "name": "ELI5 Wonder",
+  "description": "Demystifies complex concepts and everyday curiosities in 2 simple sentences",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 220 },
+  "minSize": { "w": 240, "h": 180 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "topic",
+      "label": "Favorite Topic (optional)",
+      "type": "text",
+      "placeholder": "Leave empty for random wonders"
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "text",
+      "placeholder": "gpt-4o-mini",
+      "defaultValue": "gpt-4o-mini"
+    },
+    {
+      "key": "endpoint",
+      "label": "Custom API Endpoint",
+      "type": "text",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "key": "apiKey",
+      "label": "API Key Override",
+      "type": "text",
+      "placeholder": "Optional widget-specific key"
+    }
+  ]
+}
