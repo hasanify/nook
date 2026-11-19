@@ -1,0 +1,35 @@
+{
+  "id": "github-prs",
+  "name": "GitHub PRs",
+  "description": "Review queue and assigned Pull Requests with real-time status",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 330, "h": 280 },
+  "minSize": { "w": 280, "h": 220 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "repository",
+      "label": "Repository (owner/repo, optional)",
+      "type": "text",
+      "placeholder": "hasanify/nook"
+    },
+    {
+      "key": "filter",
+      "label": "Default Filter",
+      "type": "select",
+      "defaultValue": "review-requested",
+      "options": [
+        { "label": "Review Requested", "value": "review-requested" },
+        { "label": "My Open PRs", "value": "authored" },
+        { "label": "All Repo PRs", "value": "all" }
+      ]
+    },
+    {
+      "key": "tokenOverride",
+      "label": "GitHub Token Override",
+      "type": "text",
+      "placeholder": "Optional personal access token"
+    }
+  ]
+}

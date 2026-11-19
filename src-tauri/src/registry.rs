@@ -146,6 +146,11 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let github_prs_json = include_str!("../../src/widgets/github-prs/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(github_prs_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 
