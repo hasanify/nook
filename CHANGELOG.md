@@ -1,3 +1,18 @@
+# [0.20.0](https://github.com/hasanify/nook/compare/v0.19.13...v0.20.0) (2026-11-19)
+
+### Features
+
+- **widgets:** add ai-book-nugget widget ([81a0ec5](https://github.com/hasanify/nook/commit/81a0ec548ccf74a95e9e4a98222b116c8c530e53))
+- **widgets:** add ai-eli5 widget ([a4e73b3](https://github.com/hasanify/nook/commit/a4e73b398b0b4cdb4ca3108c61986bd0da9c5d95))
+- **widgets:** add ai-history widget ([259e84c](https://github.com/hasanify/nook/commit/259e84c2fe02adeb6c6474d9cf64cf3b229c9e7d))
+- **widgets:** add ai-journal-prompt widget ([f57b295](https://github.com/hasanify/nook/commit/f57b2954a81fb9e3de1da739e7e91b0e26ff81fa))
+- **widgets:** add ai-reply widget ([393c4e4](https://github.com/hasanify/nook/commit/393c4e4e85f0ca939a566aeda89578e6fcd73d62))
+- **widgets:** add ai-stoic widget ([28b17ef](https://github.com/hasanify/nook/commit/28b17effad3fe144dfd65419c18036c57d0a0f61))
+- **widgets:** add ai-stretch widget ([3e16a8e](https://github.com/hasanify/nook/commit/3e16a8ea7e0ef07ef9e4a9d39be1d46f50156160))
+- **widgets:** add ai-tone widget ([8da90aa](https://github.com/hasanify/nook/commit/8da90aa08ab2b4447260403a83995718840a96fc))
+- **widgets:** add ai-unstuck widget ([86abf51](https://github.com/hasanify/nook/commit/86abf513b4063f07a0ef3c205c60935b6dece103))
+- **widgets:** add ai-vocab widget ([00bd5dc](https://github.com/hasanify/nook/commit/00bd5dcc16888b0adff1fd2a2c4a8fea259c4924))
+
 ## [0.19.13](https://github.com/hasanify/nook/compare/v0.19.12...v0.19.13) (2026-11-18)
 
 ## [0.19.12](https://github.com/hasanify/nook/compare/v0.19.11...v0.19.12) (2026-11-18)
