@@ -24,7 +24,8 @@
       "nsis": {
         "installMode": "currentUser",
         "installerIcon": "icons/icon.ico",
-        "uninstallerIcon": "icons/icon.ico"
+        "uninstallerIcon": "icons/icon.ico",
+        "installerHooks": "hooks.nsh"
       },
       "webviewInstallMode": {
         "type": "downloadBootstrapper"

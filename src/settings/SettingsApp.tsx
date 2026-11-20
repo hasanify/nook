@@ -226,6 +226,9 @@ export function SettingsApp() {
           };
         });
         setSelectedWidgetId((prev) => prev ?? cfg.widgets[0]?.id ?? null);
+        if (typeof cfg.app?.autostart === "boolean") {
+          setAutostartEnabled(cfg.app.autostart);
+        }
       })
       .catch(() => {});
   }, [selectedWidgetId]);
@@ -239,7 +242,23 @@ export function SettingsApp() {
       .catch(() => {});
 
     isEnabled()
-      .then((enabled) => setAutostartEnabled(enabled))
+      .then(async (osEnabled) => {
+        const cfg = await getAppConfig().catch(() => null);
+        const wanted = cfg?.app?.autostart;
+        if (typeof wanted === "boolean") {
+          if (wanted && !osEnabled) {
+            await enable().catch(() => {});
+            setAutostartEnabled(true);
+          } else if (!wanted && osEnabled) {
+            await disable().catch(() => {});
+            setAutostartEnabled(false);
+          } else {
+            setAutostartEnabled(osEnabled);
+          }
+        } else {
+          setAutostartEnabled(osEnabled);
+        }
+      })
       .catch(() => {});
 
     let unlisten: (() => void) | undefined;
