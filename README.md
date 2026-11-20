@@ -13,7 +13,7 @@
 
 # Nook
 
-**Nook** is a lightweight, zero-configuration Windows-only desktop widget application built with Tauri v2, Rust, and React 19. Compact, borderless widgets (Clock, Weather, Quick Tasks, Notes, Timer, GitHub Repo, Vercel Project) sit directly on the desktop layer below standard application windows and survive `Win+D` ("Show Desktop") and "Hide desktop icons".
+**Nook** is a lightweight, zero-configuration Windows-only desktop widget application built with Tauri v2, Rust, and React 19. Compact, borderless desktop widgets (productivity tools, developer utilities, system monitors, media playback, and AI reflection assistants) sit directly on the desktop layer below standard application windows and survive `Win+D` ("Show Desktop") and "Hide desktop icons".
 
 ---
 
@@ -26,6 +26,56 @@
 - **Pluggable Architecture:** Adding a new widget type requires only a manifest, an `index.tsx` component, and single-line registrations.
 - **Resilient Lifecycle:** Automatic self-healing and reparenting after Windows Explorer restarts (`TaskbarCreated`).
 - **Secure Secret Storage:** API tokens (GitHub PAT, Vercel token) are stored in Windows Credential Manager via `keyring` and never written to disk, config, or logs.
+
+---
+
+## Available Widgets
+
+Nook includes 27 built-in widgets categorized across productivity, development, and AI reflection:
+
+### Productivity & Focus
+
+| Widget             | ID              | Description                                                                        |
+| ------------------ | --------------- | ---------------------------------------------------------------------------------- |
+| **Clock & Date**   | `clock`         | Digital clock with date, 12/24h formats, seconds toggle, and day progress          |
+| **World Clock**    | `world-clock`   | Multi-timezone glance with daylight markers and UTC hour offsets                   |
+| **Focus Timer**    | `timer`         | Pomodoro intervals, custom countdowns, and stopwatch with native notifications     |
+| **Quick Tasks**    | `todo`          | Minimalist desktop checklist with quick completion toggles                         |
+| **Notes**          | `notes`         | Scratchpad with automatic local persistence and word counting                      |
+| **Habits Tracker** | `habits`        | 7-day visual habit streak grid with daily completion toggles and streak counters   |
+| **Weather**        | `weather`       | Current temperature, humidity, wind, and atmospheric forecasts via Open-Meteo      |
+| **Ambient Sound**  | `ambient-sound` | Offline synthesized white noise, pink noise, deep brown rumble, and rain generator |
+
+### Developer & System Utilities
+
+| Widget                | ID                | Description                                                                            |
+| --------------------- | ----------------- | -------------------------------------------------------------------------------------- |
+| **System Vitals**     | `system-vitals`   | Real-time CPU, RAM, and disk utilization sparklines with configurable polling          |
+| **Port Sentinel**     | `port-sentinel`   | Active port radar with PID mapping and one-click process termination                   |
+| **API Health**        | `api-health`      | Custom HTTP endpoint and latency ping monitor with rolling uptime history              |
+| **Battery Monitor**   | `battery-monitor` | Laptop battery charge percentage, charging state, and discharge rates                  |
+| **GitHub Repository** | `github-repo`     | Live commit history, stars, forks, release tags, and GitHub Actions CI workflow status |
+| **GitHub PRs**        | `github-prs`      | Review queue and assigned pull requests across repositories with real-time status      |
+| **Vercel Projects**   | `vercel-project`  | Deployment states, live domains, git branches, and production build health             |
+| **Now Playing**       | `now-playing`     | Windows Media Session controller with album art and playback transport controls        |
+| **Tech News Feed**    | `news-feed`       | Hacker News top, best, or new stories with upvotes, comments, and direct links         |
+
+### Desktop AI Companions
+
+_Connects to your choice of AI provider (OpenAI, Anthropic Claude, Google Gemini, Groq, AWS Bedrock, OpenRouter, or custom OpenAI-compatible endpoints). API keys are stored securely in Windows Credential Manager._
+
+| Widget               | ID                  | Description                                                                          |
+| -------------------- | ------------------- | ------------------------------------------------------------------------------------ |
+| **Tone Mirror**      | `ai-tone`           | Rewrites drafts into Professional, Concise, or Warm phrasing with one-click copy     |
+| **Quick Reply**      | `ai-reply`          | 3 contextual reply suggestions for incoming messages or emails                       |
+| **Task Breaker**     | `ai-unstuck`        | Breaks overwhelming tasks into 4 micro-actions under 5 minutes to overcome friction  |
+| **Micro Journal**    | `ai-journal-prompt` | Daily reflection prompt with streak tracking and built-in response logging           |
+| **Desk Stretch**     | `ai-stretch`        | Discreet 45-second desk ergonomic stretches and eye relaxation exercises             |
+| **Stoic Pause**      | `ai-stoic`          | Daily philosophical reflection paired with a practical behavioral micro-action       |
+| **Book Nugget**      | `ai-book-nugget`    | Extracts actionable mental models or frameworks from non-fiction books               |
+| **Today in History** | `ai-history`        | Highlights a pivotal historical event on today's calendar date and its modern impact |
+| **ELI5 Wonder**      | `ai-eli5`           | Explains complex concepts and curiosities in two simple sentences                    |
+| **Daily Vocab**      | `ai-vocab`          | Curated vocabulary words with phonetic spelling, definitions, and usage context      |
 
 ---
 
@@ -78,7 +128,7 @@ nook/
 │   ├── core/                       # IPC wrappers, types, hooks (use-instance, use-theme, use-provider, etc.)
 │   ├── components/                 # WidgetShell, EditOverlay, Banner, StatusDot, SettingsForm
 │   ├── settings/                   # Settings application interface (General, Accounts, Widget tabs)
-│   └── widgets/                    # Registered widgets (clock, weather, todo, notes, timer, github-repo, vercel-project)
+│   └── widgets/                    # Registered widgets (productivity, dev tools, system monitors, AI companions)
 └── src-tauri/
     ├── Cargo.toml                  # Pinned Rust dependencies
     ├── build.rs                    # Tauri build hook

@@ -275,7 +275,38 @@
         margin-bottom: 40px;
       }
 
-      /* Grid of 4 Widgets */
+      /* Widget Groups & Grid */
+      .widget-group {
+        margin-top: 64px;
+        padding-top: 48px;
+        border-top: 1px solid var(--border);
+      }
+
+      .widget-group:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+      }
+
+      .widget-group-header {
+        margin-bottom: 28px;
+      }
+
+      .widget-group-title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .widget-group-desc {
+        font-size: 15px;
+        color: var(--text-muted);
+        line-height: 1.55;
+        max-width: 65ch;
+      }
+
       .widget-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -522,7 +553,8 @@
         <div class="container">
           <h2>Desktop widgets library</h2>
           <p class="section-intro">
-            Every widget stays pinned directly to your Windows desktop wallpaper, updates in real time, and stays out of your active workflow.
+            Every widget stays pinned directly to your Windows desktop wallpaper, updates in real
+            time, and stays out of your active workflow.
           </p>
 
           <!-- Group 1: Productivity & Focus -->
@@ -576,7 +608,9 @@
                     >
                       <circle cx="12" cy="12" r="10" />
                       <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                      <path
+                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                      />
                     </svg>
                   </div>
                   <span>World Clock</span>
@@ -609,8 +643,8 @@
                   <span>Focus Timer</span>
                 </div>
                 <p>
-                  Pomodoro intervals with work and break cycles, custom countdowns, and stopwatch with
-                  progress tracking and native notifications.
+                  Pomodoro intervals with work and break cycles, custom countdowns, and stopwatch
+                  with progress tracking and native notifications.
                 </p>
               </div>
 
@@ -635,8 +669,8 @@
                   <span>Quick Tasks</span>
                 </div>
                 <p>
-                  Minimalist desktop checklist to capture action items, toggle completion, and
-                  clear finished tasks.
+                  Minimalist desktop checklist to capture action items, toggle completion, and clear
+                  finished tasks.
                 </p>
               </div>
 
@@ -742,8 +776,8 @@
                   <span>Ambient Sound</span>
                 </div>
                 <p>
-                  Offline synthesized background audio generator with white noise, pink noise,
-                  deep brown rumble, and rain sounds.
+                  Offline synthesized background audio generator with white noise, pink noise, deep
+                  brown rumble, and rain sounds.
                 </p>
               </div>
             </div>
@@ -754,7 +788,8 @@
             <div class="widget-group-header">
               <h3 class="widget-group-title">Developer & System Utilities</h3>
               <p class="widget-group-desc">
-                Lightweight monitors for system vitals, network ports, API endpoints, and code repositories.
+                Lightweight monitors for system vitals, network ports, API endpoints, and code
+                repositories.
               </p>
             </div>
             <div class="widget-grid">
@@ -778,8 +813,8 @@
                   <span>System Vitals</span>
                 </div>
                 <p>
-                  Real-time CPU load, memory utilization, and disk space with configurable
-                  polling rates and sparkline graphs.
+                  Real-time CPU load, memory utilization, and disk space with configurable polling
+                  rates and sparkline graphs.
                 </p>
               </div>
 
@@ -881,8 +916,8 @@
                   <span>GitHub Repository</span>
                 </div>
                 <p>
-                  Live commit history, stars, forks, latest release tags, and GitHub Actions workflow
-                  status for any repository.
+                  Live commit history, stars, forks, latest release tags, and GitHub Actions
+                  workflow status for any repository.
                 </p>
               </div>
 
@@ -909,8 +944,8 @@
                   <span>GitHub PRs</span>
                 </div>
                 <p>
-                  Review queue and assigned pull requests with real-time status, author details,
-                  and direct links.
+                  Review queue and assigned pull requests with real-time status, author details, and
+                  direct links.
                 </p>
               </div>
 
@@ -976,7 +1011,9 @@
                       stroke-linejoin="round"
                       aria-hidden="true"
                     >
-                      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+                      <path
+                        d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"
+                      />
                       <path d="M18 14h-8" />
                       <path d="M15 18h-5" />
                       <path d="M10 6h8v4h-8V6Z" />
@@ -997,7 +1034,9 @@
             <div class="widget-group-header">
               <h3 class="widget-group-title">AI Reflection & Writing Tools</h3>
               <p class="widget-group-desc">
-                Focused micro-tools supporting OpenAI, Anthropic Claude, Google Gemini, Groq, AWS Bedrock, OpenRouter, or custom OpenAI-compatible endpoints. API keys are stored securely in Windows Credential Manager.
+                Focused micro-tools supporting OpenAI, Anthropic Claude, Google Gemini, Groq, AWS
+                Bedrock, OpenRouter, or custom OpenAI-compatible endpoints. API keys are stored
+                securely in Windows Credential Manager.
               </p>
             </div>
             <div class="widget-grid">
@@ -1048,8 +1087,8 @@
                   <span>Quick Reply</span>
                 </div>
                 <p>
-                  Generates three contextual reply variations to incoming messages or emails
-                  for quick responses.
+                  Generates three contextual reply variations to incoming messages or emails for
+                  quick responses.
                 </p>
               </div>
 
@@ -1132,8 +1171,8 @@
                   <span>Desk Stretch</span>
                 </div>
                 <p>
-                  Discreet 45-second desk ergonomic stretches and eye relaxation exercises
-                  to reduce physical fatigue.
+                  Discreet 45-second desk ergonomic stretches and eye relaxation exercises to reduce
+                  physical fatigue.
                 </p>
               </div>
 
@@ -1233,7 +1272,9 @@
                     >
                       <path d="M9 18h6" />
                       <path d="M10 22h4" />
-                      <path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z" />
+                      <path
+                        d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"
+                      />
                     </svg>
                   </div>
                   <span>ELI5 Wonder</span>
