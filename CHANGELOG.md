@@ -1,3 +1,9 @@
+# [0.29.0](https://github.com/hasanify/nook/compare/v0.28.0...v0.29.0) (2026-11-20)
+
+### Features
+
+- **updates:** add toggleable automatic background update checks ([e831b7e](https://github.com/hasanify/nook/commit/e831b7e15bd00f8166895fb4ec415b0b9446cb05))
+
 # [0.28.0](https://github.com/hasanify/nook/compare/v0.27.0...v0.28.0) (2026-11-20)
 
 ### Features
