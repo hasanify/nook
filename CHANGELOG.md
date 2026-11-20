@@ -1,3 +1,9 @@
+# [0.24.0](https://github.com/hasanify/nook/compare/v0.23.0...v0.24.0) (2026-11-20)
+
+### Features
+
+- **edit-mode:** scope context menu edit mode toggle to selected widget only ([20611cc](https://github.com/hasanify/nook/commit/20611ccb2d003a30e0a98813fd097633fcb40714))
+
 # [0.23.0](https://github.com/hasanify/nook/compare/v0.22.0...v0.23.0) (2026-11-20)
 
 ### Bug Fixes
