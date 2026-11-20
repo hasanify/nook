@@ -107,6 +107,23 @@ pub fn set_edit_mode(app: AppHandle, on: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn get_widget_edit_mode(state: tauri::State<AppState>, id: String) -> bool {
+    state.is_widget_edit_mode(&id)
+}
+
+#[tauri::command]
+pub fn set_widget_edit_mode(app: AppHandle, id: String, on: bool) -> Result<(), String> {
+    let state = app.state::<AppState>();
+    state.set_widget_edit_mode(id.clone(), on);
+    info!("Widget {} edit mode set to: {}", id, on);
+    let _ = app.emit(
+        "widget-edit-mode",
+        serde_json::json!({ "id": id, "on": on }),
+    );
+    Ok(())
+}
+
+#[tauri::command]
 pub fn set_opacity(app: AppHandle, id: String, value: f32) -> Result<(), String> {
     windows::set_widget_opacity(&app, &id, value)
 }

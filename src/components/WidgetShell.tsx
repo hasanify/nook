@@ -37,7 +37,7 @@ export function WidgetShell({
   defaultSize,
   children,
 }: WidgetShellProps) {
-  const { editMode: hookEditMode, toggleEditMode: hookToggleEditMode } = useEditMode();
+  const { editMode: hookEditMode, toggleEditMode: hookToggleEditMode } = useEditMode(instance.id);
   const effectiveEditMode = propEditMode ?? hookEditMode;
   const effectiveToggle =
     propToggle && propToggle.toString() !== "() => {}" ? propToggle : hookToggleEditMode;

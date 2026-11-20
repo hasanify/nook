@@ -126,6 +126,8 @@ pub fn run() {
             commands::set_bounds,
             commands::get_edit_mode,
             commands::set_edit_mode,
+            commands::get_widget_edit_mode,
+            commands::set_widget_edit_mode,
             commands::set_opacity,
             commands::set_always_on_top,
             commands::update_state,

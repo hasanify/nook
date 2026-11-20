@@ -10,7 +10,7 @@ import { useTheme } from "./core/use-theme";
 
 function WidgetHost({ id }: { id: string }) {
   const { instance, loading, error, patchState, patchSettings } = useInstance(id);
-  const { editMode, toggleEditMode } = useEditMode();
+  const { editMode, toggleEditMode } = useEditMode(id);
 
   if (loading) {
     return (

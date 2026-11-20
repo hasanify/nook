@@ -83,7 +83,7 @@ export function ContextMenuApp() {
   }, []);
 
   const { instance, patchSettings } = useInstance(widgetId);
-  const { editMode, toggleEditMode } = useEditMode();
+  const { editMode, toggleEditMode } = useEditMode(widgetId || undefined);
 
   const handleClose = useCallback(() => {
     void hideContextMenu();

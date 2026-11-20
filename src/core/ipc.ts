@@ -11,6 +11,11 @@ export interface EditModePayload {
   on: boolean;
 }
 
+export interface WidgetEditModePayload {
+  id: string;
+  on: boolean;
+}
+
 export async function getAppConfig(): Promise<AppConfig> {
   return invoke<AppConfig>("get_app_config");
 }
@@ -48,6 +53,14 @@ export async function getEditMode(): Promise<boolean> {
 
 export async function setEditMode(on: boolean): Promise<void> {
   return invoke<void>("set_edit_mode", { on });
+}
+
+export async function getWidgetEditMode(id: string): Promise<boolean> {
+  return invoke<boolean>("get_widget_edit_mode", { id });
+}
+
+export async function setWidgetEditMode(id: string, on: boolean): Promise<void> {
+  return invoke<void>("set_widget_edit_mode", { id, on });
 }
 
 export async function setOpacity(id: string, value: number): Promise<void> {
@@ -258,6 +271,14 @@ export function onConfigChanged(
 
 export function onEditMode(callback: (payload: EditModePayload) => void): Promise<UnlistenFn> {
   return listen<EditModePayload>("edit-mode", (event) => {
+    callback(event.payload);
+  });
+}
+
+export function onWidgetEditMode(
+  callback: (payload: WidgetEditModePayload) => void,
+): Promise<UnlistenFn> {
+  return listen<WidgetEditModePayload>("widget-edit-mode", (event) => {
     callback(event.payload);
   });
 }
