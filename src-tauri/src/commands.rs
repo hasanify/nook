@@ -608,76 +608,147 @@ pub struct PortInfo {
 #[tauri::command]
 pub async fn get_listening_ports() -> Result<Vec<PortInfo>, String> {
     tokio::task::spawn_blocking(|| {
-        use std::collections::HashMap;
         #[cfg(windows)]
-        use std::os::windows::process::CommandExt;
-        use std::process::Command;
+        {
+            const AF_INET: u32 = 2;
+            const TCP_TABLE_OWNER_PID_ALL: u32 = 5;
+            const MIB_TCP_STATE_LISTEN: u32 = 2;
+            const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
 
-        let mut pid_to_name: HashMap<u32, String> = HashMap::new();
-
-        let mut tasklist_cmd = Command::new("tasklist");
-        tasklist_cmd.args(["/FO", "CSV", "/NH"]);
-        #[cfg(windows)]
-        tasklist_cmd.creation_flags(0x08000000);
-
-        if let Ok(output) = tasklist_cmd.output() {
-            let text = String::from_utf8_lossy(&output.stdout);
-            for line in text.lines() {
-                let parts: Vec<&str> = line.split(',').collect();
-                if parts.len() >= 2 {
-                    let name = parts[0].trim().trim_matches('"');
-                    let pid_str = parts[1].trim().trim_matches('"');
-                    if let Ok(pid) = pid_str.parse::<u32>() {
-                        pid_to_name.insert(pid, name.to_string());
-                    }
-                }
+            #[repr(C)]
+            #[derive(Copy, Clone)]
+            struct MibTcpRowOwnerPid {
+                dw_state: u32,
+                dw_local_addr: u32,
+                dw_local_port: u32,
+                dw_remote_addr: u32,
+                dw_remote_port: u32,
+                dw_owning_pid: u32,
             }
-        }
 
-        let mut netstat_cmd = Command::new("netstat");
-        netstat_cmd.args(["-ano", "-p", "tcp"]);
-        #[cfg(windows)]
-        netstat_cmd.creation_flags(0x08000000);
+            extern "system" {
+                fn GetExtendedTcpTable(
+                    p_tcp_table: *mut std::ffi::c_void,
+                    pdw_size: *mut u32,
+                    b_order: i32,
+                    ul_af: u32,
+                    table_class: u32,
+                    reserved: u32,
+                ) -> u32;
 
-        let mut ports: Vec<PortInfo> = Vec::new();
-        let mut seen_ports: std::collections::HashSet<u16> = std::collections::HashSet::new();
+                fn OpenProcess(
+                    dw_desired_access: u32,
+                    b_inherit_handle: i32,
+                    dw_process_id: u32,
+                ) -> isize;
+                fn QueryFullProcessImageNameW(
+                    h_process: isize,
+                    dw_flags: u32,
+                    lp_exe_name: *mut u16,
+                    lpdw_size: *mut u32,
+                ) -> i32;
+                fn CloseHandle(h_object: isize) -> i32;
+            }
 
-        if let Ok(output) = netstat_cmd.output() {
-            let text = String::from_utf8_lossy(&output.stdout);
-            for line in text.lines() {
-                let trimmed = line.trim();
-                if trimmed.contains("LISTENING") {
-                    let parts: Vec<&str> = trimmed.split_whitespace().collect();
-                    if parts.len() >= 5 {
-                        let local_addr = parts[1];
-                        let pid_str = parts[parts.len() - 1];
-                        if let (Some(colon_idx), Ok(pid)) =
-                            (local_addr.rfind(':'), pid_str.parse::<u32>())
-                        {
-                            let port_str = &local_addr[colon_idx + 1..];
-                            if let Ok(port) = port_str.parse::<u16>() {
-                                if !seen_ports.contains(&port) {
-                                    seen_ports.insert(port);
-                                    let process_name = pid_to_name
-                                        .get(&pid)
-                                        .cloned()
-                                        .unwrap_or_else(|| format!("PID: {}", pid));
-                                    ports.push(PortInfo {
-                                        port,
-                                        pid,
-                                        process_name,
-                                        protocol: "TCP".to_string(),
-                                    });
+            let mut size: u32 = 0;
+            // First call retrieves required buffer size
+            unsafe {
+                GetExtendedTcpTable(
+                    std::ptr::null_mut(),
+                    &mut size,
+                    1,
+                    AF_INET,
+                    TCP_TABLE_OWNER_PID_ALL,
+                    0,
+                );
+            }
+
+            if size == 0 {
+                return Ok(Vec::new());
+            }
+
+            let mut buffer = vec![0u8; size as usize];
+            let ret = unsafe {
+                GetExtendedTcpTable(
+                    buffer.as_mut_ptr() as *mut std::ffi::c_void,
+                    &mut size,
+                    1,
+                    AF_INET,
+                    TCP_TABLE_OWNER_PID_ALL,
+                    0,
+                )
+            };
+
+            if ret != 0 {
+                return Ok(Vec::new());
+            }
+
+            let num_entries = unsafe { *(buffer.as_ptr() as *const u32) };
+            let rows_ptr = unsafe { buffer.as_ptr().add(4) as *const MibTcpRowOwnerPid };
+
+            let mut ports: Vec<PortInfo> = Vec::new();
+            let mut seen_ports = std::collections::HashSet::new();
+
+            for i in 0..num_entries {
+                let row = unsafe { *rows_ptr.add(i as usize) };
+                if row.dw_state == MIB_TCP_STATE_LISTEN {
+                    // dw_local_port is stored in network byte order in low 16 bits
+                    let port = u16::from_be((row.dw_local_port & 0xFFFF) as u16);
+                    if port > 0 && !seen_ports.contains(&port) {
+                        seen_ports.insert(port);
+                        let pid = row.dw_owning_pid;
+
+                        let process_name = if pid == 0 {
+                            "System Idle".to_string()
+                        } else if pid == 4 {
+                            "System".to_string()
+                        } else {
+                            unsafe {
+                                let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+                                if handle != 0 {
+                                    let mut name_buf = [0u16; 1024];
+                                    let mut len = 1024u32;
+                                    let ok = QueryFullProcessImageNameW(
+                                        handle,
+                                        0,
+                                        name_buf.as_mut_ptr(),
+                                        &mut len,
+                                    );
+                                    CloseHandle(handle);
+                                    if ok != 0 && len > 0 {
+                                        let full_path =
+                                            String::from_utf16_lossy(&name_buf[..len as usize]);
+                                        if let Some(pos) = full_path.rfind('\\') {
+                                            full_path[pos + 1..].to_string()
+                                        } else {
+                                            full_path
+                                        }
+                                    } else {
+                                        format!("PID: {}", pid)
+                                    }
+                                } else {
+                                    format!("PID: {}", pid)
                                 }
                             }
-                        }
+                        };
+
+                        ports.push(PortInfo {
+                            port,
+                            pid,
+                            process_name,
+                            protocol: "TCP".to_string(),
+                        });
                     }
                 }
             }
-        }
 
-        ports.sort_by_key(|p| p.port);
-        Ok(ports)
+            ports.sort_by_key(|p| p.port);
+            Ok(ports)
+        }
+        #[cfg(not(windows))]
+        {
+            Ok(Vec::new())
+        }
     })
     .await
     .map_err(|e| e.to_string())?
@@ -690,26 +761,37 @@ pub async fn kill_port_process(pid: u32) -> Result<(), String> {
     }
     tokio::task::spawn_blocking(move || {
         #[cfg(windows)]
-        use std::os::windows::process::CommandExt;
-        use std::process::Command;
+        {
+            const PROCESS_TERMINATE: u32 = 0x0001;
 
-        let mut cmd = Command::new("taskkill");
-        cmd.args(["/F", "/PID", &pid.to_string()]);
-        #[cfg(windows)]
-        cmd.creation_flags(0x08000000);
+            extern "system" {
+                fn OpenProcess(
+                    dw_desired_access: u32,
+                    b_inherit_handle: i32,
+                    dw_process_id: u32,
+                ) -> isize;
+                fn TerminateProcess(h_process: isize, u_exit_code: u32) -> i32;
+                fn CloseHandle(h_object: isize) -> i32;
+            }
 
-        let output = cmd
-            .output()
-            .map_err(|e| format!("Failed to execute taskkill: {}", e))?;
-        if !output.status.success() {
-            let err_text = String::from_utf8_lossy(&output.stderr);
-            return Err(if err_text.trim().is_empty() {
-                format!("Failed to kill process {}", pid)
-            } else {
-                err_text.trim().to_string()
-            });
+            unsafe {
+                let handle = OpenProcess(PROCESS_TERMINATE, 0, pid);
+                if handle == 0 {
+                    return Err(format!("Access denied or process {} not found", pid));
+                }
+                let ok = TerminateProcess(handle, 1);
+                CloseHandle(handle);
+                if ok == 0 {
+                    return Err(format!("Failed to terminate process {}", pid));
+                }
+                Ok(())
+            }
         }
-        Ok(())
+        #[cfg(not(windows))]
+        {
+            let _ = pid;
+            Ok(())
+        }
     })
     .await
     .map_err(|e| e.to_string())?
@@ -933,11 +1015,30 @@ pub struct MediaStatus {
 pub async fn send_media_command(action: String) -> Result<(), String> {
     #[cfg(windows)]
     {
-        extern "system" {
-            fn keybd_event(b_vk: u8, b_scan: u8, dw_flags: u32, dw_extra_info: usize);
+        #[repr(C)]
+        struct KeybdInput {
+            w_vk: u16,
+            w_scan: u16,
+            dw_flags: u32,
+            time: u32,
+            dw_extra_info: usize,
         }
+
+        #[repr(C)]
+        struct Input {
+            r#type: u32,
+            ki: KeybdInput,
+            _padding: [u8; 8],
+        }
+
+        extern "system" {
+            fn SendInput(c_inputs: u32, p_inputs: *const Input, cb_size: i32) -> u32;
+        }
+
+        const INPUT_KEYBOARD: u32 = 1;
         const KEYEVENTF_KEYUP: u32 = 0x0002;
-        let vk: u8 = match action.as_str() {
+
+        let vk: u16 = match action.as_str() {
             "play_pause" => 0xB3,
             "next" => 0xB0,
             "previous" => 0xB1,
@@ -946,9 +1047,38 @@ pub async fn send_media_command(action: String) -> Result<(), String> {
             "mute" => 0xAD,
             _ => return Err(format!("Unsupported media action: {}", action)),
         };
+
+        let inputs = [
+            Input {
+                r#type: INPUT_KEYBOARD,
+                ki: KeybdInput {
+                    w_vk: vk,
+                    w_scan: 0,
+                    dw_flags: 0,
+                    time: 0,
+                    dw_extra_info: 0,
+                },
+                _padding: [0; 8],
+            },
+            Input {
+                r#type: INPUT_KEYBOARD,
+                ki: KeybdInput {
+                    w_vk: vk,
+                    w_scan: 0,
+                    dw_flags: KEYEVENTF_KEYUP,
+                    time: 0,
+                    dw_extra_info: 0,
+                },
+                _padding: [0; 8],
+            },
+        ];
+
         unsafe {
-            keybd_event(vk, 0, 0, 0);
-            keybd_event(vk, 0, KEYEVENTF_KEYUP, 0);
+            SendInput(
+                inputs.len() as u32,
+                inputs.as_ptr(),
+                std::mem::size_of::<Input>() as i32,
+            );
         }
         Ok(())
     }
