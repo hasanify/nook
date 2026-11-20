@@ -1,3 +1,9 @@
+# [0.30.0](https://github.com/hasanify/nook/compare/v0.29.0...v0.30.0) (2026-11-20)
+
+### Features
+
+- **widgets:** enable vertical scrolling in compact widgets with overflowing content ([13ac67e](https://github.com/hasanify/nook/commit/13ac67e02f11b1fccb8a6e1a7d949337745b1b69))
+
 # [0.29.0](https://github.com/hasanify/nook/compare/v0.28.0...v0.29.0) (2026-11-20)
 
 ### Features
