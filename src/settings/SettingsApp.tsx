@@ -494,6 +494,7 @@ export function SettingsApp() {
   };
 
   const [bentoLayoutIdx, setBentoLayoutIdx] = useState(0);
+  const [bentoLayoutName, setBentoLayoutName] = useState("");
   const [isBentoPreviewing, setIsBentoPreviewing] = useState(false);
   const originalBentoWidgetsRef = useRef<WidgetInstance[] | null>(null);
 
@@ -502,7 +503,7 @@ export function SettingsApp() {
     if (!originalBentoWidgetsRef.current) {
       originalBentoWidgetsRef.current = config.widgets;
     }
-    const nextIdx = isBentoPreviewing ? (bentoLayoutIdx + 1) % BENTO_LAYOUT_NAMES.length : 0;
+    const nextIdx = isBentoPreviewing ? bentoLayoutIdx + 1 : 0;
     setBentoLayoutIdx(nextIdx);
     setIsBentoPreviewing(true);
     let workArea = {
@@ -520,8 +521,14 @@ export function SettingsApp() {
       // Ignore
     }
     const layout = computeBentoLayout(originalBentoWidgetsRef.current, nextIdx, workArea);
+    setBentoLayoutName(layout.name);
     await applyBentoLayout(layout.widgets);
   }, [config, isBentoPreviewing, bentoLayoutIdx]);
+
+  const handleDoneSettingsBento = useCallback(() => {
+    originalBentoWidgetsRef.current = null;
+    setIsBentoPreviewing(false);
+  }, []);
 
   const handleRevertSettingsBento = useCallback(async () => {
     if (originalBentoWidgetsRef.current) {
@@ -964,11 +971,15 @@ export function SettingsApp() {
                       Bento Grid
                     </span>
                     <span className="font-mono text-[10px] text-accent-500">
-                      {bentoLayoutIdx + 1}/{BENTO_LAYOUT_NAMES.length}
+                      Layout #{bentoLayoutIdx + 1}
                     </span>
                   </div>
                   <span className="truncate text-[10px] text-fg-muted">
-                    {(BENTO_LAYOUT_NAMES[bentoLayoutIdx] ?? BENTO_LAYOUT_NAMES[0]!).name}
+                    {bentoLayoutName ||
+                      (
+                        BENTO_LAYOUT_NAMES[bentoLayoutIdx % BENTO_LAYOUT_NAMES.length] ??
+                        BENTO_LAYOUT_NAMES[0]!
+                      ).name}
                   </span>
                   <div className="flex items-center gap-1.5 pt-0.5">
                     <button
@@ -979,13 +990,24 @@ export function SettingsApp() {
                       Cycle Layout
                     </button>
                     {isBentoPreviewing && (
-                      <button
-                        type="button"
-                        onClick={() => void handleRevertSettingsBento()}
-                        className="cursor-pointer rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-medium text-fg-muted hover:text-fg"
-                      >
-                        Revert
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleDoneSettingsBento}
+                          className="cursor-pointer rounded-md bg-accent-500/20 px-2.5 py-1 text-[11px] font-semibold text-accent-500 transition-colors hover:bg-accent-500/30 active:scale-95"
+                          title="Save this layout"
+                        >
+                          Done
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRevertSettingsBento()}
+                          className="cursor-pointer rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-medium text-fg-muted hover:text-fg active:scale-95"
+                          title="Restore previous layout"
+                        >
+                          Revert
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

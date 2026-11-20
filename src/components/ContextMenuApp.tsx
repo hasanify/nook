@@ -12,7 +12,7 @@ import {
   getDesktopWorkArea,
 } from "../core/ipc";
 import { WIDGET_COLOR_OPTIONS } from "./WidgetContextMenu";
-import { computeBentoLayout, applyBentoLayout, BENTO_LAYOUT_NAMES } from "../core/bento";
+import { computeBentoLayout, applyBentoLayout } from "../core/bento";
 import type { WidgetInstance } from "../core/types";
 
 async function getEffectiveWorkArea() {
@@ -141,6 +141,10 @@ export function ContextMenuApp() {
 
   const [isBentoMode, setIsBentoMode] = useState(false);
   const [bentoIdx, setBentoIdx] = useState(0);
+  const [bentoMeta, setBentoMeta] = useState({
+    name: "Full-Width Wall",
+    description: "Edge-to-edge multi-column bento matrix spanning the entire monitor",
+  });
   const originalWidgetsRef = useRef<WidgetInstance[] | null>(null);
 
   const handleStartBento = useCallback(async () => {
@@ -152,6 +156,7 @@ export function ContextMenuApp() {
       setBentoIdx(0);
       const workArea = await getEffectiveWorkArea();
       const layout = computeBentoLayout(cfg.widgets, 0, workArea);
+      setBentoMeta({ name: layout.name, description: layout.description });
       await applyBentoLayout(layout.widgets);
     } catch {
       // Ignore
@@ -160,10 +165,11 @@ export function ContextMenuApp() {
 
   const handleCycleBento = useCallback(async () => {
     if (!originalWidgetsRef.current) return;
-    const nextIdx = (bentoIdx + 1) % BENTO_LAYOUT_NAMES.length;
+    const nextIdx = bentoIdx + 1;
     setBentoIdx(nextIdx);
     const workArea = await getEffectiveWorkArea();
     const layout = computeBentoLayout(originalWidgetsRef.current, nextIdx, workArea);
+    setBentoMeta({ name: layout.name, description: layout.description });
     await applyBentoLayout(layout.widgets);
   }, [bentoIdx]);
 
@@ -207,85 +213,78 @@ export function ContextMenuApp() {
         }}
       >
         {isBentoMode ? (
-          (() => {
-            const bentoPreset = BENTO_LAYOUT_NAMES[bentoIdx] ?? BENTO_LAYOUT_NAMES[0]!;
-            return (
-              <div className="flex flex-col gap-2 p-1 text-xs">
-                <div className="flex items-center justify-between border-b border-line/50 px-1 pb-1.5">
-                  <div className="flex items-center gap-1.5 font-semibold text-accent-500">
-                    <svg
-                      className="h-4 w-4 shrink-0"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect width="7" height="7" x="3" y="3" rx="1" />
-                      <rect width="7" height="7" x="3" y="14" rx="1" />
-                      <rect width="7" height="18" x="14" y="3" rx="1" />
-                    </svg>
-                    <span>Bento Arranger</span>
-                  </div>
-                  <span className="font-mono text-[10px] text-fg-muted">
-                    {bentoIdx + 1}/{BENTO_LAYOUT_NAMES.length}
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-1 rounded-lg border border-line/60 bg-surface-raised p-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-fg">{bentoPreset.name}</span>
-                    <span className="rounded bg-accent-500/10 px-1 py-0.5 font-mono text-[9px] text-accent-500">
-                      Preset
-                    </span>
-                  </div>
-                  <span className="text-[10px] leading-tight text-fg-muted">
-                    {bentoPreset.description}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleCycleBento}
-                  className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+          <div className="flex flex-col gap-2 p-1 text-xs">
+            <div className="flex items-center justify-between border-b border-line/50 px-1 pb-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-accent-500">
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <svg
-                    className="h-3.5 w-3.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                    <path d="M3 3v5h5" />
-                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                    <path d="M16 21h5v-5" />
-                  </svg>
-                  <span>Cycle Layout</span>
-                </button>
-
-                <div className="flex items-center gap-1.5 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={handleCancelBento}
-                    className="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1.5 text-center text-xs font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDoneBento}
-                    className="flex-1 cursor-pointer rounded-lg bg-accent-500/20 px-2.5 py-1.5 text-center text-xs font-semibold text-accent-500 transition-colors hover:bg-accent-500/30"
-                  >
-                    Done
-                  </button>
-                </div>
+                  <rect width="7" height="7" x="3" y="3" rx="1" />
+                  <rect width="7" height="7" x="3" y="14" rx="1" />
+                  <rect width="7" height="18" x="14" y="3" rx="1" />
+                </svg>
+                <span>Bento Arranger</span>
               </div>
-            );
-          })()
+              <span className="font-mono text-[10px] text-accent-500">Layout #{bentoIdx + 1}</span>
+            </div>
+
+            <div className="flex flex-col gap-1 rounded-lg border border-line/60 bg-surface-raised p-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-fg">{bentoMeta.name}</span>
+                <span className="rounded bg-accent-500/10 px-1 py-0.5 font-mono text-[9px] text-accent-500">
+                  Bento
+                </span>
+              </div>
+              <span className="text-[10px] leading-tight text-fg-muted">
+                {bentoMeta.description}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCycleBento}
+              className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+            >
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 21h5v-5" />
+              </svg>
+              <span>Cycle Layout</span>
+            </button>
+
+            <div className="flex items-center gap-1.5 pt-0.5">
+              <button
+                type="button"
+                onClick={handleCancelBento}
+                className="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1.5 text-center text-xs font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDoneBento}
+                className="flex-1 cursor-pointer rounded-lg bg-accent-500/20 px-2.5 py-1.5 text-center text-xs font-semibold text-accent-500 transition-colors hover:bg-accent-500/30"
+              >
+                Done
+              </button>
+            </div>
+          </div>
         ) : (
           <>
             {/* Edit Mode Toggle */}
