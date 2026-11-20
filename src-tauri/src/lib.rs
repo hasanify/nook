@@ -46,6 +46,40 @@ pub fn get_app_handle() -> Option<&'static tauri::AppHandle> {
     GLOBAL_APP.get()
 }
 
+fn start_auto_update_loop(app: tauri::AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        // Initial grace period after startup before checking
+        tokio::time::sleep(tokio::time::Duration::from_secs(15)).await;
+
+        loop {
+            let auto_update_enabled = {
+                let state = app.state::<AppState>();
+                state.config.get_config().app.auto_update
+            };
+
+            if auto_update_enabled {
+                match commands::check_for_updates(app.clone()).await {
+                    Ok(res) => {
+                        if res.has_update {
+                            info!(
+                                "Automatic update check found new version: {}",
+                                res.latest_version
+                            );
+                            let _ = app.emit("update-available", &res);
+                        }
+                    }
+                    Err(e) => {
+                        tracing::debug!("Automatic update check failed: {}", e);
+                    }
+                }
+            }
+
+            // Check every 4 hours
+            tokio::time::sleep(tokio::time::Duration::from_secs(4 * 3600)).await;
+        }
+    });
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     setup_logging();
@@ -86,6 +120,9 @@ pub fn run() {
             // Start shared background HTTP poller
             let state = handle.state::<AppState>();
             state.poller.start_background_loop(handle.clone());
+
+            // Start background auto-update periodic checker
+            start_auto_update_loop(handle.clone());
 
             // Synchronize autostart with user preference in config.json.
             // On Windows, NSIS uninstaller deletes the Run registry key during an update.

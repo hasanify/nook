@@ -138,6 +138,7 @@ export function SettingsApp() {
   });
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [autostartEnabled, setAutostartEnabled] = useState(false);
+  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true);
   const [githubConfigured, setGithubConfigured] = useState(false);
   const [vercelConfigured, setVercelConfigured] = useState(false);
   const [aiTokensConfigured, setAiTokensConfigured] = useState<Record<string, boolean>>({});
@@ -230,6 +231,11 @@ export function SettingsApp() {
         if (typeof cfg.app?.autostart === "boolean") {
           setAutostartEnabled(cfg.app.autostart);
         }
+        const autoUp =
+          cfg.app?.auto_update ?? (cfg.app as unknown as { autoUpdate?: boolean })?.autoUpdate;
+        if (typeof autoUp === "boolean") {
+          setAutoUpdateEnabled(autoUp);
+        }
       })
       .catch(() => {});
   }, [selectedWidgetId]);
@@ -286,10 +292,20 @@ export function SettingsApp() {
       unlistenFocus = fn;
     });
 
+    let unlistenUpdate: (() => void) | undefined;
+    listen<UpdateCheckResult>("update-available", (event) => {
+      if (event.payload?.has_update) {
+        setUpdateResult(event.payload);
+      }
+    }).then((fn) => {
+      unlistenUpdate = fn;
+    });
+
     return () => {
       if (unlisten) unlisten();
       if (unlistenProgress) unlistenProgress();
       if (unlistenFocus) unlistenFocus();
+      if (unlistenUpdate) unlistenUpdate();
       if (opacityDebounceRef.current) clearTimeout(opacityDebounceRef.current);
     };
   }, [fetchConfig, refreshAccountStatus]);
@@ -449,6 +465,19 @@ export function SettingsApp() {
       void updateAppConfig({ autostart: next });
     } catch {
       // Autostart plugin error handling
+    }
+  };
+
+  const handleToggleAutoUpdate = async () => {
+    const next = !autoUpdateEnabled;
+    setAutoUpdateEnabled(next);
+    try {
+      await updateAppConfig({ autoUpdate: next });
+      if (next) {
+        void handleCheckUpdates();
+      }
+    } catch {
+      setAutoUpdateEnabled(!next);
     }
   };
 
@@ -666,20 +695,30 @@ export function SettingsApp() {
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          <svg
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4" />
-            <path d="M12 8h.01" />
-          </svg>
+          <div className="relative">
+            <svg
+              className="h-3.5 w-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+            {updateResult?.has_update && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full bg-accent-500" />
+            )}
+          </div>
           <span>About</span>
+          {updateResult?.has_update && (
+            <span className="py-0.2 rounded-full bg-accent-500/20 px-1.5 text-[10px] font-semibold text-accent-500">
+              Update
+            </span>
+          )}
         </button>
       </div>
 
@@ -720,6 +759,22 @@ export function SettingsApp() {
                     checked={autostartEnabled}
                     onChange={() => void handleAutostartToggle()}
                     ariaLabel="Toggle launch on startup"
+                  />
+                </div>
+
+                {/* Automatic Updates */}
+                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                  <div>
+                    <div className="font-medium text-fg">Automatic Updates</div>
+                    <div className="text-[11px] text-fg-muted">
+                      Periodically check for new releases in the background and notify when
+                      available
+                    </div>
+                  </div>
+                  <Toggle
+                    checked={autoUpdateEnabled}
+                    onChange={() => void handleToggleAutoUpdate()}
+                    ariaLabel="Toggle automatic updates"
                   />
                 </div>
 
@@ -1815,6 +1870,21 @@ export function SettingsApp() {
                     </svg>
                     <span>{checkingUpdate ? "Checking..." : "Check for Updates"}</span>
                   </button>
+                </div>
+
+                {/* Auto Update Setting */}
+                <div className="flex items-center justify-between border-t border-line/40 pt-3">
+                  <div>
+                    <div className="font-medium text-fg">Automatic Updates</div>
+                    <div className="text-[11px] text-fg-muted">
+                      Periodically check for new releases in the background
+                    </div>
+                  </div>
+                  <Toggle
+                    checked={autoUpdateEnabled}
+                    onChange={() => void handleToggleAutoUpdate()}
+                    ariaLabel="Toggle automatic updates"
+                  />
                 </div>
 
                 {/* Status messages */}

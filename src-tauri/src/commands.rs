@@ -249,6 +249,7 @@ pub fn update_app_config(
     autostart: Option<bool>,
     widget_preset: Option<String>,
     default_ai_provider: Option<String>,
+    auto_update: Option<bool>,
 ) -> Result<(), String> {
     let state = app.state::<AppState>();
     state.config.update_config(|cfg| {
@@ -270,6 +271,9 @@ pub fn update_app_config(
             } else {
                 Some(ai)
             };
+        }
+        if let Some(u) = auto_update {
+            cfg.app.auto_update = u;
         }
     });
 

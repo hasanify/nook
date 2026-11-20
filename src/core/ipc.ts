@@ -107,7 +107,10 @@ export async function updateAppConfig(patch: {
   autostart?: boolean;
   widgetPreset?: string;
   defaultAiProvider?: string;
+  autoUpdate?: boolean;
+  auto_update?: boolean;
 }): Promise<void> {
+  const autoUpdate = patch.autoUpdate ?? patch.auto_update;
   return invoke<void>("update_app_config", {
     theme: patch.theme,
     gridSnap: patch.gridSnap,
@@ -117,6 +120,8 @@ export async function updateAppConfig(patch: {
     widget_preset: patch.widgetPreset,
     defaultAiProvider: patch.defaultAiProvider,
     default_ai_provider: patch.defaultAiProvider,
+    autoUpdate,
+    auto_update: autoUpdate,
   });
 }
 

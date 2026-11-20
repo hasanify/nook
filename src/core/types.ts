@@ -34,6 +34,8 @@ export interface AppConfig {
     pinStrategy: string;
     widgetPreset?: string;
     defaultAiProvider?: string;
+    autoUpdate?: boolean;
+    auto_update?: boolean;
   };
   widgets: WidgetInstance[];
 }

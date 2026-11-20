@@ -62,10 +62,16 @@ pub struct AppSection {
     pub widget_preset: String,
     #[serde(default, alias = "default_ai_provider")]
     pub default_ai_provider: Option<String>,
+    #[serde(default = "default_auto_update", alias = "auto_update")]
+    pub auto_update: bool,
 }
 
 fn default_widget_preset() -> String {
     "default".to_string()
+}
+
+fn default_auto_update() -> bool {
+    true
 }
 
 impl Default for AppSection {
@@ -78,6 +84,7 @@ impl Default for AppSection {
             pin_strategy: "auto".to_string(),
             widget_preset: "default".to_string(),
             default_ai_provider: None,
+            auto_update: true,
         }
     }
 }
