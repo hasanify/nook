@@ -137,19 +137,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className={`h-3 w-3 shrink-0 ${isHealthy ? "text-ok" : "text-error"}`}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-        </svg>
-      }
+
       headerActions={
         <button
           type="button"

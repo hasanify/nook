@@ -124,19 +124,7 @@ export function AiUnstuckWidget({ instance, editMode, patchState }: WidgetProps)
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className="h-3 w-3 shrink-0 text-accent-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-        </svg>
-      }
+
       banner={
         errorBanner ? (
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />

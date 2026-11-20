@@ -121,20 +121,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className="h-3 w-3 shrink-0 text-accent-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="2" />
-          <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
-        </svg>
-      }
+
       headerActions={
         <div className="flex items-center gap-1">
           <span className="py-0.2 rounded-full bg-surface-raised px-1.5 font-mono text-[9px] font-bold text-fg-muted">

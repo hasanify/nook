@@ -27,6 +27,7 @@ import { CustomSelect } from "../components/CustomSelect";
 import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
 import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
 import { WIDGET_PRESETS } from "../core/presets";
+import { computeBentoLayout, applyBentoLayout, BENTO_LAYOUT_NAMES } from "../core/bento";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { AppConfig, WidgetInstance } from "../core/types";
@@ -472,6 +473,32 @@ export function SettingsApp() {
     }
   };
 
+  const [bentoLayoutIdx, setBentoLayoutIdx] = useState(0);
+  const [isBentoPreviewing, setIsBentoPreviewing] = useState(false);
+  const originalBentoWidgetsRef = useRef<WidgetInstance[] | null>(null);
+
+  const handleCycleSettingsBento = useCallback(async () => {
+    if (!config?.widgets || config.widgets.length === 0) return;
+    if (!originalBentoWidgetsRef.current) {
+      originalBentoWidgetsRef.current = config.widgets;
+    }
+    const nextIdx = isBentoPreviewing ? (bentoLayoutIdx + 1) % BENTO_LAYOUT_NAMES.length : 0;
+    setBentoLayoutIdx(nextIdx);
+    setIsBentoPreviewing(true);
+    const screenW = window.screen.availWidth || 1920;
+    const screenH = window.screen.availHeight || 1080;
+    const layout = computeBentoLayout(originalBentoWidgetsRef.current, nextIdx, screenW, screenH);
+    await applyBentoLayout(layout.widgets);
+  }, [config, isBentoPreviewing, bentoLayoutIdx]);
+
+  const handleRevertSettingsBento = useCallback(async () => {
+    if (originalBentoWidgetsRef.current) {
+      await applyBentoLayout(originalBentoWidgetsRef.current);
+      originalBentoWidgetsRef.current = null;
+    }
+    setIsBentoPreviewing(false);
+  }, []);
+
   const selectedWidget: WidgetInstance | undefined = config?.widgets.find(
     (w) => w.id === selectedWidgetId,
   );
@@ -883,6 +910,54 @@ export function SettingsApp() {
                   {config?.widgets.length ?? 0}
                 </span>
               </div>
+
+              {/* Bento Grid Arranger Option */}
+              {(config?.widgets.length ?? 0) > 0 && (
+                <div className="flex flex-col gap-1.5 rounded-lg border border-line/60 bg-surface-raised/60 p-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 font-semibold text-fg">
+                      <svg
+                        className="h-3.5 w-3.5 text-accent-500"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect width="7" height="7" x="3" y="3" rx="1" />
+                        <rect width="7" height="7" x="3" y="14" rx="1" />
+                        <rect width="7" height="18" x="14" y="3" rx="1" />
+                      </svg>
+                      Bento Grid
+                    </span>
+                    <span className="font-mono text-[10px] text-accent-500">
+                      {bentoLayoutIdx + 1}/{BENTO_LAYOUT_NAMES.length}
+                    </span>
+                  </div>
+                  <span className="truncate text-[10px] text-fg-muted">
+                    {(BENTO_LAYOUT_NAMES[bentoLayoutIdx] ?? BENTO_LAYOUT_NAMES[0]!).name}
+                  </span>
+                  <div className="flex items-center gap-1.5 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => void handleCycleSettingsBento()}
+                      className="flex-1 cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-center text-[11px] font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+                    >
+                      Cycle Layout
+                    </button>
+                    {isBentoPreviewing && (
+                      <button
+                        type="button"
+                        onClick={() => void handleRevertSettingsBento()}
+                        className="cursor-pointer rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-medium text-fg-muted hover:text-fg"
+                      >
+                        Revert
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-none pr-1">
                 {config?.widgets.map((w) => {

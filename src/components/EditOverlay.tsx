@@ -1,9 +1,12 @@
 import { useRef, useEffect } from "react";
+import { WidgetIcon } from "./WidgetIcon";
 import type { Rect } from "../core/types";
 
 interface EditOverlayProps {
   id: string;
   title: string;
+  kind?: string | undefined;
+  icon?: React.ReactNode | undefined;
   editMode: boolean;
   resizable?: boolean | undefined;
   minSize?: { w: number; h: number } | undefined;
@@ -22,6 +25,8 @@ interface EditOverlayProps {
 
 export function EditOverlay({
   title,
+  kind,
+  icon,
   editMode,
   resizable = true,
   minSize = { w: 200, h: 160 },
@@ -70,7 +75,7 @@ export function EditOverlay({
 
   // Handle Dragging
   const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (!editMode || e.button !== 0) return;
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -242,28 +247,41 @@ export function EditOverlay({
           widgetColor
             ? {
                 backgroundColor: editMode
-                  ? `color-mix(in srgb, ${widgetColor} 25%, var(--surface-raised))`
-                  : `color-mix(in srgb, ${widgetColor} 18%, var(--surface-raised))`,
-                borderBottomColor: `color-mix(in srgb, ${widgetColor} 35%, var(--line))`,
+                  ? `color-mix(in srgb, ${widgetColor} 20%, var(--surface-raised))`
+                  : `color-mix(in srgb, ${widgetColor} 8%, var(--surface-raised))`,
+                borderBottomColor: `color-mix(in srgb, ${widgetColor} 22%, var(--line))`,
               }
             : undefined
         }
         className={`flex h-8 touch-none items-center justify-between rounded-t-[inherit] border-b px-3 text-xs transition-colors select-none ${
           editMode
             ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : `cursor-grab text-fg-muted hover:bg-surface-raised/50 active:cursor-grabbing ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
+            : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
         }`}
-        onPointerDown={handleDragStart}
+        onPointerDown={editMode ? handleDragStart : undefined}
       >
         <div
-          className={`flex min-w-0 flex-1 items-center gap-1.5 font-medium ${
+          className={`flex min-w-0 flex-1 items-center gap-2 font-medium ${
             editMode ? "pointer-events-none" : ""
           }`}
         >
-          {headerSlot}
-          <span className="truncate text-[11px] font-semibold tracking-tight text-fg/80">
+          <span
+            className="flex shrink-0 items-center justify-center transition-colors"
+            style={
+              widgetColor
+                ? {
+                    color: widgetColor,
+                    filter: `drop-shadow(0 0 5px color-mix(in srgb, ${widgetColor} 50%, transparent))`,
+                  }
+                : undefined
+            }
+          >
+            {icon ?? <WidgetIcon kind={kind} className="h-3.5 w-3.5 shrink-0 text-accent-500" />}
+          </span>
+          <span className="truncate text-[11px] font-semibold tracking-tight text-fg/90">
             {title}
           </span>
+          {headerSlot && <div className="flex shrink-0 items-center gap-1.5">{headerSlot}</div>}
         </div>
         <div
           className="flex shrink-0 items-center gap-1.5"

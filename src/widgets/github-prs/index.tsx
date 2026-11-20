@@ -196,22 +196,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className="h-3 w-3 shrink-0 text-accent-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="18" cy="18" r="3" />
-          <circle cx="6" cy="6" r="3" />
-          <path d="M13 6h3a2 2 0 0 1 2 2v7" />
-          <line x1="6" y1="9" x2="6" y2="21" />
-        </svg>
-      }
+
       headerActions={
         <button
           type="button"

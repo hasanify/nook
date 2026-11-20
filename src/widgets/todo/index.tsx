@@ -68,18 +68,6 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className="h-3.5 w-3.5 text-fg-muted"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M9 11l3 3L22 4" />
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-        </svg>
-      }
     >
       <div className="flex h-full flex-col gap-2 overflow-hidden select-none">
         {/* Add Task Input Form */}

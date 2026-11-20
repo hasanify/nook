@@ -126,15 +126,16 @@ export function WidgetShell({
 
   const colorStyle: React.CSSProperties = widgetColor
     ? ({
+        "--widget-accent": widgetColor,
         "--color-accent-500": widgetColor,
-        "--color-accent-400": widgetColor,
-        "--color-accent-600": widgetColor,
+        "--color-accent-400": `color-mix(in srgb, ${widgetColor} 80%, white)`,
+        "--color-accent-600": `color-mix(in srgb, ${widgetColor} 80%, black)`,
         "--focus": widgetColor,
         borderColor: effectiveEditMode
           ? widgetColor
-          : `color-mix(in srgb, ${widgetColor} 50%, var(--line))`,
-        backgroundColor: `color-mix(in srgb, ${widgetColor} 16%, var(--surface))`,
-        boxShadow: undefined,
+          : `color-mix(in srgb, ${widgetColor} 32%, var(--line))`,
+        background: `radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, ${widgetColor} 8%, transparent) 0%, transparent 85%), var(--surface)`,
+        boxShadow: `0 8px 24px -4px color-mix(in srgb, ${widgetColor} 16%, transparent), 0 2px 6px -1px color-mix(in srgb, ${widgetColor} 8%, transparent)`,
       } as React.CSSProperties)
     : {};
 
@@ -145,15 +146,26 @@ export function WidgetShell({
         ...colorStyle,
         opacity: widgetOpacity,
       }}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,opacity] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${
-        preset.highlightClass
-      } before:to-transparent ${preset.containerClass} ${
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,opacity,box-shadow] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px ${
+        widgetColor
+          ? ""
+          : `before:bg-gradient-to-r before:from-transparent ${preset.highlightClass} before:to-transparent`
+      } ${preset.containerClass} ${
         effectiveEditMode ? "!border-accent-500/80 ring-2 ring-accent-500/80 ring-inset" : ""
       }`}
     >
+      {widgetColor && (
+        <span
+          className="pointer-events-none absolute inset-x-6 top-0 h-px"
+          style={{
+            background: `linear-gradient(90deg, transparent, color-mix(in srgb, ${widgetColor} 70%, transparent), transparent)`,
+          }}
+        />
+      )}
       <EditOverlay
         id={instance.id}
         title={title}
+        kind={instance.kind}
         editMode={effectiveEditMode}
         resizable={resizable}
         minSize={minSize}

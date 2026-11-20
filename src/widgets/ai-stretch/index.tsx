@@ -151,21 +151,7 @@ export function AiStretchWidget({ instance, editMode, patchState }: WidgetProps)
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className="h-3 w-3 shrink-0 text-ok"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M18 20V10" />
-          <path d="M12 20V4" />
-          <path d="M6 20v-6" />
-        </svg>
-      }
+
       headerActions={
         <button
           type="button"

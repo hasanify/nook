@@ -49,20 +49,6 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
-      headerSlot={
-        <svg
-          className="h-3.5 w-3.5 text-fg-muted"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-      }
     >
       <div className="flex h-full flex-col justify-between pt-1 pb-2 select-none">
         {/* Main Clock Display */}

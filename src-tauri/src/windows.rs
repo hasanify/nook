@@ -264,8 +264,8 @@ pub fn update_widget_geometry(
     let config = state.config.get_config();
 
     // Min size constraints
-    w = w.max(200);
-    h = h.max(160);
+    w = w.max(160);
+    h = h.max(100);
 
     // Grid snap if configured (> 1)
     let grid_snap = config.app.grid_snap;
@@ -535,8 +535,8 @@ pub fn apply_window_corners(hwnd: HWND) {
 
 pub fn ensure_context_menu_window(app: &AppHandle) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: f64 = 204.0;
-    const MENU_H: f64 = 300.0;
+    const MENU_W: f64 = 216.0;
+    const MENU_H: f64 = 360.0;
 
     if app.get_webview_window(LABEL).is_some() {
         return Ok(());
@@ -569,8 +569,8 @@ pub fn show_context_menu_window(
     _screen_y: Option<i32>,
 ) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: i32 = 204;
-    const MENU_H: i32 = 300;
+    const MENU_W: i32 = 216;
+    const MENU_H: i32 = 360;
 
     #[cfg(windows)]
     let (mut phys_x, mut phys_y) = unsafe {
