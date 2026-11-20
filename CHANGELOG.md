@@ -1,3 +1,10 @@
+## [0.26.1](https://github.com/hasanify/nook/compare/v0.26.0...v0.26.1) (2026-11-20)
+
+### Bug Fixes
+
+- **core:** preserve launch on startup across application updates ([e016874](https://github.com/hasanify/nook/commit/e01687491ddafbaeeef5377216d63077b63a2fb2))
+- **ui:** ensure CustomSelect correctly matches numeric and string option values ([db973e6](https://github.com/hasanify/nook/commit/db973e6d306442c8970aa94730d6cbbc8abfdcc4))
+
 # [0.26.0](https://github.com/hasanify/nook/compare/v0.25.0...v0.26.0) (2026-11-20)
 
 ### Features
