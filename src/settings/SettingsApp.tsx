@@ -441,6 +441,15 @@ export function SettingsApp() {
   };
 
   const handleWidgetSettingChange = (widgetId: string, key: string, value: unknown) => {
+    setConfig((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        widgets: prev.widgets.map((w) =>
+          w.id === widgetId ? { ...w, settings: { ...w.settings, [key]: value } } : w,
+        ),
+      };
+    });
     void updateSettings(widgetId, { [key]: value });
   };
 
@@ -470,6 +479,12 @@ export function SettingsApp() {
     ? selectedWidget.kind || (selectedWidget as unknown as { type?: string }).type || ""
     : "";
   const selectedModule = selectedKind ? getWidgetModule(selectedKind) : undefined;
+  const selectedWidgetColor =
+    selectedWidget &&
+    typeof selectedWidget.settings?.widgetColor === "string" &&
+    selectedWidget.settings.widgetColor.trim() !== ""
+      ? selectedWidget.settings.widgetColor.trim()
+      : undefined;
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden overscroll-none bg-surface font-sans text-fg select-none">
@@ -874,6 +889,11 @@ export function SettingsApp() {
                     getWidgetModule(widgetKind)?.manifest.name ??
                     (widgetKind ? widgetKind : "Widget");
                   const isSelected = selectedWidgetId === w.id;
+                  const wColor =
+                    typeof w.settings?.widgetColor === "string" &&
+                    w.settings.widgetColor.trim() !== ""
+                      ? w.settings.widgetColor.trim()
+                      : undefined;
                   return (
                     <button
                       key={w.id}
@@ -881,22 +901,54 @@ export function SettingsApp() {
                       onClick={() => setSelectedWidgetId(w.id)}
                       className={`group flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition-all ${
                         isSelected
-                          ? "border-accent-500/60 bg-accent-500/15 font-semibold text-fg shadow-sm"
+                          ? `font-semibold text-fg shadow-xs ${!wColor ? "border-accent-500/60 bg-accent-500/15" : ""}`
                           : "border-transparent bg-surface-raised text-fg hover:border-line hover:bg-surface"
                       }`}
+                      style={
+                        isSelected && wColor
+                          ? {
+                              borderColor: `color-mix(in srgb, ${wColor} 60%, transparent)`,
+                              backgroundColor: `color-mix(in srgb, ${wColor} 16%, var(--surface))`,
+                            }
+                          : undefined
+                      }
                     >
                       <div className="flex min-w-0 items-center gap-2 truncate">
                         <span
-                          className={`h-2 w-2 shrink-0 rounded-full ${
-                            isSelected ? "bg-accent-500" : "bg-fg-muted/40"
+                          className={`h-2 w-2 shrink-0 rounded-full transition-colors ${
+                            isSelected && !wColor
+                              ? "bg-accent-500"
+                              : !isSelected && !wColor
+                                ? "bg-fg-muted/40"
+                                : ""
                           }`}
+                          style={
+                            wColor
+                              ? {
+                                  backgroundColor: wColor,
+                                  opacity: isSelected ? 1 : 0.65,
+                                  boxShadow: isSelected ? `0 0 6px ${wColor}` : undefined,
+                                }
+                              : undefined
+                          }
                         />
                         <span className="truncate font-medium text-fg">{title}</span>
                       </div>
                       <span
                         className={`ml-2 shrink-0 font-mono text-[10px] ${
-                          isSelected ? "text-accent-500" : "text-fg-muted"
+                          isSelected && !wColor
+                            ? "text-accent-500"
+                            : !isSelected
+                              ? "text-fg-muted"
+                              : ""
                         }`}
+                        style={
+                          isSelected && wColor
+                            ? {
+                                color: wColor,
+                              }
+                            : undefined
+                        }
                       >
                         {w.id.slice(0, 5)}
                       </span>
@@ -985,7 +1037,10 @@ export function SettingsApp() {
                   <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
                     <div className="flex justify-between">
                       <span className="font-medium text-fg">Window Opacity</span>
-                      <span className="font-mono font-medium text-accent-500">
+                      <span
+                        className={`font-mono font-medium ${!selectedWidgetColor ? "text-accent-500" : ""}`}
+                        style={selectedWidgetColor ? { color: selectedWidgetColor } : undefined}
+                      >
                         {Math.round(selectedWidget.opacity * 100)}%
                       </span>
                     </div>
@@ -1020,7 +1075,8 @@ export function SettingsApp() {
                           }
                         }, 40);
                       }}
-                      className="cursor-pointer accent-accent-500"
+                      className={`cursor-pointer ${!selectedWidgetColor ? "accent-accent-500" : ""}`}
+                      style={selectedWidgetColor ? { accentColor: selectedWidgetColor } : undefined}
                     />
                   </div>
 
