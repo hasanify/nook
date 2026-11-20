@@ -112,7 +112,7 @@ export function WidgetContextMenu({
         maxWidth: "calc(100vw - 12px)",
         maxHeight: "calc(100vh - 12px)",
       }}
-      className="fixed z-[999999] flex max-w-[calc(100vw-12px)] min-w-[140px] animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
+      className="fixed z-[999999] flex max-w-[calc(100vw-12px)] min-w-[204px] animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -229,7 +229,7 @@ export function WidgetContextMenu({
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-medium text-fg-muted">Color</span>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          <div className="flex items-center justify-between pt-0.5">
             {WIDGET_COLOR_OPTIONS.map((c) => {
               const active = (currentColor || "") === c.value;
               return (
@@ -240,7 +240,7 @@ export function WidgetContextMenu({
                     onSelectColor(c.value);
                     onClose();
                   }}
-                  className={`h-3.5 w-3.5 cursor-pointer rounded-full transition-transform hover:scale-125 ${
+                  className={`h-3.5 w-3.5 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-125 ${
                     active ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface" : ""
                   }`}
                   style={{ backgroundColor: c.hex }}
@@ -257,7 +257,7 @@ export function WidgetContextMenu({
               return (
                 <label
                   title={isCustomActive ? `Custom Color (${currentColor})` : "Pick custom color"}
-                  className={`relative flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
+                  className={`relative flex h-3.5 w-3.5 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
                     isCustomActive
                       ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface"
                       : "border border-line/60"

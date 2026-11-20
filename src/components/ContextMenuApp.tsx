@@ -236,7 +236,7 @@ export function ContextMenuApp() {
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-medium text-fg-muted">Color</span>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          <div className="flex items-center justify-between pt-0.5">
             {WIDGET_COLOR_OPTIONS.map((c) => {
               const active = widgetColor === c.value;
               return (
@@ -247,7 +247,7 @@ export function ContextMenuApp() {
                     patchSettings({ widgetColor: c.value });
                     handleClose();
                   }}
-                  className={`h-3.5 w-3.5 cursor-pointer rounded-full transition-transform hover:scale-125 ${
+                  className={`h-3.5 w-3.5 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-125 ${
                     active ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface" : ""
                   }`}
                   style={{ backgroundColor: c.hex }}
@@ -263,7 +263,7 @@ export function ContextMenuApp() {
               return (
                 <label
                   title={isCustomActive ? `Custom Color (${widgetColor})` : "Pick custom color"}
-                  className={`relative flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
+                  className={`relative flex h-3.5 w-3.5 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
                     isCustomActive
                       ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface"
                       : "border border-line/60"

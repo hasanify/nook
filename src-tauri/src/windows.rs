@@ -535,7 +535,7 @@ pub fn apply_window_corners(hwnd: HWND) {
 
 pub fn ensure_context_menu_window(app: &AppHandle) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: f64 = 190.0;
+    const MENU_W: f64 = 204.0;
     const MENU_H: f64 = 300.0;
 
     if app.get_webview_window(LABEL).is_some() {
@@ -569,7 +569,7 @@ pub fn show_context_menu_window(
     _screen_y: Option<i32>,
 ) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: i32 = 190;
+    const MENU_W: i32 = 204;
     const MENU_H: i32 = 300;
 
     #[cfg(windows)]
