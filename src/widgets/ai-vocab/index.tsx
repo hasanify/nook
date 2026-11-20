@@ -7,11 +7,14 @@ import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
-const SYSTEM_PROMPT = `Pick 1 expressive word or cultural slang term.
+const SYSTEM_PROMPT = `Pick 1 unusual, memorable, and expressive word or cultural slang term.
+Rules:
+- Be unexpected and diverse. Never pick clichés or overused words (avoid: petrichor, sonder, serendipity, ephemeral, defenestration, mellifluous).
+- Provide accurate phonetic transcription.
 Format exactly:
 WORD: <Word> (/phonetic/) [Part of Speech]
-DEF: <Concise definition, max 12 words>
-USE: "<Sample conversational sentence, max 18 words>"`;
+DEF: <Concise definition, max 14 words>
+USE: "<Sample conversational sentence, max 20 words>"`;
 
 interface VocabItem {
   word: string;
@@ -29,13 +32,47 @@ const DEFAULT_SAMPLE: VocabItem = {
   use: "Watching the rush-hour crowd at the station, she was struck by sudden sonder.",
 };
 
-const FLAVOR_PROMPTS = [
-  "rare evocative literary word",
-  "modern cultural slang or vernacular term",
-  "poetic untranslatable foreign concept",
-  "expressive architectural or aesthetic adjective",
-  "clever conversational portmanteau",
-];
+const THEMES_BY_FLAVOR: Record<string, string[]> = {
+  literary: [
+    "rare evocative English word from classic literature",
+    "striking aesthetic, architectural, or sensory adjective",
+    "poetic term for light, shadows, weather, or atmosphere",
+    "philosophical noun describing nuanced human emotion or time",
+    "forgotten maritime, astronomical, or nocturnal term",
+    "evocative adjective for voice, sound, or silences",
+    "archaic psychological observation or character trait",
+    "word for an unexpected everyday sensation or beauty",
+  ],
+  slang: [
+    "clever modern colloquialism or internet vernacular",
+    "witty workplace or creative culture slang",
+    "contemporary youth culture or subculture term",
+    "playful conversational portmanteau or blend word",
+    "informal regional English slang with vivid meaning",
+    "witty idiom condensed into a punchy term",
+  ],
+  untranslatable: [
+    "poetic Japanese aesthetic concept (nature, impermanence, mindfulness)",
+    "German compound noun capturing a very specific dilemma, habit, or feeling",
+    "Portuguese or Spanish term of deep emotion, longing, or warmth",
+    "Nordic term for comfort, cozy resilience, or connection with nature",
+    "Greek or Italian term for passion, craftsmanship, or joie de vivre",
+    "indigenous or world language concept with no direct English translation",
+    "French or Arabic term capturing an evocative mood or social dynamic",
+  ],
+  all: [
+    "rare evocative literary adjective or noun",
+    "subtle psychological phenomenon or obscure emotion",
+    "modern cultural slang or witty portmanteau",
+    "untranslatable foreign philosophical concept",
+    "aesthetic, architectural, or atmospheric descriptor",
+    "curious vintage idiom condensed into one word",
+    "sensory texture, sound, or natural phenomenon descriptor",
+    "clever neologism or forgotten historical gem",
+  ],
+};
+
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 function parseVocabOutput(raw: string): VocabItem {
   const wordMatch = raw.match(/WORD:\s*([\s\S]*?)(?=\nDEF:|$)/i);
@@ -95,16 +132,42 @@ export function AiVocabWidget({ instance, editMode, patchState }: WidgetProps) {
     setLoading(true);
     setErrorBanner(null);
 
-    const userPrompt =
-      flavor && flavor !== "all"
-        ? `Pick a ${flavor} word`
-        : (FLAVOR_PROMPTS[Math.floor(Math.random() * FLAVOR_PROMPTS.length)] ?? "expressive word");
+    const themeList = THEMES_BY_FLAVOR[flavor] ?? THEMES_BY_FLAVOR["all"] ?? [];
+    const chosenTheme =
+      themeList.length > 0
+        ? (themeList[Math.floor(Math.random() * themeList.length)] ?? "expressive word")
+        : "expressive word";
+    const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+
+    const recentHistory = Array.isArray(instance.state.history)
+      ? (instance.state.history as string[])
+      : [];
+    const avoidWords = [
+      "sonder",
+      "petrichor",
+      "serendipity",
+      "ephemeral",
+      "defenestration",
+      "mellifluous",
+      vocab.word,
+      ...recentHistory,
+    ]
+      .filter(Boolean)
+      .slice(0, 15)
+      .join(", ");
+
+    const userPrompt = `Pick a fresh, uncommon word.
+Category: ${chosenTheme}.
+Letter hint: starting with or containing '${randomLetter}'.
+Do NOT pick any of these words: ${avoidWords}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
     try {
       const output = await callAI({
         systemPrompt: SYSTEM_PROMPT,
         userPrompt,
-        maxTokens: 65,
+        maxTokens: 75,
+        temperature: 0.95,
         model,
         endpoint,
         apiKey,
@@ -112,13 +175,17 @@ export function AiVocabWidget({ instance, editMode, patchState }: WidgetProps) {
 
       const parsed = parseVocabOutput(output);
       setVocab(parsed);
-      patchState({ vocab: parsed });
+      const nextHistory = [
+        parsed.word,
+        ...recentHistory.filter((w) => w.toLowerCase() !== parsed.word.toLowerCase()),
+      ].slice(0, 20);
+      patchState({ vocab: parsed, history: nextHistory });
     } catch (err) {
       setErrorBanner(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
-  }, [flavor, model, endpoint, apiKey, patchState]);
+  }, [flavor, model, endpoint, apiKey, vocab.word, instance.state.history, patchState]);
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(
@@ -244,6 +311,7 @@ const aiVocabModule: WidgetModule = {
   },
   defaultState: {
     vocab: DEFAULT_SAMPLE,
+    history: [DEFAULT_SAMPLE.word],
   },
 };
 

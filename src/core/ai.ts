@@ -63,6 +63,7 @@ export interface AICallOptions {
   apiKey?: string | undefined;
   model?: string | undefined;
   endpoint?: string | undefined;
+  temperature?: number | undefined;
 }
 
 export async function resolveActiveAI(options?: Partial<AICallOptions>): Promise<{
@@ -169,7 +170,7 @@ export async function callAI(options: AICallOptions): Promise<string> {
         max_tokens: options.maxTokens,
         system: options.systemPrompt,
         messages: [{ role: "user", content: options.userPrompt }],
-        temperature: 0.7,
+        temperature: options.temperature ?? 0.7,
       }),
     });
 
@@ -218,7 +219,7 @@ export async function callAI(options: AICallOptions): Promise<string> {
         { role: "user", content: options.userPrompt },
       ],
       max_tokens: options.maxTokens,
-      temperature: 0.7,
+      temperature: options.temperature ?? 0.7,
     }),
   });
 
