@@ -26,11 +26,21 @@ const DEFAULT_SAMPLE: StretchItem = {
 };
 
 const FOCUS_QUERIES = [
-  "neck and shoulder tension relief",
-  "20-20-20 eye strain reset",
-  "wrist and forearm keyboard stretch",
-  "seated thoracic spine twist",
-  "chest opener and shoulder roll",
+  "neck and upper trapezius tension release",
+  "20-20-20 eye strain reset and focal distance stretch",
+  "wrist flexor and extensor stretch for keyboard fatigue",
+  "seated thoracic spine twist and rib cage expansion",
+  "doorway chest opener and shoulder blade squeeze",
+  "levator scapulae neck tilt and chin tuck reset",
+  "seated piriformis and glute chair stretch",
+  "diaphragmatic box breathing and pelvic tilt alignment",
+  "seated cat-cow spine wave and postural decompression",
+  "forearm prayer stretch with gentle finger extension",
+  "palming eye relaxation and warm dark palm rest",
+  "ankle alphabet circles and calf pump for circulation",
+  "suboccipital skull base self-massage and jaw release",
+  "seated hamstring reach and lower back decompression",
+  "shoulder clock rotations and collarbone wideners",
 ];
 
 function parseStretchOutput(raw: string): StretchItem {
@@ -80,16 +90,26 @@ export function AiStretchWidget({ instance, editMode, patchState }: WidgetProps)
     }
     setTimerRunning(false);
 
-    const query =
+    const recentHistory = Array.isArray(instance.state.history)
+      ? (instance.state.history as string[])
+      : [];
+    const avoidList = [stretch.name, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
+
+    const randomTarget =
       focusArea === "all"
         ? FOCUS_QUERIES[Math.floor(Math.random() * FOCUS_QUERIES.length)]
-        : `desk stretch for ${focusArea}`;
+        : `desk exercise for ${focusArea}`;
+
+    const userPrompt = `Target: ${randomTarget}.
+Do NOT repeat stretches like: ${avoidList}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
     try {
       const output = await callAI({
         systemPrompt: SYSTEM_PROMPT,
-        userPrompt: `Target: ${query}`,
-        maxTokens: 50,
+        userPrompt,
+        maxTokens: 60,
+        temperature: 0.9,
         model,
         endpoint,
         apiKey,
@@ -98,13 +118,17 @@ export function AiStretchWidget({ instance, editMode, patchState }: WidgetProps)
       const parsed = parseStretchOutput(output);
       setStretch(parsed);
       setSecondsLeft(parsed.time || 45);
-      patchState({ stretch: parsed });
+      const nextHistory = [
+        parsed.name,
+        ...recentHistory.filter((s) => s.toLowerCase() !== parsed.name.toLowerCase()),
+      ].slice(0, 20);
+      patchState({ stretch: parsed, history: nextHistory });
     } catch (err) {
       setErrorBanner(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
-  }, [focusArea, model, endpoint, apiKey, patchState]);
+  }, [focusArea, model, endpoint, apiKey, stretch.name, instance.state.history, patchState]);
 
   const toggleTimer = () => {
     if (timerRunning) {

@@ -13,16 +13,48 @@ Rules: Exactly 2 sentences. Max 45 words. Plain text only. No preamble.`;
 const CURIOSITY_TOPICS = [
   "Quantum Computing",
   "Why the sky is blue",
-  "Black holes",
+  "Black holes and event horizons",
   "How airplanes stay in the air",
-  "How the internet works",
-  "Photosynthesis",
-  "How our brain stores memories",
-  "DNA and genetics",
-  "Gravity",
-  "Rainbows",
-  "Volcanoes",
-  "Artificial Intelligence",
+  "How the internet routes a message across the globe",
+  "Photosynthesis and how plants eat sunshine",
+  "How our brain stores and recalls memories",
+  "DNA and the code of life",
+  "Why gravity bends space and time",
+  "How rainbows form in the mist",
+  "Volcanoes and tectonic plates",
+  "Neural networks and Artificial Intelligence",
+  "How noise-cancelling headphones work",
+  "Why the ocean has tides",
+  "How mirrors reflect light",
+  "Why stars twinkle at night",
+  "How vaccines teach our immune system",
+  "How optical fiber carries light under oceans",
+  "Why ice floats on water",
+  "How GPS satellites know your exact spot",
+  "How bats use echolocation in pitch black",
+  "Why lightning strikes before thunder is heard",
+  "How touchscreens detect your fingertip",
+  "How clocks and quartz crystals measure time",
+  "Why leaves change color in autumn",
+  "How solar panels convert light into electricity",
+  "How fireflies glow without getting hot",
+  "Why honey never spoils for thousands of years",
+  "How whales communicate across entire oceans",
+  "What causes the Northern Lights (Aurora)",
+  "How CRISPR gene editing works",
+  "Why we dream while sleeping",
+  "How cryptography keeps passwords secret",
+  "How carbon dating reveals the age of ancient fossils",
+];
+
+const ANALOGY_STYLES = [
+  "Use a playground or amusement park analogy.",
+  "Use a bustling kitchen, bakery, or recipe analogy.",
+  "Use toy building blocks or LEGO structures as the analogy.",
+  "Use a secret detective agency or message courier analogy.",
+  "Use a musical symphony or orchestra analogy.",
+  "Use an enchanted forest or animal kingdom analogy.",
+  "Use a library with magical books as the analogy.",
 ];
 
 const DEFAULT_SAMPLE = {
@@ -61,11 +93,25 @@ export function AiEli5Widget({ instance, editMode, patchState }: WidgetProps) {
       setLoading(true);
       setErrorBanner(null);
 
+      const recentHistory = Array.isArray(instance.state.history)
+        ? (instance.state.history as string[])
+        : [];
+      const avoidList = [topic, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
+      const randomStyle =
+        ANALOGY_STYLES[Math.floor(Math.random() * ANALOGY_STYLES.length)] ??
+        "Use a vivid everyday analogy.";
+
+      const userPrompt = `Topic to explain: ${cleanTopic}.
+Analogy angle: ${randomStyle}
+Do NOT repeat analogies or explanations for: ${avoidList}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
+
       try {
         const output = await callAI({
           systemPrompt: SYSTEM_PROMPT,
-          userPrompt: cleanTopic,
-          maxTokens: 70,
+          userPrompt,
+          maxTokens: 85,
+          temperature: 0.95,
           model,
           endpoint,
           apiKey,
@@ -73,7 +119,11 @@ export function AiEli5Widget({ instance, editMode, patchState }: WidgetProps) {
 
         setTopic(cleanTopic);
         setExplanation(output);
-        patchState({ topic: cleanTopic, explanation: output });
+        const nextHistory = [
+          cleanTopic,
+          ...recentHistory.filter((t) => t.toLowerCase() !== cleanTopic.toLowerCase()),
+        ].slice(0, 20);
+        patchState({ topic: cleanTopic, explanation: output, history: nextHistory });
         setShowInput(false);
       } catch (err) {
         setErrorBanner(err instanceof Error ? err.message : String(err));
@@ -81,7 +131,7 @@ export function AiEli5Widget({ instance, editMode, patchState }: WidgetProps) {
         setLoading(false);
       }
     },
-    [model, endpoint, apiKey, patchState],
+    [model, endpoint, apiKey, topic, instance.state.history, patchState],
   );
 
   const handleShuffle = () => {

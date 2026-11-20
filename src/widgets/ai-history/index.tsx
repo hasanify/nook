@@ -27,6 +27,16 @@ const DEFAULT_SAMPLE: HistoryEvent = {
     "Proved pinpoint automated lunar targeting, laying foundational groundwork for modern GPS and satellite navigation.",
 };
 
+const HISTORY_DOMAINS = [
+  "an astonishing scientific discovery, invention, or technological breakthrough",
+  "a courageous exploration, maritime voyage, or aviation pioneer milestone",
+  "a profound artistic, literary, architectural, or musical masterpiece debut",
+  "an unexpected unsung hero or grassroots social movement triumph",
+  "an ancient, classical, or medieval turning point that shaped world civilization",
+  "a curious cultural phenomenon, codebreaking achievement, or medical milestone",
+  "a pivotal philosophical treaty, peace accord, or diplomatic revolution",
+];
+
 function getFormattedDate(d = new Date()): { mmDd: string; display: string } {
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
@@ -72,11 +82,28 @@ export function AiHistoryWidget({ instance, editMode, patchState }: WidgetProps)
       setLoading(true);
       setErrorBanner(null);
 
+      const recentHistory = Array.isArray(instance.state.history)
+        ? (instance.state.history as string[])
+        : [];
+      const avoidYears = [historyItem.year, ...recentHistory]
+        .filter(Boolean)
+        .slice(0, 15)
+        .join(", ");
+      const randomDomain =
+        HISTORY_DOMAINS[Math.floor(Math.random() * HISTORY_DOMAINS.length)] ??
+        "historical milestone";
+
+      const userPrompt = `Date: ${targetDate}.
+Theme focus: Pick ${randomDomain}.
+Do NOT pick events from these years or previously used events: ${avoidYears}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
+
       try {
         const output = await callAI({
           systemPrompt: SYSTEM_PROMPT,
-          userPrompt: `Date: ${targetDate}`,
-          maxTokens: 75,
+          userPrompt,
+          maxTokens: 85,
+          temperature: 0.95,
           model,
           endpoint,
           apiKey,
@@ -85,14 +112,18 @@ export function AiHistoryWidget({ instance, editMode, patchState }: WidgetProps)
         const parsed = parseHistoryOutput(output);
         setHistoryItem(parsed);
         setDate(targetDate);
-        patchState({ date: targetDate, historyItem: parsed });
+        const nextHistory = [parsed.year, ...recentHistory.filter((y) => y !== parsed.year)].slice(
+          0,
+          20,
+        );
+        patchState({ date: targetDate, historyItem: parsed, history: nextHistory });
       } catch (err) {
         setErrorBanner(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
     },
-    [model, endpoint, apiKey, patchState],
+    [model, endpoint, apiKey, historyItem.year, instance.state.history, patchState],
   );
 
   const handleCopy = () => {

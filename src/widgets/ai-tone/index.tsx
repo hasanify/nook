@@ -61,10 +61,15 @@ export function AiToneWidget({ instance, editMode, patchState }: WidgetProps) {
     setErrorBanner(null);
 
     try {
+      const userPrompt = `Text to rewrite: "${textToTransform}"
+Rules: Expressive, idiomatic, and non-generic versions.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
+
       const output = await callAI({
         systemPrompt: SYSTEM_PROMPT,
-        userPrompt: textToTransform,
-        maxTokens: 120,
+        userPrompt,
+        maxTokens: 130,
+        temperature: 0.85,
         model,
         endpoint,
         apiKey,

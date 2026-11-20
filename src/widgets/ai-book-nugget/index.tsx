@@ -30,6 +30,42 @@ const CURATED_BOOKS = [
   "High Output Management by Andy Grove",
   "Principles by Ray Dalio",
   "Man's Search for Meaning by Viktor Frankl",
+  "The Courage to Be Disliked by Ichiro Kishimi",
+  "Range by David Epstein",
+  "Skin in the Game by Nassim Nicholas Taleb",
+  "Creativity, Inc. by Ed Catmull",
+  "The Almanack of Naval Ravikant by Eric Jorgenson",
+  "Show Your Work! by Austin Kleon",
+  "Meditations by Marcus Aurelius",
+  "The Beginning of Infinity by David Deutsch",
+  "Poor Charlie's Almanack by Charlie Munger",
+  "Make It Stick by Peter C. Brown",
+  "Never Split the Difference by Chris Voss",
+  "Four Thousand Weeks by Oliver Burkeman",
+  "The War of Art by Steven Pressfield",
+  "Drive by Daniel H. Pink",
+  "Influence by Robert Cialdini",
+  "Flow by Mihaly Csikszentmihalyi",
+  "Peak by Anders Ericsson",
+  "The Black Swan by Nassim Nicholas Taleb",
+  "Guns, Germs, and Steel by Jared Diamond",
+  "Sapiens by Yuval Noah Harari",
+  "Finite and Infinite Games by James P. Carse",
+  "Breath by James Nestor",
+  "Algorithms to Live By by Brian Christian",
+  "The Daily Stoic by Ryan Holiday",
+  "Atomic Focus by Matthew Syed",
+  "Mastery by Robert Greene",
+];
+
+const NUGGET_ANGLES = [
+  "one counter-intuitive rule that challenges conventional wisdom",
+  "a subtle psychological habit you can test immediately",
+  "a powerful mental model for decision-making under uncertainty",
+  "the most profound single lesson in the entire work",
+  "a ruthless prioritization tactic for daily focus",
+  "an unexpected biological or cognitive truth about performance",
+  "a mindset shift for resilience in the face of setbacks",
 ];
 
 const DEFAULT_SAMPLE: BookNugget = {
@@ -74,11 +110,24 @@ export function AiBookNuggetWidget({ instance, editMode, patchState }: WidgetPro
       setLoading(true);
       setErrorBanner(null);
 
+      const recentHistory = Array.isArray(instance.state.history)
+        ? (instance.state.history as string[])
+        : [];
+      const avoidList = [nugget.book, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
+      const randomAngle =
+        NUGGET_ANGLES[Math.floor(Math.random() * NUGGET_ANGLES.length)] ?? "key insight";
+
+      const userPrompt = `Book: ${cleanBook}.
+Angle: Highlight ${randomAngle}.
+Do NOT repeat takeaways from: ${avoidList}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
+
       try {
         const output = await callAI({
           systemPrompt: SYSTEM_PROMPT,
-          userPrompt: cleanBook,
-          maxTokens: 65,
+          userPrompt,
+          maxTokens: 85,
+          temperature: 0.95,
           model,
           endpoint,
           apiKey,
@@ -86,7 +135,11 @@ export function AiBookNuggetWidget({ instance, editMode, patchState }: WidgetPro
 
         const parsed = parseBookOutput(output);
         setNugget(parsed);
-        patchState({ nugget: parsed });
+        const nextHistory = [
+          parsed.book,
+          ...recentHistory.filter((b) => b.toLowerCase() !== parsed.book.toLowerCase()),
+        ].slice(0, 20);
+        patchState({ nugget: parsed, history: nextHistory });
         setShowInput(false);
       } catch (err) {
         setErrorBanner(err instanceof Error ? err.message : String(err));
@@ -94,7 +147,7 @@ export function AiBookNuggetWidget({ instance, editMode, patchState }: WidgetPro
         setLoading(false);
       }
     },
-    [model, endpoint, apiKey, patchState],
+    [model, endpoint, apiKey, nugget.book, instance.state.history, patchState],
   );
 
   const handleShuffle = () => {

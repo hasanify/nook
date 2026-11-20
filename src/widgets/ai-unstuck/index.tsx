@@ -81,10 +81,15 @@ export function AiUnstuckWidget({ instance, editMode, patchState }: WidgetProps)
     setErrorBanner(null);
 
     try {
+      const userPrompt = `Task: ${cleanTask}
+Angle: Break into hyper-concrete, ridiculously low-friction initial movements to shatter psychological inertia.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
+
       const output = await callAI({
         systemPrompt: SYSTEM_PROMPT,
-        userPrompt: `Task: ${cleanTask}`,
-        maxTokens: 70,
+        userPrompt,
+        maxTokens: 85,
+        temperature: 0.85,
         model,
         endpoint,
         apiKey,

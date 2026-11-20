@@ -26,13 +26,26 @@ const DEFAULT_SAMPLE: StoicInsight = {
 };
 
 const PROMPT_TOPICS = [
-  "Marcus Aurelius on resilience",
-  "Epictetus on things in our control",
-  "Seneca on the brevity of life",
-  "Musonius Rufus on daily discipline",
-  "Zeno of Citium on stillness",
-  "Marcus Aurelius on morning gratitude",
-  "Seneca on overcoming anxiety",
+  "Marcus Aurelius on inner citadel and unshakeable resilience",
+  "Epictetus on the dichotomy of control (what is up to us vs not)",
+  "Seneca on the shortness of life and valuing each hour",
+  "Musonius Rufus on training the body and mind through daily discipline",
+  "Zeno of Citium on flowing with nature and finding inner stillness",
+  "Marcus Aurelius on morning gratitude and dealing with difficult people",
+  "Seneca on conquering anxiety and unnecessary future dread",
+  "Epictetus on freedom through self-mastery and detachment from reputation",
+  "Chrysippus on rational judgment and mastering emotional impulses",
+  "Cato the Younger on unwavering integrity and acting without pretense",
+  "Seneca on voluntary discomfort to build profound fearlessness",
+  "Marcus Aurelius on memento mori: keeping life in deep perspective",
+  "Epictetus on transforming obstacles into fuel (amor fati)",
+  "Hierocles on expanding circles of empathy to all human beings",
+  "Seneca on anger as temporary madness and how to dissolve it instantly",
+  "Marcus Aurelius on the view from above: cosmic humility",
+  "Cleanthes on gratitude for the natural order and guiding reason",
+  "Musonius Rufus on eating simply and practicing mindful restraint",
+  "Epictetus on speaking only what is necessary and listening twice as much",
+  "Marcus Aurelius on returning to your center after being knocked off balance",
 ];
 
 function parseStoicOutput(raw: string): StoicInsight {
@@ -83,16 +96,29 @@ export function AiStoicWidget({ instance, editMode, patchState }: WidgetProps) {
       setLoading(true);
       setErrorBanner(null);
 
-      const userPrompt =
+      const recentHistory = Array.isArray(instance.state.history)
+        ? (instance.state.history as string[])
+        : [];
+      const avoidList = [insight.quote, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
+
+      const randomTopic =
+        PROMPT_TOPICS[Math.floor(Math.random() * PROMPT_TOPICS.length)] ?? "Stoic resilience";
+      const chosenFocus =
         topic || philosopher
-          ? `Focus: ${topic || philosopher}`
-          : (PROMPT_TOPICS[Math.floor(Math.random() * PROMPT_TOPICS.length)] ?? "Stoic resilience");
+          ? `Focus: ${topic || philosopher} (${randomTopic})`
+          : `Focus: ${randomTopic}`;
+
+      const userPrompt = `${chosenFocus}.
+Rules: Select a striking, memorable quote or lesser-known teaching.
+Do NOT quote or repeat: ${avoidList}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
       try {
         const output = await callAI({
           systemPrompt: SYSTEM_PROMPT,
           userPrompt,
-          maxTokens: 60,
+          maxTokens: 80,
+          temperature: 0.95,
           model,
           endpoint,
           apiKey,
@@ -101,14 +127,18 @@ export function AiStoicWidget({ instance, editMode, patchState }: WidgetProps) {
         const parsed = parseStoicOutput(output);
         setInsight(parsed);
         setCompleted(false);
-        patchState({ insight: parsed, completed: false });
+        const nextHistory = [
+          parsed.quote,
+          ...recentHistory.filter((q) => q.toLowerCase() !== parsed.quote.toLowerCase()),
+        ].slice(0, 20);
+        patchState({ insight: parsed, completed: false, history: nextHistory });
       } catch (err) {
         setErrorBanner(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
     },
-    [philosopher, model, endpoint, apiKey, patchState],
+    [philosopher, model, endpoint, apiKey, insight.quote, instance.state.history, patchState],
   );
 
   const handleCopy = () => {

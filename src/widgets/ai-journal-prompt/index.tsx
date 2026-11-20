@@ -12,6 +12,19 @@ Rules: Under 15 words. Open-ended. Focuses on gratitude, progress, or clarity.`;
 
 const DEFAULT_SAMPLE_PROMPT = "What is one small win today that you haven't celebrated yet?";
 
+const JOURNAL_THEMES = [
+  "uncovering an unexpressed gratitude or small hidden beauty",
+  "identifying mental clutter to release before tonight",
+  "celebrating a quiet victory or micro-progress nobody noticed",
+  "finding genuine clarity on a decision currently causing hesitation",
+  "noticing who energized or supported you recently and why",
+  "exploring an assumption you held today that might not be true",
+  "giving yourself permission to slow down or forgive a misstep",
+  "imagining the most peaceful version of tomorrow morning",
+  "reflecting on what energized your curious mind the most today",
+  "grounding yourself in physical sensations and simple presence",
+];
+
 function getTodayKey(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -57,14 +70,27 @@ export function AiJournalPromptWidget({ instance, editMode, patchState }: Widget
     setLoading(true);
     setErrorBanner(null);
 
-    const userPrompt =
-      focus && focus !== "any" ? `Theme: ${focus}` : "Theme: daily progress or gratitude";
+    const recentHistory = Array.isArray(instance.state.history)
+      ? (instance.state.history as string[])
+      : [];
+    const avoidList = [prompt, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
+    const randomTheme =
+      JOURNAL_THEMES[Math.floor(Math.random() * JOURNAL_THEMES.length)] ??
+      "daily progress or gratitude";
+
+    const chosenTheme = focus && focus !== "any" ? `${focus} (${randomTheme})` : randomTheme;
+
+    const userPrompt = `Theme: ${chosenTheme}.
+Make the question deeply insightful, novel, and concise.
+Do NOT use clichés or ask questions similar to: ${avoidList}.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
     try {
       const output = await callAI({
         systemPrompt: SYSTEM_PROMPT,
         userPrompt,
-        maxTokens: 35,
+        maxTokens: 50,
+        temperature: 0.95,
         model,
         endpoint,
         apiKey,
@@ -72,13 +98,17 @@ export function AiJournalPromptWidget({ instance, editMode, patchState }: Widget
 
       const clean = output.trim().replace(/^["'\d.\s]+|["'\s]+$/g, "");
       setPrompt(clean);
-      patchState({ prompt: clean });
+      const nextHistory = [
+        clean,
+        ...recentHistory.filter((p) => p.toLowerCase() !== clean.toLowerCase()),
+      ].slice(0, 20);
+      patchState({ prompt: clean, history: nextHistory });
     } catch (err) {
       setErrorBanner(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
-  }, [focus, model, endpoint, apiKey, patchState]);
+  }, [focus, model, endpoint, apiKey, prompt, instance.state.history, patchState]);
 
   const handleLogAnswer = (textToLog: string) => {
     const clean = textToLog.trim();

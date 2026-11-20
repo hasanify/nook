@@ -61,10 +61,15 @@ export function AiReplyWidget({ instance, editMode, patchState }: WidgetProps) {
     setErrorBanner(null);
 
     try {
+      const userPrompt = `Incoming message: "${text}"
+Rules: Provide fresh, natural, and distinct options.
+Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
+
       const output = await callAI({
         systemPrompt: SYSTEM_PROMPT,
-        userPrompt: text,
-        maxTokens: 90,
+        userPrompt,
+        maxTokens: 100,
+        temperature: 0.85,
         model,
         endpoint,
         apiKey,
