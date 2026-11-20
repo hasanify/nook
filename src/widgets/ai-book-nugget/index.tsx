@@ -203,7 +203,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
         {/* Book Header Tag */}
         <div className="flex items-center justify-between">
           <span className="truncate rounded-md bg-accent-500/10 px-2 py-0.5 text-[10px] font-medium text-accent-500">

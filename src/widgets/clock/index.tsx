@@ -50,7 +50,7 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
     >
-      <div className="flex h-full flex-col justify-between pt-1 pb-2 select-none">
+      <div className="flex min-h-full flex-col justify-between pt-1 pb-2 select-none">
         {/* Main Clock Display */}
         <div className="flex flex-col items-center justify-center pt-2">
           <div className="flex items-baseline gap-1 font-mono tracking-tight text-fg">

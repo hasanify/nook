@@ -156,7 +156,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-1.5 p-1 select-none">
+      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-none">
         {/* Search Bar */}
         <div className="relative">
           <input

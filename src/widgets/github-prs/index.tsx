@@ -223,7 +223,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-1.5 p-1 select-none">
+      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-none">
         {/* Filter Tabs */}
         <div className="flex items-center gap-1 border-b border-line/40 pb-1 text-[10px]">
           <button

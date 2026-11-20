@@ -194,7 +194,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex h-full flex-col gap-2 overflow-hidden select-none">
+      <div className="flex min-h-full flex-col gap-2 select-none">
         {/* Primary Deployment Domain Card */}
         {showDomain && primaryDomain && (
           <div className="flex items-center justify-between rounded-lg border border-line/60 bg-surface-raised/60 px-2.5 py-1.5 transition-colors hover:border-accent-500/40 hover:bg-surface-raised">

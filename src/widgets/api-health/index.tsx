@@ -164,7 +164,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-1.5 p-1 select-none">
+      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-none">
         {/* Endpoint URL Pill */}
         <div className="flex items-center justify-between gap-2">
           <span className="truncate font-mono text-[10px] text-fg-muted" title={endpoint}>

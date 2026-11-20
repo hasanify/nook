@@ -77,7 +77,7 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between">
+      <div className="flex min-h-full flex-1 flex-col justify-between">
         <textarea
           value={text}
           onChange={handleTextChange}

@@ -134,7 +134,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="Habits Tracker">
-      <div className="flex h-full flex-col justify-between p-3 select-none">
+      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line/40 pb-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">

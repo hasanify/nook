@@ -123,7 +123,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="World Clock">
-      <div className="flex h-full flex-col justify-between p-3 select-none">
+      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line/40 pb-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">

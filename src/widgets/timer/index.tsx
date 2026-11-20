@@ -379,7 +379,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
         ) : undefined
       }
     >
-      <div className="flex h-full flex-col justify-between select-none">
+      <div className="flex min-h-full flex-col justify-between select-none">
         {/* Mode Selector */}
         <div className="flex rounded-lg border border-line/50 bg-surface-raised/70 p-0.5 text-xs">
           {(["pomodoro", "countdown", "stopwatch"] as const).map((m) => (

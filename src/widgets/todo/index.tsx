@@ -69,7 +69,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
     >
-      <div className="flex h-full flex-col gap-2 overflow-hidden select-none">
+      <div className="flex min-h-full flex-col gap-2 select-none">
         {/* Add Task Input Form */}
         <form onSubmit={handleAddTodo} className="flex gap-1.5">
           <input

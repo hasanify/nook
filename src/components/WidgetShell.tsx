@@ -184,7 +184,7 @@ export function WidgetShell({
 
       {banner && <div className="px-3 pt-2">{banner}</div>}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto px-3.5 pt-2 pb-0 text-sm select-auto">
+      <div className="widget-content-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain px-3.5 pt-2 pb-2.5 text-sm select-auto [&>*]:h-auto [&>*]:min-h-full">
         {children}
       </div>
     </div>

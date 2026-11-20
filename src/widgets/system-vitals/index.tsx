@@ -98,7 +98,7 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="System Vitals">
-      <div className="flex h-full flex-col justify-between p-3 select-none">
+      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
         <div className="flex items-center justify-between border-b border-line/40 pb-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
             <span className="relative flex h-2 w-2">

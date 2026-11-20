@@ -206,7 +206,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
     >
-      <div className="flex h-full flex-col justify-between select-none">
+      <div className="flex min-h-full flex-col justify-between select-none">
         {error ? (
           <div className="flex h-full flex-col items-center justify-center p-3 text-center">
             <span className="text-xs text-error">{error}</span>

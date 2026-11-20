@@ -230,7 +230,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-1.5 p-1 select-text">
+      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-text">
         {/* Word Title & Pronunciation Header */}
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center justify-between">

@@ -280,7 +280,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex h-full flex-col gap-2.5 overflow-hidden select-none">
+      <div className="flex min-h-full flex-col gap-2.5 select-none">
         {/* Badges / Meta bar (Stars, Release, Forks, Issues) */}
         {((showStars && data?.stars !== undefined) ||
           (showForks && data?.forks !== undefined && data.forks > 0) ||

@@ -183,7 +183,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
         {/* Main Card Content */}
         <div className="flex flex-1 flex-col gap-1.5">
           <div className="flex items-center justify-between">
