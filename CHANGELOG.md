@@ -1,3 +1,15 @@
+# [0.23.0](https://github.com/hasanify/nook/compare/v0.22.0...v0.23.0) (2026-11-20)
+
+### Bug Fixes
+
+- **ai-vocab:** increase temperature and add dynamic themes, seeds, and repetition prevention ([477accb](https://github.com/hasanify/nook/commit/477accb81eff7f2263472ed0c4f9669598f017d3))
+- **context-menu:** fit all color swatches including custom picker on single line ([451231e](https://github.com/hasanify/nook/commit/451231ef0fe2c744d6b274b43be3dd57624e7572))
+- **ui:** replace checkmark unicode characters with inline svg check icon ([ca5fcaf](https://github.com/hasanify/nook/commit/ca5fcafda623314d977e61ab3b582d54af37ce92))
+
+### Features
+
+- **settings:** highlight active widget item using widget accent color ([ede3558](https://github.com/hasanify/nook/commit/ede3558cb7af3b0dd3022d6497f15be60c744530))
+
 # [0.22.0](https://github.com/hasanify/nook/compare/v0.21.0...v0.22.0) (2026-11-19)
 
 ### Features
