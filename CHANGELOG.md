@@ -1,3 +1,13 @@
+# [0.25.0](https://github.com/hasanify/nook/compare/v0.24.0...v0.25.0) (2026-11-20)
+
+### Bug Fixes
+
+- **core:** eliminate antivirus heuristic triggers by replacing cli subprocesses with native win32 apis ([a4e0800](https://github.com/hasanify/nook/commit/a4e0800839100dccf663287fd93f62f92f1799fc))
+
+### Features
+
+- **ui:** replace native select elements with searchable custom dropdown ([2c071d3](https://github.com/hasanify/nook/commit/2c071d33f346844f7d6d83c8665e6a08d1aa7b5a))
+
 # [0.24.0](https://github.com/hasanify/nook/compare/v0.23.0...v0.24.0) (2026-11-20)
 
 ### Features
