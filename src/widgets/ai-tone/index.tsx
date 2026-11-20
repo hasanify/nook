@@ -202,8 +202,25 @@ export function AiToneWidget({ instance, editMode, patchState }: WidgetProps) {
               <span className="rounded bg-accent-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
                 PRO • Professional
               </span>
-              <span className="text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
-                {copiedKey === "pro" ? "✓ Copied!" : "Click to copy"}
+              <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
+                {copiedKey === "pro" ? (
+                  <>
+                    <svg
+                      className="h-3 w-3 shrink-0 text-ok"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span className="font-medium text-ok">Copied!</span>
+                  </>
+                ) : (
+                  "Click to copy"
+                )}
               </span>
             </div>
             <p className="text-xs leading-relaxed text-fg select-text">
@@ -220,8 +237,25 @@ export function AiToneWidget({ instance, editMode, patchState }: WidgetProps) {
               <span className="rounded bg-ok/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
                 CON • Concise
               </span>
-              <span className="text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
-                {copiedKey === "con" ? "✓ Copied!" : "Click to copy"}
+              <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
+                {copiedKey === "con" ? (
+                  <>
+                    <svg
+                      className="h-3 w-3 shrink-0 text-ok"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span className="font-medium text-ok">Copied!</span>
+                  </>
+                ) : (
+                  "Click to copy"
+                )}
               </span>
             </div>
             <p className="text-xs leading-relaxed text-fg select-text">
@@ -238,8 +272,25 @@ export function AiToneWidget({ instance, editMode, patchState }: WidgetProps) {
               <span className="bg-amber-500/10 text-amber-500 rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold">
                 WRM • Warm
               </span>
-              <span className="text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
-                {copiedKey === "wrm" ? "✓ Copied!" : "Click to copy"}
+              <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
+                {copiedKey === "wrm" ? (
+                  <>
+                    <svg
+                      className="h-3 w-3 shrink-0 text-ok"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span className="font-medium text-ok">Copied!</span>
+                  </>
+                ) : (
+                  "Click to copy"
+                )}
               </span>
             </div>
             <p className="text-xs leading-relaxed text-fg select-text">

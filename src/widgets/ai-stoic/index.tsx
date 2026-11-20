@@ -224,9 +224,26 @@ export function AiStoicWidget({ instance, editMode, patchState }: WidgetProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className="cursor-pointer text-fg-muted hover:text-fg"
+            className="flex cursor-pointer items-center gap-1 text-fg-muted hover:text-fg"
           >
-            {copied ? "✓ Copied" : "Copy"}
+            {copied ? (
+              <>
+                <svg
+                  className="h-3 w-3 shrink-0 text-ok"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span className="text-ok">Copied</span>
+              </>
+            ) : (
+              "Copy"
+            )}
           </button>
         </div>
       </div>

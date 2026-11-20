@@ -155,9 +155,26 @@ export function AiEli5Widget({ instance, editMode, patchState }: WidgetProps) {
             <button
               type="button"
               onClick={handleCopy}
-              className="cursor-pointer text-[10px] text-fg-muted transition-colors hover:text-fg"
+              className="flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted transition-colors hover:text-fg"
             >
-              {copied ? "✓ Copied" : "Copy"}
+              {copied ? (
+                <>
+                  <svg
+                    className="h-3 w-3 shrink-0 text-ok"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span className="text-ok">Copied</span>
+                </>
+              ) : (
+                "Copy"
+              )}
             </button>
           </div>
 

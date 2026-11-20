@@ -187,7 +187,20 @@ export function AiJournalPromptWidget({ instance, editMode, patchState }: Widget
           {isAnsweredToday && !isEditing ? (
             <div className="flex flex-col gap-1 rounded-lg border border-ok/30 bg-ok/5 p-2">
               <div className="flex items-center justify-between text-[10px]">
-                <span className="font-semibold text-ok">✓ Logged today</span>
+                <span className="flex items-center gap-1 font-semibold text-ok">
+                  <svg
+                    className="h-3.5 w-3.5 shrink-0 text-ok"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span>Logged today</span>
+                </span>
                 <button
                   type="button"
                   onClick={() => {
