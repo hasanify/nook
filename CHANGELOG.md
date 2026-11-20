@@ -1,3 +1,9 @@
+# [0.28.0](https://github.com/hasanify/nook/compare/v0.27.0...v0.28.0) (2026-11-20)
+
+### Features
+
+- **bento:** add Done save button, infinite procedural cycling, edge-to-edge monitor coverage, and arrange all widgets ([e833773](https://github.com/hasanify/nook/commit/e833773df702e78270b66aac77df6053419a198c))
+
 # [0.27.0](https://github.com/hasanify/nook/compare/v0.26.2...v0.27.0) (2026-11-20)
 
 ### Features
