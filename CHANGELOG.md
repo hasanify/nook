@@ -1,3 +1,9 @@
+# [0.27.0](https://github.com/hasanify/nook/compare/v0.26.2...v0.27.0) (2026-11-20)
+
+### Features
+
+- **ai-widgets:** add dynamic seeding, elevated temperature, and repetition avoidance across all AI widgets ([c2a4a71](https://github.com/hasanify/nook/commit/c2a4a713fbcea9c3294583635abf83a4a3a47cc9))
+
 ## [0.26.2](https://github.com/hasanify/nook/compare/v0.26.1...v0.26.2) (2026-11-20)
 
 ### Bug Fixes
