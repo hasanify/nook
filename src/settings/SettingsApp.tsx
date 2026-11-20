@@ -23,6 +23,7 @@ import {
 import { listen } from "@tauri-apps/api/event";
 import { SettingsForm } from "../components/SettingsForm";
 import { Toggle } from "../components/Toggle";
+import { CustomSelect } from "../components/CustomSelect";
 import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
 import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
 import { WIDGET_PRESETS } from "../core/presets";
@@ -664,16 +665,17 @@ export function SettingsApp() {
                       Snap widget position and size during drag (0 for free movement)
                     </div>
                   </div>
-                  <select
+                  <CustomSelect<number>
                     value={config?.app?.gridSnap ?? 0}
-                    onChange={(e) => handleGridSnapChange(Number(e.target.value))}
-                    className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
-                  >
-                    <option value={0}>Disabled (Free Movement)</option>
-                    <option value={4}>4 px (Fine)</option>
-                    <option value={8}>8 px (Default)</option>
-                    <option value={16}>16 px (Coarse)</option>
-                  </select>
+                    onChange={(val) => handleGridSnapChange(val)}
+                    options={[
+                      { value: 0, label: "Disabled (Free Movement)" },
+                      { value: 4, label: "4 px (Fine)" },
+                      { value: 8, label: "8 px (Default)" },
+                      { value: 16, label: "16 px (Coarse)" },
+                    ]}
+                    className="w-48"
+                  />
                 </div>
               </div>
             </div>
@@ -966,17 +968,21 @@ export function SettingsApp() {
               <div className="mt-auto flex shrink-0 flex-col gap-1.5 border-t border-line/60 pt-3 pb-2">
                 <span className="text-[11px] font-medium text-fg-muted">Add new widget:</span>
                 <div className="flex items-center gap-1.5">
-                  <select
+                  <CustomSelect<string>
                     value={widgetToAdd}
-                    onChange={(e) => setWidgetToAdd(e.target.value)}
-                    className="h-8 min-w-0 flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
-                  >
-                    {Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => (
-                      <option key={kind} value={kind}>
-                        {mod.manifest.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setWidgetToAdd(val)}
+                    options={Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => ({
+                      value: kind,
+                      label: mod.manifest.name,
+                      description: mod.manifest.description,
+                    }))}
+                    placeholder="Choose widget..."
+                    searchPlaceholder="Search widgets..."
+                    searchable={true}
+                    direction="up"
+                    className="h-8 min-w-0 flex-1"
+                    buttonClassName="h-8"
+                  />
                   <button
                     type="button"
                     onClick={() => {
@@ -1400,19 +1406,21 @@ export function SettingsApp() {
 
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-medium text-fg-muted">Provider Priority:</span>
-                    <select
+                    <CustomSelect<string>
                       value={config?.app?.defaultAiProvider || "auto"}
-                      onChange={(e) => handlePreferredAiProviderChange(e.target.value)}
-                      className="cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
-                    >
-                      <option value="auto">Auto-detect (Recommended)</option>
-                      <option value="openai">OpenAI</option>
-                      <option value="openrouter">OpenRouter</option>
-                      <option value="gemini">Google Gemini</option>
-                      <option value="anthropic">Anthropic Claude</option>
-                      <option value="bedrock">AWS Bedrock</option>
-                      <option value="groq">Groq</option>
-                    </select>
+                      onChange={(val) => handlePreferredAiProviderChange(val)}
+                      options={[
+                        { value: "auto", label: "Auto-detect (Recommended)" },
+                        { value: "openai", label: "OpenAI" },
+                        { value: "openrouter", label: "OpenRouter" },
+                        { value: "gemini", label: "Google Gemini" },
+                        { value: "anthropic", label: "Anthropic Claude" },
+                        { value: "bedrock", label: "AWS Bedrock" },
+                        { value: "groq", label: "Groq" },
+                      ]}
+                      className="w-52"
+                      buttonClassName="py-1"
+                    />
                   </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { SettingsField } from "../core/types";
 import { Toggle } from "./Toggle";
+import { CustomSelect } from "./CustomSelect";
 import { listVercelProjects, type VercelProjectSummary } from "../core/ipc";
 
 interface SettingsFormProps {
@@ -206,18 +207,13 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
             )}
 
             {field.type === "select" && (
-              <select
+              <CustomSelect
                 id={`field-${field.key}`}
                 value={String(val ?? "")}
-                onChange={(e) => onChange(field.key, e.target.value)}
-                className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
-              >
-                {field.options?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(newVal) => onChange(field.key, newVal)}
+                options={field.options ?? []}
+                className="w-full"
+              />
             )}
 
             {field.type === "secret" && (
