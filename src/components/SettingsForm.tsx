@@ -209,7 +209,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
             {field.type === "select" && (
               <CustomSelect
                 id={`field-${field.key}`}
-                value={String(val ?? "")}
+                value={(val as string | number) ?? ""}
                 onChange={(newVal) => onChange(field.key, newVal)}
                 options={field.options ?? []}
                 className="w-full"

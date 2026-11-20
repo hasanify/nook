@@ -23,6 +23,12 @@ export interface CustomSelectProps<T extends string | number = string | number> 
   ariaLabel?: string;
 }
 
+function isOptionMatch<T>(optVal: T, targetVal: T): boolean {
+  if (optVal === targetVal) return true;
+  if (targetVal === undefined || targetVal === null || targetVal === "") return false;
+  return String(optVal) === String(targetVal);
+}
+
 export function CustomSelect<T extends string | number = string | number>({
   id,
   value,
@@ -58,7 +64,7 @@ export function CustomSelect<T extends string | number = string | number>({
 
   // Selected option lookup
   const selectedOption = useMemo(
-    () => options.find((opt) => opt.value === value),
+    () => options.find((opt) => isOptionMatch(opt.value, value)),
     [options, value],
   );
 
@@ -87,7 +93,7 @@ export function CustomSelect<T extends string | number = string | number>({
       setResolvedDirection(spaceBelow < 240 && spaceAbove > spaceBelow ? "up" : "down");
     }
 
-    const initialIdx = filteredOptions.findIndex((opt) => opt.value === value);
+    const initialIdx = filteredOptions.findIndex((opt) => isOptionMatch(opt.value, value));
     setHighlightedIndex(initialIdx >= 0 ? initialIdx : 0);
     setIsOpen(true);
   };
@@ -298,7 +304,7 @@ export function CustomSelect<T extends string | number = string | number>({
               <li className="px-3 py-2 text-center text-xs text-fg-muted">No matching options</li>
             ) : (
               filteredOptions.map((opt, idx) => {
-                const isSelected = opt.value === value;
+                const isSelected = isOptionMatch(opt.value, value);
                 const isHighlighted = idx === highlightedIndex;
 
                 return (
