@@ -79,6 +79,40 @@ pub fn remove_widget(app: AppHandle, id: String) -> Result<(), String> {
     Ok(())
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct DesktopWorkArea {
+    pub x: i32,
+    pub y: i32,
+    pub w: i32,
+    pub h: i32,
+    #[serde(rename = "scaleFactor")]
+    pub scale_factor: f64,
+}
+
+#[tauri::command]
+pub fn get_desktop_work_area(app: AppHandle) -> Result<DesktopWorkArea, String> {
+    let scale = app
+        .webview_windows()
+        .values()
+        .next()
+        .and_then(|w| w.scale_factor().ok())
+        .unwrap_or(1.0);
+
+    let (raw_left, raw_top, raw_w, raw_h) = windows::get_primary_work_area();
+    let x = (raw_left as f64 / scale).round() as i32;
+    let y = (raw_top as f64 / scale).round() as i32;
+    let w = (raw_w as f64 / scale).round() as i32;
+    let h = (raw_h as f64 / scale).round() as i32;
+
+    Ok(DesktopWorkArea {
+        x,
+        y,
+        w,
+        h,
+        scale_factor: scale,
+    })
+}
+
 #[tauri::command]
 pub fn set_bounds(
     app: AppHandle,
@@ -90,6 +124,11 @@ pub fn set_bounds(
     commit: Option<bool>,
 ) -> Result<(), String> {
     windows::update_widget_geometry(&app, &id, x, y, w, h, commit.unwrap_or(false))
+}
+
+#[tauri::command]
+pub fn batch_set_bounds(app: AppHandle, bounds: Vec<windows::WidgetBounds>) -> Result<(), String> {
+    windows::batch_update_widget_geometries(&app, bounds)
 }
 
 #[tauri::command]

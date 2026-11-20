@@ -36,6 +36,18 @@ export async function removeWidget(id: string): Promise<void> {
   return invoke<void>("remove_widget", { id });
 }
 
+export interface DesktopWorkArea {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  scaleFactor: number;
+}
+
+export async function getDesktopWorkArea(): Promise<DesktopWorkArea> {
+  return invoke<DesktopWorkArea>("get_desktop_work_area");
+}
+
 export async function setBounds(
   id: string,
   x: number,
@@ -45,6 +57,12 @@ export async function setBounds(
   commit?: boolean,
 ): Promise<void> {
   return invoke<void>("set_bounds", { id, x, y, w, h, commit });
+}
+
+export async function batchSetBounds(
+  bounds: Array<{ id: string; x: number; y: number; w: number; h: number }>,
+): Promise<void> {
+  return invoke<void>("batch_set_bounds", { bounds });
 }
 
 export async function getEditMode(): Promise<boolean> {

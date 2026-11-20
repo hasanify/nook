@@ -18,6 +18,7 @@ import {
   installUpdate,
   onUpdateDownloadProgress,
   showSettingsWindow,
+  getDesktopWorkArea,
   type UpdateCheckResult,
 } from "../core/ipc";
 import { listen } from "@tauri-apps/api/event";
@@ -504,9 +505,21 @@ export function SettingsApp() {
     const nextIdx = isBentoPreviewing ? (bentoLayoutIdx + 1) % BENTO_LAYOUT_NAMES.length : 0;
     setBentoLayoutIdx(nextIdx);
     setIsBentoPreviewing(true);
-    const screenW = window.screen.availWidth || 1920;
-    const screenH = window.screen.availHeight || 1080;
-    const layout = computeBentoLayout(originalBentoWidgetsRef.current, nextIdx, screenW, screenH);
+    let workArea = {
+      x: 0,
+      y: 0,
+      w: window.screen.availWidth || 1920,
+      h: window.screen.availHeight || 1080,
+    };
+    try {
+      const area = await getDesktopWorkArea();
+      if (area && area.w > 0 && area.h > 0) {
+        workArea = area;
+      }
+    } catch {
+      // Ignore
+    }
+    const layout = computeBentoLayout(originalBentoWidgetsRef.current, nextIdx, workArea);
     await applyBentoLayout(layout.widgets);
   }, [config, isBentoPreviewing, bentoLayoutIdx]);
 

@@ -9,10 +9,28 @@ import {
   openSettingsWindow,
   hideContextMenu,
   getAppConfig,
+  getDesktopWorkArea,
 } from "../core/ipc";
 import { WIDGET_COLOR_OPTIONS } from "./WidgetContextMenu";
 import { computeBentoLayout, applyBentoLayout, BENTO_LAYOUT_NAMES } from "../core/bento";
 import type { WidgetInstance } from "../core/types";
+
+async function getEffectiveWorkArea() {
+  try {
+    const area = await getDesktopWorkArea();
+    if (area && area.w > 0 && area.h > 0) {
+      return area;
+    }
+  } catch {
+    // Ignore
+  }
+  return {
+    x: 0,
+    y: 0,
+    w: window.screen.availWidth || 1920,
+    h: window.screen.availHeight || 1080,
+  };
+}
 
 export function ContextMenuApp() {
   const [widgetId, setWidgetId] = useState<string>(() => {
@@ -132,9 +150,8 @@ export function ContextMenuApp() {
       originalWidgetsRef.current = cfg.widgets;
       setIsBentoMode(true);
       setBentoIdx(0);
-      const screenW = window.screen.availWidth || 1920;
-      const screenH = window.screen.availHeight || 1080;
-      const layout = computeBentoLayout(cfg.widgets, 0, screenW, screenH);
+      const workArea = await getEffectiveWorkArea();
+      const layout = computeBentoLayout(cfg.widgets, 0, workArea);
       await applyBentoLayout(layout.widgets);
     } catch {
       // Ignore
@@ -145,9 +162,8 @@ export function ContextMenuApp() {
     if (!originalWidgetsRef.current) return;
     const nextIdx = (bentoIdx + 1) % BENTO_LAYOUT_NAMES.length;
     setBentoIdx(nextIdx);
-    const screenW = window.screen.availWidth || 1920;
-    const screenH = window.screen.availHeight || 1080;
-    const layout = computeBentoLayout(originalWidgetsRef.current, nextIdx, screenW, screenH);
+    const workArea = await getEffectiveWorkArea();
+    const layout = computeBentoLayout(originalWidgetsRef.current, nextIdx, workArea);
     await applyBentoLayout(layout.widgets);
   }, [bentoIdx]);
 

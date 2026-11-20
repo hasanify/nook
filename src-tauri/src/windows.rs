@@ -327,6 +327,90 @@ pub fn update_widget_geometry(
     Ok(())
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct WidgetBounds {
+    pub id: String,
+    pub x: i32,
+    pub y: i32,
+    pub w: i32,
+    pub h: i32,
+}
+
+pub fn batch_update_widget_geometries(
+    app: &AppHandle,
+    updates: Vec<WidgetBounds>,
+) -> Result<(), String> {
+    let state = app.state::<AppState>();
+    let config = state.config.get_config();
+    let mut updated_ids = Vec::new();
+
+    for update in &updates {
+        let label = format!("widget-{}", update.id);
+        let Some(window) = app.get_webview_window(&label) else {
+            continue;
+        };
+
+        let raw_hwnd = match window.hwnd() {
+            Ok(h) => h,
+            Err(_) => continue,
+        };
+        let hwnd = HWND(raw_hwnd.0);
+
+        let is_always_on_top = config
+            .widgets
+            .iter()
+            .find(|w| w.id == update.id)
+            .map(|w| w.always_on_top)
+            .unwrap_or(false);
+
+        let strategy = if is_always_on_top {
+            PinStrategy::Topmost
+        } else if pin::verify(hwnd) {
+            PinStrategy::AboveIcons
+        } else {
+            PinStrategy::BottomToplevel
+        };
+
+        let scale = window.scale_factor().unwrap_or(1.0);
+        let phys_x = (update.x as f64 * scale).round() as i32;
+        let phys_y = (update.y as f64 * scale).round() as i32;
+        let phys_w = (update.w as f64 * scale).round() as i32;
+        let phys_h = (update.h as f64 * scale).round() as i32;
+
+        let rect = RECT {
+            left: phys_x,
+            top: phys_y,
+            right: phys_x + phys_w,
+            bottom: phys_y + phys_h,
+        };
+
+        let _ = pin::set_bounds_screen(hwnd, rect, strategy);
+        updated_ids.push(update.id.clone());
+    }
+
+    if !updated_ids.is_empty() {
+        state.config.update_config(|cfg| {
+            for update in &updates {
+                if let Some(target) = cfg.widgets.iter_mut().find(|w| w.id == update.id) {
+                    target.rect = Rect {
+                        x: update.x,
+                        y: update.y,
+                        w: update.w,
+                        h: update.h,
+                    };
+                }
+            }
+        });
+
+        let _ = app.emit(
+            "config-changed",
+            serde_json::json!({ "ids": updated_ids, "app": false }),
+        );
+    }
+
+    Ok(())
+}
+
 pub fn sync_widget_effects(_app: &AppHandle, _widget_id: Option<&str>) {}
 
 pub fn handle_widget_move_end(app: &AppHandle, hwnd: HWND) {

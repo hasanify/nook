@@ -148,6 +148,8 @@ pub fn run() {
             commands::duplicate_widget,
             commands::remove_widget,
             commands::set_bounds,
+            commands::batch_set_bounds,
+            commands::get_desktop_work_area,
             commands::get_edit_mode,
             commands::set_edit_mode,
             commands::get_widget_edit_mode,
