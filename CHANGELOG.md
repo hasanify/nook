@@ -1,3 +1,9 @@
+## [0.26.2](https://github.com/hasanify/nook/compare/v0.26.1...v0.26.2) (2026-11-20)
+
+### Bug Fixes
+
+- **bento:** enforce edge-anchored layouts, height budgeting, and batch window updates ([5a5c6de](https://github.com/hasanify/nook/commit/5a5c6de93e80099db340838b5d7a99845c934b49))
+
 ## [0.26.1](https://github.com/hasanify/nook/compare/v0.26.0...v0.26.1) (2026-11-20)
 
 ### Bug Fixes
