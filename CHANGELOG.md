@@ -1,3 +1,9 @@
+# [0.26.0](https://github.com/hasanify/nook/compare/v0.25.0...v0.26.0) (2026-11-20)
+
+### Features
+
+- **widgets:** lock dragging to edit mode, add bento grid layout arranger, unify header icons, and enhance accent styling ([ffb390a](https://github.com/hasanify/nook/commit/ffb390af38f47c8682008754bf37c5e3ae47f733))
+
 # [0.25.0](https://github.com/hasanify/nook/compare/v0.24.0...v0.25.0) (2026-11-20)
 
 ### Bug Fixes
