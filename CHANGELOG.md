@@ -1,3 +1,9 @@
+# [0.35.0](https://github.com/hasanify/nook/compare/v0.34.0...v0.35.0) (2026-11-21)
+
+### Features
+
+- **bento:** add monitor coverage area selector and keep exclusive to settings ([eeee974](https://github.com/hasanify/nook/commit/eeee974f758a6bac484590fa8e3ccf62476a20f1))
+
 # [0.34.0](https://github.com/hasanify/nook/compare/v0.33.0...v0.34.0) (2026-11-21)
 
 ### Features
