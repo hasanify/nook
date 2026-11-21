@@ -647,12 +647,89 @@ pub async fn install_update(
 
     #[cfg(windows)]
     {
-        std::process::Command::new(&dest_path)
-            .spawn()
-            .map_err(|e| {
-                IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
-                format!("Failed to launch installer: {}", e)
-            })?;
+        use std::os::windows::ffi::OsStrExt;
+
+        // Try standard spawn first; if elevation is required (os error 740), invoke via ShellExecuteW "runas"
+        let spawn_res = std::process::Command::new(&dest_path).spawn();
+
+        let launched = match spawn_res {
+            Ok(_) => true,
+            Err(e) if e.raw_os_error() == Some(740) => {
+                extern "system" {
+                    fn ShellExecuteW(
+                        hwnd: isize,
+                        lpOperation: *const u16,
+                        lpFile: *const u16,
+                        lpParameters: *const u16,
+                        lpDirectory: *const u16,
+                        nShowCmd: i32,
+                    ) -> isize;
+                }
+
+                let wide_path: Vec<u16> =
+                    dest_path.as_os_str().encode_wide().chain(Some(0)).collect();
+                let wide_verb: Vec<u16> = std::ffi::OsStr::new("runas")
+                    .encode_wide()
+                    .chain(Some(0))
+                    .collect();
+
+                let ret = unsafe {
+                    ShellExecuteW(
+                        0,
+                        wide_verb.as_ptr(),
+                        wide_path.as_ptr(),
+                        std::ptr::null(),
+                        std::ptr::null(),
+                        1, // SW_SHOWNORMAL
+                    )
+                };
+
+                ret > 32
+            }
+            Err(e) => {
+                // Also attempt ShellExecuteW fallback for any other spawn failure on Windows
+                extern "system" {
+                    fn ShellExecuteW(
+                        hwnd: isize,
+                        lpOperation: *const u16,
+                        lpFile: *const u16,
+                        lpParameters: *const u16,
+                        lpDirectory: *const u16,
+                        nShowCmd: i32,
+                    ) -> isize;
+                }
+
+                let wide_path: Vec<u16> =
+                    dest_path.as_os_str().encode_wide().chain(Some(0)).collect();
+                let wide_verb: Vec<u16> = std::ffi::OsStr::new("runas")
+                    .encode_wide()
+                    .chain(Some(0))
+                    .collect();
+
+                let ret = unsafe {
+                    ShellExecuteW(
+                        0,
+                        wide_verb.as_ptr(),
+                        wide_path.as_ptr(),
+                        std::ptr::null(),
+                        std::ptr::null(),
+                        1,
+                    )
+                };
+
+                if ret > 32 {
+                    true
+                } else {
+                    IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+                    return Err(format!("Failed to launch installer: {}", e));
+                }
+            }
+        };
+
+        if !launched {
+            IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+            return Err("Failed to launch installer: Elevation was canceled or denied".to_string());
+        }
 
         tokio::time::sleep(std::time::Duration::from_millis(500)).await;
         app.exit(0);

@@ -806,7 +806,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-sub text-fg-muted">
-                      CheckIcon for updates in the background and prompt when ready to install
+                      Check for updates in the background and prompt when ready to install
                     </div>
                   </div>
                   <Toggle
@@ -2258,7 +2258,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-sub text-fg-muted">
-                      CheckIcon for updates in the background and prompt when ready to install
+                      Check for updates in the background and prompt when ready to install
                     </div>
                   </div>
                   <Toggle
