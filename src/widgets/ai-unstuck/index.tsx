@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { Check } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { callAI } from "../../core/ai";
@@ -185,16 +186,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                       : "border-line bg-surface hover:border-accent-500"
                   }`}
                 >
-                  {step.done && (
-                    <svg className="h-3 w-3 stroke-current" viewBox="0 0 24 24" fill="none">
-                      <polyline
-                        points="20 6 9 17 4 12"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
+                  {step.done && <Check className="h-3 w-3" weight="bold" />}
                 </div>
 
                 {/* Minute badge */}

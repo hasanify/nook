@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { ArrowClockwise, X } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { getListeningPorts, killPortProcess, type PortInfo } from "../../core/ipc";
@@ -137,16 +138,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
             title="Scan ports"
             className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
           >
-            <svg
-              className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
+            <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>
       }
@@ -170,9 +162,9 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute top-1/2 right-1.5 -translate-y-1/2 cursor-pointer text-[10px] text-fg-muted hover:text-fg"
+              className="absolute top-1/2 right-1.5 -translate-y-1/2 cursor-pointer text-fg-muted hover:text-fg"
             >
-              ✕
+              <X className="h-3 w-3" />
             </button>
           )}
         </div>

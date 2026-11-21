@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Lightning } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { getBatteryStatus, type BatteryStatus } from "../../core/ipc";
 import manifestJson from "./manifest.json";
@@ -109,9 +110,7 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
               {/* Charging Bolt Overlay */}
               {isCharging && (
                 <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow">
-                  <svg className="h-6 w-6 animate-pulse" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-6 10.49z" />
-                  </svg>
+                  <Lightning className="h-6 w-6 animate-pulse" weight="fill" />
                 </div>
               )}
             </div>

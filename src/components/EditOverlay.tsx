@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { DotsSixVertical } from "@phosphor-icons/react";
 import { WidgetIcon } from "./WidgetIcon";
 import type { Rect } from "../core/types";
 
@@ -341,17 +342,7 @@ export function EditOverlay({
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >
-          <svg
-            className="h-3 w-3"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          >
-            <line x1="10" y1="2" x2="2" y2="10" />
-            <line x1="10" y1="6" x2="6" y2="10" />
-          </svg>
+          <DotsSixVertical className="h-3 w-3" />
         </div>
       )}
     </>

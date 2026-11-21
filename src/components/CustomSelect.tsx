@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useId, useMemo, useCallback, type ReactNode } from "react";
+import { CaretDown, MagnifyingGlass, X, Check } from "@phosphor-icons/react";
 
 export interface SelectOption<T extends string | number = string | number> {
   value: T;
@@ -204,20 +205,12 @@ export function CustomSelect<T extends string | number = string | number>({
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
           <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         </span>
-        <svg
+        <CaretDown
           className={`h-3.5 w-3.5 shrink-0 text-fg-muted transition-transform duration-200 group-hover:text-fg ${
             isOpen ? "rotate-180" : ""
           }`}
-          viewBox="0 0 20 20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
           aria-hidden="true"
-        >
-          <path d="m6 8 4 4 4-4" />
-        </svg>
+        />
       </button>
 
       {/* Dropdown Menu */}
@@ -234,19 +227,7 @@ export function CustomSelect<T extends string | number = string | number>({
           {isSearchable && (
             <div className="relative border-b border-line/50 p-1 pb-1.5">
               <div className="flex items-center gap-1.5 rounded-lg border border-line/80 bg-surface-raised px-2 py-1 text-xs text-fg transition-colors focus-within:border-accent-500 focus-within:ring-1 focus-within:ring-accent-500/20">
-                <svg
-                  className="h-3 w-3 shrink-0 text-fg-muted"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
+                <MagnifyingGlass className="h-3 w-3 shrink-0 text-fg-muted" aria-hidden="true" />
                 <input
                   ref={(el) => {
                     searchInputRef.current = el;
@@ -275,18 +256,7 @@ export function CustomSelect<T extends string | number = string | number>({
                     className="cursor-pointer text-fg-muted hover:text-fg"
                     aria-label="Clear search"
                   >
-                    <svg
-                      className="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -334,18 +304,11 @@ export function CustomSelect<T extends string | number = string | number>({
                       </div>
                     </div>
                     {isSelected && (
-                      <svg
+                      <Check
                         className="h-3.5 w-3.5 shrink-0 text-accent-500"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                        weight="bold"
                         aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      />
                     )}
                   </li>
                 );

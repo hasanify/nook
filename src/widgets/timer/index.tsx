@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Minus, Plus, NotePencil, Play, Pause, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { timerSchedule, timerCancel } from "../../core/ipc";
 import manifestJson from "./manifest.json";
@@ -409,15 +410,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-line/60 bg-surface-raised/40 text-fg-muted transition-colors hover:border-accent-500/60 hover:text-accent-500 active:scale-95"
                   title="Decrease 1 min (Shift for 5 min)"
                 >
-                  <svg
-                    className="h-3 w-3"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  <Minus className="h-3 w-3" weight="bold" />
                 </button>
 
                 {isEditing ? (
@@ -448,17 +441,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                     title="Click to type custom duration"
                   >
                     <span>{display.main}</span>
-                    <svg
-                      className="h-3 w-3 text-fg-muted opacity-0 transition-opacity group-hover:opacity-70"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                    </svg>
+                    <NotePencil className="h-3 w-3 text-fg-muted opacity-0 transition-opacity group-hover:opacity-70" />
                   </div>
                 )}
 
@@ -468,16 +451,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-line/60 bg-surface-raised/40 text-fg-muted transition-colors hover:border-accent-500/60 hover:text-accent-500 active:scale-95"
                   title="Increase 1 min (Shift for 5 min)"
                 >
-                  <svg
-                    className="h-3 w-3"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  <Plus className="h-3 w-3" weight="bold" />
                 </button>
               </div>
 
@@ -548,10 +522,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               onClick={handlePause}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface-raised py-1.5 text-xs font-medium text-fg transition-colors hover:bg-surface"
             >
-              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="6" y="4" width="4" height="16" rx="1" />
-                <rect x="14" y="4" width="4" height="16" rx="1" />
-              </svg>
+              <Pause className="h-3 w-3" weight="fill" />
               <span>Pause</span>
             </button>
           ) : (
@@ -560,9 +531,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               onClick={handleStart}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-accent-500 py-1.5 text-xs font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
             >
-              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
+              <Play className="h-3 w-3" weight="fill" />
               <span>{status === "paused" ? "Resume" : "Start"}</span>
             </button>
           )}
@@ -596,18 +565,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
             className="flex items-center justify-center gap-1 rounded-lg border border-line bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-fg disabled:opacity-40"
             title="Reset timer"
           >
-            <svg
-              className="h-3 w-3"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
+            <ArrowCounterClockwise className="h-3 w-3" />
             <span>Reset</span>
           </button>
         </div>

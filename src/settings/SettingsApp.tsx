@@ -1,4 +1,26 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import {
+  Sparkle,
+  Globe,
+  Brain,
+  Cloud,
+  Lightning,
+  SlidersHorizontal,
+  SquaresFour,
+  User,
+  PaintBrush,
+  Info,
+  Desktop,
+  Sun,
+  Moon,
+  Check,
+  Plus,
+  Trash,
+  LockKey,
+  GithubLogo,
+  Triangle,
+  ArrowClockwise,
+} from "@phosphor-icons/react";
 import { useEditMode } from "../core/use-edit-mode";
 import {
   getAppConfig,
@@ -49,11 +71,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-proj-••••••••••••••••••••••••",
     desc: "Powers GPT-4o, GPT-4o-mini, and OpenAI models.",
     defaultModel: "gpt-4o-mini",
-    icon: (
-      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M22.28 9.82a5.98 5.98 0 0 0-.51-4.91 6.05 6.05 0 0 0-6.51-2.9 6.07 6.07 0 0 0-10.28 2.17 5.98 5.98 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9 5.98 5.98 0 0 0 4.5 2 6.06 6.06 0 0 0 5.77-4.2 5.99 5.99 0 0 0 4-2.9 6.06 6.06 0 0 0-.74-7.07zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.8.8 0 0 0 .39-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.59a4.5 4.5 0 0 1-4.49 4.49zm-9.66-4.12a4.47 4.47 0 0 1-.54-3.02l.14.09 4.79 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.65zM2.34 7.9a4.49 4.49 0 0 1 2.37-1.98V11.6a.77.77 0 0 0 .38.68l5.82 3.35-2.02 1.17a.08.08 0 0 1-.07 0l-4.83-2.79A4.5 4.5 0 0 1 2.34 7.87zm16.6 3.86L13.1 8.36 15.12 7.2a.08.08 0 0 1 .07 0l4.83 2.8a4.5 4.5 0 0 1-.68 8.1v-5.68a.79.79 0 0 0-.4-.66zm2.01-3.03l-.14-.08-4.78-2.78a.78.78 0 0 0-.78 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.79 2.76a.8.8 0 0 0-.39.68zm1.1-2.36l2.6-1.5 2.6 1.5v3l-2.6 1.5-2.6-1.5Z" />
-      </svg>
-    ),
+    icon: <Sparkle className="h-4 w-4 text-accent-500" weight="fill" />,
   },
   {
     id: "openrouter",
@@ -61,19 +79,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-or-v1-••••••••••••••••••••••••",
     desc: "Single unified API to 100+ AI models (Claude, Llama, DeepSeek, Gemini).",
     defaultModel: "openai/gpt-4o-mini",
-    icon: (
-      <svg
-        className="h-4 w-4 text-accent-500"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-      </svg>
-    ),
+    icon: <Globe className="h-4 w-4 text-accent-500" />,
   },
   {
     id: "gemini",
@@ -81,11 +87,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "AIzaSy••••••••••••••••••••••••",
     desc: "Generous free tier powering ultra-fast Gemini 2.0 Flash.",
     defaultModel: "gemini-2.0-flash",
-    icon: (
-      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
-      </svg>
-    ),
+    icon: <Sparkle className="h-4 w-4 text-accent-500" />,
   },
   {
     id: "anthropic",
@@ -93,11 +95,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-ant-api••••••••••••••••••••••••",
     desc: "Direct access to Claude 3.5 Sonnet and Claude 3.5 Haiku.",
     defaultModel: "claude-3-5-haiku-20241022",
-    icon: (
-      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M13.8 2.4L7.4 21.6h2.9l1.4-4.2h5.7l1.4 4.2h2.9L15.3 2.4h-1.5zm-.6 5.8l2 6.1h-4l2-6.1z" />
-      </svg>
-    ),
+    icon: <Brain className="h-4 w-4 text-accent-500" />,
   },
   {
     id: "bedrock",
@@ -105,11 +103,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "Bedrock API key or Bearer token...",
     desc: "AWS Bedrock runtime or custom OpenAI-compatible gateway.",
     defaultModel: "anthropic.claude-3-5-haiku-20241022-v1:0",
-    icon: (
-      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
-      </svg>
-    ),
+    icon: <Cloud className="h-4 w-4 text-accent-500" />,
   },
   {
     id: "groq",
@@ -117,11 +111,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "gsk_••••••••••••••••••••••••",
     desc: "Near-instant LPU inference powering Llama 3.3 70B.",
     defaultModel: "llama-3.3-70b-versatile",
-    icon: (
-      <svg className="h-4 w-4 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    ),
+    icon: <Lightning className="h-4 w-4 text-accent-500" weight="fill" />,
   },
 ];
 
@@ -593,18 +583,7 @@ export function SettingsApp() {
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          <svg
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
+          <SlidersHorizontal className="h-3.5 w-3.5" />
           <span>General</span>
         </button>
         <button
@@ -616,20 +595,7 @@ export function SettingsApp() {
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          <svg
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect width="7" height="7" x="3" y="3" rx="1.5" />
-            <rect width="7" height="7" x="14" y="3" rx="1.5" />
-            <rect width="7" height="7" x="14" y="14" rx="1.5" />
-            <rect width="7" height="7" x="3" y="14" rx="1.5" />
-          </svg>
+          <SquaresFour className="h-3.5 w-3.5" />
           <span>Widgets</span>
           <span className="py-0.2 rounded-full bg-surface-raised px-1.5 font-mono text-[10px] text-fg-muted">
             {config?.widgets.length ?? 0}
@@ -644,18 +610,7 @@ export function SettingsApp() {
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          <svg
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          <User className="h-3.5 w-3.5" />
           <span>Accounts</span>
         </button>
         <button
@@ -667,21 +622,7 @@ export function SettingsApp() {
               : "border-transparent text-fg-muted hover:text-fg"
           }`}
         >
-          <svg
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
-            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
-            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
-            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
-          </svg>
+          <PaintBrush className="h-3.5 w-3.5" />
           <span>Appearance</span>
         </button>
         <button
@@ -694,19 +635,7 @@ export function SettingsApp() {
           }`}
         >
           <div className="relative">
-            <svg
-              className="h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 16v-4" />
-              <path d="M12 8h.01" />
-            </svg>
+            <Info className="h-3.5 w-3.5" />
             {updateResult?.has_update && (
               <span className="absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full bg-accent-500" />
             )}
@@ -817,63 +746,17 @@ export function SettingsApp() {
                     {
                       id: "system" as const,
                       label: "System",
-                      icon: (
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <rect width="20" height="14" x="2" y="3" rx="2" />
-                          <line x1="8" y1="21" x2="16" y2="21" />
-                          <line x1="12" y1="17" x2="12" y2="21" />
-                        </svg>
-                      ),
+                      icon: <Desktop className="h-4 w-4" />,
                     },
                     {
                       id: "light" as const,
                       label: "Light",
-                      icon: (
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle cx="12" cy="12" r="4" />
-                          <path d="M12 2v2" />
-                          <path d="M12 20v2" />
-                          <path d="m4.93 4.93 1.41 1.41" />
-                          <path d="m17.66 17.66 1.41 1.41" />
-                          <path d="M2 12h2" />
-                          <path d="M20 12h2" />
-                          <path d="m6.34 17.66-1.41 1.41" />
-                          <path d="m19.07 4.93-1.41 1.41" />
-                        </svg>
-                      ),
+                      icon: <Sun className="h-4 w-4" />,
                     },
                     {
                       id: "dark" as const,
                       label: "Dark",
-                      icon: (
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                        </svg>
-                      ),
+                      icon: <Moon className="h-4 w-4" />,
                     },
                   ].map((item) => (
                     <button
@@ -978,17 +861,7 @@ export function SettingsApp() {
                                 : "border border-line/60 bg-surface-raised text-transparent group-hover:border-line"
                             }`}
                           >
-                            <svg
-                              className="h-2.5 w-2.5"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
+                            <Check className="h-2.5 w-2.5" weight="bold" />
                           </div>
                         </div>
                       </button>
@@ -1017,19 +890,7 @@ export function SettingsApp() {
                 <div className="flex flex-col gap-1.5 rounded-lg border border-line/60 bg-surface-raised/60 p-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-semibold text-fg">
-                      <svg
-                        className="h-3.5 w-3.5 text-accent-500"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect width="7" height="7" x="3" y="3" rx="1" />
-                        <rect width="7" height="7" x="3" y="14" rx="1" />
-                        <rect width="7" height="18" x="14" y="3" rx="1" />
-                      </svg>
+                      <SquaresFour className="h-3.5 w-3.5 text-accent-500" />
                       Bento Grid
                     </span>
                   </div>
@@ -1155,18 +1016,7 @@ export function SettingsApp() {
                     }}
                     className="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-lg bg-accent-500 px-2.5 text-xs font-semibold whitespace-nowrap text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <svg
-                      className="h-3.5 w-3.5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
+                    <Plus className="h-3.5 w-3.5" weight="bold" />
                     <span>Add</span>
                   </button>
                 </div>
@@ -1277,17 +1127,10 @@ export function SettingsApp() {
                             style={{ backgroundColor: c.hex }}
                           >
                             {isSelected && (
-                              <svg
+                              <Check
                                 className="pointer-events-none h-3.5 w-3.5 text-white drop-shadow-sm"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
+                                weight="bold"
+                              />
                             )}
                           </button>
                         );
@@ -1336,30 +1179,15 @@ export function SettingsApp() {
                               className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                             />
                             {isCustomSelected ? (
-                              <svg
+                              <Check
                                 className="pointer-events-none h-3.5 w-3.5 text-white drop-shadow-sm"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
+                                weight="bold"
+                              />
                             ) : (
-                              <svg
+                              <Plus
                                 className="pointer-events-none h-3 w-3 text-white drop-shadow-sm"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                              </svg>
+                                weight="bold"
+                              />
                             )}
                           </label>
                         );
@@ -1386,18 +1214,7 @@ export function SettingsApp() {
                       onClick={() => void removeWidget(selectedWidget.id)}
                       className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-error/40 bg-error/10 px-3 py-1.5 text-xs font-medium text-error transition-colors hover:bg-error/20"
                     >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      </svg>
+                      <Trash className="h-3.5 w-3.5" />
                       <span>Remove Widget</span>
                     </button>
                   </div>
@@ -1416,18 +1233,7 @@ export function SettingsApp() {
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex w-full flex-col gap-5 pb-4">
               <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
-                <svg
-                  className="h-4 w-4 shrink-0 text-accent-500"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
+                <LockKey className="h-4 w-4 shrink-0 text-accent-500" />
                 <span>
                   Tokens are stored securely in Windows Credential Manager and never logged or
                   exported.
@@ -1438,9 +1244,7 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4 text-fg" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                    </svg>
+                    <GithubLogo className="h-4 w-4 text-fg" weight="fill" />
                     <label htmlFor="gh-token-input" className="font-semibold text-fg">
                       GitHub Personal Access Token
                     </label>
@@ -1496,9 +1300,7 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <svg className="h-3.5 w-3.5 text-fg" viewBox="0 0 76 65" fill="currentColor">
-                      <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
-                    </svg>
+                    <Triangle className="h-3.5 w-3.5 text-fg" weight="fill" />
                     <label htmlFor="vercel-token-input" className="font-semibold text-fg">
                       Vercel API Token
                     </label>
@@ -1554,9 +1356,7 @@ export function SettingsApp() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-500/15 text-accent-500">
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
-                      </svg>
+                      <Sparkle className="h-4 w-4" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-fg">AI Models & API Keys</h3>
@@ -1833,20 +1633,9 @@ export function SettingsApp() {
                     onClick={() => void handleCheckUpdates()}
                     className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 py-1.5 font-medium text-fg shadow-xs transition-colors hover:border-accent-500 hover:text-accent-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <svg
+                    <ArrowClockwise
                       className={`h-3.5 w-3.5 ${checkingUpdate ? "animate-spin" : ""}`}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21.5 2v6h-6" />
-                      <path d="M2.5 22v-6h6" />
-                      <path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8" />
-                      <path d="M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16" />
-                    </svg>
+                    />
                     <span>{checkingUpdate ? "Checking..." : "Check for Updates"}</span>
                   </button>
                 </div>
@@ -1875,17 +1664,7 @@ export function SettingsApp() {
 
                 {updateResult && !updateResult.has_update && !updateError && (
                   <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-[11px] text-ok">
-                    <svg
-                      className="h-3.5 w-3.5 shrink-0 text-ok"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <Check className="h-3.5 w-3.5 shrink-0 text-ok" weight="bold" />
                     <span>You are running the latest version of Nook.</span>
                   </div>
                 )}

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { ArrowClockwise, Check, Flame } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { callAI } from "../../core/ai";
@@ -154,7 +155,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             }`}
             title={`${streak} day streak`}
           >
-            <span>🔥</span>
+            <Flame className="h-3 w-3 text-amber-500" weight="fill" />
             <span>{streak}</span>
           </div>
 
@@ -165,16 +166,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             title="New prompt"
             className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
           >
-            <svg
-              className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
+            <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>
       }
@@ -205,17 +197,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             <div className="flex flex-col gap-1 rounded-lg border border-ok/30 bg-ok/5 p-2">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="flex items-center gap-1 font-semibold text-ok">
-                  <svg
-                    className="h-3.5 w-3.5 shrink-0 text-ok"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <Check className="h-3.5 w-3.5 shrink-0 text-ok" weight="bold" />
                   <span>Logged today</span>
                 </span>
                 <button

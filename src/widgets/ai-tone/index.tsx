@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { CircleNotch, Sparkle, Check } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { callAI } from "../../core/ai";
@@ -142,34 +143,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             >
               {loading ? (
                 <>
-                  <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
+                  <CircleNotch className="h-3 w-3 animate-spin" />
                   <span>Polishing…</span>
                 </>
               ) : (
                 <>
-                  <svg
-                    className="h-3 w-3"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
-                  </svg>
+                  <Sparkle className="h-3 w-3" weight="fill" />
                   <span>Polish</span>
                 </>
               )}
@@ -191,17 +170,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
                 {copiedKey === "pro" ? (
                   <>
-                    <svg
-                      className="h-3 w-3 shrink-0 text-ok"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -226,17 +195,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
                 {copiedKey === "con" ? (
                   <>
-                    <svg
-                      className="h-3 w-3 shrink-0 text-ok"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -261,17 +220,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
                 {copiedKey === "wrm" ? (
                   <>
-                    <svg
-                      className="h-3 w-3 shrink-0 text-ok"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (

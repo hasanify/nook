@@ -1,4 +1,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+  ArrowSquareOut,
+  ArrowClockwise,
+  Star,
+  GitFork,
+  WarningCircle,
+  Tag,
+} from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { StatusDot } from "../../components/StatusDot";
 import { Banner } from "../../components/Banner";
@@ -228,19 +236,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               title={`Open ${repo} on GitHub`}
               aria-label={`Open ${repo} on GitHub`}
             >
-              <svg
-                className="h-3 w-3"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
+              <ArrowSquareOut className="h-3 w-3" />
             </button>
             <button
               type="button"
@@ -253,18 +249,9 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               title={isRefreshing ? "Refreshing..." : "Refresh repository data"}
               aria-label="Refresh repository data"
             >
-              <svg
+              <ArrowClockwise
                 className={`h-3 w-3 ${isRefreshing ? "animate-spin text-accent-500" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                <polyline points="21 3 21 9 15 9" />
-              </svg>
+              />
             </button>
           </div>
         ) : undefined
@@ -294,9 +281,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="GitHub Stars"
               >
-                <svg className="h-3 w-3 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+                <Star className="h-3 w-3 text-amber-500" weight="fill" />
                 <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
                   {formatCount(data.stars)}
                 </span>
@@ -310,19 +295,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="Forks"
               >
-                <svg
-                  className="h-3 w-3"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="18" r="3" />
-                  <circle cx="6" cy="6" r="3" />
-                  <circle cx="18" cy="6" r="3" />
-                  <path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9" />
-                  <path d="M12 12v3" />
-                </svg>
+                <GitFork className="h-3 w-3" />
                 <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
                   {formatCount(data.forks)}
                 </span>
@@ -336,16 +309,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="Open Issues"
               >
-                <svg
-                  className="h-3 w-3 text-emerald-500"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="1" fill="currentColor" />
-                </svg>
+                <WarningCircle className="h-3 w-3 text-emerald-500" />
                 <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
                   {formatCount(data.open_issues)} issues
                 </span>
@@ -359,16 +323,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 className="group flex max-w-[140px] cursor-pointer items-center gap-1 truncate rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 font-medium text-accent-500 transition-colors hover:bg-accent-500/20"
                 title={`Latest Release: ${data.latest_release.name || data.latest_release.tag_name}`}
               >
-                <svg
-                  className="h-3 w-3 shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                  <line x1="7" y1="7" x2="7.01" y2="7" />
-                </svg>
+                <Tag className="h-3 w-3 shrink-0" />
                 <span className="truncate font-mono text-[10px]">
                   {data.latest_release.tag_name}
                 </span>

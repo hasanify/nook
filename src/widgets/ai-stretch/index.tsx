@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { ArrowClockwise } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { callAI } from "../../core/ai";
@@ -184,16 +185,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           title="New stretch"
           className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
         >
-          <svg
-            className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <polyline points="23 4 23 10 17 10" />
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-          </svg>
+          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
         </button>
       }
       banner={

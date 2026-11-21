@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Sun, Moon, Cloud, CloudRain, CloudSnow, Drop, Wind } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { useProvider } from "../../core/use-provider";
 import manifestJson from "./manifest.json";
@@ -65,100 +66,25 @@ function getWeatherDescription(code: number): string {
 function WeatherIcon({ code, isDay }: { code: number; isDay: number }) {
   if (code === 0) {
     return isDay ? (
-      <svg
-        className="h-9 w-9 text-amber-500"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <circle cx="12" cy="12" r="5" />
-        <line x1="12" y1="1" x2="12" y2="3" />
-        <line x1="12" y1="21" x2="12" y2="23" />
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-        <line x1="1" y1="12" x2="3" y2="12" />
-        <line x1="21" y1="12" x2="23" y2="12" />
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-      </svg>
+      <Sun className="h-9 w-9 text-amber-500" weight="fill" />
     ) : (
-      <svg
-        className="text-indigo-400 h-9 w-9"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-      </svg>
+      <Moon className="text-indigo-400 h-9 w-9" weight="fill" />
     );
   }
 
   if (code >= 1 && code <= 3) {
-    return (
-      <svg
-        className="h-9 w-9 text-neutral-400"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
-      </svg>
-    );
+    return <Cloud className="h-9 w-9 text-neutral-400" weight="fill" />;
   }
 
   if ((code >= 51 && code <= 65) || (code >= 80 && code <= 82)) {
-    return (
-      <svg
-        className="h-9 w-9 text-accent-500"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <line x1="16" y1="13" x2="16" y2="21" />
-        <line x1="8" y1="13" x2="8" y2="21" />
-        <line x1="12" y1="15" x2="12" y2="23" />
-        <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" />
-      </svg>
-    );
+    return <CloudRain className="h-9 w-9 text-accent-500" weight="fill" />;
   }
 
   if (code >= 71 && code <= 75) {
-    return (
-      <svg
-        className="text-sky-300 h-9 w-9"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25" />
-        <line x1="8" y1="16" x2="8.01" y2="16" />
-        <line x1="8" y1="20" x2="8.01" y2="20" />
-        <line x1="12" y1="18" x2="12.01" y2="18" />
-        <line x1="12" y1="22" x2="12.01" y2="22" />
-        <line x1="16" y1="16" x2="16.01" y2="16" />
-        <line x1="16" y1="20" x2="16.01" y2="20" />
-      </svg>
-    );
+    return <CloudSnow className="text-sky-300 h-9 w-9" weight="fill" />;
   }
 
-  return (
-    <svg
-      className="h-9 w-9 text-amber-500"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <circle cx="12" cy="12" r="5" />
-      <line x1="12" y1="1" x2="12" y2="3" />
-      <line x1="12" y1="21" x2="12" y2="23" />
-    </svg>
-  );
+  return <Sun className="h-9 w-9 text-amber-500" weight="fill" />;
 }
 
 export function WeatherWidget({ instance, editMode }: WidgetProps) {
@@ -250,29 +176,13 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
             {/* Atmosphere Details Pill */}
             <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line/40 pt-2 pb-2 text-[11px]">
               <div className="flex items-center gap-1.5 text-fg-muted">
-                <svg
-                  className="h-3 w-3"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-                </svg>
+                <Drop className="h-3.5 w-3.5 shrink-0 text-accent-500" weight="fill" />
                 <span>Humidity:</span>
                 <span className="font-mono font-medium text-fg">{weather.humidity}%</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-fg-muted">
-                <svg
-                  className="h-3 w-3"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
-                </svg>
+                <Wind className="h-3.5 w-3.5 shrink-0 text-accent-500" />
                 <span>Wind:</span>
                 <span className="font-mono font-medium text-fg">
                   {windSpeed} {windUnit}

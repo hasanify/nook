@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { ArrowClockwise, ArrowUp, ChatCircle } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -242,9 +243,10 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
               onClick={() => void fetchFeed()}
               disabled={loading}
               title="Refresh stories"
-              className="cursor-pointer text-[11px] font-medium text-accent-500 transition-colors hover:text-accent-400 disabled:opacity-40"
+              className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-accent-500 transition-colors hover:text-accent-400 disabled:opacity-40"
             >
-              {loading ? "…" : "↻ Refresh"}
+              <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
             </button>
           </div>
         </div>
@@ -278,15 +280,19 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                     <span className="py-0.2 max-w-[110px] truncate rounded bg-surface-raised px-1 font-mono text-[9px] text-fg-muted/90">
                       {story.domain}
                     </span>
-                    <span className="font-mono font-medium text-amber-400">▲ {story.score}</span>
+                    <span className="flex items-center gap-0.5 font-mono font-medium text-amber-400">
+                      <ArrowUp className="h-2.5 w-2.5" weight="bold" />
+                      {story.score}
+                    </span>
                     <span>by {story.by}</span>
                     <button
                       type="button"
                       onClick={(e) => handleOpenComments(e, story.id)}
                       title="View discussion on HN"
-                      className="ml-auto flex cursor-pointer items-center gap-0.5 font-mono transition-colors hover:text-accent-500"
+                      className="ml-auto flex cursor-pointer items-center gap-1 font-mono transition-colors hover:text-accent-500"
                     >
-                      💬 {story.comments}
+                      <ChatCircle className="h-3 w-3" />
+                      <span>{story.comments}</span>
                     </button>
                   </div>
                 </div>

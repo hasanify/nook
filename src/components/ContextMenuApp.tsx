@@ -1,5 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
+import {
+  SquaresFour,
+  ArrowsClockwise,
+  Check,
+  NotePencil,
+  ArrowsInCardinal,
+  ArrowCounterClockwise,
+  Gear,
+  Trash,
+} from "@phosphor-icons/react";
 import { useInstance } from "../core/use-instance";
 import { useEditMode } from "../core/use-edit-mode";
 import { getWidgetModule } from "../widgets/registry";
@@ -210,19 +220,7 @@ export function ContextMenuApp() {
           <div className="flex flex-col gap-2 p-1 text-xs">
             <div className="flex items-center justify-between border-b border-line/50 px-1 pb-1.5">
               <div className="flex items-center gap-1.5 font-semibold text-accent-500">
-                <svg
-                  className="h-4 w-4 shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="7" height="7" x="3" y="3" rx="1" />
-                  <rect width="7" height="7" x="3" y="14" rx="1" />
-                  <rect width="7" height="18" x="14" y="3" rx="1" />
-                </svg>
+                <SquaresFour className="h-4 w-4 shrink-0" />
                 <span>Bento Arranger</span>
               </div>
             </div>
@@ -232,20 +230,7 @@ export function ContextMenuApp() {
               onClick={handleCycleBento}
               className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
             >
-              <svg
-                className="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                <path d="M16 21h5v-5" />
-              </svg>
+              <ArrowsClockwise className="h-3.5 w-3.5" />
               <span>Cycle Layout</span>
             </button>
 
@@ -279,33 +264,12 @@ export function ContextMenuApp() {
             >
               {editMode ? (
                 <>
-                  <svg
-                    className="h-3.5 w-3.5 shrink-0 text-accent-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <Check className="h-3.5 w-3.5 shrink-0 text-accent-500" weight="bold" />
                   <span className="font-medium text-accent-500">Done Editing</span>
                 </>
               ) : (
                 <>
-                  <svg
-                    className="h-3.5 w-3.5 shrink-0 text-fg-muted"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
+                  <NotePencil className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
                   <span>Edit Widget</span>
                   <span className="ml-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
                 </>
@@ -320,18 +284,7 @@ export function ContextMenuApp() {
                 className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
               >
                 <div className="flex items-center gap-2">
-                  <svg
-                    className="h-3.5 w-3.5 shrink-0 text-fg-muted"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 14h6m0 0v6m0-6L3 21" />
-                    <path d="M20 10h-6m0 0V4m0 6l7-7" />
-                  </svg>
+                  <ArrowsInCardinal className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
                   <span>Fit Size</span>
                 </div>
                 <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
@@ -343,18 +296,7 @@ export function ContextMenuApp() {
                   className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
                 >
                   <div className="flex items-center gap-2">
-                    <svg
-                      className="h-3.5 w-3.5 shrink-0 text-fg-muted"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                      <path d="M3 3v5h5" />
-                    </svg>
+                    <ArrowCounterClockwise className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
                     <span>Reset Default</span>
                   </div>
                   <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
@@ -370,19 +312,7 @@ export function ContextMenuApp() {
                 className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
               >
                 <div className="flex items-center gap-2">
-                  <svg
-                    className="h-3.5 w-3.5 shrink-0 text-accent-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect width="7" height="7" x="3" y="3" rx="1" />
-                    <rect width="7" height="7" x="3" y="14" rx="1" />
-                    <rect width="7" height="18" x="14" y="3" rx="1" />
-                  </svg>
+                  <SquaresFour className="h-3.5 w-3.5 shrink-0 text-accent-500" />
                   <span>Arrange Bento Grid...</span>
                 </div>
                 <span className="font-mono text-[9px] text-fg-muted/60">Auto</span>
@@ -466,18 +396,7 @@ export function ContextMenuApp() {
               }}
               className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
             >
-              <svg
-                className="h-3.5 w-3.5 shrink-0 text-fg-muted"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
+              <Gear className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
               <span>Settings...</span>
             </button>
 
@@ -492,20 +411,7 @@ export function ContextMenuApp() {
               }}
               className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-error/10 hover:text-error dark:hover:bg-error/20"
             >
-              <svg
-                className="h-3.5 w-3.5 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
+              <Trash className="h-3.5 w-3.5 shrink-0" />
               <span className="font-medium">Delete Widget</span>
             </button>
           </>

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import { Banner } from "../../components/Banner";
 import { callAI } from "../../core/ai";
@@ -172,16 +173,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           title="New reflection"
           className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
         >
-          <svg
-            className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <polyline points="23 4 23 10 17 10" />
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-          </svg>
+          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
         </button>
       }
       banner={
@@ -215,11 +207,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           }`}
         >
           <div className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border border-line bg-surface">
-            {completed && (
-              <svg className="h-2.5 w-2.5 text-ok" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg>
-            )}
+            {completed && <Check className="h-2.5 w-2.5 text-ok" weight="bold" />}
           </div>
           <div className="flex flex-1 flex-col gap-0.5">
             <span
@@ -245,21 +233,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           >
             {copied ? (
               <>
-                <svg
-                  className="h-3 w-3 shrink-0 text-ok"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
                 <span className="text-ok">Copied</span>
               </>
             ) : (
-              "Copy"
+              <>
+                <Copy className="h-3 w-3" />
+                <span>Copy</span>
+              </>
             )}
           </button>
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Globe, Sun, Moon } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import manifestJson from "./manifest.json";
 import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
@@ -127,7 +128,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line/40 pb-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span className="text-sm">🌐</span>
+            <Globe className="h-3.5 w-3.5 text-accent-500" />
             World Clocks
           </div>
           <span className="font-mono text-[10px] text-fg-muted">
@@ -152,11 +153,17 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
               >
                 {/* Left: Flag, City, Offset */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">{city.flag}</span>
+                  <span className="flex items-center text-sm">
+                    {city.flag === "🌐" ? <Globe className="h-4 w-4 text-fg-muted" /> : city.flag}
+                  </span>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-semibold text-fg">{city.name}</span>
-                      <span className="text-[10px]">{isDay ? "☀️" : "🌙"}</span>
+                      {isDay ? (
+                        <Sun className="h-3 w-3 text-amber-500" weight="fill" />
+                      ) : (
+                        <Moon className="text-indigo-400 h-3 w-3" weight="fill" />
+                      )}
                     </div>
                     <div className="flex items-center gap-1 text-[10px] text-fg-muted">
                       <span>{dayDiff}</span>
@@ -191,7 +198,10 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
           <span>{DEFAULT_CITIES.length} timezones active</span>
-          <span>☀️ Day / 🌙 Night</span>
+          <span className="flex items-center gap-1">
+            <Sun className="h-2.5 w-2.5 text-amber-500" weight="fill" /> Day /{" "}
+            <Moon className="text-indigo-400 h-2.5 w-2.5" weight="fill" /> Night
+          </span>
         </div>
       </div>
     </WidgetShell>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Check, DotsSixVertical } from "@phosphor-icons/react";
 import { useInstance } from "../core/use-instance";
 import { useEditMode } from "../core/use-edit-mode";
 import {
@@ -305,17 +306,7 @@ export function TestWidget({ id }: TestWidgetProps) {
             {isAttached ? (
               <>
                 <span>Attached to Host</span>
-                <svg
-                  className="h-3 w-3 text-ok"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check className="h-3 w-3 text-ok" weight="bold" />
               </>
             ) : (
               "Top-level"
@@ -370,7 +361,7 @@ export function TestWidget({ id }: TestWidgetProps) {
           className="absolute right-0 bottom-0 flex h-5 w-5 cursor-se-resize items-end justify-end p-1 text-[11px] text-accent-500 hover:scale-110"
           onPointerDown={handleResizeStart}
         >
-          ◢
+          <DotsSixVertical className="h-3 w-3" />
         </div>
       )}
 

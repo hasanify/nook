@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Lightning, Flame, X } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import manifestJson from "./manifest.json";
 import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
@@ -138,7 +139,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line/40 pb-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span>⚡</span>
+            <Lightning className="h-3.5 w-3.5 text-accent-500" weight="fill" />
             <span>Habits</span>
           </div>
 
@@ -198,8 +199,9 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                   <div className="mb-1.5 flex items-center justify-between">
                     <span className="truncate text-xs font-semibold text-fg">{habit.title}</span>
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-400">
-                        🔥 {streak}
+                      <span className="flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-400">
+                        <Flame className="h-3 w-3 text-amber-500" weight="fill" />
+                        <span>{streak}</span>
                       </span>
                       <button
                         type="button"
@@ -207,7 +209,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                         title="Delete habit"
                         className="cursor-pointer text-xs text-fg-muted/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-error"
                       >
-                        ✕
+                        <X className="h-3 w-3" />
                       </button>
                     </div>
                   </div>

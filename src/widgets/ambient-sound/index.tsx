@@ -1,4 +1,15 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, type ComponentType } from "react";
+import {
+  Play,
+  Pause,
+  SpeakerLow,
+  SpeakerHigh,
+  CloudRain,
+  Coffee,
+  Flower,
+  Lightning,
+  type IconProps,
+} from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import manifestJson from "./manifest.json";
 import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
@@ -10,15 +21,15 @@ type SoundType = "rain" | "brown" | "pink" | "white";
 interface SoundPreset {
   id: SoundType;
   label: string;
-  icon: string;
+  icon: ComponentType<IconProps>;
   desc: string;
 }
 
 const PRESETS: SoundPreset[] = [
-  { id: "rain", label: "Gentle Rain", icon: "🌧️", desc: "Soothing natural rainfall" },
-  { id: "brown", label: "Deep Brown", icon: "☕", desc: "Warm cozy low-frequency rumble" },
-  { id: "pink", label: "Pink Noise", icon: "🌸", desc: "Balanced focus & sleep noise" },
-  { id: "white", label: "White Noise", icon: "⚡", desc: "Crisp sound masking & privacy" },
+  { id: "rain", label: "Gentle Rain", icon: CloudRain, desc: "Soothing natural rainfall" },
+  { id: "brown", label: "Deep Brown", icon: Coffee, desc: "Warm cozy low-frequency rumble" },
+  { id: "pink", label: "Pink Noise", icon: Flower, desc: "Balanced focus & sleep noise" },
+  { id: "white", label: "White Noise", icon: Lightning, desc: "Crisp sound masking & privacy" },
 ];
 
 export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
@@ -205,6 +216,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
         <div className="my-1 grid grid-cols-2 gap-1.5">
           {PRESETS.map((p) => {
             const isSelected = activeSound === p.id;
+            const Icon = p.icon;
             return (
               <button
                 key={p.id}
@@ -216,7 +228,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
                     : "border-line/40 bg-surface/50 text-fg-muted hover:bg-surface-raised"
                 }`}
               >
-                <span className="text-base">{p.icon}</span>
+                <Icon className="h-4 w-4 shrink-0" weight="duotone" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-xs leading-tight font-semibold">{p.label}</div>
                   <div className="truncate text-[9px] leading-tight text-fg-muted/80">{p.desc}</div>
@@ -240,16 +252,12 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
           >
             {isPlaying ? (
               <>
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                </svg>
+                <Pause className="h-3.5 w-3.5" weight="fill" />
                 <span>Pause</span>
               </>
             ) : (
               <>
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+                <Play className="h-3.5 w-3.5" weight="fill" />
                 <span>Play {activePreset?.label}</span>
               </>
             )}
@@ -257,7 +265,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
 
           {/* Volume Slider */}
           <div className="flex max-w-[120px] flex-1 items-center gap-1.5">
-            <span className="text-[10px] text-fg-muted">🔈</span>
+            <SpeakerLow className="h-3 w-3 shrink-0 text-fg-muted" />
             <input
               type="range"
               min="0"
@@ -268,7 +276,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
               className="h-1.5 w-full cursor-pointer accent-accent-500"
               title={`Volume: ${Math.round(volume * 100)}%`}
             />
-            <span className="text-[10px] text-fg-muted">🔊</span>
+            <SpeakerHigh className="h-3 w-3 shrink-0 text-fg-muted" />
           </div>
         </div>
       </div>

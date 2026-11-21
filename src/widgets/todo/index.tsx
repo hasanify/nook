@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Check, X } from "@phosphor-icons/react";
 import { WidgetShell } from "../../components/WidgetShell";
 import manifestJson from "./manifest.json";
 import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
@@ -116,19 +117,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
                         : "border-line bg-surface group-hover:border-fg-muted"
                     }`}
                   >
-                    {todo.done && (
-                      <svg
-                        className="h-2.5 w-2.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
+                    {todo.done && <Check className="h-2.5 w-2.5" weight="bold" />}
                   </span>
                   <span
                     className={`truncate transition-all ${
@@ -145,16 +134,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
                   className="opacity-0 transition-opacity group-hover:opacity-100 hover:text-error"
                   title="Delete task"
                 >
-                  <svg
-                    className="h-3 w-3 text-fg-muted hover:text-error"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
+                  <X className="h-3 w-3 text-fg-muted hover:text-error" />
                 </button>
               </div>
             ))
