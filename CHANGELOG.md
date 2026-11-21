@@ -1,3 +1,9 @@
+# [0.37.0](https://github.com/hasanify/nook/compare/v0.36.1...v0.37.0) (2026-11-21)
+
+### Features
+
+- **theme:** define design tokens for text, radii, and spacing and forbid arbitrary classes in oxlint ([375cdaf](https://github.com/hasanify/nook/commit/375cdaf4a34c1186fd61abd6ccaae546b171e337))
+
 ## [0.36.1](https://github.com/hasanify/nook/compare/v0.36.0...v0.36.1) (2026-11-21)
 
 ### Bug Fixes
