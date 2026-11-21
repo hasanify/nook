@@ -1,3 +1,9 @@
+## [0.38.1](https://github.com/hasanify/nook/compare/v0.38.0...v0.38.1) (2026-11-21)
+
+### Bug Fixes
+
+- **ports:** add requireAdministrator manifest and service-aware process termination ([2aaf03b](https://github.com/hasanify/nook/commit/2aaf03b57b6972a97a3ddd218559d6256fb0d967))
+
 # [0.38.0](https://github.com/hasanify/nook/compare/v0.37.0...v0.38.0) (2026-11-21)
 
 ### Features
