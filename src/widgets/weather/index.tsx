@@ -152,7 +152,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
 
             <div className="flex items-center gap-1.5 text-fg-muted">
               <WindIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
-              <span>WindIcon:</span>
+              <span>Wind:</span>
               <span className="font-mono font-medium text-fg">
                 {windSpeed} {windUnit}
               </span>

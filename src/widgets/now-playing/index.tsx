@@ -201,11 +201,11 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
               <SkipBackIcon className="block-4 inline-4" weight="fill" />
             </button>
 
-            {/* PlayIcon/PauseIcon */}
+            {/* Play/Pause */}
             <button
               type="button"
               onClick={() => void handleAction("play_pause")}
-              title={isPlaying ? "PauseIcon" : "PlayIcon"}
+              title={isPlaying ? "Pause" : "Play"}
               className="
                 flex cursor-pointer items-center justify-center rounded-full
                 bg-accent-500 text-white shadow-md transition-all block-8

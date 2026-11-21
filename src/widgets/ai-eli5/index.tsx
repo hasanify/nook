@@ -264,7 +264,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               ) : (
                 <>
                   <CopyIcon className="block-3 inline-3" />
-                  <span>CopyIcon</span>
+                  <span>Copy</span>
                 </>
               )}
             </button>

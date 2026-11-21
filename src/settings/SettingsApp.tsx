@@ -847,9 +847,9 @@ export function SettingsApp() {
         {activeTab === "general" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
-              {/* DesktopIcon & Interaction Settings */}
+              {/* Desktop & Interaction Settings */}
               <div className="flex flex-col gap-4 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
-                <span className="font-semibold text-fg">DesktopIcon & Interaction</span>
+                <span className="font-semibold text-fg">Desktop & Interaction</span>
 
                 {/* Edit Mode Toggle */}
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-4">

@@ -579,7 +579,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               "
             >
               <PauseIcon className="block-3 inline-3" weight="fill" />
-              <span>PauseIcon</span>
+              <span>Pause</span>
             </button>
           ) : (
             <button

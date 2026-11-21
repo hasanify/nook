@@ -221,12 +221,12 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
             {isPlaying ? (
               <>
                 <PauseIcon className="block-3 inline-3" weight="fill" />
-                <span>PauseIcon</span>
+                <span>Pause</span>
               </>
             ) : (
               <>
                 <PlayIcon className="block-3 inline-3" weight="fill" />
-                <span>PlayIcon {activePreset?.label}</span>
+                <span>Play {activePreset?.label}</span>
               </>
             )}
           </button>
