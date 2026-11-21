@@ -1,3 +1,14 @@
+# [0.32.0](https://github.com/hasanify/nook/compare/v0.31.0...v0.32.0) (2026-11-21)
+
+### Bug Fixes
+
+- **theme:** define status color tokens and resolve greyed out vitals RAM ([8368234](https://github.com/hasanify/nook/commit/836823418af126107a69a95417aaad37edb88ba3))
+
+### Features
+
+- **appearance:** expand and enhance widget presets with adaptive styling and cleaner appearance tab ([7a9e1e9](https://github.com/hasanify/nook/commit/7a9e1e9bac7d815d2842eefdf584a822ea9e4994))
+- **ui:** seed random accent color for new widgets and streamline bento & sidebar UI ([6969c36](https://github.com/hasanify/nook/commit/6969c365df0457e2645cbea790a13709f3773afc))
+
 # [0.31.0](https://github.com/hasanify/nook/compare/v0.30.0...v0.31.0) (2026-11-21)
 
 ### Features
