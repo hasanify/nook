@@ -3,6 +3,8 @@ import { getWidgetModule } from "@/widgets/registry";
 import { batchSetBounds, setBounds } from "./ipc";
 import type { WidgetInstance } from "./types";
 
+export type BentoCoverage = "auto" | "quarter" | "half" | "full";
+
 export interface BentoLayoutResult {
   index: number;
   name: string;
@@ -15,6 +17,144 @@ export interface WorkArea {
   y: number;
   w: number;
   h: number;
+}
+
+export function getEffectiveBentoArea(
+  baseArea: WorkArea,
+  coverage: BentoCoverage,
+  cycle: number,
+  widgetCount: number,
+): { area: WorkArea; coverageName: string } {
+  const minW = 320;
+  const minH = 220;
+
+  switch (coverage) {
+    case "quarter": {
+      // 25% of monitor area. Alternates between 4 corner quadrants and 2 side columns.
+      const variant = cycle % 6;
+      const qw = Math.max(minW, Math.round(baseArea.w * 0.5));
+      const qh = Math.max(minH, Math.round(baseArea.h * 0.5));
+      const stripW = Math.max(minW, Math.round(baseArea.w * 0.25));
+
+      switch (variant) {
+        case 0:
+          return {
+            area: { x: baseArea.x + baseArea.w - qw, y: baseArea.y, w: qw, h: qh },
+            coverageName: "Quarter (Top-Right)",
+          };
+        case 1:
+          return {
+            area: {
+              x: baseArea.x + baseArea.w - qw,
+              y: baseArea.y + baseArea.h - qh,
+              w: qw,
+              h: qh,
+            },
+            coverageName: "Quarter (Bottom-Right)",
+          };
+        case 2:
+          return {
+            area: { x: baseArea.x + baseArea.w - stripW, y: baseArea.y, w: stripW, h: baseArea.h },
+            coverageName: "Quarter (Right Strip)",
+          };
+        case 3:
+          return {
+            area: { x: baseArea.x, y: baseArea.y, w: qw, h: qh },
+            coverageName: "Quarter (Top-Left)",
+          };
+        case 4:
+          return {
+            area: { x: baseArea.x, y: baseArea.y + baseArea.h - qh, w: qw, h: qh },
+            coverageName: "Quarter (Bottom-Left)",
+          };
+        case 5:
+        default:
+          return {
+            area: { x: baseArea.x, y: baseArea.y, w: stripW, h: baseArea.h },
+            coverageName: "Quarter (Left Strip)",
+          };
+      }
+    }
+
+    case "half": {
+      // 50% of monitor area. Alternates between right half, left half, bottom half, and center half.
+      const variant = cycle % 4;
+      const halfW = Math.max(minW, Math.round(baseArea.w * 0.5));
+      const halfH = Math.max(minH, Math.round(baseArea.h * 0.5));
+
+      switch (variant) {
+        case 0:
+          return {
+            area: { x: baseArea.x + baseArea.w - halfW, y: baseArea.y, w: halfW, h: baseArea.h },
+            coverageName: "Half (Right Screen)",
+          };
+        case 1:
+          return {
+            area: { x: baseArea.x, y: baseArea.y, w: halfW, h: baseArea.h },
+            coverageName: "Half (Left Screen)",
+          };
+        case 2:
+          return {
+            area: { x: baseArea.x, y: baseArea.y + baseArea.h - halfH, w: baseArea.w, h: halfH },
+            coverageName: "Half (Bottom Screen)",
+          };
+        case 3:
+        default:
+          return {
+            area: {
+              x: baseArea.x + Math.round((baseArea.w - halfW) / 2),
+              y: baseArea.y,
+              w: halfW,
+              h: baseArea.h,
+            },
+            coverageName: "Half (Center Screen)",
+          };
+      }
+    }
+
+    case "full": {
+      return {
+        area: baseArea,
+        coverageName: "Full Screen",
+      };
+    }
+
+    case "auto":
+    default: {
+      if (widgetCount <= 2) {
+        const autoW = Math.min(baseArea.w, Math.max(minW, Math.round(baseArea.w * 0.44)));
+        const autoH = Math.min(baseArea.h, Math.max(minH, Math.round(baseArea.h * 0.55)));
+        const isRight = cycle % 2 === 0;
+        return {
+          area: {
+            x: isRight ? baseArea.x + baseArea.w - autoW : baseArea.x,
+            y: baseArea.y,
+            w: autoW,
+            h: autoH,
+          },
+          coverageName: "Auto (Compact)",
+        };
+      } else if (widgetCount <= 4) {
+        const autoW = Math.min(baseArea.w, Math.max(minW, Math.round(baseArea.w * 0.6)));
+        const autoH = Math.min(baseArea.h, Math.max(minH, Math.round(baseArea.h * 0.72)));
+        const isRight = cycle % 2 === 0;
+        return {
+          area: {
+            x: isRight ? baseArea.x + baseArea.w - autoW : baseArea.x,
+            y: baseArea.y,
+            w: autoW,
+            h: autoH,
+          },
+          coverageName: "Auto (Balanced)",
+        };
+      } else {
+        return {
+          area: baseArea,
+          coverageName: "Auto (Full Wall)",
+        };
+      }
+    }
+  }
 }
 
 export async function applyBentoLayout(widgets: WidgetInstance[]): Promise<void> {
@@ -206,7 +346,8 @@ export function computeBentoLayout(
   widgets: WidgetInstance[],
   layoutIndex: number,
   workAreaOrWidth?: WorkArea | number,
-  screenHeight?: number,
+  screenHeightOrCoverage?: number | BentoCoverage,
+  explicitCoverage?: BentoCoverage,
 ): BentoLayoutResult {
   if (widgets.length === 0) {
     return {
@@ -217,33 +358,42 @@ export function computeBentoLayout(
     };
   }
 
-  let area: WorkArea;
+  let coverage: BentoCoverage = "auto";
+  if (typeof explicitCoverage === "string") {
+    coverage = explicitCoverage;
+  } else if (typeof screenHeightOrCoverage === "string") {
+    coverage = screenHeightOrCoverage;
+  }
+
+  let baseArea: WorkArea;
   if (typeof workAreaOrWidth === "object" && workAreaOrWidth !== null) {
-    area = workAreaOrWidth;
+    baseArea = workAreaOrWidth;
   } else {
-    area = {
+    baseArea = {
       x: 0,
       y: 0,
       w: typeof workAreaOrWidth === "number" ? workAreaOrWidth : 1920,
-      h: typeof screenHeight === "number" ? screenHeight : 1080,
+      h: typeof screenHeightOrCoverage === "number" ? screenHeightOrCoverage : 1080,
     };
   }
 
+  const cycle = Math.max(0, layoutIndex);
+  const { area, coverageName } = getEffectiveBentoArea(baseArea, coverage, cycle, widgets.length);
+
   const EDGE = 12;
   const GAP = 12;
-  const availW = Math.max(area.w - EDGE * 2, 400);
-  const availH = Math.max(area.h - EDGE * 2, 300);
+  const availW = Math.max(area.w - EDGE * 2, 280);
+  const availH = Math.max(area.h - EDGE * 2, 200);
 
-  const cycle = Math.max(0, layoutIndex);
   const updated: WidgetInstance[] = [];
 
-  // Single widget fills the entire available work area
+  // Single widget fills the effective work area
   if (widgets.length === 1) {
     const w = widgets[0]!;
     return {
       index: cycle,
-      name: "Full Display",
-      description: "Single widget expanded to full monitor work area",
+      name: `${coverageName} (Single Widget)`,
+      description: `Single widget formatted to ${coverage} monitor work area`,
       widgets: [
         {
           ...w,
@@ -748,8 +898,8 @@ export function computeBentoLayout(
 
   return {
     index: cycle,
-    name: layoutName,
-    description: layoutDesc,
+    name: `${layoutName} • ${coverageName}`,
+    description: `${layoutDesc} (${coverage} monitor coverage)`,
     widgets: updated,
   };
 }

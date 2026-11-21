@@ -1,48 +1,20 @@
 import {
   ArrowCounterClockwise,
-  ArrowsClockwise,
   ArrowsInCardinal,
   Check,
   Gear,
   NotePencil,
-  SquaresFour,
   Trash,
 } from "@phosphor-icons/react";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { applyBentoLayout, computeBentoLayout } from "@/core/bento";
-import {
-  getAppConfig,
-  getDesktopWorkArea,
-  hideContextMenu,
-  openSettingsWindow,
-  removeWidget,
-  setBounds,
-} from "@/core/ipc";
-import type { WidgetInstance } from "@/core/types";
+import { hideContextMenu, openSettingsWindow, removeWidget, setBounds } from "@/core/ipc";
 import { useEditMode } from "@/core/use-edit-mode";
 import { useInstance } from "@/core/use-instance";
 import { getWidgetModule } from "@/widgets/registry";
 
 import { WIDGET_COLOR_OPTIONS } from "./WidgetContextMenu";
-
-async function getEffectiveWorkArea() {
-  try {
-    const area = await getDesktopWorkArea();
-    if (area && area.w > 0 && area.h > 0) {
-      return area;
-    }
-  } catch {
-    // Ignore
-  }
-  return {
-    x: 0,
-    y: 0,
-    w: window.screen.availWidth || 1920,
-    h: window.screen.availHeight || 1080,
-  };
-}
 
 export function ContextMenuApp() {
   const [widgetId, setWidgetId] = useState<string>(() => {
@@ -151,49 +123,6 @@ export function ContextMenuApp() {
     handleClose();
   }, [instance, manifest, handleClose]);
 
-  const [isBentoMode, setIsBentoMode] = useState(false);
-  const [bentoIdx, setBentoIdx] = useState(0);
-  const originalWidgetsRef = useRef<WidgetInstance[] | null>(null);
-
-  const handleStartBento = useCallback(async () => {
-    try {
-      const cfg = await getAppConfig();
-      if (!cfg.widgets || cfg.widgets.length === 0) return;
-      originalWidgetsRef.current = cfg.widgets;
-      setIsBentoMode(true);
-      setBentoIdx(0);
-      const workArea = await getEffectiveWorkArea();
-      const layout = computeBentoLayout(cfg.widgets, 0, workArea);
-      await applyBentoLayout(layout.widgets);
-    } catch {
-      // Ignore
-    }
-  }, []);
-
-  const handleCycleBento = useCallback(async () => {
-    if (!originalWidgetsRef.current) return;
-    const nextIdx = bentoIdx + 1;
-    setBentoIdx(nextIdx);
-    const workArea = await getEffectiveWorkArea();
-    const layout = computeBentoLayout(originalWidgetsRef.current, nextIdx, workArea);
-    await applyBentoLayout(layout.widgets);
-  }, [bentoIdx]);
-
-  const handleDoneBento = useCallback(() => {
-    setIsBentoMode(false);
-    originalWidgetsRef.current = null;
-    handleClose();
-  }, [handleClose]);
-
-  const handleCancelBento = useCallback(async () => {
-    if (originalWidgetsRef.current) {
-      await applyBentoLayout(originalWidgetsRef.current);
-    }
-    setIsBentoMode(false);
-    originalWidgetsRef.current = null;
-    handleClose();
-  }, [handleClose]);
-
   if (!instance) {
     return (
       <div className="flex items-start justify-start p-1.5 select-none block-full inline-full">
@@ -218,161 +147,88 @@ export function ContextMenuApp() {
           e.stopPropagation();
         }}
       >
-        {isBentoMode ? (
-          <div className="flex flex-col gap-2 p-1 text-xs">
-            <div className="flex items-center justify-between border-be border-line/50 px-1 pbe-1.5">
-              <div className="flex items-center gap-1.5 font-semibold text-accent-500">
-                <SquaresFour className="shrink-0 block-4" />
-                <span>Bento Arranger</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleCycleBento}
-              className="
-                flex cursor-pointer items-center justify-center gap-1.5
-                rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold
-                text-white shadow-xs transition-colors inline-full
-                hover:bg-accent-600
-                active:scale-95
-              "
-            >
-              <ArrowsClockwise className="block-3.5 inline-3.5" />
-              <span>Cycle Layout</span>
-            </button>
-
-            <div className="flex items-center gap-1.5 pbs-0.5">
-              <button
-                type="button"
-                onClick={handleCancelBento}
-                className="
-                  flex-1 cursor-pointer rounded-lg border border-line bg-surface
-                  px-2.5 py-1.5 text-center text-xs font-medium text-fg-muted
-                  transition-colors
-                  hover:bg-surface-raised hover:text-fg
-                "
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDoneBento}
-                className="
-                  flex-1 cursor-pointer rounded-lg bg-accent-500/20 px-2.5
-                  py-1.5 text-center text-xs font-semibold text-accent-500
-                  transition-colors
-                  hover:bg-accent-500/30
-                "
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Edit Mode Toggle */}
-            <button
-              type="button"
-              onClick={() => {
-                handleClose();
-                toggleEditMode();
-              }}
-              className="
+        {/* Edit Mode Toggle */}
+        <button
+          type="button"
+          onClick={() => {
+            handleClose();
+            toggleEditMode();
+          }}
+          className="
                 flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
                 text-start text-fg-muted transition-colors inline-full
                 hover:bg-surface-raised hover:text-fg
               "
-            >
-              {editMode ? (
-                <>
-                  <Check className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="bold" />
-                  <span className="font-medium text-accent-500">Done Editing</span>
-                </>
-              ) : (
-                <>
-                  <NotePencil className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
-                  <span>Edit Widget</span>
-                  <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
-                </>
-              )}
-            </button>
+        >
+          {editMode ? (
+            <>
+              <Check className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="bold" />
+              <span className="font-medium text-accent-500">Done Editing</span>
+            </>
+          ) : (
+            <>
+              <NotePencil className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+              <span>Edit Widget</span>
+              <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
+            </>
+          )}
+        </button>
 
-            {/* Quick Size Reset options */}
-            <div className="flex flex-col gap-0.5 border-bs border-line/40 pbs-1">
-              <button
-                type="button"
-                onClick={handleResetToFit}
-                className="
+        {/* Quick Size Reset options */}
+        <div className="flex flex-col gap-0.5 border-bs border-line/40 pbs-1">
+          <button
+            type="button"
+            onClick={handleResetToFit}
+            className="
                   flex cursor-pointer items-center justify-between rounded-lg
                   px-2.5 py-1 text-start text-fg-muted transition-colors
                   inline-full
                   hover:bg-surface-raised hover:text-fg
                 "
-              >
-                <div className="flex items-center gap-2">
-                  <ArrowsInCardinal className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
-                  <span>Fit Size</span>
-                </div>
-                <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
-              </button>
-              {manifest?.defaultSize && (
-                <button
-                  type="button"
-                  onClick={handleResetToDefault}
-                  className="
+          >
+            <div className="flex items-center gap-2">
+              <ArrowsInCardinal className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+              <span>Fit Size</span>
+            </div>
+            <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
+          </button>
+          {manifest?.defaultSize && (
+            <button
+              type="button"
+              onClick={handleResetToDefault}
+              className="
                     flex cursor-pointer items-center justify-between rounded-lg
                     px-2.5 py-1 text-start text-fg-muted transition-colors
                     inline-full
                     hover:bg-surface-raised hover:text-fg
                   "
-                >
-                  <div className="flex items-center gap-2">
-                    <ArrowCounterClockwise className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
-                    <span>Reset Default</span>
-                  </div>
-                  <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
-                </button>
-              )}
-            </div>
-
-            {/* Auto Arrange Bento Grid Option */}
-            <div className="border-bs border-line/40 pbs-1">
-              <button
-                type="button"
-                onClick={handleStartBento}
-                className="
-                  flex cursor-pointer items-center justify-between rounded-lg
-                  px-2.5 py-1.5 text-start text-fg-muted transition-colors
-                  inline-full
-                  hover:bg-surface-raised hover:text-fg
-                "
-              >
-                <div className="flex items-center gap-2">
-                  <SquaresFour className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
-                  <span>Arrange Bento Grid...</span>
-                </div>
-                <span className="font-mono text-[9px] text-fg-muted/60">Auto</span>
-              </button>
-            </div>
-
-            {/* Quick Color Swatches */}
-            <div className="flex flex-col gap-1 border-bs border-line/40 px-2.5 py-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium text-fg-muted">Color</span>
+            >
+              <div className="flex items-center gap-2">
+                <ArrowCounterClockwise className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+                <span>Reset Default</span>
               </div>
-              <div className="flex items-center justify-between pbs-0.5">
-                {WIDGET_COLOR_OPTIONS.map((c) => {
-                  const active = widgetColor === c.value;
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => {
-                        patchSettings({ widgetColor: c.value });
-                        handleClose();
-                      }}
-                      className={`
+              <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
+            </button>
+          )}
+        </div>
+
+        {/* Quick Color Swatches */}
+        <div className="flex flex-col gap-1 border-bs border-line/40 px-2.5 py-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium text-fg-muted">Color</span>
+          </div>
+          <div className="flex items-center justify-between pbs-0.5">
+            {WIDGET_COLOR_OPTIONS.map((c) => {
+              const active = widgetColor === c.value;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    patchSettings({ widgetColor: c.value });
+                    handleClose();
+                  }}
+                  className={`
                         shrink-0 cursor-pointer rounded-full
                         transition-transform block-3.5 inline-3.5
                         hover:scale-125
@@ -382,21 +238,20 @@ export function ContextMenuApp() {
                             : ""
                         }
                       `}
-                      style={{ backgroundColor: c.hex }}
-                      title={c.label}
-                    />
-                  );
-                })}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.label}
+                />
+              );
+            })}
 
-                {/* Custom Color Swatch */}
-                {(() => {
-                  const isCustomActive =
-                    Boolean(widgetColor) &&
-                    !WIDGET_COLOR_OPTIONS.some((o) => o.value === widgetColor);
-                  return (
-                    <label
-                      title={isCustomActive ? `Custom Color (${widgetColor})` : "Pick custom color"}
-                      className={`
+            {/* Custom Color Swatch */}
+            {(() => {
+              const isCustomActive =
+                Boolean(widgetColor) && !WIDGET_COLOR_OPTIONS.some((o) => o.value === widgetColor);
+              return (
+                <label
+                  title={isCustomActive ? `Custom Color (${widgetColor})` : "Pick custom color"}
+                  className={`
                         relative flex shrink-0 cursor-pointer items-center
                         justify-center rounded-full transition-transform
                         block-3.5 inline-3.5
@@ -407,72 +262,70 @@ export function ContextMenuApp() {
                             : "border border-line/60"
                         }
                       `}
-                      style={
-                        isCustomActive
-                          ? { backgroundColor: widgetColor }
-                          : {
-                              background:
-                                "conic-gradient(from 180deg at 50% 50%, #f43f5e, #fbbf24, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e)",
-                            }
-                      }
-                    >
-                      <input
-                        type="color"
-                        value={widgetColor?.startsWith("#") ? widgetColor : "#3b82f6"}
-                        onPointerDown={() => {
-                          isPickingColorRef.current = true;
-                        }}
-                        onChange={(e) => {
-                          isPickingColorRef.current = false;
-                          patchSettings({ widgetColor: e.target.value });
-                          handleClose();
-                        }}
-                        className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
-                      />
-                    </label>
-                  );
-                })()}
-              </div>
-            </div>
+                  style={
+                    isCustomActive
+                      ? { backgroundColor: widgetColor }
+                      : {
+                          background:
+                            "conic-gradient(from 180deg at 50% 50%, #f43f5e, #fbbf24, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e)",
+                        }
+                  }
+                >
+                  <input
+                    type="color"
+                    value={widgetColor?.startsWith("#") ? widgetColor : "#3b82f6"}
+                    onPointerDown={() => {
+                      isPickingColorRef.current = true;
+                    }}
+                    onChange={(e) => {
+                      isPickingColorRef.current = false;
+                      patchSettings({ widgetColor: e.target.value });
+                      handleClose();
+                    }}
+                    className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
+                  />
+                </label>
+              );
+            })()}
+          </div>
+        </div>
 
-            {/* Settings */}
-            <button
-              type="button"
-              onClick={() => {
-                handleClose();
-                void openSettingsWindow(instance.id);
-              }}
-              className="
+        {/* Settings */}
+        <button
+          type="button"
+          onClick={() => {
+            handleClose();
+            void openSettingsWindow(instance.id);
+          }}
+          className="
                 flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
                 text-start text-fg-muted transition-colors inline-full
                 hover:bg-surface-raised hover:text-fg
               "
-            >
-              <Gear className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
-              <span>Settings...</span>
-            </button>
+        >
+          <Gear className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+          <span>Settings...</span>
+        </button>
 
-            <div className="my-1 border-bs border-line/60" />
+        <div className="my-1 border-bs border-line/60" />
 
-            {/* Delete / Remove Widget */}
-            <button
-              type="button"
-              onClick={() => {
-                handleClose();
-                void removeWidget(instance.id);
-              }}
-              className="
+        {/* Delete / Remove Widget */}
+        <button
+          type="button"
+          onClick={() => {
+            handleClose();
+            void removeWidget(instance.id);
+          }}
+          className="
                 flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
                 text-start text-fg-muted transition-colors inline-full
                 hover:bg-error/10 hover:text-error
                 dark:hover:bg-error/20
               "
-            >
-              <Trash className="shrink-0 block-3.5 inline-3.5" />
-              <span className="font-medium">Delete Widget</span>
-            </button>
-          </>
-        )}
+        >
+          <Trash className="shrink-0 block-3.5 inline-3.5" />
+          <span className="font-medium">Delete Widget</span>
+        </button>
       </div>
     </div>
   );

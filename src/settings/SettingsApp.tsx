@@ -29,7 +29,7 @@ import { CustomSelect } from "@/components/CustomSelect";
 import { SettingsForm } from "@/components/SettingsForm";
 import { Toggle } from "@/components/Toggle";
 import { WIDGET_COLOR_OPTIONS } from "@/components/WidgetContextMenu";
-import { applyBentoLayout, computeBentoLayout } from "@/core/bento";
+import { applyBentoLayout, type BentoCoverage, computeBentoLayout } from "@/core/bento";
 import {
   addWidget,
   checkForUpdates,
@@ -541,8 +541,55 @@ export function SettingsApp() {
   };
 
   const [bentoLayoutIdx, setBentoLayoutIdx] = useState(0);
+  const [bentoCoverage, setBentoCoverage] = useState<BentoCoverage>(() => {
+    if (typeof window === "undefined") return "auto";
+    try {
+      const saved = localStorage.getItem("nook_bento_coverage");
+      if (saved === "quarter" || saved === "half" || saved === "full" || saved === "auto") {
+        return saved;
+      }
+    } catch {
+      // Ignore
+    }
+    return "auto";
+  });
   const [isBentoPreviewing, setIsBentoPreviewing] = useState(false);
   const originalBentoWidgetsRef = useRef<WidgetInstance[] | null>(null);
+
+  const handleSetBentoCoverage = useCallback(
+    async (coverage: BentoCoverage) => {
+      setBentoCoverage(coverage);
+      try {
+        localStorage.setItem("nook_bento_coverage", coverage);
+      } catch {
+        // Ignore
+      }
+      if (isBentoPreviewing && originalBentoWidgetsRef.current) {
+        let workArea = {
+          x: 0,
+          y: 0,
+          w: window.screen.availWidth || 1920,
+          h: window.screen.availHeight || 1080,
+        };
+        try {
+          const area = await getDesktopWorkArea();
+          if (area && area.w > 0 && area.h > 0) {
+            workArea = area;
+          }
+        } catch {
+          // Ignore
+        }
+        const layout = computeBentoLayout(
+          originalBentoWidgetsRef.current,
+          bentoLayoutIdx,
+          workArea,
+          coverage,
+        );
+        await applyBentoLayout(layout.widgets);
+      }
+    },
+    [isBentoPreviewing, bentoLayoutIdx],
+  );
 
   const handleCycleSettingsBento = useCallback(async () => {
     if (!config?.widgets || config.widgets.length === 0) return;
@@ -566,9 +613,14 @@ export function SettingsApp() {
     } catch {
       // Ignore
     }
-    const layout = computeBentoLayout(originalBentoWidgetsRef.current, nextIdx, workArea);
+    const layout = computeBentoLayout(
+      originalBentoWidgetsRef.current,
+      nextIdx,
+      workArea,
+      bentoCoverage,
+    );
     await applyBentoLayout(layout.widgets);
-  }, [config, isBentoPreviewing, bentoLayoutIdx]);
+  }, [config, isBentoPreviewing, bentoLayoutIdx, bentoCoverage]);
 
   const handleDoneSettingsBento = useCallback(() => {
     originalBentoWidgetsRef.current = null;
@@ -1244,6 +1296,35 @@ export function SettingsApp() {
                       <SquaresFour className="text-accent-500 block-3.5 inline-3.5" />
                       Bento Grid
                     </span>
+
+                    {/* Coverage Area Selector */}
+                    <div className="flex items-center rounded-md border border-line/60 bg-surface/80 p-0.5 text-[10px]">
+                      {(
+                        [
+                          { id: "auto", label: "Auto", title: "Auto (adapts to widget count)" },
+                          { id: "quarter", label: "1/4", title: "Quarter monitor area (25%)" },
+                          { id: "half", label: "1/2", title: "Half monitor area (50%)" },
+                          { id: "full", label: "Full", title: "Full monitor area (100%)" },
+                        ] as const
+                      ).map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => void handleSetBentoCoverage(item.id)}
+                          title={item.title}
+                          className={`
+                            cursor-pointer rounded-sm px-1.5 py-0.5 font-medium transition-all
+                            ${
+                              bentoCoverage === item.id
+                                ? "bg-accent-500 font-semibold text-white shadow-2xs"
+                                : "text-fg-muted hover:text-fg"
+                            }
+                          `}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="flex items-center gap-1.5 pbs-0.5">
                     <button
