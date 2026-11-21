@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
 import { ArrowClockwise, ChatCircle } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { getAccountToken } from "../../core/ipc";
+import { useCallback, useEffect, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { getAccountToken } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -204,9 +206,19 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
           onClick={() => void fetchPRs()}
           disabled={loading}
           title="Refresh PRs"
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          className="
+            flex cursor-pointer items-center justify-center rounded-sm
+            text-fg-muted block-5 inline-5
+            hover:bg-surface-raised hover:text-fg
+            disabled:opacity-40
+          "
         >
-          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+          <ArrowClockwise
+            className={`
+            block-3 inline-3
+            ${loading ? "animate-spin" : ""}
+          `}
+          />
         </button>
       }
       banner={
@@ -215,28 +227,42 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-none">
+      <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 border-b border-line/40 pb-1 text-[10px]">
+        <div className="flex items-center gap-1 border-be border-line/40 pbe-1 text-[10px]">
           <button
             type="button"
             onClick={() => setActiveTab("review-requested")}
-            className={`cursor-pointer rounded px-2 py-0.5 font-medium transition-colors ${
-              activeTab === "review-requested"
-                ? "bg-accent-500/15 font-semibold text-accent-500"
-                : "text-fg-muted hover:text-fg"
-            }`}
+            className={`
+              cursor-pointer rounded-sm px-2 py-0.5 font-medium
+              transition-colors
+              ${
+                activeTab === "review-requested"
+                  ? "bg-accent-500/15 font-semibold text-accent-500"
+                  : `
+                  text-fg-muted
+                  hover:text-fg
+                `
+              }
+            `}
           >
             Review Queue
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("authored")}
-            className={`cursor-pointer rounded px-2 py-0.5 font-medium transition-colors ${
-              activeTab === "authored"
-                ? "bg-accent-500/15 font-semibold text-accent-500"
-                : "text-fg-muted hover:text-fg"
-            }`}
+            className={`
+              cursor-pointer rounded-sm px-2 py-0.5 font-medium
+              transition-colors
+              ${
+                activeTab === "authored"
+                  ? "bg-accent-500/15 font-semibold text-accent-500"
+                  : `
+                  text-fg-muted
+                  hover:text-fg
+                `
+              }
+            `}
           >
             My PRs
           </button>
@@ -244,11 +270,18 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
             <button
               type="button"
               onClick={() => setActiveTab("all")}
-              className={`cursor-pointer rounded px-2 py-0.5 font-medium transition-colors ${
-                activeTab === "all"
-                  ? "bg-accent-500/15 font-semibold text-accent-500"
-                  : "text-fg-muted hover:text-fg"
-              }`}
+              className={`
+                cursor-pointer rounded-sm px-2 py-0.5 font-medium
+                transition-colors
+                ${
+                  activeTab === "all"
+                    ? "bg-accent-500/15 font-semibold text-accent-500"
+                    : `
+                    text-fg-muted
+                    hover:text-fg
+                  `
+                }
+              `}
             >
               {repository.split("/")[1] || "Repo"}
             </button>
@@ -266,23 +299,32 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
               <div
                 key={pr.id}
                 onClick={() => void openUrl(pr.html_url)}
-                className="group flex cursor-pointer flex-col gap-1 rounded-lg border border-line bg-surface-raised/40 p-2 transition-all hover:border-accent-500/40 hover:bg-surface-raised"
+                className="
+                  group flex cursor-pointer flex-col gap-1 rounded-lg border
+                  border-line bg-surface-raised/40 p-2 transition-all
+                  hover:border-accent-500/40 hover:bg-surface-raised
+                "
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     <span className="shrink-0 font-mono text-[10px] font-bold text-accent-500">
                       #{pr.number}
                     </span>
-                    <span className="line-clamp-1 text-xs font-medium text-fg group-hover:text-accent-500">
+                    <span
+                      className="
+                      line-clamp-1 text-xs font-medium text-fg
+                      group-hover:text-accent-500
+                    "
+                    >
                       {pr.title}
                     </span>
                   </div>
                   {pr.draft ? (
-                    <span className="py-0.2 shrink-0 rounded bg-fg-muted/15 px-1 font-mono text-[9px] text-fg-muted">
+                    <span className="shrink-0 rounded-sm bg-fg-muted/15 px-1 py-0.5 font-mono text-[9px] text-fg-muted">
                       Draft
                     </span>
                   ) : (
-                    <span className="py-0.2 shrink-0 rounded bg-ok/15 px-1 font-mono text-[9px] font-semibold text-ok">
+                    <span className="shrink-0 rounded-sm bg-ok/15 px-1 py-0.5 font-mono text-[9px] font-semibold text-ok">
                       Open
                     </span>
                   )}
@@ -290,7 +332,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
 
                 <div className="flex items-center justify-between text-[10px] text-fg-muted">
                   <div className="flex items-center gap-2">
-                    <span className="py-0.2 truncate rounded bg-surface px-1.5 font-mono text-[9px] font-medium text-fg-muted">
+                    <span className="truncate rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted">
                       {pr.repo}
                     </span>
                     <span>by {pr.author}</span>
@@ -298,7 +340,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
                   <div className="flex items-center gap-2">
                     {pr.comments > 0 && (
                       <span className="flex items-center gap-0.5">
-                        <ChatCircle className="h-3 w-3" /> {pr.comments}
+                        <ChatCircle className="block-3 inline-3" /> {pr.comments}
                       </span>
                     )}
                     <span>{formatRelativeTime(pr.updated_at)}</span>
@@ -310,10 +352,13 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>{prs.length} pull requests</span>
           <span
-            className="cursor-pointer text-accent-500 hover:underline"
+            className="
+              cursor-pointer text-accent-500
+              hover:underline
+            "
             onClick={() => void fetchPRs()}
           >
             Refresh

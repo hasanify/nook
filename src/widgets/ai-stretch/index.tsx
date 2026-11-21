@@ -1,10 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from "react";
 import { ArrowClockwise } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -183,9 +185,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           onClick={() => void handleFetch()}
           disabled={loading}
           title="New stretch"
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          className="
+            flex cursor-pointer items-center justify-center rounded-sm
+            text-fg-muted block-5 inline-5
+            hover:bg-surface-raised hover:text-fg
+            disabled:opacity-40
+          "
         >
-          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+          <ArrowClockwise
+            className={`
+            block-3 inline-3
+            ${loading ? "animate-spin" : ""}
+          `}
+          />
         </button>
       }
       banner={
@@ -194,7 +206,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Name and Timer Bar */}
         <div className="flex items-center justify-between">
           <span className="truncate rounded-md bg-ok/10 px-2 py-0.5 text-[10px] font-semibold text-ok">
@@ -202,18 +214,31 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           </span>
           <div className="flex items-center gap-1.5">
             <span
-              className={`font-mono text-xs font-bold ${
-                secondsLeft === 0 ? "text-ok" : "text-fg-muted"
-              }`}
+              className={`
+                font-mono text-xs font-bold
+                ${secondsLeft === 0 ? "text-ok" : "text-fg-muted"}
+              `}
             >
               {secondsLeft === 0 ? "DONE!" : `${secondsLeft}s`}
             </span>
             <button
               type="button"
               onClick={toggleTimer}
-              className={`cursor-pointer rounded px-2 py-0.5 text-[10px] font-medium text-white transition-colors ${
-                timerRunning ? "hover:bg-amber-600 bg-amber-500" : "bg-ok hover:bg-ok/90"
-              }`}
+              className={`
+                cursor-pointer rounded-sm px-2 py-0.5 text-[10px] font-medium
+                text-white transition-colors
+                ${
+                  timerRunning
+                    ? `
+                  bg-amber-500
+                  hover:bg-amber-600
+                `
+                    : `
+                  bg-ok
+                  hover:bg-ok/90
+                `
+                }
+              `}
             >
               {timerRunning ? "Pause" : secondsLeft === 0 ? "Restart" : "Start"}
             </button>
@@ -221,7 +246,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               <button
                 type="button"
                 onClick={resetTimer}
-                className="cursor-pointer text-[10px] text-fg-muted hover:text-fg"
+                className="
+                  cursor-pointer text-[10px] text-fg-muted
+                  hover:text-fg
+                "
               >
                 ↺
               </button>
@@ -239,17 +267,17 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 key={idx}
                 className="flex items-start gap-2 rounded-lg border border-line bg-surface-raised/40 p-2"
               >
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-surface text-[9px] font-bold text-accent-500 shadow-2xs">
+                <span className="flex shrink-0 items-center justify-center rounded-full bg-surface text-[9px] font-bold text-accent-500 shadow-2xs block-4 inline-4">
                   {idx + 1}
                 </span>
-                <p className="text-xs leading-relaxed text-fg">{step}.</p>
+                <p className="text-xs/relaxed text-fg">{step}.</p>
               </div>
             ))
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>~15 in / ~35 out tokens</span>
           <span>45-sec micro-break</span>
         </div>

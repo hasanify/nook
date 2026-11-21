@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
 import { ArrowClockwise, ArrowUp, ChatCircle } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -224,11 +226,11 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="Tech News Feed">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line/40 pb-1.5 text-xs">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span className="flex h-4 w-4 items-center justify-center rounded bg-amber-500 text-[10px] font-bold text-white">
+            <span className="flex items-center justify-center rounded-sm bg-amber-500 text-[10px] font-bold text-white block-4 inline-4">
               Y
             </span>
             <span>Hacker News</span>
@@ -243,9 +245,19 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
               onClick={() => void fetchFeed()}
               disabled={loading}
               title="Refresh stories"
-              className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-accent-500 transition-colors hover:text-accent-400 disabled:opacity-40"
+              className="
+                flex cursor-pointer items-center gap-1 text-[11px] font-medium
+                text-accent-500 transition-colors
+                hover:text-accent-400
+                disabled:opacity-40
+              "
             >
-              <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+              <ArrowClockwise
+                className={`
+                block-3 inline-3
+                ${loading ? "animate-spin" : ""}
+              `}
+              />
               <span>Refresh</span>
             </button>
           </div>
@@ -258,30 +270,39 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
         )}
 
         {/* Stories list */}
-        <div className="my-1.5 space-y-1.5 pr-0.5">
+        <div className="my-1.5 space-y-1.5 pe-0.5">
           {stories.map((story, idx) => (
             <div
               key={story.id}
               onClick={() => handleOpenStory(story)}
-              className="group cursor-pointer rounded-lg border border-line/40 bg-surface/50 p-2 transition-colors hover:border-accent-500/40 hover:bg-surface-raised/60"
+              className="
+                group cursor-pointer rounded-lg border border-line/40
+                bg-surface/50 p-2 transition-colors
+                hover:border-accent-500/40 hover:bg-surface-raised/60
+              "
             >
               <div className="flex items-start gap-2">
-                <span className="mt-0.5 font-mono text-[11px] font-bold text-fg-muted/60">
+                <span className="mbs-0.5 font-mono text-[11px] font-bold text-fg-muted/60">
                   #{idx + 1}
                 </span>
 
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs leading-snug font-semibold text-fg transition-colors group-hover:text-accent-400">
+                <div className="flex-1 min-inline-0">
+                  <h4
+                    className="
+                    text-xs/snug font-semibold text-fg transition-colors
+                    group-hover:text-accent-400
+                  "
+                  >
                     {story.title}
                   </h4>
 
                   {/* Metadata Row */}
-                  <div className="mt-1 flex items-center gap-2 text-[10px] text-fg-muted">
-                    <span className="py-0.2 max-w-[110px] truncate rounded bg-surface-raised px-1 font-mono text-[9px] text-fg-muted/90">
+                  <div className="mbs-1 flex items-center gap-2 text-[10px] text-fg-muted">
+                    <span className="truncate rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-[9px] text-fg-muted/90 max-inline-[110px]">
                       {story.domain}
                     </span>
                     <span className="flex items-center gap-0.5 font-mono font-medium text-amber-400">
-                      <ArrowUp className="h-2.5 w-2.5" weight="bold" />
+                      <ArrowUp className="block-2.5 inline-2.5" weight="bold" />
                       {story.score}
                     </span>
                     <span>by {story.by}</span>
@@ -289,9 +310,13 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                       type="button"
                       onClick={(e) => handleOpenComments(e, story.id)}
                       title="View discussion on HN"
-                      className="ml-auto flex cursor-pointer items-center gap-1 font-mono transition-colors hover:text-accent-500"
+                      className="
+                        ms-auto flex cursor-pointer items-center gap-1 font-mono
+                        transition-colors
+                        hover:text-accent-500
+                      "
                     >
-                      <ChatCircle className="h-3 w-3" />
+                      <ChatCircle className="block-3 inline-3" />
                       <span>{story.comments}</span>
                     </button>
                   </div>
@@ -302,7 +327,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>{stories.length} stories</span>
           <span>Click story to open</span>
         </div>

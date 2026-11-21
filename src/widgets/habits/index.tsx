@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
-import { Lightning, Flame, X } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
+import { Flame, Lightning, X } from "@phosphor-icons/react";
+import { useMemo, useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -135,11 +137,11 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="Habits Tracker">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line/40 pb-1.5 text-xs">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <Lightning className="h-3.5 w-3.5 text-accent-500" weight="fill" />
+            <Lightning className="text-accent-500 block-3.5 inline-3.5" weight="fill" />
             <span>Habits</span>
           </div>
 
@@ -147,7 +149,11 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
             <button
               type="button"
               onClick={() => setShowInput((v) => !v)}
-              className="cursor-pointer text-[11px] font-medium text-accent-500 transition-colors hover:text-accent-400"
+              className="
+                cursor-pointer text-[11px] font-medium text-accent-500
+                transition-colors
+                hover:text-accent-400
+              "
             >
               {showInput ? "Cancel" : "+ Habit"}
             </button>
@@ -166,13 +172,22 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                 if (e.key === "Escape") setShowInput(false);
               }}
               placeholder="e.g. Meditate 10 mins"
-              className="flex-1 rounded-lg border border-line bg-surface-raised/60 px-2 py-1 text-xs text-fg placeholder:text-fg-muted/60 focus:border-accent-500 focus:outline-none"
+              className="
+                flex-1 rounded-lg border border-line bg-surface-raised/60 px-2
+                py-1 text-xs text-fg
+                placeholder:text-fg-muted/60
+                focus:border-accent-500 focus:outline-none
+              "
               autoFocus
             />
             <button
               type="button"
               onClick={handleAdd}
-              className="cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-accent-600"
+              className="
+                cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-xs
+                font-semibold text-white transition-colors
+                hover:bg-accent-600
+              "
             >
               Add
             </button>
@@ -180,7 +195,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
         )}
 
         {/* Table / List */}
-        <div className="my-1.5 space-y-2 pr-0.5">
+        <div className="my-1.5 space-y-2 pe-0.5">
           {habits.length === 0 ? (
             <div className="py-6 text-center text-xs text-fg-muted">
               No habits tracked yet. Click + Habit to start!
@@ -193,23 +208,32 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
               return (
                 <div
                   key={habit.id}
-                  className="group rounded-lg border border-line/40 bg-surface/50 p-2 transition-colors hover:bg-surface-raised/40"
+                  className="
+                    group rounded-lg border border-line/40 bg-surface/50 p-2
+                    transition-colors
+                    hover:bg-surface-raised/40
+                  "
                 >
                   {/* Top row: Title & Streak & Delete */}
-                  <div className="mb-1.5 flex items-center justify-between">
+                  <div className="mbe-1.5 flex items-center justify-between">
                     <span className="truncate text-xs font-semibold text-fg">{habit.title}</span>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-400">
-                        <Flame className="h-3 w-3 text-amber-500" weight="fill" />
+                        <Flame className="text-amber-500 block-3 inline-3" weight="fill" />
                         <span>{streak}</span>
                       </span>
                       <button
                         type="button"
                         onClick={() => handleDelete(habit.id)}
                         title="Delete habit"
-                        className="cursor-pointer text-xs text-fg-muted/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-error"
+                        className="
+                          cursor-pointer text-xs text-fg-muted/40 opacity-0
+                          transition-opacity
+                          group-hover:opacity-100
+                          hover:text-error
+                        "
                       >
-                        <X className="h-3 w-3" />
+                        <X className="block-3 inline-3" />
                       </button>
                     </div>
                   </div>
@@ -223,16 +247,23 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                           key={day.iso}
                           type="button"
                           onClick={() => toggleDay(habit.id, day.iso)}
-                          className={`flex cursor-pointer flex-col items-center justify-center rounded py-1 transition-all ${
-                            checked
-                              ? "bg-accent-500 font-bold text-white shadow-sm"
-                              : day.isToday
-                                ? "border border-accent-500/50 bg-surface-raised text-fg"
-                                : "bg-surface-raised/40 text-fg-muted hover:bg-surface-raised"
-                          }`}
+                          className={`
+                            flex cursor-pointer flex-col items-center
+                            justify-center rounded-sm py-1 transition-all
+                            ${
+                              checked
+                                ? "bg-accent-500 font-bold text-white shadow-sm"
+                                : day.isToday
+                                  ? `border border-accent-500/50 bg-surface-raised text-fg`
+                                  : `
+                                  bg-surface-raised/40 text-fg-muted
+                                  hover:bg-surface-raised
+                                `
+                            }
+                          `}
                         >
                           <span className="text-[9px] tracking-wider uppercase">{day.label}</span>
-                          <span className="mt-0.5 font-mono text-[10px] leading-none">
+                          <span className="mbs-0.5 font-mono text-[10px] leading-none">
                             {day.dayNum}
                           </span>
                         </button>
@@ -246,7 +277,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>{habits.length} habits active</span>
           <span>7-Day Rolling Streak</span>
         </div>

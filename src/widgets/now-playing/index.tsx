@@ -1,17 +1,19 @@
-import { useEffect, useState, useCallback } from "react";
 import {
-  SpeakerLow,
-  SpeakerHigh,
-  SkipBack,
-  Play,
   Pause,
+  Play,
+  SkipBack,
   SkipForward,
+  SpeakerHigh,
+  SpeakerLow,
   SpeakerSimpleNone,
 } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { sendMediaCommand, getMediaStatus, type MediaStatus } from "../../core/ipc";
+import { useCallback, useEffect, useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import { getMediaStatus, type MediaStatus, sendMediaCommand } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -82,46 +84,57 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="Now Playing">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header / Player Badge */}
-        <div className="flex items-center justify-between border-b border-line/40 pb-1 text-xs">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-fg">
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex block-2 inline-2">
               <span
-                className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isPlaying ? "animate-ping bg-accent-400" : "bg-fg-muted"
-                }`}
+                className={`
+                  absolute inline-flex rounded-full opacity-75 block-full
+                  inline-full
+                  ${isPlaying ? "animate-ping bg-accent-400" : "bg-fg-muted"}
+                `}
               />
               <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${
-                  isPlaying ? "bg-accent-500" : "bg-fg-muted"
-                }`}
+                className={`
+                  relative inline-flex rounded-full block-2 inline-2
+                  ${isPlaying ? "bg-accent-500" : "bg-fg-muted"}
+                `}
               />
             </span>
             <span>{media?.player || "Windows Media"}</span>
           </div>
 
           {/* Equalizer Wave Bars */}
-          <div className="flex h-3 items-end gap-0.5">
+          <div className="flex items-end gap-0.5 block-3">
             <div
-              className={`w-0.5 rounded-full bg-accent-500 transition-all duration-200 ${
-                isPlaying ? "h-3 animate-pulse" : "h-1 opacity-40"
-              }`}
+              className={`
+                rounded-full bg-accent-500 transition-all duration-200
+                inline-0.5
+                ${isPlaying ? "animate-pulse block-3" : "opacity-40 block-1"}
+              `}
             />
             <div
-              className={`w-0.5 rounded-full bg-accent-500 transition-all duration-300 ${
-                isPlaying ? "h-2 animate-bounce" : "h-1 opacity-40"
-              }`}
+              className={`
+                rounded-full bg-accent-500 transition-all duration-300
+                inline-0.5
+                ${isPlaying ? "animate-bounce block-2" : "opacity-40 block-1"}
+              `}
             />
             <div
-              className={`w-0.5 rounded-full bg-accent-500 transition-all duration-150 ${
-                isPlaying ? "h-3.5 animate-pulse" : "h-1 opacity-40"
-              }`}
+              className={`
+                rounded-full bg-accent-500 transition-all duration-150
+                inline-0.5
+                ${isPlaying ? "animate-pulse block-3.5" : "opacity-40 block-1"}
+              `}
             />
             <div
-              className={`w-0.5 rounded-full bg-accent-500 transition-all duration-250 ${
-                isPlaying ? "h-2 animate-bounce" : "h-1 opacity-40"
-              }`}
+              className={`
+                rounded-full bg-accent-500 transition-all duration-250
+                inline-0.5
+                ${isPlaying ? "animate-bounce block-2" : "opacity-40 block-1"}
+              `}
             />
           </div>
         </div>
@@ -130,18 +143,21 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
         <div className="my-1 flex items-center gap-3 rounded-xl border border-line/40 bg-surface/50 p-2.5">
           {/* Vinyl Disc Icon */}
           <div
-            className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line/60 bg-gradient-to-tr from-surface-raised via-line/40 to-surface shadow-inner ${
-              isPlaying ? "animate-spin" : ""
-            }`}
+            className={`
+              relative flex shrink-0 items-center justify-center rounded-full
+              border border-line/60 bg-linear-to-tr from-surface-raised
+              via-line/40 to-surface shadow-inner block-12 inline-12
+              ${isPlaying ? "animate-spin" : ""}
+            `}
             style={{ animationDuration: "6s" }}
           >
-            <div className="flex h-4 w-4 items-center justify-center rounded-full border border-accent-500/40 bg-accent-500/20">
-              <div className="h-1.5 w-1.5 rounded-full bg-accent-500" />
+            <div className="flex items-center justify-center rounded-full border border-accent-500/40 bg-accent-500/20 block-4 inline-4">
+              <div className="rounded-full bg-accent-500 block-1.5 inline-1.5" />
             </div>
           </div>
 
           {/* Titles */}
-          <div className="flex min-w-0 flex-1 flex-col justify-center">
+          <div className="flex flex-1 flex-col justify-center min-inline-0">
             <span className="truncate text-xs font-semibold text-fg select-text">
               {hasTrack ? media.title : "No Track Active"}
             </span>
@@ -152,24 +168,30 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between pbs-1">
           {/* Volume controls */}
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={() => void handleAction("volume_down")}
               title="Volume Down"
-              className="cursor-pointer rounded p-1 text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                cursor-pointer rounded-sm p-1 text-fg-muted transition-colors
+                hover:bg-surface-raised hover:text-fg
+              "
             >
-              <SpeakerLow className="h-3.5 w-3.5" weight="fill" />
+              <SpeakerLow className="block-3.5 inline-3.5" weight="fill" />
             </button>
             <button
               type="button"
               onClick={() => void handleAction("volume_up")}
               title="Volume Up"
-              className="cursor-pointer rounded p-1 text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                cursor-pointer rounded-sm p-1 text-fg-muted transition-colors
+                hover:bg-surface-raised hover:text-fg
+              "
             >
-              <SpeakerHigh className="h-3.5 w-3.5" weight="fill" />
+              <SpeakerHigh className="block-3.5 inline-3.5" weight="fill" />
             </button>
           </div>
 
@@ -180,9 +202,13 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
               type="button"
               onClick={() => void handleAction("previous")}
               title="Previous Track"
-              className="cursor-pointer rounded-full p-1.5 text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                cursor-pointer rounded-full p-1.5 text-fg-muted
+                transition-colors
+                hover:bg-surface-raised hover:text-fg
+              "
             >
-              <SkipBack className="h-4 w-4" weight="fill" />
+              <SkipBack className="block-4 inline-4" weight="fill" />
             </button>
 
             {/* Play/Pause */}
@@ -190,12 +216,18 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
               type="button"
               onClick={() => void handleAction("play_pause")}
               title={isPlaying ? "Pause" : "Play"}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-accent-500 text-white shadow-md transition-all hover:bg-accent-600 active:scale-95"
+              className="
+                flex cursor-pointer items-center justify-center rounded-full
+                bg-accent-500 text-white shadow-md transition-all block-8
+                inline-8
+                hover:bg-accent-600
+                active:scale-95
+              "
             >
               {isPlaying ? (
-                <Pause className="h-4 w-4" weight="fill" />
+                <Pause className="block-4 inline-4" weight="fill" />
               ) : (
-                <Play className="h-4 w-4 translate-x-0.5" weight="fill" />
+                <Play className="translate-x-0.5 block-4 inline-4" weight="fill" />
               )}
             </button>
 
@@ -204,9 +236,13 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
               type="button"
               onClick={() => void handleAction("next")}
               title="Next Track"
-              className="cursor-pointer rounded-full p-1.5 text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                cursor-pointer rounded-full p-1.5 text-fg-muted
+                transition-colors
+                hover:bg-surface-raised hover:text-fg
+              "
             >
-              <SkipForward className="h-4 w-4" weight="fill" />
+              <SkipForward className="block-4 inline-4" weight="fill" />
             </button>
           </div>
 
@@ -215,9 +251,12 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
             type="button"
             onClick={() => void handleAction("mute")}
             title="Mute / Unmute"
-            className="cursor-pointer rounded p-1 text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+            className="
+              cursor-pointer rounded-sm p-1 text-fg-muted transition-colors
+              hover:bg-surface-raised hover:text-fg
+            "
           >
-            <SpeakerSimpleNone className="h-3.5 w-3.5" weight="bold" />
+            <SpeakerSimpleNone className="block-3.5 inline-3.5" weight="bold" />
           </button>
         </div>
       </div>

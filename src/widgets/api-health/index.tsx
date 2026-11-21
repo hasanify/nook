@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
 import { ArrowClockwise } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { pingEndpoint, type PingResult } from "../../core/ipc";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { pingEndpoint, type PingResult } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -145,9 +147,19 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
           onClick={() => void handlePing()}
           disabled={loading}
           title="Ping now"
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          className="
+            flex cursor-pointer items-center justify-center rounded-sm
+            text-fg-muted block-5 inline-5
+            hover:bg-surface-raised hover:text-fg
+            disabled:opacity-40
+          "
         >
-          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+          <ArrowClockwise
+            className={`
+            block-3 inline-3
+            ${loading ? "animate-spin" : ""}
+          `}
+          />
         </button>
       }
       banner={
@@ -156,16 +168,17 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-none">
+      <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Endpoint URL Pill */}
         <div className="flex items-center justify-between gap-2">
           <span className="truncate font-mono text-[10px] text-fg-muted" title={endpoint}>
             {method} {endpoint.replace(/^https?:\/\//, "")}
           </span>
           <span
-            className={`py-0.2 shrink-0 rounded px-1.5 font-mono text-[9px] font-bold ${
-              isHealthy ? "bg-ok/15 text-ok" : "bg-error/15 text-error"
-            }`}
+            className={`
+              shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold
+              ${isHealthy ? "bg-ok/15 text-ok" : "bg-error/15 text-error"}
+            `}
           >
             {latest?.status ? `${latest.status} ${latest.ok ? "OK" : "ERR"}` : "OFFLINE"}
           </span>
@@ -176,30 +189,36 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
           <div>
             <span className="block font-mono text-[9px] font-semibold text-fg-muted">LATENCY</span>
             <span
-              className={`font-mono text-xl font-bold tracking-tight ${
-                !isHealthy
-                  ? "text-error"
-                  : latestLatency < 150
-                    ? "text-ok"
-                    : latestLatency < 350
-                      ? "text-amber-500"
-                      : "text-error"
-              }`}
+              className={`
+                font-mono text-xl font-bold tracking-tight
+                ${
+                  !isHealthy
+                    ? "text-error"
+                    : latestLatency < 150
+                      ? "text-ok"
+                      : latestLatency < 350
+                        ? "text-amber-500"
+                        : "text-error"
+                }
+              `}
             >
               {latestLatency} <span className="text-xs font-normal text-fg-muted">ms</span>
             </span>
           </div>
 
-          <div className="text-right">
+          <div className="text-end">
             <span className="block font-mono text-[9px] font-semibold text-fg-muted">UPTIME</span>
             <span
-              className={`font-mono text-base font-bold ${
-                uptimePercent >= 99
-                  ? "text-ok"
-                  : uptimePercent >= 90
-                    ? "text-amber-500"
-                    : "text-error"
-              }`}
+              className={`
+                font-mono text-base font-bold
+                ${
+                  uptimePercent >= 99
+                    ? "text-ok"
+                    : uptimePercent >= 90
+                      ? "text-amber-500"
+                      : "text-error"
+                }
+              `}
             >
               {uptimePercent}%
             </span>
@@ -208,16 +227,17 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
 
         {/* Sparkline History Bars */}
         <div className="flex flex-col gap-1">
-          <div className="flex h-9 items-end gap-1 rounded border border-line/40 bg-surface-raised/20 p-1">
+          <div className="flex items-end gap-1 rounded-sm border border-line/40 bg-surface-raised/20 p-1 block-9">
             {pings.map((p, idx) => {
               const heightPct = Math.max(15, Math.min(100, (p.latency / maxLatency) * 100));
               return (
                 <div
                   key={idx}
                   title={`${p.latency}ms (${p.status})`}
-                  className={`flex-1 rounded-xs transition-all duration-300 ${
-                    !p.ok ? "bg-error" : p.latency < 150 ? "bg-ok/80" : "bg-amber-500/80"
-                  }`}
+                  className={`
+                    flex-1 rounded-xs transition-all duration-300
+                    ${!p.ok ? "bg-error" : p.latency < 150 ? "bg-ok/80" : `bg-amber-500/80`}
+                  `}
                   style={{ height: `${heightPct}%` }}
                 />
               );
@@ -226,7 +246,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>Poll every {intervalSec}s</span>
           <span>HTTP Sentinel</span>
         </div>

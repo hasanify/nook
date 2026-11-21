@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { getInstance, updateState, updateSettings, onConfigChanged } from "./ipc";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { getInstance, onConfigChanged, updateSettings, updateState } from "./ipc";
 import type { WidgetInstance } from "./types";
 
 export function useInstance(id: string) {

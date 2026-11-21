@@ -1,12 +1,14 @@
-import { useMemo } from "react";
-import { ArrowSquareOut, Globe, GithubLogo } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { StatusDot } from "../../components/StatusDot";
-import { Banner } from "../../components/Banner";
-import { useProvider } from "../../core/use-provider";
+import { ArrowSquareOut, GithubLogo, Globe } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useMemo } from "react";
+
+import { Banner } from "@/components/Banner";
+import { StatusDot } from "@/components/StatusDot";
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, ProviderStatus, WidgetModule, WidgetProps } from "@/core/types";
+import { useProvider } from "@/core/use-provider";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest, ProviderStatus } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -164,11 +166,15 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
               e.stopPropagation();
               handleOpenLink(primaryDomain);
             }}
-            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised hover:text-accent-500"
+            className="
+              flex cursor-pointer items-center justify-center rounded-sm
+              text-fg-muted transition-colors block-5 inline-5
+              hover:bg-surface-raised hover:text-accent-500
+            "
             title={`Open https://${primaryDomain}`}
             aria-label={`Open https://${primaryDomain}`}
           >
-            <ArrowSquareOut className="h-3 w-3" />
+            <ArrowSquareOut className="block-3 inline-3" />
           </button>
         ) : undefined
       }
@@ -183,32 +189,47 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-col gap-2 select-none">
+      <div className="flex flex-col gap-2 select-none min-block-full">
         {/* Primary Deployment Domain Card */}
         {showDomain && primaryDomain && (
-          <div className="flex items-center justify-between rounded-lg border border-line/60 bg-surface-raised/60 px-2.5 py-1.5 transition-colors hover:border-accent-500/40 hover:bg-surface-raised">
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-accent-500/10 text-accent-500">
-                <Globe className="h-3 w-3" />
+          <div
+            className="
+            flex items-center justify-between rounded-lg border border-line/60
+            bg-surface-raised/60 px-2.5 py-1.5 transition-colors
+            hover:border-accent-500/40 hover:bg-surface-raised
+          "
+          >
+            <div className="flex items-center gap-2 min-inline-0">
+              <div className="flex shrink-0 items-center justify-center rounded-sm bg-accent-500/10 text-accent-500 block-5 inline-5">
+                <Globe className="block-3 inline-3" />
               </div>
-              <div className="flex min-w-0 flex-col">
+              <div className="flex flex-col min-inline-0">
                 <span className="text-[9px] font-semibold tracking-wider text-fg-muted uppercase">
                   Primary Domain
                 </span>
                 <button
                   type="button"
                   onClick={() => handleOpenLink(primaryDomain)}
-                  className="group flex cursor-pointer items-center gap-1 text-left font-mono text-[11px] font-medium text-fg transition-colors hover:text-accent-500"
+                  className="
+                    group flex cursor-pointer items-center gap-1 text-start
+                    font-mono text-[11px] font-medium text-fg transition-colors
+                    hover:text-accent-500
+                  "
                   title={`Open https://${primaryDomain}`}
                 >
                   <span className="truncate">{primaryDomain}</span>
-                  <ArrowSquareOut className="h-2.5 w-2.5 opacity-60 transition-opacity group-hover:opacity-100" />
+                  <ArrowSquareOut
+                    className="
+                    opacity-60 transition-opacity block-2.5 inline-2.5
+                    group-hover:opacity-100
+                  "
+                  />
                 </button>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               {showFramework && data?.meta?.framework && (
-                <span className="rounded border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                <span className="rounded-sm border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
                   {data.meta.framework}
                 </span>
               )}
@@ -216,10 +237,15 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                 <button
                   type="button"
                   onClick={() => handleOpenLink(`https://github.com/${data.meta!.git_repo}`)}
-                  className="flex cursor-pointer items-center gap-1 rounded border border-line/50 bg-surface px-1.5 py-0.5 text-fg-muted transition-colors hover:border-accent-500/50 hover:text-accent-500"
+                  className="
+                    flex cursor-pointer items-center gap-1 rounded-sm border
+                    border-line/50 bg-surface px-1.5 py-0.5 text-fg-muted
+                    transition-colors
+                    hover:border-accent-500/50 hover:text-accent-500
+                  "
                   title={`Open GitHub: ${data.meta.git_repo}`}
                 >
-                  <GithubLogo className="h-2.5 w-2.5" weight="fill" />
+                  <GithubLogo className="block-2.5 inline-2.5" weight="fill" />
                 </button>
               )}
             </div>
@@ -229,7 +255,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
         <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
           Deployments
         </span>
-        <div className="flex flex-col gap-1.5 pr-1 pb-2">
+        <div className="flex flex-col gap-1.5 pe-1 pbe-2">
           {data?.deployments && data.deployments.length > 0 ? (
             data.deployments.map((dep) => {
               const status = mapVercelState(dep.state);
@@ -239,21 +265,34 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                   key={dep.id}
                   type="button"
                   onClick={() => handleOpenLink(dep.url)}
-                  className="group flex cursor-pointer flex-col rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                  className="
+                    group flex cursor-pointer flex-col rounded-lg px-2.5 py-1.5
+                    text-start text-xs transition-colors
+                    hover:bg-surface-raised/80
+                  "
                 >
                   <div className="flex items-center justify-between gap-1.5">
-                    <div className="flex min-w-0 items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 min-inline-0">
                       <StatusDot status={status} />
-                      <span className="truncate font-medium text-fg group-hover:text-accent-500">
+                      <span
+                        className="
+                        truncate font-medium text-fg
+                        group-hover:text-accent-500
+                      "
+                      >
                         {dep.name}
                       </span>
                       {dep.target && (
                         <span
-                          className={`py-0.2 rounded-full px-1.5 font-mono text-[9px] font-medium uppercase ${
-                            dep.target === "production"
-                              ? "border border-ok/30 bg-ok/15 text-ok"
-                              : "border border-line/60 bg-surface-raised text-fg-muted"
-                          }`}
+                          className={`
+                            rounded-full px-1.5 py-0.5 font-mono text-[9px]
+                            font-medium uppercase
+                            ${
+                              dep.target === "production"
+                                ? "border border-ok/30 bg-ok/15 text-ok"
+                                : `border border-line/60 bg-surface-raised text-fg-muted`
+                            }
+                          `}
                         >
                           {dep.target}
                         </span>
@@ -264,12 +303,12 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                     </span>
                   </div>
 
-                  <div className="mt-1 flex items-center justify-between truncate text-[10px] text-fg-muted">
+                  <div className="mbs-1 flex items-center justify-between truncate text-[10px] text-fg-muted">
                     <span className="truncate">
                       {dep.commit_msg || dep.branch || "Manual deploy"}
                     </span>
                     {dep.branch && (
-                      <span className="py-0.2 ml-1 shrink-0 rounded bg-surface-raised px-1 font-mono text-accent-500">
+                      <span className="ms-1 shrink-0 rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-accent-500">
                         {dep.branch}
                       </span>
                     )}

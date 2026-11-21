@@ -1,6 +1,7 @@
+import { getWidgetModule } from "@/widgets/registry";
+
+import { batchSetBounds, setBounds } from "./ipc";
 import type { WidgetInstance } from "./types";
-import { getWidgetModule } from "../widgets/registry";
-import { setBounds, batchSetBounds } from "./ipc";
 
 export interface BentoLayoutResult {
   index: number;
@@ -181,7 +182,7 @@ function budgetColumnHeights(items: WidgetInstance[], maxTotalH: number, gap: nu
  */
 function partitionIntoColumns(items: WidgetInstance[], columnCount: number): WidgetInstance[][] {
   const cols: WidgetInstance[][] = Array.from({ length: columnCount }, () => []);
-  const colHeights: number[] = new Array(columnCount).fill(0);
+  const colHeights: number[] = Array.from({ length: columnCount }, () => 0);
 
   items.forEach((item) => {
     let minCol = 0;
@@ -275,7 +276,7 @@ export function computeBentoLayout(
       const colRange = Math.max(1, maxCols - minCols + 1);
       const colCount = minCols + (Math.floor(cycle / 6) % colRange);
 
-      const weights: number[] = new Array(colCount).fill(1.0);
+      const weights: number[] = Array.from({ length: colCount }, () => 1.0);
       const variant = (cycle + Math.floor(cycle / 3)) % 4;
       if (variant === 1) {
         // Left column wider
@@ -346,7 +347,11 @@ export function computeBentoLayout(
       const bodyH = availH - heroH - GAP;
 
       // Top Hero row (spans edge-to-edge)
-      const heroWidths = budgetColumnWidths(new Array(heroCount).fill(1), availW, GAP);
+      const heroWidths = budgetColumnWidths(
+        Array.from({ length: heroCount }, () => 1),
+        availW,
+        GAP,
+      );
       let heroX = area.x + EDGE;
       heroWidgets.forEach((w, idx) => {
         const hW = heroWidths[idx] ?? availW;
@@ -364,7 +369,11 @@ export function computeBentoLayout(
 
       // Bottom section columns (spans edge-to-edge)
       const colCount = Math.max(2, Math.min(bodyWidgets.length, Math.floor(availW / 300)));
-      const colWidths = budgetColumnWidths(new Array(colCount).fill(1), availW, GAP);
+      const colWidths = budgetColumnWidths(
+        Array.from({ length: colCount }, () => 1),
+        availW,
+        GAP,
+      );
       const cols = partitionIntoColumns(bodyWidgets, colCount);
 
       let curX = area.x + EDGE;
@@ -423,7 +432,11 @@ export function computeBentoLayout(
 
       // Top section columns (spans edge-to-edge)
       const colCount = Math.max(2, Math.min(bodyWidgets.length, Math.floor(availW / 300)));
-      const colWidths = budgetColumnWidths(new Array(colCount).fill(1), availW, GAP);
+      const colWidths = budgetColumnWidths(
+        Array.from({ length: colCount }, () => 1),
+        availW,
+        GAP,
+      );
       const cols = partitionIntoColumns(bodyWidgets, colCount);
 
       let curX = area.x + EDGE;
@@ -450,7 +463,11 @@ export function computeBentoLayout(
       });
 
       // Bottom anchor banner (spans edge-to-edge)
-      const anchorWidths = budgetColumnWidths(new Array(anchorCount).fill(1), availW, GAP);
+      const anchorWidths = budgetColumnWidths(
+        Array.from({ length: anchorCount }, () => 1),
+        availW,
+        GAP,
+      );
       let anchorX = area.x + EDGE;
       anchorWidgets.forEach((w, idx) => {
         const aW = anchorWidths[idx] ?? availW;
@@ -518,7 +535,11 @@ export function computeBentoLayout(
         1,
         Math.min(rightWidgets.length, Math.floor(rightAvailW / 260)),
       );
-      const rightColWidths = budgetColumnWidths(new Array(rightColCount).fill(1), rightAvailW, GAP);
+      const rightColWidths = budgetColumnWidths(
+        Array.from({ length: rightColCount }, () => 1),
+        rightAvailW,
+        GAP,
+      );
       const rightCols = partitionIntoColumns(rightWidgets, rightColCount);
 
       let curX = area.x + EDGE + pillarW + GAP;
@@ -576,7 +597,11 @@ export function computeBentoLayout(
 
       // Left Wall (touches left edge, fills full height)
       const leftColCount = Math.max(1, Math.min(leftWidgets.length, Math.floor(leftAvailW / 260)));
-      const leftColWidths = budgetColumnWidths(new Array(leftColCount).fill(1), leftAvailW, GAP);
+      const leftColWidths = budgetColumnWidths(
+        Array.from({ length: leftColCount }, () => 1),
+        leftAvailW,
+        GAP,
+      );
       const leftCols = partitionIntoColumns(leftWidgets, leftColCount);
 
       let curX = area.x + EDGE;
@@ -631,7 +656,11 @@ export function computeBentoLayout(
       if (N < 4) {
         // Fallback to multi-column
         const colCount = Math.max(2, Math.min(N, 3));
-        const colWidths = budgetColumnWidths(new Array(colCount).fill(1), availW, GAP);
+        const colWidths = budgetColumnWidths(
+          Array.from({ length: colCount }, () => 1),
+          availW,
+          GAP,
+        );
         const cols = partitionIntoColumns(permuted, colCount);
 
         let curX = area.x + EDGE;
@@ -670,7 +699,11 @@ export function computeBentoLayout(
       const row1H = availH - row0H - GAP;
 
       // Row 0 columns (touches left and right edges)
-      const colWidths0 = budgetColumnWidths(new Array(row0Count).fill(1), availW, GAP);
+      const colWidths0 = budgetColumnWidths(
+        Array.from({ length: row0Count }, () => 1),
+        availW,
+        GAP,
+      );
       let curX0 = area.x + EDGE;
       row0Widgets.forEach((w, idx) => {
         const cWidth = colWidths0[idx] ?? Math.floor(availW / row0Count);
@@ -687,7 +720,11 @@ export function computeBentoLayout(
       });
 
       // Row 1 columns (touches left and right edges)
-      const colWidths1 = budgetColumnWidths(new Array(row1Widgets.length).fill(1), availW, GAP);
+      const colWidths1 = budgetColumnWidths(
+        Array.from({ length: row1Widgets.length }, () => 1),
+        availW,
+        GAP,
+      );
       let curX1 = area.x + EDGE;
       row1Widgets.forEach((w, idx) => {
         const cWidth = colWidths1[idx] ?? Math.floor(availW / row1Widgets.length);

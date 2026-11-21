@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useId, useMemo, useCallback, type ReactNode } from "react";
-import { CaretDown, MagnifyingGlass, X, Check } from "@phosphor-icons/react";
+import { CaretDown, Check, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 export interface SelectOption<T extends string | number = string | number> {
   value: T;
@@ -180,7 +180,10 @@ export function CustomSelect<T extends string | number = string | number>({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-block ${className}`}
+      className={`
+        relative inline-block
+        ${className}
+      `}
       onKeyDown={handleKeyDown}
     >
       {/* Trigger Button */}
@@ -199,16 +202,27 @@ export function CustomSelect<T extends string | number = string | number>({
             openDropdown();
           }
         }}
-        className={`group flex w-full items-center justify-between gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-fg transition-all outline-none hover:border-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 disabled:cursor-not-allowed disabled:opacity-50 ${buttonClassName}`}
+        className={`
+          group flex items-center justify-between gap-2 rounded-lg border
+          border-line bg-surface px-2.5 py-1.5 text-xs text-fg transition-all
+          outline-none inline-full
+          hover:border-fg-muted/40
+          focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20
+          disabled:cursor-not-allowed disabled:opacity-50
+          ${buttonClassName}
+        `}
       >
-        <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate text-left">
+        <span className="flex flex-1 items-center gap-1.5 truncate text-start min-inline-0">
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
           <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         </span>
         <CaretDown
-          className={`h-3.5 w-3.5 shrink-0 text-fg-muted transition-transform duration-200 group-hover:text-fg ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`
+            shrink-0 text-fg-muted transition-transform duration-200 block-3.5
+            inline-3.5
+            group-hover:text-fg
+            ${isOpen ? "rotate-180" : ""}
+          `}
           aria-hidden="true"
         />
       </button>
@@ -216,18 +230,35 @@ export function CustomSelect<T extends string | number = string | number>({
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute z-50 min-w-full rounded-xl border border-line/80 bg-surface/95 p-1 text-fg shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition-all dark:ring-white/5 ${
-            resolvedDirection === "up"
-              ? "bottom-full mb-1.5 origin-bottom"
-              : "top-full mt-1.5 origin-top"
-          } ${menuClassName}`}
+          className={`
+            absolute z-50 rounded-xl border border-line/80 bg-surface/95 p-1
+            text-fg shadow-xl ring-1 ring-black/5 backdrop-blur-xl
+            transition-all min-inline-full
+            dark:ring-white/5
+            ${
+              resolvedDirection === "up"
+                ? "inset-be-full mbe-1.5 origin-bottom"
+                : "inset-bs-full mbs-1.5 origin-top"
+            }
+            ${menuClassName}
+          `}
           style={{ minWidth: "max(100%, 160px)" }}
         >
           {/* Optional Search Filter */}
           {isSearchable && (
-            <div className="relative border-b border-line/50 p-1 pb-1.5">
-              <div className="flex items-center gap-1.5 rounded-lg border border-line/80 bg-surface-raised px-2 py-1 text-xs text-fg transition-colors focus-within:border-accent-500 focus-within:ring-1 focus-within:ring-accent-500/20">
-                <MagnifyingGlass className="h-3 w-3 shrink-0 text-fg-muted" aria-hidden="true" />
+            <div className="relative border-be border-line/50 p-1 pbe-1.5">
+              <div
+                className="
+                flex items-center gap-1.5 rounded-lg border border-line/80
+                bg-surface-raised px-2 py-1 text-xs text-fg transition-colors
+                focus-within:border-accent-500 focus-within:ring-1
+                focus-within:ring-accent-500/20
+              "
+              >
+                <MagnifyingGlass
+                  className="shrink-0 text-fg-muted block-3 inline-3"
+                  aria-hidden="true"
+                />
                 <input
                   ref={(el) => {
                     searchInputRef.current = el;
@@ -242,7 +273,11 @@ export function CustomSelect<T extends string | number = string | number>({
                     setHighlightedIndex(0);
                   }}
                   placeholder={searchPlaceholder}
-                  className="min-w-0 flex-1 bg-transparent text-xs text-fg outline-none placeholder:text-fg-muted/60"
+                  className="
+                    flex-1 bg-transparent text-xs text-fg outline-none
+                    min-inline-0
+                    placeholder:text-fg-muted/60
+                  "
                   autoComplete="off"
                   spellCheck="false"
                 />
@@ -253,10 +288,13 @@ export function CustomSelect<T extends string | number = string | number>({
                       setSearchQuery("");
                       searchInputRef.current?.focus();
                     }}
-                    className="cursor-pointer text-fg-muted hover:text-fg"
+                    className="
+                      cursor-pointer text-fg-muted
+                      hover:text-fg
+                    "
                     aria-label="Clear search"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="block-3 inline-3" />
                   </button>
                 )}
               </div>
@@ -268,7 +306,7 @@ export function CustomSelect<T extends string | number = string | number>({
             ref={listRef}
             role="listbox"
             tabIndex={-1}
-            className="max-h-56 overflow-y-auto overscroll-contain py-1 text-xs outline-none"
+            className="overflow-y-auto overscroll-contain py-1 text-xs outline-none max-block-56"
           >
             {filteredOptions.length === 0 ? (
               <li className="px-3 py-2 text-center text-xs text-fg-muted">No matching options</li>
@@ -284,17 +322,24 @@ export function CustomSelect<T extends string | number = string | number>({
                     aria-selected={isSelected}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                     onClick={() => handleSelect(opt.value)}
-                    className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors select-none ${
-                      isSelected
-                        ? "bg-accent-500/10 font-medium text-accent-500"
-                        : isHighlighted
-                          ? "bg-surface-raised text-fg"
-                          : "text-fg hover:bg-surface-raised"
-                    }`}
+                    className={`
+                      flex cursor-pointer items-center justify-between gap-2
+                      rounded-lg px-2.5 py-1.5 transition-colors select-none
+                      ${
+                        isSelected
+                          ? "bg-accent-500/10 font-medium text-accent-500"
+                          : isHighlighted
+                            ? "bg-surface-raised text-fg"
+                            : `
+                            text-fg
+                            hover:bg-surface-raised
+                          `
+                      }
+                    `}
                   >
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2 min-inline-0">
                       {opt.icon && <span className="shrink-0">{opt.icon}</span>}
-                      <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex flex-1 flex-col min-inline-0">
                         <span className="truncate">{opt.label}</span>
                         {opt.description && (
                           <span className="truncate text-[10px] text-fg-muted">
@@ -305,7 +350,7 @@ export function CustomSelect<T extends string | number = string | number>({
                     </div>
                     {isSelected && (
                       <Check
-                        className="h-3.5 w-3.5 shrink-0 text-accent-500"
+                        className="shrink-0 text-accent-500 block-3.5 inline-3.5"
                         weight="bold"
                         aria-hidden="true"
                       />

@@ -1,9 +1,11 @@
+import { Cloud, CloudRain, CloudSnow, Drop, Moon, Sun, Wind } from "@phosphor-icons/react";
 import { useEffect } from "react";
-import { Sun, Moon, Cloud, CloudRain, CloudSnow, Drop, Wind } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { useProvider } from "../../core/use-provider";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+import { useProvider } from "@/core/use-provider";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -66,25 +68,25 @@ function getWeatherDescription(code: number): string {
 function WeatherIcon({ code, isDay }: { code: number; isDay: number }) {
   if (code === 0) {
     return isDay ? (
-      <Sun className="h-9 w-9 text-amber-500" weight="fill" />
+      <Sun className="text-amber-500 block-9 inline-9" weight="fill" />
     ) : (
-      <Moon className="text-indigo-400 h-9 w-9" weight="fill" />
+      <Moon className="text-indigo-400 block-9 inline-9" weight="fill" />
     );
   }
 
   if (code >= 1 && code <= 3) {
-    return <Cloud className="h-9 w-9 text-neutral-400" weight="fill" />;
+    return <Cloud className="text-neutral-400 block-9 inline-9" weight="fill" />;
   }
 
   if ((code >= 51 && code <= 65) || (code >= 80 && code <= 82)) {
-    return <CloudRain className="h-9 w-9 text-accent-500" weight="fill" />;
+    return <CloudRain className="text-accent-500 block-9 inline-9" weight="fill" />;
   }
 
   if (code >= 71 && code <= 75) {
-    return <CloudSnow className="text-sky-300 h-9 w-9" weight="fill" />;
+    return <CloudSnow className="text-sky-300 block-9 inline-9" weight="fill" />;
   }
 
-  return <Sun className="h-9 w-9 text-amber-500" weight="fill" />;
+  return <Sun className="text-amber-500 block-9" weight="fill" />;
 }
 
 export function WeatherWidget({ instance, editMode }: WidgetProps) {
@@ -132,26 +134,29 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
     >
-      <div className="flex min-h-full flex-col justify-between select-none">
+      <div className="flex flex-col justify-between select-none min-block-full">
         {error ? (
-          <div className="flex h-full flex-col items-center justify-center p-3 text-center">
+          <div className="flex flex-col items-center justify-center p-3 text-center block-full">
             <span className="text-xs text-error">{error}</span>
             <button
               type="button"
               onClick={() => void refresh()}
-              className="mt-2 rounded bg-surface-raised px-2 py-1 text-[11px] text-fg hover:bg-line/40"
+              className="
+                mbs-2 rounded-sm bg-surface-raised px-2 py-1 text-[11px] text-fg
+                hover:bg-line/40
+              "
             >
               Retry
             </button>
           </div>
         ) : loading && !weather ? (
-          <div className="flex h-full items-center justify-center text-xs text-fg-muted italic">
+          <div className="flex items-center justify-center text-xs text-fg-muted italic block-full">
             Fetching weather...
           </div>
         ) : weather ? (
           <>
             {/* Main Weather Info */}
-            <div className="flex items-center justify-between px-1 pt-1">
+            <div className="flex items-center justify-between px-1 pbs-1">
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold tracking-tight text-fg">
@@ -168,21 +173,21 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
                 </span>
               </div>
 
-              <div className="pr-1">
+              <div className="pe-1">
                 <WeatherIcon code={weatherCode} isDay={isDay} />
               </div>
             </div>
 
             {/* Atmosphere Details Pill */}
-            <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line/40 pt-2 pb-2 text-[11px]">
+            <div className="mbs-auto grid grid-cols-2 gap-2 border-bs border-line/40 pbs-2 pbe-2 text-[11px]">
               <div className="flex items-center gap-1.5 text-fg-muted">
-                <Drop className="h-3.5 w-3.5 shrink-0 text-accent-500" weight="fill" />
+                <Drop className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="fill" />
                 <span>Humidity:</span>
                 <span className="font-mono font-medium text-fg">{weather.humidity}%</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-fg-muted">
-                <Wind className="h-3.5 w-3.5 shrink-0 text-accent-500" />
+                <Wind className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
                 <span>Wind:</span>
                 <span className="font-mono font-medium text-fg">
                   {windSpeed} {windUnit}

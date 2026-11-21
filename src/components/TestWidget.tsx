@@ -1,17 +1,19 @@
-import { useState, useRef, useEffect } from "react";
 import { Check, DotsSixVertical } from "@phosphor-icons/react";
-import { useInstance } from "../core/use-instance";
-import { useEditMode } from "../core/use-edit-mode";
+import { useEffect, useRef, useState } from "react";
+
 import {
-  setBounds,
-  verifyDesktopPin,
-  setOpacity,
-  setAlwaysOnTop,
-  removeWidget,
   openSettingsWindow,
-} from "../core/ipc";
+  removeWidget,
+  setAlwaysOnTop,
+  setBounds,
+  setOpacity,
+  verifyDesktopPin,
+} from "@/core/ipc";
+import type { Rect } from "@/core/types";
+import { useEditMode } from "@/core/use-edit-mode";
+import { useInstance } from "@/core/use-instance";
+
 import { WidgetContextMenu } from "./WidgetContextMenu";
-import type { Rect } from "../core/types";
 
 interface TestWidgetProps {
   id: string;
@@ -212,7 +214,7 @@ export function TestWidget({ id }: TestWidgetProps) {
 
   if (loading) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted">
+      <div className="flex items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted block-full inline-full">
         Loading widget...
       </div>
     );
@@ -220,7 +222,7 @@ export function TestWidget({ id }: TestWidgetProps) {
 
   if (error || !instance) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error">
+      <div className="flex items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error block-full inline-full">
         Error: {error || "Instance not found"}
       </div>
     );
@@ -237,22 +239,35 @@ export function TestWidget({ id }: TestWidgetProps) {
   return (
     <div
       onContextMenu={handleContextMenu}
-      className={`relative flex h-full w-full flex-col overflow-hidden rounded-card border bg-surface shadow-card transition-shadow select-none ${
-        editMode ? "border-accent-500 ring-2 ring-accent-500/30" : "border-line"
-      }`}
+      className={`
+        relative flex flex-col overflow-hidden rounded-card border bg-surface
+        shadow-card transition-shadow select-none block-full inline-full
+        ${editMode ? "border-accent-500 ring-2 ring-accent-500/30" : "border-line"}
+      `}
     >
       {/* Drag Bar (Active in Edit Mode, or Header in normal mode) */}
       <div
-        className={`flex h-7 items-center justify-between border-b border-line px-3 text-xs ${
-          editMode
-            ? "cursor-grab bg-accent-500/10 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : "bg-surface-raised text-fg-muted"
-        }`}
+        className={`
+          flex items-center justify-between border-be border-line px-3 text-xs
+          block-7
+          ${
+            editMode
+              ? `
+              cursor-grab bg-accent-500/10 text-accent-500
+              hover:bg-accent-500/20
+              active:cursor-grabbing
+            `
+              : "bg-surface-raised text-fg-muted"
+          }
+        `}
         onPointerDown={editMode ? handleDragStart : undefined}
       >
         <div className="flex items-center gap-1.5 font-medium">
           <span
-            className={`inline-block h-2 w-2 rounded-full ${isAttached ? "bg-ok" : "bg-warn"}`}
+            className={`
+              inline-block rounded-full block-2 inline-2
+              ${isAttached ? "bg-ok" : `bg-warn`}
+            `}
           />
           <span className="truncate">
             {instance.kind} ({instance.id.slice(0, 8)})
@@ -273,14 +288,19 @@ export function TestWidget({ id }: TestWidgetProps) {
         <div>
           <label
             htmlFor="focus-test-input"
-            className="mb-1 block text-xs font-medium text-fg-muted"
+            className="mbe-1 block text-xs font-medium text-fg-muted"
           >
             Keyboard Focus Gate:
           </label>
           <input
             id="focus-test-input"
             type="text"
-            className="w-full rounded-md border border-line bg-surface-raised px-2.5 py-1.5 text-xs text-fg outline-none select-text placeholder:text-fg-muted focus:ring-1 focus:ring-focus"
+            className="
+              rounded-md border border-line bg-surface-raised px-2.5 py-1.5
+              text-xs text-fg outline-none select-text inline-full
+              placeholder:text-fg-muted
+              focus:ring-1 focus:ring-focus
+            "
             placeholder="Click here and type to test focus..."
             value={currentText}
             onChange={(e) => {
@@ -295,7 +315,12 @@ export function TestWidget({ id }: TestWidgetProps) {
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            className="rounded-md bg-accent-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-600 active:scale-95"
+            className="
+              rounded-md bg-accent-500 px-3 py-1.5 text-xs font-medium
+              text-white transition-colors
+              hover:bg-accent-600
+              active:scale-95
+            "
             onClick={() => {
               patchState({ clicks: clicks + 1 });
             }}
@@ -306,7 +331,7 @@ export function TestWidget({ id }: TestWidgetProps) {
             {isAttached ? (
               <>
                 <span>Attached to Host</span>
-                <Check className="h-3 w-3 text-ok" weight="bold" />
+                <Check className="text-ok block-3 inline-3" weight="bold" />
               </>
             ) : (
               "Top-level"
@@ -315,7 +340,7 @@ export function TestWidget({ id }: TestWidgetProps) {
         </div>
 
         {/* Bounds & Edit Controls */}
-        <div className="border-t border-line pt-2 text-[11px] text-fg-muted">
+        <div className="border-bs border-line pbs-2 text-[11px] text-fg-muted">
           <div className="flex justify-between">
             <span>
               Pos: {displayedBounds.x}, {displayedBounds.y}
@@ -324,17 +349,23 @@ export function TestWidget({ id }: TestWidgetProps) {
               Size: {displayedBounds.w} × {displayedBounds.h}
             </span>
           </div>
-          <div className="mt-2 flex items-center justify-between gap-2">
+          <div className="mbs-2 flex items-center justify-between gap-2">
             {(() => {
               const isAlwaysOnTop = Boolean(instance.alwaysOnTop ?? instance.always_on_top);
               return (
                 <button
                   type="button"
-                  className={`rounded border px-2 py-0.5 text-[10px] font-medium ${
-                    isAlwaysOnTop
-                      ? "border-accent-500 bg-accent-500/10 text-accent-500"
-                      : "border-line bg-surface-raised text-fg-muted hover:text-fg"
-                  }`}
+                  className={`
+                    rounded-sm border px-2 py-0.5 text-[10px] font-medium
+                    ${
+                      isAlwaysOnTop
+                        ? "border-accent-500 bg-accent-500/10 text-accent-500"
+                        : `
+                        border-line bg-surface-raised text-fg-muted
+                        hover:text-fg
+                      `
+                    }
+                  `}
                   onClick={() => void setAlwaysOnTop(id, !isAlwaysOnTop)}
                 >
                   {isAlwaysOnTop ? "Always on top: ON" : "Always on top: OFF"}
@@ -343,7 +374,11 @@ export function TestWidget({ id }: TestWidgetProps) {
             })()}
             <button
               type="button"
-              className="rounded border border-line bg-surface-raised px-2 py-0.5 text-[10px] font-medium text-fg-muted hover:text-fg"
+              className="
+                rounded-sm border border-line bg-surface-raised px-2 py-0.5
+                text-[10px] font-medium text-fg-muted
+                hover:text-fg
+              "
               onClick={() => {
                 const nextOp = instance.opacity < 0.9 ? 0.95 : 0.6;
                 void setOpacity(id, nextOp);
@@ -358,10 +393,14 @@ export function TestWidget({ id }: TestWidgetProps) {
       {/* Resize Grip Corner (Only in Edit Mode) */}
       {editMode && (
         <div
-          className="absolute right-0 bottom-0 flex h-5 w-5 cursor-se-resize items-end justify-end p-1 text-[11px] text-accent-500 hover:scale-110"
+          className="
+            absolute inset-e-0 inset-be-0 flex cursor-se-resize items-end
+            justify-end p-1 text-[11px] text-accent-500 block-5 inline-5
+            hover:scale-110
+          "
           onPointerDown={handleResizeStart}
         >
-          <DotsSixVertical className="h-3 w-3" />
+          <DotsSixVertical className="block-3 inline-3" />
         </div>
       )}
 

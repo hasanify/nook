@@ -1,5 +1,5 @@
-import { TestWidget } from "../../components/TestWidget";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
+import { TestWidget } from "@/components/TestWidget";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
 
 const manifest: Manifest = {
   id: "placeholder",

@@ -1,10 +1,12 @@
-import { useState, useRef, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
+
+import { openContextMenu, setBounds } from "@/core/ipc";
+import { getWidgetPreset } from "@/core/presets";
+import type { Rect, WidgetInstance } from "@/core/types";
+import { useEditMode } from "@/core/use-edit-mode";
+import { useTheme } from "@/core/use-theme";
+
 import { EditOverlay } from "./EditOverlay";
-import { setBounds, openContextMenu } from "../core/ipc";
-import { useEditMode } from "../core/use-edit-mode";
-import { useTheme } from "../core/use-theme";
-import { getWidgetPreset } from "../core/presets";
-import type { WidgetInstance, Rect } from "../core/types";
 
 function rectsEqual(a: Rect, b: Rect): boolean {
   return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
@@ -150,17 +152,28 @@ export function WidgetShell({
     <div
       onContextMenu={handleContextMenu}
       style={mergedStyle}
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,opacity,box-shadow] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px ${
-        widgetColor
-          ? ""
-          : `before:bg-gradient-to-r before:from-transparent ${preset.highlightClass} before:to-transparent`
-      } ${preset.containerClass} ${
-        effectiveEditMode ? "!border-accent-500/80 ring-2 ring-accent-500/80 ring-inset" : ""
-      }`}
+      className={`
+        relative flex flex-col overflow-hidden
+        transition-[border-color,opacity,box-shadow] duration-150 select-none
+        block-full inline-full min-block-0
+        before:pointer-events-none before:absolute before:inset-x-6
+        before:inset-bs-0 before:block-px
+        ${
+          widgetColor
+            ? ""
+            : `
+            before:bg-linear-to-r before:from-transparent
+            ${preset.highlightClass}
+            before:to-transparent
+          `
+        }
+        ${preset.containerClass}
+        ${effectiveEditMode ? `border-accent-500/80! ring-2 ring-accent-500/80 ring-inset` : ""}
+      `}
     >
       {widgetColor && (
         <span
-          className="pointer-events-none absolute inset-x-6 top-0 h-px"
+          className="pointer-events-none absolute inset-x-6 inset-bs-0 block-px"
           style={{
             background: `linear-gradient(90deg, transparent, color-mix(in srgb, ${widgetColor} 70%, transparent), transparent)`,
           }}
@@ -186,9 +199,16 @@ export function WidgetShell({
         onResetToFit={handleResetToFit}
       />
 
-      {banner && <div className="px-3 pt-2">{banner}</div>}
+      {banner && <div className="px-3 pbs-2">{banner}</div>}
 
-      <div className="widget-content-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain px-3.5 pt-2 pb-2.5 text-sm select-auto [&>*]:h-auto [&>*]:min-h-full">
+      <div
+        className="
+        flex flex-1 flex-col overflow-x-hidden overflow-y-auto
+        overscroll-y-contain px-3.5 pbs-2 pbe-2.5 text-sm select-auto
+        min-block-0
+        *:block-auto *:min-block-full
+      "
+      >
         {children}
       </div>
     </div>

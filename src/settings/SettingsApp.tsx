@@ -1,59 +1,60 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
-  Sparkle,
-  Globe,
-  Brain,
-  Cloud,
-  Lightning,
-  SlidersHorizontal,
-  SquaresFour,
-  User,
-  PaintBrush,
-  Info,
-  Desktop,
-  Sun,
-  Moon,
-  Check,
-  Plus,
-  Trash,
-  LockKey,
-  GithubLogo,
-  Triangle,
   ArrowClockwise,
+  Brain,
+  Check,
+  Cloud,
+  Desktop,
+  GithubLogo,
+  Globe,
+  Info,
+  Lightning,
+  LockKey,
+  Moon,
+  PaintBrush,
+  Plus,
+  SlidersHorizontal,
+  Sparkle,
+  SquaresFour,
+  Sun,
+  Trash,
+  Triangle,
+  User,
 } from "@phosphor-icons/react";
-import { useEditMode } from "../core/use-edit-mode";
+import { listen } from "@tauri-apps/api/event";
+import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { CustomSelect } from "@/components/CustomSelect";
+import { SettingsForm } from "@/components/SettingsForm";
+import { Toggle } from "@/components/Toggle";
+import { WIDGET_COLOR_OPTIONS } from "@/components/WidgetContextMenu";
+import { applyBentoLayout, computeBentoLayout } from "@/core/bento";
 import {
-  getAppConfig,
-  updateAppConfig,
-  setOpacity,
-  setAlwaysOnTop,
-  updateSettings,
-  removeWidget,
   addWidget,
-  onConfigChanged,
-  hasAccountToken,
-  saveAccountToken,
+  checkForUpdates,
   clearAccountToken,
   getAccountToken,
+  getAppConfig,
   getAppVersion,
-  checkForUpdates,
-  installUpdate,
-  onUpdateDownloadProgress,
-  showSettingsWindow,
   getDesktopWorkArea,
+  hasAccountToken,
+  installUpdate,
+  onConfigChanged,
+  onUpdateDownloadProgress,
+  removeWidget,
+  saveAccountToken,
+  setAlwaysOnTop,
+  setOpacity,
+  showSettingsWindow,
+  updateAppConfig,
   type UpdateCheckResult,
-} from "../core/ipc";
-import { listen } from "@tauri-apps/api/event";
-import { SettingsForm } from "../components/SettingsForm";
-import { Toggle } from "../components/Toggle";
-import { CustomSelect } from "../components/CustomSelect";
-import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
-import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
-import { WIDGET_PRESETS } from "../core/presets";
-import { computeBentoLayout, applyBentoLayout } from "../core/bento";
-import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
-import { openUrl } from "@tauri-apps/plugin-opener";
-import type { AppConfig, WidgetInstance } from "../core/types";
+  updateSettings,
+} from "@/core/ipc";
+import { WIDGET_PRESETS } from "@/core/presets";
+import type { AppConfig, WidgetInstance } from "@/core/types";
+import { useEditMode } from "@/core/use-edit-mode";
+import { getWidgetModule, WIDGET_REGISTRY } from "@/widgets/registry";
 
 interface AIProviderItem {
   id: string;
@@ -71,7 +72,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-proj-••••••••••••••••••••••••",
     desc: "Powers GPT-4o, GPT-4o-mini, and OpenAI models.",
     defaultModel: "gpt-4o-mini",
-    icon: <Sparkle className="h-4 w-4 text-accent-500" weight="fill" />,
+    icon: <Sparkle className="text-accent-500 block-4 inline-4" weight="fill" />,
   },
   {
     id: "openrouter",
@@ -79,7 +80,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-or-v1-••••••••••••••••••••••••",
     desc: "Single unified API to 100+ AI models (Claude, Llama, DeepSeek, Gemini).",
     defaultModel: "openai/gpt-4o-mini",
-    icon: <Globe className="h-4 w-4 text-accent-500" />,
+    icon: <Globe className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "gemini",
@@ -87,7 +88,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "AIzaSy••••••••••••••••••••••••",
     desc: "Generous free tier powering ultra-fast Gemini 2.0 Flash.",
     defaultModel: "gemini-2.0-flash",
-    icon: <Sparkle className="h-4 w-4 text-accent-500" />,
+    icon: <Sparkle className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "anthropic",
@@ -95,7 +96,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-ant-api••••••••••••••••••••••••",
     desc: "Direct access to Claude 3.5 Sonnet and Claude 3.5 Haiku.",
     defaultModel: "claude-3-5-haiku-20241022",
-    icon: <Brain className="h-4 w-4 text-accent-500" />,
+    icon: <Brain className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "bedrock",
@@ -103,7 +104,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "Bedrock API key or Bearer token...",
     desc: "AWS Bedrock runtime or custom OpenAI-compatible gateway.",
     defaultModel: "anthropic.claude-3-5-haiku-20241022-v1:0",
-    icon: <Cloud className="h-4 w-4 text-accent-500" />,
+    icon: <Cloud className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "groq",
@@ -111,7 +112,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "gsk_••••••••••••••••••••••••",
     desc: "Near-instant LPU inference powering Llama 3.3 70B.",
     defaultModel: "llama-3.3-70b-versatile",
-    icon: <Lightning className="h-4 w-4 text-accent-500" weight="fill" />,
+    icon: <Lightning className="text-accent-500 block-4 inline-4" weight="fill" />,
   },
 ];
 
@@ -571,78 +572,113 @@ export function SettingsApp() {
       : undefined;
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden overscroll-none bg-surface font-sans text-fg select-none">
+    <div className="flex flex-col overflow-hidden overscroll-none bg-surface font-sans text-fg select-none block-full inline-full">
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-line/60 bg-surface-raised/40 px-5 pt-1.5 text-xs font-medium">
+      <div className="flex gap-1 border-be border-line/60 bg-surface-raised/40 px-5 pbs-1.5 text-xs font-medium">
         <button
           type="button"
           onClick={() => setActiveTab("general")}
-          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
-            activeTab === "general"
-              ? "border-accent-500 font-semibold text-fg"
-              : "border-transparent text-fg-muted hover:text-fg"
-          }`}
+          className={`
+            flex cursor-pointer items-center gap-2 border-be-2 px-3 py-2.5
+            transition-all
+            ${
+              activeTab === "general"
+                ? "border-accent-500 font-semibold text-fg"
+                : `
+                border-transparent text-fg-muted
+                hover:text-fg
+              `
+            }
+          `}
         >
-          <SlidersHorizontal className="h-3.5 w-3.5" />
+          <SlidersHorizontal className="block-3.5 inline-3.5" />
           <span>General</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("widgets")}
-          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
-            activeTab === "widgets"
-              ? "border-accent-500 font-semibold text-fg"
-              : "border-transparent text-fg-muted hover:text-fg"
-          }`}
+          className={`
+            flex cursor-pointer items-center gap-2 border-be-2 px-3 py-2.5
+            transition-all
+            ${
+              activeTab === "widgets"
+                ? "border-accent-500 font-semibold text-fg"
+                : `
+                border-transparent text-fg-muted
+                hover:text-fg
+              `
+            }
+          `}
         >
-          <SquaresFour className="h-3.5 w-3.5" />
+          <SquaresFour className="block-3.5 inline-3.5" />
           <span>Widgets</span>
-          <span className="py-0.2 rounded-full bg-surface-raised px-1.5 font-mono text-[10px] text-fg-muted">
+          <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-fg-muted">
             {config?.widgets.length ?? 0}
           </span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("accounts")}
-          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
-            activeTab === "accounts"
-              ? "border-accent-500 font-semibold text-fg"
-              : "border-transparent text-fg-muted hover:text-fg"
-          }`}
+          className={`
+            flex cursor-pointer items-center gap-2 border-be-2 px-3 py-2.5
+            transition-all
+            ${
+              activeTab === "accounts"
+                ? "border-accent-500 font-semibold text-fg"
+                : `
+                border-transparent text-fg-muted
+                hover:text-fg
+              `
+            }
+          `}
         >
-          <User className="h-3.5 w-3.5" />
+          <User className="block-3.5 inline-3.5" />
           <span>Accounts</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("appearance")}
-          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
-            activeTab === "appearance"
-              ? "border-accent-500 font-semibold text-fg"
-              : "border-transparent text-fg-muted hover:text-fg"
-          }`}
+          className={`
+            flex cursor-pointer items-center gap-2 border-be-2 px-3 py-2.5
+            transition-all
+            ${
+              activeTab === "appearance"
+                ? "border-accent-500 font-semibold text-fg"
+                : `
+                border-transparent text-fg-muted
+                hover:text-fg
+              `
+            }
+          `}
         >
-          <PaintBrush className="h-3.5 w-3.5" />
+          <PaintBrush className="block-3.5 inline-3.5" />
           <span>Appearance</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("about")}
-          className={`flex cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 transition-all ${
-            activeTab === "about"
-              ? "border-accent-500 font-semibold text-fg"
-              : "border-transparent text-fg-muted hover:text-fg"
-          }`}
+          className={`
+            flex cursor-pointer items-center gap-2 border-be-2 px-3 py-2.5
+            transition-all
+            ${
+              activeTab === "about"
+                ? "border-accent-500 font-semibold text-fg"
+                : `
+                border-transparent text-fg-muted
+                hover:text-fg
+              `
+            }
+          `}
         >
           <div className="relative">
-            <Info className="h-3.5 w-3.5" />
+            <Info className="block-3.5 inline-3.5" />
             {updateResult?.has_update && (
-              <span className="absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full bg-accent-500" />
+              <span className="absolute -inset-e-1 -inset-bs-1 animate-pulse rounded-full bg-accent-500 block-2 inline-2" />
             )}
           </div>
           <span>About</span>
           {updateResult?.has_update && (
-            <span className="py-0.2 rounded-full bg-accent-500/20 px-1.5 text-[10px] font-semibold text-accent-500">
+            <span className="rounded-full bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-accent-500">
               Update
             </span>
           )}
@@ -650,17 +686,17 @@ export function SettingsApp() {
       </div>
 
       {/* Content Area */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden text-xs">
+      <div className="flex flex-1 flex-col overflow-hidden text-xs min-block-0">
         {/* GENERAL TAB */}
         {activeTab === "general" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
-            <div className="my-3 flex w-full flex-col gap-5 pb-4">
+            <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
               {/* Desktop & Interaction Settings */}
               <div className="flex flex-col gap-4 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <span className="font-semibold text-fg">Desktop & Interaction</span>
 
                 {/* Edit Mode Toggle */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Edit Layout</div>
                     <div className="text-[11px] text-fg-muted">
@@ -675,7 +711,7 @@ export function SettingsApp() {
                 </div>
 
                 {/* Launch on Startup */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Launch on Startup</div>
                     <div className="text-[11px] text-fg-muted">
@@ -690,7 +726,7 @@ export function SettingsApp() {
                 </div>
 
                 {/* Automatic Updates */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
@@ -705,7 +741,7 @@ export function SettingsApp() {
                 </div>
 
                 {/* Grid Snap */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-4">
+                <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Grid Snap</div>
                     <div className="text-[11px] text-fg-muted">
@@ -721,7 +757,7 @@ export function SettingsApp() {
                       { value: 8, label: "8 px (Default)" },
                       { value: 16, label: "16 px (Coarse)" },
                     ]}
-                    className="w-48"
+                    className="inline-48"
                   />
                 </div>
               </div>
@@ -732,7 +768,7 @@ export function SettingsApp() {
         {/* APPEARANCE TAB */}
         {activeTab === "appearance" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
-            <div className="my-3 flex w-full flex-col gap-5 pb-6">
+            <div className="my-3 flex flex-col gap-5 pbe-6 inline-full">
               {/* Color Theme */}
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-4 backdrop-blur-xs">
                 <div>
@@ -746,28 +782,36 @@ export function SettingsApp() {
                     {
                       id: "system" as const,
                       label: "System",
-                      icon: <Desktop className="h-4 w-4" />,
+                      icon: <Desktop className="block-4" />,
                     },
                     {
                       id: "light" as const,
                       label: "Light",
-                      icon: <Sun className="h-4 w-4" />,
+                      icon: <Sun className="block-4 inline-4" />,
                     },
                     {
                       id: "dark" as const,
                       label: "Dark",
-                      icon: <Moon className="h-4 w-4" />,
+                      icon: <Moon className="block-4 inline-4" />,
                     },
                   ].map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => handleThemeChange(item.id)}
-                      className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border p-2.5 text-center text-xs font-medium transition-all ${
-                        config?.app?.theme === item.id
-                          ? "border-accent-500 bg-accent-500/15 font-semibold text-accent-500 shadow-xs"
-                          : "border-line/60 bg-surface text-fg-muted hover:border-line hover:text-fg"
-                      }`}
+                      className={`
+                        flex cursor-pointer items-center justify-center gap-2
+                        rounded-xl border p-2.5 text-center text-xs font-medium
+                        transition-all
+                        ${
+                          config?.app?.theme === item.id
+                            ? `border-accent-500 bg-accent-500/15 font-semibold text-accent-500 shadow-xs`
+                            : `
+                            border-line/60 bg-surface text-fg-muted
+                            hover:border-line hover:text-fg
+                          `
+                        }
+                      `}
                     >
                       {item.icon}
                       <span>{item.label}</span>
@@ -785,7 +829,7 @@ export function SettingsApp() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-2 gap-3 pbs-1">
                   {WIDGET_PRESETS.map((preset) => {
                     const isSelected = (config?.app?.widgetPreset || "default") === preset.id;
                     const isDarkTheme =
@@ -800,46 +844,60 @@ export function SettingsApp() {
                         key={preset.id}
                         type="button"
                         onClick={() => handlePresetChange(preset.id)}
-                        className={`group relative flex cursor-pointer flex-col gap-2.5 rounded-xl border p-3.5 text-left transition-all ${
-                          isSelected
-                            ? "border-accent-500 bg-accent-500/[0.08] shadow-xs ring-1 ring-accent-500/40"
-                            : "border-line/70 bg-surface/80 hover:border-line hover:bg-surface"
-                        }`}
+                        className={`
+                          group relative flex cursor-pointer flex-col gap-2.5
+                          rounded-xl border p-3.5 text-start transition-all
+                          ${
+                            isSelected
+                              ? `border-accent-500 bg-accent-500/8 shadow-xs ring-1 ring-accent-500/40`
+                              : `
+                              border-line/70 bg-surface/80
+                              hover:border-line hover:bg-surface
+                            `
+                          }
+                        `}
                       >
                         {/* Mini Widget Preview Mockup */}
-                        <div className="relative flex h-24 w-full items-center justify-center overflow-hidden rounded-lg border border-line/40 bg-surface-raised/60 p-2.5">
+                        <div className="relative flex items-center justify-center overflow-hidden rounded-lg border border-line/40 bg-surface-raised/60 p-2.5 block-24 inline-full">
                           {/* Simulated mini desktop wallpaper texture */}
                           <div className="absolute inset-0 bg-radial from-accent-500/5 via-transparent to-transparent opacity-50" />
 
                           {/* The Mini Widget Box */}
                           <div
-                            className={`relative flex h-full w-full flex-col overflow-hidden transition-all duration-200 ${preset.containerClass}`}
+                            className={`
+                              relative flex flex-col overflow-hidden
+                              transition-all duration-200 block-full inline-full
+                              ${preset.containerClass}
+                            `}
                             style={previewStyle}
                           >
                             {/* Mini Header Bar */}
                             <div
-                              className={`flex items-center justify-between px-2 py-1 ${preset.headerClass}`}
+                              className={`
+                                flex items-center justify-between px-2 py-1
+                                ${preset.headerClass}
+                              `}
                             >
                               <div className="flex items-center gap-1">
-                                <div className="h-1.5 w-1.5 rounded-full bg-accent-500" />
+                                <div className="rounded-full bg-accent-500 block-1.5" />
                                 <span className="font-mono text-[9px] font-medium text-fg/80">
                                   Widget
                                 </span>
                               </div>
-                              <div className="h-1 w-3 rounded-full bg-fg-muted/40" />
+                              <div className="rounded-full bg-fg-muted/40 block-1 inline-3" />
                             </div>
 
                             {/* Mini Content Skeleton */}
                             <div className="flex flex-1 flex-col justify-center gap-1.5 px-2.5 py-1.5">
-                              <div className="h-1.5 w-3/4 rounded-full bg-fg-muted/20" />
-                              <div className="h-1.5 w-1/2 rounded-full bg-fg-muted/15" />
+                              <div className="rounded-full bg-fg-muted/20 block-1.5 inline-3/4" />
+                              <div className="rounded-full bg-fg-muted/15 block-1.5 inline-1/2" />
                             </div>
                           </div>
                         </div>
 
                         {/* Text and Selection Meta */}
                         <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
+                          <div className="flex-1 min-inline-0">
                             <div className="flex items-center gap-1.5">
                               <span className="truncate text-xs font-semibold text-fg">
                                 {preset.name}
@@ -848,20 +906,29 @@ export function SettingsApp() {
                                 {preset.tagline}
                               </span>
                             </div>
-                            <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-fg-muted">
+                            <div className="mbs-1 line-clamp-2 text-[11px] leading-relaxed text-fg-muted">
                               {preset.description}
                             </div>
                           </div>
 
                           {/* Active Indicator Icon */}
                           <div
-                            className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full transition-colors ${
-                              isSelected
-                                ? "bg-accent-500 text-white"
-                                : "border border-line/60 bg-surface-raised text-transparent group-hover:border-line"
-                            }`}
+                            className={`
+                              flex shrink-0 items-center justify-center
+                              rounded-full transition-colors block-4.5
+                              inline-4.5
+                              ${
+                                isSelected
+                                  ? "bg-accent-500 text-white"
+                                  : `
+                                  border border-line/60 bg-surface-raised
+                                  text-transparent
+                                  group-hover:border-line
+                                `
+                              }
+                            `}
                           >
-                            <Check className="h-2.5 w-2.5" weight="bold" />
+                            <Check className="block-2.5 inline-2.5" weight="bold" />
                           </div>
                         </div>
                       </button>
@@ -875,9 +942,9 @@ export function SettingsApp() {
 
         {/* WIDGETS TAB */}
         {activeTab === "widgets" && (
-          <div className="flex min-h-0 flex-1 gap-5 overflow-hidden px-6 py-0">
+          <div className="flex flex-1 gap-5 overflow-hidden px-6 py-0 min-block-0">
             {/* Left Column: Widget List */}
-            <div className="my-3 flex w-56 shrink-0 flex-col gap-2.5 border-r border-line/60 pr-4">
+            <div className="my-3 flex shrink-0 flex-col gap-2.5 border-e border-line/60 pe-4 inline-56">
               <div className="flex items-center justify-between font-medium text-fg">
                 <span>Active Widgets</span>
                 <span className="font-mono text-[11px] text-fg-muted">
@@ -890,15 +957,21 @@ export function SettingsApp() {
                 <div className="flex flex-col gap-1.5 rounded-lg border border-line/60 bg-surface-raised/60 p-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-semibold text-fg">
-                      <SquaresFour className="h-3.5 w-3.5 text-accent-500" />
+                      <SquaresFour className="text-accent-500 block-3.5 inline-3.5" />
                       Bento Grid
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 pt-0.5">
+                  <div className="flex items-center gap-1.5 pbs-0.5">
                     <button
                       type="button"
                       onClick={() => void handleCycleSettingsBento()}
-                      className="flex-1 cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-center text-[11px] font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+                      className="
+                        flex-1 cursor-pointer rounded-md bg-accent-500 px-2 py-1
+                        text-center text-[11px] font-semibold text-white
+                        shadow-xs transition-colors
+                        hover:bg-accent-600
+                        active:scale-95
+                      "
                     >
                       Cycle Layout
                     </button>
@@ -907,7 +980,13 @@ export function SettingsApp() {
                         <button
                           type="button"
                           onClick={handleDoneSettingsBento}
-                          className="cursor-pointer rounded-md bg-accent-500/20 px-2.5 py-1 text-[11px] font-semibold text-accent-500 transition-colors hover:bg-accent-500/30 active:scale-95"
+                          className="
+                            cursor-pointer rounded-md bg-accent-500/20 px-2.5
+                            py-1 text-[11px] font-semibold text-accent-500
+                            transition-colors
+                            hover:bg-accent-500/30
+                            active:scale-95
+                          "
                           title="Save this layout"
                         >
                           Done
@@ -915,7 +994,13 @@ export function SettingsApp() {
                         <button
                           type="button"
                           onClick={() => void handleRevertSettingsBento()}
-                          className="cursor-pointer rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-medium text-fg-muted hover:text-fg active:scale-95"
+                          className="
+                            cursor-pointer rounded-md border border-line
+                            bg-surface px-2 py-1 text-[11px] font-medium
+                            text-fg-muted
+                            hover:text-fg
+                            active:scale-95
+                          "
                           title="Restore previous layout"
                         >
                           Revert
@@ -926,7 +1011,7 @@ export function SettingsApp() {
                 </div>
               )}
 
-              <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-none pr-1">
+              <div className="flex flex-1 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-none pe-1 min-block-0">
                 {config?.widgets.map((w) => {
                   const widgetKind = w.kind || (w as unknown as { type?: string }).type || "";
                   const title =
@@ -943,11 +1028,22 @@ export function SettingsApp() {
                       key={w.id}
                       type="button"
                       onClick={() => setSelectedWidgetId(w.id)}
-                      className={`group flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition-all ${
-                        isSelected
-                          ? `font-semibold text-fg shadow-xs ${!wColor ? "border-accent-500/60 bg-accent-500/15" : ""}`
-                          : "border-transparent bg-surface-raised text-fg hover:border-line hover:bg-surface"
-                      }`}
+                      className={`
+                        group flex cursor-pointer items-center justify-between
+                        rounded-lg border px-3 py-2 text-start text-xs
+                        transition-all
+                        ${
+                          isSelected
+                            ? `
+                            font-semibold text-fg shadow-xs
+                            ${!wColor ? `border-accent-500/60 bg-accent-500/15` : ""}
+                          `
+                            : `
+                            border-transparent bg-surface-raised text-fg
+                            hover:border-line hover:bg-surface
+                          `
+                        }
+                      `}
                       style={
                         isSelected && wColor
                           ? {
@@ -957,15 +1053,19 @@ export function SettingsApp() {
                           : undefined
                       }
                     >
-                      <div className="flex min-w-0 items-center gap-2 truncate">
+                      <div className="flex items-center gap-2 truncate min-inline-0">
                         <span
-                          className={`h-2 w-2 shrink-0 rounded-full transition-colors ${
-                            isSelected && !wColor
-                              ? "bg-accent-500"
-                              : !isSelected && !wColor
-                                ? "bg-fg-muted/40"
-                                : ""
-                          }`}
+                          className={`
+                            shrink-0 rounded-full transition-colors block-2
+                            inline-2
+                            ${
+                              isSelected && !wColor
+                                ? "bg-accent-500"
+                                : !isSelected && !wColor
+                                  ? "bg-fg-muted/40"
+                                  : ""
+                            }
+                          `}
                           style={
                             wColor
                               ? {
@@ -989,7 +1089,7 @@ export function SettingsApp() {
               </div>
 
               {/* Add Widget */}
-              <div className="mt-auto flex shrink-0 flex-col gap-1.5 border-t border-line/60 pt-3 pb-2">
+              <div className="mbs-auto flex shrink-0 flex-col gap-1.5 border-bs border-line/60 pbs-3 pbe-2">
                 <span className="text-[11px] font-medium text-fg-muted">Add new widget:</span>
                 <div className="flex items-center gap-1.5">
                   <CustomSelect<string>
@@ -1004,7 +1104,7 @@ export function SettingsApp() {
                     searchPlaceholder="Search widgets..."
                     searchable={true}
                     direction="up"
-                    className="h-8 min-w-0 flex-1"
+                    className="flex-1 block-8 min-inline-0"
                     buttonClassName="h-8"
                   />
                   <button
@@ -1014,9 +1114,17 @@ export function SettingsApp() {
                         void handleAddWidget(widgetToAdd);
                       }
                     }}
-                    className="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-lg bg-accent-500 px-2.5 text-xs font-semibold whitespace-nowrap text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="
+                      flex shrink-0 cursor-pointer items-center justify-center
+                      gap-1 rounded-lg bg-accent-500 px-2.5 text-xs
+                      font-semibold whitespace-nowrap text-white shadow-xs
+                      transition-colors block-8
+                      hover:bg-accent-600
+                      active:scale-95
+                      disabled:cursor-not-allowed disabled:opacity-50
+                    "
                   >
-                    <Plus className="h-3.5 w-3.5" weight="bold" />
+                    <Plus className="block-3.5 inline-3.5" weight="bold" />
                     <span>Add</span>
                   </button>
                 </div>
@@ -1024,9 +1132,9 @@ export function SettingsApp() {
             </div>
 
             {/* Right Column: Widget Inspector */}
-            <div className="my-3 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none pr-2 pl-2">
+            <div className="my-3 flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-2 min-block-0">
               {selectedWidget ? (
-                <div className="flex w-full flex-col gap-5 pb-4">
+                <div className="flex flex-col gap-5 pbe-4 inline-full">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-sm font-semibold text-fg">
@@ -1036,7 +1144,7 @@ export function SettingsApp() {
                   </div>
 
                   {/* Always on top */}
-                  <div className="flex items-center justify-between border-t border-line/60 pt-3">
+                  <div className="flex items-center justify-between border-bs border-line/60 pbs-3">
                     <div>
                       <div className="font-medium text-fg">Always on Top</div>
                       <div className="text-[11px] text-fg-muted">
@@ -1053,11 +1161,14 @@ export function SettingsApp() {
                   </div>
 
                   {/* Opacity slider */}
-                  <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
+                  <div className="flex flex-col gap-2 border-bs border-line/60 pbs-3">
                     <div className="flex justify-between">
                       <span className="font-medium text-fg">Window Opacity</span>
                       <span
-                        className={`font-mono font-medium ${!selectedWidgetColor ? "text-accent-500" : ""}`}
+                        className={`
+                          font-mono font-medium
+                          ${!selectedWidgetColor ? `text-accent-500` : ""}
+                        `}
                         style={selectedWidgetColor ? { color: selectedWidgetColor } : undefined}
                       >
                         {Math.round(selectedWidget.opacity * 100)}%
@@ -1094,20 +1205,23 @@ export function SettingsApp() {
                           }
                         }, 40);
                       }}
-                      className={`cursor-pointer ${!selectedWidgetColor ? "accent-accent-500" : ""}`}
+                      className={`
+                        cursor-pointer
+                        ${!selectedWidgetColor ? `accent-accent-500` : ""}
+                      `}
                       style={selectedWidgetColor ? { accentColor: selectedWidgetColor } : undefined}
                     />
                   </div>
 
                   {/* Widget Accent Color */}
-                  <div className="flex flex-col gap-2 border-t border-line/60 pt-3">
+                  <div className="flex flex-col gap-2 border-bs border-line/60 pbs-3">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-fg">Widget Accent Color</span>
                       <span className="text-[11px] text-fg-muted">
                         Customize badge, highlight, and focus tint
                       </span>
                     </div>
-                    <div className="flex items-center gap-2.5 pt-1">
+                    <div className="flex items-center gap-2.5 pbs-1">
                       {WIDGET_COLOR_OPTIONS.map((c) => {
                         const isSelected = (selectedWidget.settings.widgetColor || "") === c.value;
                         return (
@@ -1119,16 +1233,23 @@ export function SettingsApp() {
                             }}
                             title={c.label}
                             aria-label={c.label}
-                            className={`group relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 active:scale-95 ${
-                              isSelected
-                                ? "scale-105 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface"
-                                : "hover:ring-1 hover:ring-line"
-                            }`}
+                            className={`
+                              group relative flex cursor-pointer items-center
+                              justify-center rounded-full transition-transform
+                              block-6 inline-6
+                              hover:scale-110
+                              active:scale-95
+                              ${
+                                isSelected
+                                  ? `scale-105 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface`
+                                  : "hover:ring-1 hover:ring-line"
+                              }
+                            `}
                             style={{ backgroundColor: c.hex }}
                           >
                             {isSelected && (
                               <Check
-                                className="pointer-events-none h-3.5 w-3.5 text-white drop-shadow-sm"
+                                className="pointer-events-none text-white drop-shadow-sm block-3.5 inline-3.5"
                                 weight="bold"
                               />
                             )}
@@ -1152,11 +1273,21 @@ export function SettingsApp() {
                             title={
                               isCustomSelected ? `Custom Color (${customVal})` : "Pick custom color"
                             }
-                            className={`group relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 active:scale-95 ${
-                              isCustomSelected
-                                ? "scale-105 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface"
-                                : "border border-line/80 hover:border-fg-muted"
-                            }`}
+                            className={`
+                              group relative flex cursor-pointer items-center
+                              justify-center rounded-full transition-transform
+                              block-6 inline-6
+                              hover:scale-110
+                              active:scale-95
+                              ${
+                                isCustomSelected
+                                  ? `scale-105 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface`
+                                  : `
+                                  border border-line/80
+                                  hover:border-fg-muted
+                                `
+                              }
+                            `}
                             style={
                               isCustomSelected
                                 ? { backgroundColor: customVal }
@@ -1176,16 +1307,16 @@ export function SettingsApp() {
                                   e.target.value,
                                 );
                               }}
-                              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                              className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
                             />
                             {isCustomSelected ? (
                               <Check
-                                className="pointer-events-none h-3.5 w-3.5 text-white drop-shadow-sm"
+                                className="pointer-events-none text-white drop-shadow-sm block-3.5 inline-3.5"
                                 weight="bold"
                               />
                             ) : (
                               <Plus
-                                className="pointer-events-none h-3 w-3 text-white drop-shadow-sm"
+                                className="pointer-events-none text-white drop-shadow-sm block-3 inline-3"
                                 weight="bold"
                               />
                             )}
@@ -1197,8 +1328,8 @@ export function SettingsApp() {
 
                   {/* Widget Settings Schema Form */}
                   {selectedModule?.manifest.settingsSchema && (
-                    <div className="border-t border-line/60 pt-3">
-                      <span className="mb-2 block font-medium text-fg">Configuration</span>
+                    <div className="border-bs border-line/60 pbs-3">
+                      <span className="mbe-2 block font-medium text-fg">Configuration</span>
                       <SettingsForm
                         fields={selectedModule.manifest.settingsSchema}
                         values={selectedWidget.settings}
@@ -1208,19 +1339,24 @@ export function SettingsApp() {
                   )}
 
                   {/* Remove Widget */}
-                  <div className="border-t border-line/60 pt-4 pb-6">
+                  <div className="border-bs border-line/60 pbs-4 pbe-6">
                     <button
                       type="button"
                       onClick={() => void removeWidget(selectedWidget.id)}
-                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-error/40 bg-error/10 px-3 py-1.5 text-xs font-medium text-error transition-colors hover:bg-error/20"
+                      className="
+                        inline-flex cursor-pointer items-center gap-1.5
+                        rounded-lg border border-error/40 bg-error/10 px-3
+                        py-1.5 text-xs font-medium text-error transition-colors
+                        hover:bg-error/20
+                      "
                     >
-                      <Trash className="h-3.5 w-3.5" />
+                      <Trash className="block-3.5 inline-3.5" />
                       <span>Remove Widget</span>
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex h-full items-center justify-center text-xs text-fg-muted italic">
+                <div className="flex items-center justify-center text-xs text-fg-muted italic block-full">
                   Select a widget to view and edit its settings.
                 </div>
               )}
@@ -1231,9 +1367,9 @@ export function SettingsApp() {
         {/* ACCOUNTS TAB */}
         {activeTab === "accounts" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
-            <div className="my-3 flex w-full flex-col gap-5 pb-4">
+            <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
               <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
-                <LockKey className="h-4 w-4 shrink-0 text-accent-500" />
+                <LockKey className="shrink-0 text-accent-500 block-4 inline-4" />
                 <span>
                   Tokens are stored securely in Windows Credential Manager and never logged or
                   exported.
@@ -1244,18 +1380,19 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <GithubLogo className="h-4 w-4 text-fg" weight="fill" />
+                    <GithubLogo className="text-fg block-4 inline-4" weight="fill" />
                     <label htmlFor="gh-token-input" className="font-semibold text-fg">
                       GitHub Personal Access Token
                     </label>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs font-medium">
                     <span
-                      className={`h-2 w-2 rounded-full ${
-                        githubConfigured ? "bg-ok" : "bg-fg-muted/30"
-                      }`}
+                      className={`
+                        rounded-full block-2 inline-2
+                        ${githubConfigured ? "bg-ok" : "bg-fg-muted/30"}
+                      `}
                     />
-                    <span className={githubConfigured ? "text-ok" : "text-fg-muted/60"}>
+                    <span className={githubConfigured ? "text-ok" : `text-fg-muted/60`}>
                       {githubConfigured ? "Active" : "Not set"}
                     </span>
                   </div>
@@ -1264,7 +1401,7 @@ export function SettingsApp() {
                   Required for private repository commits and CI workflow runs. Public repos do not
                   strictly require a token.
                 </p>
-                <div className="flex gap-2 pt-1">
+                <div className="flex gap-2 pbs-1">
                   <input
                     id="gh-token-input"
                     type="password"
@@ -1275,12 +1412,23 @@ export function SettingsApp() {
                     value={githubInput}
                     onChange={(e) => setGithubInput(e.target.value)}
                     placeholder="ghp_••••••••••••••••••••••••••••••••••••"
-                    className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                    className="
+                      flex-1 rounded-lg border border-line bg-surface px-3
+                      py-1.5 text-xs text-fg transition-colors outline-none
+                      placeholder:text-fg-muted/40
+                      focus:border-accent-500 focus:ring-2
+                      focus:ring-accent-500/20
+                    "
                   />
                   <button
                     type="button"
                     onClick={() => void handleSaveGithubToken()}
-                    className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="
+                      cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5
+                      font-medium text-white shadow-xs transition-colors
+                      hover:bg-accent-600
+                      disabled:cursor-not-allowed disabled:opacity-50
+                    "
                   >
                     Save
                   </button>
@@ -1288,7 +1436,11 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void handleClearGithubToken()}
-                      className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                      className="
+                        cursor-pointer rounded-lg border border-line bg-surface
+                        px-3 py-1.5 font-medium text-fg-muted transition-colors
+                        hover:bg-surface-raised hover:text-error
+                      "
                     >
                       Clear
                     </button>
@@ -1300,18 +1452,19 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Triangle className="h-3.5 w-3.5 text-fg" weight="fill" />
+                    <Triangle className="text-fg block-3.5 inline-3.5" weight="fill" />
                     <label htmlFor="vercel-token-input" className="font-semibold text-fg">
                       Vercel API Token
                     </label>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs font-medium">
                     <span
-                      className={`h-2 w-2 rounded-full ${
-                        vercelConfigured ? "bg-ok" : "bg-fg-muted/30"
-                      }`}
+                      className={`
+                        rounded-full block-2 inline-2
+                        ${vercelConfigured ? "bg-ok" : "bg-fg-muted/30"}
+                      `}
                     />
-                    <span className={vercelConfigured ? "text-ok" : "text-fg-muted/60"}>
+                    <span className={vercelConfigured ? "text-ok" : `text-fg-muted/60`}>
                       {vercelConfigured ? "Active" : "Not set"}
                     </span>
                   </div>
@@ -1319,7 +1472,7 @@ export function SettingsApp() {
                 <p className="text-[11px] text-fg-muted">
                   Used to query deployment pipeline states and build status.
                 </p>
-                <div className="flex gap-2 pt-1">
+                <div className="flex gap-2 pbs-1">
                   <input
                     id="vercel-token-input"
                     type="password"
@@ -1330,12 +1483,23 @@ export function SettingsApp() {
                     value={vercelInput}
                     onChange={(e) => setVercelInput(e.target.value)}
                     placeholder="••••••••••••••••••••••••"
-                    className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                    className="
+                      flex-1 rounded-lg border border-line bg-surface px-3
+                      py-1.5 text-xs text-fg transition-colors outline-none
+                      placeholder:text-fg-muted/40
+                      focus:border-accent-500 focus:ring-2
+                      focus:ring-accent-500/20
+                    "
                   />
                   <button
                     type="button"
                     onClick={() => void handleSaveVercelToken()}
-                    className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="
+                      cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5
+                      font-medium text-white shadow-xs transition-colors
+                      hover:bg-accent-600
+                      disabled:cursor-not-allowed disabled:opacity-50
+                    "
                   >
                     Save
                   </button>
@@ -1343,7 +1507,11 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void handleClearVercelToken()}
-                      className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                      className="
+                        cursor-pointer rounded-lg border border-line bg-surface
+                        px-3 py-1.5 font-medium text-fg-muted transition-colors
+                        hover:bg-surface-raised hover:text-error
+                      "
                     >
                       Clear
                     </button>
@@ -1355,8 +1523,8 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-500/15 text-accent-500">
-                      <Sparkle className="h-4 w-4" />
+                    <div className="flex items-center justify-center rounded-lg bg-accent-500/15 text-accent-500 block-7 inline-7">
+                      <Sparkle className="block-4" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-fg">AI Models & API Keys</h3>
@@ -1381,24 +1549,24 @@ export function SettingsApp() {
                         { value: "bedrock", label: "AWS Bedrock" },
                         { value: "groq", label: "Groq" },
                       ]}
-                      className="w-52"
+                      className="inline-52"
                       buttonClassName="py-1"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 border-t border-line/40 pt-2 text-[11px]">
+                <div className="flex items-center gap-2 border-bs border-line/40 pbs-2 text-[11px]">
                   <span className="text-fg-muted">Active Endpoint:</span>
                   {activeAiProvider ? (
                     <span className="flex items-center gap-1.5 font-semibold text-ok">
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-ok" />
+                      <span className="animate-pulse rounded-full bg-ok block-2 inline-2" />
                       {AI_PROVIDER_LIST.find((p) => p.id === activeAiProvider)?.name ||
                         activeAiProvider}
                       {preferredAi === "auto" ? " (Auto-picked)" : " (Pinned)"}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5 text-amber-400">
-                      <span className="h-2 w-2 rounded-full bg-amber-400" />
+                      <span className="rounded-full bg-amber-400 block-2 inline-2" />
                       None configured yet – add any API key below to activate
                     </span>
                   )}
@@ -1417,11 +1585,15 @@ export function SettingsApp() {
                   return (
                     <div
                       key={provider.id}
-                      className={`flex flex-col gap-3 rounded-2xl border p-4.5 backdrop-blur-xs transition-all ${
-                        isCurrentActive
-                          ? "border-accent-500/60 bg-accent-500/5 shadow-xs"
-                          : "border-line/70 bg-surface-raised/40"
-                      }`}
+                      className={`
+                        flex flex-col gap-3 rounded-2xl border p-4.5
+                        backdrop-blur-xs transition-all
+                        ${
+                          isCurrentActive
+                            ? "border-accent-500/60 bg-accent-500/5 shadow-xs"
+                            : "border-line/70 bg-surface-raised/40"
+                        }
+                      `}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1433,7 +1605,7 @@ export function SettingsApp() {
                             {provider.name}
                           </label>
                           {isCurrentActive && (
-                            <span className="py-0.2 rounded bg-accent-500/15 px-1.5 text-[9px] font-semibold text-accent-500 uppercase">
+                            <span className="rounded-sm bg-accent-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-accent-500 uppercase">
                               Active
                             </span>
                           )}
@@ -1441,11 +1613,12 @@ export function SettingsApp() {
 
                         <div className="flex items-center gap-1.5 text-xs font-medium">
                           <span
-                            className={`h-2 w-2 rounded-full ${
-                              isConfigured ? "bg-ok" : "bg-fg-muted/30"
-                            }`}
+                            className={`
+                              rounded-full block-2 inline-2
+                              ${isConfigured ? "bg-ok" : "bg-fg-muted/30"}
+                            `}
                           />
-                          <span className={isConfigured ? "text-ok" : "text-fg-muted/60"}>
+                          <span className={isConfigured ? "text-ok" : `text-fg-muted/60`}>
                             {isConfigured ? "Configured" : "Not set"}
                           </span>
                         </div>
@@ -1453,7 +1626,7 @@ export function SettingsApp() {
 
                       <p className="text-[11px] text-fg-muted">{provider.desc}</p>
 
-                      <div className="flex gap-2 pt-0.5">
+                      <div className="flex gap-2 pbs-0.5">
                         <input
                           id={`ai-input-${provider.id}`}
                           type="password"
@@ -1469,12 +1642,26 @@ export function SettingsApp() {
                             }))
                           }
                           placeholder={provider.placeholder}
-                          className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                          className="
+                            flex-1 rounded-lg border border-line bg-surface px-3
+                            py-1.5 text-xs text-fg transition-colors
+                            outline-none
+                            placeholder:text-fg-muted/40
+                            focus:border-accent-500 focus:ring-2
+                            focus:ring-accent-500/20
+                          "
                         />
                         <button
                           type="button"
                           onClick={() => void handleSaveAiProviderToken(provider.id)}
-                          className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 text-xs font-medium text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="
+                            cursor-pointer rounded-lg bg-accent-500 px-3.5
+                            py-1.5 text-xs font-medium text-white shadow-xs
+                            transition-colors
+                            hover:bg-accent-600
+                            active:scale-95
+                            disabled:cursor-not-allowed disabled:opacity-50
+                          "
                         >
                           Save
                         </button>
@@ -1482,7 +1669,12 @@ export function SettingsApp() {
                           <button
                             type="button"
                             onClick={() => void handleClearAiProviderToken(provider.id)}
-                            className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-error"
+                            className="
+                              cursor-pointer rounded-lg border border-line
+                              bg-surface px-3 py-1.5 text-xs font-medium
+                              text-fg-muted transition-colors
+                              hover:bg-surface-raised hover:text-error
+                            "
                           >
                             Clear
                           </button>
@@ -1491,7 +1683,7 @@ export function SettingsApp() {
 
                       {/* Special custom endpoint for Bedrock */}
                       {provider.id === "bedrock" && (
-                        <div className="flex flex-col gap-1.5 border-t border-line/30 pt-2">
+                        <div className="flex flex-col gap-1.5 border-bs border-line/30 pbs-2">
                           <div className="flex items-center justify-between text-[11px]">
                             <label
                               htmlFor="bedrock-endpoint-input"
@@ -1512,12 +1704,24 @@ export function SettingsApp() {
                               value={bedrockEndpointInput}
                               onChange={(e) => setBedrockEndpointInput(e.target.value)}
                               placeholder="https://your-bedrock-gateway.com/v1"
-                              className="flex-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/40 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                              className="
+                                flex-1 rounded-lg border border-line bg-surface
+                                px-3 py-1.5 text-xs text-fg transition-colors
+                                outline-none
+                                placeholder:text-fg-muted/40
+                                focus:border-accent-500 focus:ring-2
+                                focus:ring-accent-500/20
+                              "
                             />
                             <button
                               type="button"
                               onClick={() => void handleSaveBedrockEndpoint()}
-                              className="cursor-pointer rounded-lg border border-line bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg transition-colors hover:border-accent-500"
+                              className="
+                                cursor-pointer rounded-lg border border-line
+                                bg-surface-raised px-3 py-1.5 text-xs
+                                font-medium text-fg transition-colors
+                                hover:border-accent-500
+                              "
                             >
                               Save Endpoint
                             </button>
@@ -1525,7 +1729,12 @@ export function SettingsApp() {
                               <button
                                 type="button"
                                 onClick={() => void handleClearBedrockEndpoint()}
-                                className="cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-error"
+                                className="
+                                  cursor-pointer rounded-lg border border-line
+                                  bg-surface px-3 py-1.5 text-xs font-medium
+                                  text-fg-muted transition-colors
+                                  hover:text-error
+                                "
                               >
                                 Clear
                               </button>
@@ -1544,7 +1753,7 @@ export function SettingsApp() {
         {/* ABOUT TAB */}
         {activeTab === "about" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
-            <div className="my-3 flex w-full flex-col gap-5 pb-4">
+            <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
               {/* Hero Section */}
               <div className="flex items-center gap-5 px-1 py-2">
                 <img
@@ -1552,11 +1761,11 @@ export function SettingsApp() {
                   alt="Nook"
                   width={80}
                   height={80}
-                  className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+                  className="shrink-0 rounded-2xl object-cover block-20"
                 />
                 <div className="flex flex-col gap-1.5">
                   <h2 className="text-xl font-bold tracking-tight text-fg">Nook</h2>
-                  <p className="text-xs leading-relaxed text-fg-muted">
+                  <p className="text-xs/relaxed text-fg-muted">
                     Lightweight, distraction-free desktop widgets
                     <br />
                     pinned directly to your Windows desktop.
@@ -1565,7 +1774,12 @@ export function SettingsApp() {
               </div>
 
               {/* Developer & Project Info */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div
+                className="
+                grid grid-cols-1 gap-4
+                md:grid-cols-2
+              "
+              >
                 <div className="flex flex-col gap-2 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                   <span className="font-semibold text-fg">Developer</span>
                   <p className="text-[11px] leading-relaxed text-fg-muted">
@@ -1573,17 +1787,25 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify")}
-                      className="cursor-pointer text-accent-500 underline underline-offset-2 hover:text-accent-600"
+                      className="
+                        cursor-pointer text-accent-500 underline
+                        underline-offset-2
+                        hover:text-accent-600
+                      "
                     >
                       @hasanify
                     </button>
                     ).
                   </p>
-                  <div className="pt-2">
+                  <div className="pbs-2">
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook")}
-                      className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-accent-500 hover:text-accent-600"
+                      className="
+                        inline-flex cursor-pointer items-center gap-1.5 text-xs
+                        font-medium text-accent-500
+                        hover:text-accent-600
+                      "
                     >
                       <span>Visit GitHub Repository</span>
                       <span>→</span>
@@ -1597,14 +1819,22 @@ export function SettingsApp() {
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/issues")}
-                      className="w-fit cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
+                      className="
+                        cursor-pointer text-start text-fg-muted
+                        transition-colors inline-fit
+                        hover:text-accent-500
+                      "
                     >
                       • Report a Bug or Request Feature
                     </button>
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/releases")}
-                      className="w-fit cursor-pointer text-left text-fg-muted transition-colors hover:text-accent-500"
+                      className="
+                        cursor-pointer text-start text-fg-muted
+                        transition-colors inline-fit
+                        hover:text-accent-500
+                      "
                     >
                       • View Release Changelog
                     </button>
@@ -1631,17 +1861,26 @@ export function SettingsApp() {
                     type="button"
                     disabled={checkingUpdate || downloadingUpdate}
                     onClick={() => void handleCheckUpdates()}
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 py-1.5 font-medium text-fg shadow-xs transition-colors hover:border-accent-500 hover:text-accent-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="
+                      inline-flex cursor-pointer items-center gap-1.5 rounded-lg
+                      border border-line bg-surface px-3.5 py-1.5 font-medium
+                      text-fg shadow-xs transition-colors
+                      hover:border-accent-500 hover:text-accent-500
+                      disabled:cursor-not-allowed disabled:opacity-50
+                    "
                   >
                     <ArrowClockwise
-                      className={`h-3.5 w-3.5 ${checkingUpdate ? "animate-spin" : ""}`}
+                      className={`
+                        block-3.5 inline-3.5
+                        ${checkingUpdate ? "animate-spin" : ""}
+                      `}
                     />
                     <span>{checkingUpdate ? "Checking..." : "Check for Updates"}</span>
                   </button>
                 </div>
 
                 {/* Auto Update Setting */}
-                <div className="flex items-center justify-between border-t border-line/40 pt-3">
+                <div className="flex items-center justify-between border-bs border-line/40 pbs-3">
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
@@ -1664,7 +1903,7 @@ export function SettingsApp() {
 
                 {updateResult && !updateResult.has_update && !updateError && (
                   <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-[11px] text-ok">
-                    <Check className="h-3.5 w-3.5 shrink-0 text-ok" weight="bold" />
+                    <Check className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
                     <span>You are running the latest version of Nook.</span>
                   </div>
                 )}
@@ -1682,7 +1921,11 @@ export function SettingsApp() {
                         <button
                           type="button"
                           onClick={() => void openUrl(updateResult.release_url)}
-                          className="cursor-pointer text-[11px] text-accent-500 underline underline-offset-2 hover:text-accent-600"
+                          className="
+                            cursor-pointer text-[11px] text-accent-500 underline
+                            underline-offset-2
+                            hover:text-accent-600
+                          "
                         >
                           Release Notes
                         </button>
@@ -1695,9 +1938,9 @@ export function SettingsApp() {
                           <span>Downloading update...</span>
                           <span>{downloadPercent}%</span>
                         </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
+                        <div className="overflow-hidden rounded-full bg-surface block-1.5 inline-full">
                           <div
-                            className="h-full bg-accent-500 transition-all duration-150"
+                            className="bg-accent-500 transition-all duration-150 block-full"
                             style={{ width: `${downloadPercent}%` }}
                           />
                         </div>
@@ -1706,12 +1949,18 @@ export function SettingsApp() {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="flex items-center gap-2 pbs-1">
                         {updateResult.download_url ? (
                           <button
                             type="button"
                             onClick={() => void handleInstallUpdate()}
-                            className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="
+                              cursor-pointer rounded-lg bg-accent-500 px-3.5
+                              py-1.5 font-medium text-white shadow-xs
+                              transition-colors
+                              hover:bg-accent-600
+                              disabled:cursor-not-allowed disabled:opacity-50
+                            "
                           >
                             Download & Install Update
                           </button>
@@ -1719,7 +1968,13 @@ export function SettingsApp() {
                           <button
                             type="button"
                             onClick={() => void openUrl(updateResult.release_url)}
-                            className="cursor-pointer rounded-lg bg-accent-500 px-3.5 py-1.5 font-medium text-white shadow-xs transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="
+                              cursor-pointer rounded-lg bg-accent-500 px-3.5
+                              py-1.5 font-medium text-white shadow-xs
+                              transition-colors
+                              hover:bg-accent-600
+                              disabled:cursor-not-allowed disabled:opacity-50
+                            "
                           >
                             Download from GitHub
                           </button>

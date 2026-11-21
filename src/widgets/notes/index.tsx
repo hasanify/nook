@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 const MAX_BYTES = 100 * 1024; // 100 KB limit
@@ -77,17 +79,20 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between">
+      <div className="flex flex-1 flex-col justify-between min-block-full">
         <textarea
           value={text}
           onChange={handleTextChange}
           placeholder="Write something…"
           style={{ fontSize: `${fontSize}px` }}
-          className={`min-h-0 w-full flex-1 resize-none border-none bg-transparent p-0 leading-relaxed text-fg outline-none select-text placeholder:text-fg-muted/40 ${
-            lineWrapping ? "whitespace-pre-wrap" : "overflow-x-auto whitespace-pre"
-          }`}
+          className={`
+            flex-1 resize-none border-none bg-transparent p-0 leading-relaxed
+            text-fg outline-none select-text inline-full min-block-0
+            placeholder:text-fg-muted/40
+            ${lineWrapping ? "whitespace-pre-wrap" : `overflow-x-auto whitespace-pre`}
+          `}
         />
-        <div className="mt-auto flex items-center justify-end border-t border-line/20 pt-1 pb-1 font-mono text-[9px] text-fg-muted/50 select-none">
+        <div className="mbs-auto flex items-center justify-end border-bs border-line/20 pbs-1 pbe-1 font-mono text-[9px] text-fg-muted/50 select-none">
           <span>
             {wordCount} {wordCount === 1 ? "word" : "words"}
           </span>

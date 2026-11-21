@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { ArrowClockwise, Check, Flame } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -150,12 +152,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         <div className="flex items-center gap-1.5">
           {/* Streak Flame Badge */}
           <div
-            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              streak > 0 ? "bg-amber-500/15 text-amber-500" : "bg-surface-raised text-fg-muted"
-            }`}
+            className={`
+              flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]
+              font-bold
+              ${streak > 0 ? "bg-amber-500/15 text-amber-500" : `bg-surface-raised text-fg-muted`}
+            `}
             title={`${streak} day streak`}
           >
-            <Flame className="h-3 w-3 text-amber-500" weight="fill" />
+            <Flame className="text-amber-500 block-3 inline-3" weight="fill" />
             <span>{streak}</span>
           </div>
 
@@ -164,9 +168,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             onClick={() => void handleFetchPrompt()}
             disabled={loading}
             title="New prompt"
-            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+            className="
+              flex cursor-pointer items-center justify-center rounded-sm
+              text-fg-muted block-5 inline-5
+              hover:bg-surface-raised hover:text-fg
+              disabled:opacity-40
+            "
           >
-            <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            <ArrowClockwise
+              className={`
+              block-3 inline-3
+              ${loading ? "animate-spin" : ""}
+            `}
+            />
           </button>
         </div>
       }
@@ -176,13 +190,13 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Daily Question */}
         <div className="flex flex-1 flex-col justify-center gap-1 select-text">
           <span className="font-mono text-[9px] font-semibold text-accent-500">
             TODAY&apos;S REFLECTION
           </span>
-          <p className="text-xs leading-relaxed font-medium text-fg">
+          <p className="text-xs/relaxed font-medium text-fg">
             {loading ? (
               <span className="text-fg-muted italic">Crafting reflection question…</span>
             ) : (
@@ -192,12 +206,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         </div>
 
         {/* Answer section */}
-        <div className="border-t border-line/40 pt-2">
+        <div className="border-bs border-line/40 pbs-2">
           {isAnsweredToday && !isEditing ? (
             <div className="flex flex-col gap-1 rounded-lg border border-ok/30 bg-ok/5 p-2">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="flex items-center gap-1 font-semibold text-ok">
-                  <Check className="h-3.5 w-3.5 shrink-0 text-ok" weight="bold" />
+                  <Check className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
                   <span>Logged today</span>
                 </span>
                 <button
@@ -206,12 +220,15 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                     setAnswerInput(lastAnswer);
                     setIsEditing(true);
                   }}
-                  className="cursor-pointer text-fg-muted hover:text-fg"
+                  className="
+                    cursor-pointer text-fg-muted
+                    hover:text-fg
+                  "
                 >
                   Edit
                 </button>
               </div>
-              <p className="text-xs leading-relaxed text-fg italic select-text">
+              <p className="text-xs/relaxed text-fg italic select-text">
                 &ldquo;{lastAnswer}&rdquo;
               </p>
             </div>
@@ -227,13 +244,23 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                   }
                 }}
                 placeholder="1-sentence reflection… (Enter)"
-                className="flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+                className="
+                  flex-1 rounded-lg border border-line bg-surface-raised/40
+                  px-2.5 py-1 text-xs text-fg
+                  placeholder:text-fg-muted/50
+                  focus:border-accent-500 focus:outline-none
+                "
               />
               <button
                 type="button"
                 onClick={() => handleLogAnswer(answerInput)}
                 disabled={!answerInput.trim()}
-                className="cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px] font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="
+                  cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1
+                  text-[11px] font-medium text-white transition-opacity
+                  hover:opacity-90
+                  disabled:cursor-not-allowed disabled:opacity-40
+                "
               >
                 Log
               </button>

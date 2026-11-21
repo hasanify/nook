@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
-import { CircleNotch, Sparkle, Check } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { Check, CircleNotch, Sparkle } from "@phosphor-icons/react";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -117,7 +119,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col gap-2.5 p-1">
+      <div className="flex flex-1 flex-col gap-2.5 p-1 min-block-full">
         {/* Input Box */}
         <div className="flex flex-col gap-1.5">
           <div className="relative">
@@ -130,7 +132,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               onKeyDown={handleKeyDown}
               placeholder="Paste rough draft… (Enter to polish)"
               rows={2}
-              className="w-full resize-none rounded-lg border border-line bg-surface-raised/40 px-2.5 py-1.5 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+              className="
+                resize-none rounded-lg border border-line bg-surface-raised/40
+                px-2.5 py-1.5 text-xs text-fg inline-full
+                placeholder:text-fg-muted/50
+                focus:border-accent-500 focus:outline-none
+              "
             />
           </div>
           <div className="flex items-center justify-between">
@@ -139,16 +146,22 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               type="button"
               onClick={() => void handleGenerate()}
               disabled={loading || !draft.trim()}
-              className="flex cursor-pointer items-center gap-1.5 rounded-md bg-accent-500 px-2.5 py-1 text-[11px] font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="
+                flex cursor-pointer items-center gap-1.5 rounded-md
+                bg-accent-500 px-2.5 py-1 text-[11px] font-medium text-white
+                transition-opacity
+                hover:opacity-90
+                disabled:cursor-not-allowed disabled:opacity-40
+              "
             >
               {loading ? (
                 <>
-                  <CircleNotch className="h-3 w-3 animate-spin" />
+                  <CircleNotch className="animate-spin block-3 inline-3" />
                   <span>Polishing…</span>
                 </>
               ) : (
                 <>
-                  <Sparkle className="h-3 w-3" weight="fill" />
+                  <Sparkle className="block-3 inline-3" weight="fill" />
                   <span>Polish</span>
                 </>
               )}
@@ -161,16 +174,26 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           {/* Professional Tile */}
           <div
             onClick={() => handleCopy("pro", result.pro)}
-            className="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-line bg-surface-raised/50 p-2.5 transition-all hover:border-accent-500/50 hover:bg-surface-raised"
+            className="
+              group relative flex cursor-pointer flex-col gap-1 rounded-lg
+              border border-line bg-surface-raised/50 p-2.5 transition-all
+              hover:border-accent-500/50 hover:bg-surface-raised
+            "
           >
             <div className="flex items-center justify-between">
-              <span className="rounded bg-accent-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
+              <span className="rounded-sm bg-accent-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
                 PRO • Professional
               </span>
-              <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
+              <span
+                className="
+                flex items-center gap-1 text-[10px] text-fg-muted opacity-0
+                transition-opacity
+                group-hover:opacity-100
+              "
+              >
                 {copiedKey === "pro" ? (
                   <>
-                    <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                    <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -178,7 +201,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 )}
               </span>
             </div>
-            <p className="text-xs leading-relaxed text-fg select-text">
+            <p className="text-xs/relaxed text-fg select-text">
               {result.pro || <span className="text-fg-muted italic">Awaiting prompt…</span>}
             </p>
           </div>
@@ -186,16 +209,26 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           {/* Concise Tile */}
           <div
             onClick={() => handleCopy("con", result.con)}
-            className="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-line bg-surface-raised/50 p-2.5 transition-all hover:border-accent-500/50 hover:bg-surface-raised"
+            className="
+              group relative flex cursor-pointer flex-col gap-1 rounded-lg
+              border border-line bg-surface-raised/50 p-2.5 transition-all
+              hover:border-accent-500/50 hover:bg-surface-raised
+            "
           >
             <div className="flex items-center justify-between">
-              <span className="rounded bg-ok/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
+              <span className="rounded-sm bg-ok/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
                 CON • Concise
               </span>
-              <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
+              <span
+                className="
+                flex items-center gap-1 text-[10px] text-fg-muted opacity-0
+                transition-opacity
+                group-hover:opacity-100
+              "
+              >
                 {copiedKey === "con" ? (
                   <>
-                    <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                    <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -203,7 +236,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 )}
               </span>
             </div>
-            <p className="text-xs leading-relaxed text-fg select-text">
+            <p className="text-xs/relaxed text-fg select-text">
               {result.con || <span className="text-fg-muted italic">Awaiting prompt…</span>}
             </p>
           </div>
@@ -211,16 +244,26 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           {/* Warm Tile */}
           <div
             onClick={() => handleCopy("wrm", result.wrm)}
-            className="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-line bg-surface-raised/50 p-2.5 transition-all hover:border-accent-500/50 hover:bg-surface-raised"
+            className="
+              group relative flex cursor-pointer flex-col gap-1 rounded-lg
+              border border-line bg-surface-raised/50 p-2.5 transition-all
+              hover:border-accent-500/50 hover:bg-surface-raised
+            "
           >
             <div className="flex items-center justify-between">
-              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-500">
+              <span className="rounded-sm bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-500">
                 WRM • Warm
               </span>
-              <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
+              <span
+                className="
+                flex items-center gap-1 text-[10px] text-fg-muted opacity-0
+                transition-opacity
+                group-hover:opacity-100
+              "
+              >
                 {copiedKey === "wrm" ? (
                   <>
-                    <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                    <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -228,7 +271,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 )}
               </span>
             </div>
-            <p className="text-xs leading-relaxed text-fg select-text">
+            <p className="text-xs/relaxed text-fg select-text">
               {result.wrm || <span className="text-fg-muted italic">Awaiting prompt…</span>}
             </p>
           </div>

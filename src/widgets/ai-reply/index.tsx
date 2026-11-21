@@ -1,9 +1,11 @@
-import { useState, useCallback } from "react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -116,7 +118,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col gap-2 p-1">
+      <div className="flex flex-1 flex-col gap-2 p-1 min-block-full">
         {/* Input Field */}
         <div className="flex gap-1.5">
           <input
@@ -128,13 +130,23 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             }}
             onKeyDown={handleKeyDown}
             placeholder="Paste incoming message… (Enter)"
-            className="flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+            className="
+              flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5
+              py-1 text-xs text-fg
+              placeholder:text-fg-muted/50
+              focus:border-accent-500 focus:outline-none
+            "
           />
           <button
             type="button"
             onClick={() => void handleGenerate()}
             disabled={loading || !message.trim()}
-            className="cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px] font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="
+              cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px]
+              font-medium text-white transition-opacity
+              hover:opacity-90
+              disabled:cursor-not-allowed disabled:opacity-40
+            "
           >
             {loading ? "…" : "Reply"}
           </button>
@@ -146,9 +158,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <button
             type="button"
             onClick={() => handleCopy("accept", replies.accept)}
-            className="group flex w-full cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised/40 p-2 text-left transition-all hover:border-ok/40 hover:bg-surface-raised"
+            className="
+              group flex cursor-pointer items-start gap-2 rounded-lg border
+              border-line bg-surface-raised/40 p-2 text-start transition-all
+              inline-full
+              hover:border-ok/40 hover:bg-surface-raised
+            "
           >
-            <span className="shrink-0 rounded bg-ok/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
+            <span className="shrink-0 rounded-sm bg-ok/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
               {copiedKey === "accept" ? "COPIED" : "ACCEPT"}
             </span>
             <span className="flex-1 text-[11px] leading-tight text-fg select-text">
@@ -160,9 +177,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <button
             type="button"
             onClick={() => handleCopy("decline", replies.decline)}
-            className="group flex w-full cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised/40 p-2 text-left transition-all hover:border-error/40 hover:bg-surface-raised"
+            className="
+              group flex cursor-pointer items-start gap-2 rounded-lg border
+              border-line bg-surface-raised/40 p-2 text-start transition-all
+              inline-full
+              hover:border-error/40 hover:bg-surface-raised
+            "
           >
-            <span className="shrink-0 rounded bg-error/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-error">
+            <span className="shrink-0 rounded-sm bg-error/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-error">
               {copiedKey === "decline" ? "COPIED" : "DECLINE"}
             </span>
             <span className="flex-1 text-[11px] leading-tight text-fg select-text">
@@ -174,9 +196,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <button
             type="button"
             onClick={() => handleCopy("counter", replies.counter)}
-            className="group flex w-full cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised/40 p-2 text-left transition-all hover:border-accent-500/40 hover:bg-surface-raised"
+            className="
+              group flex cursor-pointer items-start gap-2 rounded-lg border
+              border-line bg-surface-raised/40 p-2 text-start transition-all
+              inline-full
+              hover:border-accent-500/40 hover:bg-surface-raised
+            "
           >
-            <span className="shrink-0 rounded bg-accent-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
+            <span className="shrink-0 rounded-sm bg-accent-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
               {copiedKey === "counter" ? "COPIED" : "COUNTER"}
             </span>
             <span className="flex-1 text-[11px] leading-tight text-fg select-text">

@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -183,9 +185,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             onClick={handleShuffle}
             disabled={loading}
             title="Next book nugget"
-            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+            className="
+              flex cursor-pointer items-center justify-center rounded-sm
+              text-fg-muted block-5 inline-5
+              hover:bg-surface-raised hover:text-fg
+              disabled:opacity-40
+            "
           >
-            <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            <ArrowClockwise
+              className={`
+              block-3 inline-3
+              ${loading ? "animate-spin" : ""}
+            `}
+            />
           </button>
         </div>
       }
@@ -195,7 +207,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Book Header Tag */}
         <div className="flex items-center justify-between">
           <span className="truncate rounded-md bg-accent-500/10 px-2 py-0.5 text-[10px] font-medium text-accent-500">
@@ -204,16 +216,20 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <button
             type="button"
             onClick={handleCopy}
-            className="flex shrink-0 cursor-pointer items-center gap-1 text-[10px] text-fg-muted hover:text-fg"
+            className="
+              flex shrink-0 cursor-pointer items-center gap-1 text-[10px]
+              text-fg-muted
+              hover:text-fg
+            "
           >
             {copied ? (
               <>
-                <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                 <span className="text-ok">Copied</span>
               </>
             ) : (
               <>
-                <Copy className="h-3 w-3" />
+                <Copy className="block-3 inline-3" />
                 <span>Copy</span>
               </>
             )}
@@ -224,7 +240,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         <div className="flex flex-1 flex-col justify-center gap-2 select-text">
           <div className="flex flex-col gap-0.5 rounded-lg border border-line bg-surface-raised/40 p-2">
             <span className="font-mono text-[9px] font-semibold text-fg-muted">CORE MODEL</span>
-            <p className="text-xs leading-relaxed text-fg">
+            <p className="text-xs/relaxed text-fg">
               {loading ? (
                 <span className="text-fg-muted italic">Extracting capsule…</span>
               ) : (
@@ -235,14 +251,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
           <div className="flex flex-col gap-0.5 rounded-lg border border-line bg-surface-raised/40 p-2">
             <span className="font-mono text-[9px] font-semibold text-ok">HOW TO APPLY TODAY</span>
-            <p className="text-xs leading-relaxed text-fg">
+            <p className="text-xs/relaxed text-fg">
               {loading ? <span className="text-fg-muted italic">…</span> : nugget.apply}
             </p>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-line/40 pt-1.5">
+        <div className="border-bs border-line/40 pbs-1.5">
           {showInput ? (
             <div className="flex gap-1.5">
               <input
@@ -258,7 +274,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                   }
                 }}
                 placeholder="Enter book title or author… (Enter)"
-                className="flex-1 rounded-md border border-line bg-surface-raised/40 px-2 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+                className="
+                  flex-1 rounded-md border border-line bg-surface-raised/40 px-2
+                  py-1 text-xs text-fg
+                  placeholder:text-fg-muted/50
+                  focus:border-accent-500 focus:outline-none
+                "
               />
               <button
                 type="button"
@@ -279,7 +300,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                   setInputVal("");
                   setShowInput(true);
                 }}
-                className="cursor-pointer text-accent-500 hover:underline"
+                className="
+                  cursor-pointer text-accent-500
+                  hover:underline
+                "
               >
                 Search book
               </button>

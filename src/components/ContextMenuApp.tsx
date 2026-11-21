@@ -1,29 +1,31 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { listen } from "@tauri-apps/api/event";
 import {
-  SquaresFour,
-  ArrowsClockwise,
-  Check,
-  NotePencil,
-  ArrowsInCardinal,
   ArrowCounterClockwise,
+  ArrowsClockwise,
+  ArrowsInCardinal,
+  Check,
   Gear,
+  NotePencil,
+  SquaresFour,
   Trash,
 } from "@phosphor-icons/react";
-import { useInstance } from "../core/use-instance";
-import { useEditMode } from "../core/use-edit-mode";
-import { getWidgetModule } from "../widgets/registry";
+import { listen } from "@tauri-apps/api/event";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { applyBentoLayout, computeBentoLayout } from "@/core/bento";
 import {
-  setBounds,
-  removeWidget,
-  openSettingsWindow,
-  hideContextMenu,
   getAppConfig,
   getDesktopWorkArea,
-} from "../core/ipc";
+  hideContextMenu,
+  openSettingsWindow,
+  removeWidget,
+  setBounds,
+} from "@/core/ipc";
+import type { WidgetInstance } from "@/core/types";
+import { useEditMode } from "@/core/use-edit-mode";
+import { useInstance } from "@/core/use-instance";
+import { getWidgetModule } from "@/widgets/registry";
+
 import { WIDGET_COLOR_OPTIONS } from "./WidgetContextMenu";
-import { computeBentoLayout, applyBentoLayout } from "../core/bento";
-import type { WidgetInstance } from "../core/types";
 
 async function getEffectiveWorkArea() {
   try {
@@ -194,8 +196,8 @@ export function ContextMenuApp() {
 
   if (!instance) {
     return (
-      <div className="flex h-full w-full items-start justify-start p-1.5 select-none">
-        <div className="flex w-full flex-col rounded-xl border border-line/80 bg-surface/95 p-3 text-xs text-fg-muted shadow-card backdrop-blur-md select-none">
+      <div className="flex items-start justify-start p-1.5 select-none block-full inline-full">
+        <div className="flex flex-col rounded-xl border border-line/80 bg-surface/95 p-3 text-xs text-fg-muted shadow-card backdrop-blur-md select-none inline-full">
           Loading menu...
         </div>
       </div>
@@ -208,9 +210,9 @@ export function ContextMenuApp() {
       : "";
 
   return (
-    <div className="flex h-full w-full items-start justify-start p-1.5 select-none">
+    <div className="flex items-start justify-start p-1.5 select-none block-full inline-full">
       <div
-        className="flex w-full flex-col rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
+        className="flex flex-col rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none inline-full"
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -218,9 +220,9 @@ export function ContextMenuApp() {
       >
         {isBentoMode ? (
           <div className="flex flex-col gap-2 p-1 text-xs">
-            <div className="flex items-center justify-between border-b border-line/50 px-1 pb-1.5">
+            <div className="flex items-center justify-between border-be border-line/50 px-1 pbe-1.5">
               <div className="flex items-center gap-1.5 font-semibold text-accent-500">
-                <SquaresFour className="h-4 w-4 shrink-0" />
+                <SquaresFour className="shrink-0 block-4" />
                 <span>Bento Arranger</span>
               </div>
             </div>
@@ -228,24 +230,40 @@ export function ContextMenuApp() {
             <button
               type="button"
               onClick={handleCycleBento}
-              className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+              className="
+                flex cursor-pointer items-center justify-center gap-1.5
+                rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold
+                text-white shadow-xs transition-colors inline-full
+                hover:bg-accent-600
+                active:scale-95
+              "
             >
-              <ArrowsClockwise className="h-3.5 w-3.5" />
+              <ArrowsClockwise className="block-3.5 inline-3.5" />
               <span>Cycle Layout</span>
             </button>
 
-            <div className="flex items-center gap-1.5 pt-0.5">
+            <div className="flex items-center gap-1.5 pbs-0.5">
               <button
                 type="button"
                 onClick={handleCancelBento}
-                className="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-1.5 text-center text-xs font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                className="
+                  flex-1 cursor-pointer rounded-lg border border-line bg-surface
+                  px-2.5 py-1.5 text-center text-xs font-medium text-fg-muted
+                  transition-colors
+                  hover:bg-surface-raised hover:text-fg
+                "
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDoneBento}
-                className="flex-1 cursor-pointer rounded-lg bg-accent-500/20 px-2.5 py-1.5 text-center text-xs font-semibold text-accent-500 transition-colors hover:bg-accent-500/30"
+                className="
+                  flex-1 cursor-pointer rounded-lg bg-accent-500/20 px-2.5
+                  py-1.5 text-center text-xs font-semibold text-accent-500
+                  transition-colors
+                  hover:bg-accent-500/30
+                "
               >
                 Done
               </button>
@@ -260,31 +278,40 @@ export function ContextMenuApp() {
                 handleClose();
                 toggleEditMode();
               }}
-              className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+                text-start text-fg-muted transition-colors inline-full
+                hover:bg-surface-raised hover:text-fg
+              "
             >
               {editMode ? (
                 <>
-                  <Check className="h-3.5 w-3.5 shrink-0 text-accent-500" weight="bold" />
+                  <Check className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="bold" />
                   <span className="font-medium text-accent-500">Done Editing</span>
                 </>
               ) : (
                 <>
-                  <NotePencil className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+                  <NotePencil className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                   <span>Edit Widget</span>
-                  <span className="ml-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
+                  <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
                 </>
               )}
             </button>
 
             {/* Quick Size Reset options */}
-            <div className="flex flex-col gap-0.5 border-t border-line/40 pt-1">
+            <div className="flex flex-col gap-0.5 border-bs border-line/40 pbs-1">
               <button
                 type="button"
                 onClick={handleResetToFit}
-                className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                className="
+                  flex cursor-pointer items-center justify-between rounded-lg
+                  px-2.5 py-1 text-start text-fg-muted transition-colors
+                  inline-full
+                  hover:bg-surface-raised hover:text-fg
+                "
               >
                 <div className="flex items-center gap-2">
-                  <ArrowsInCardinal className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+                  <ArrowsInCardinal className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                   <span>Fit Size</span>
                 </div>
                 <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
@@ -293,10 +320,15 @@ export function ContextMenuApp() {
                 <button
                   type="button"
                   onClick={handleResetToDefault}
-                  className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                  className="
+                    flex cursor-pointer items-center justify-between rounded-lg
+                    px-2.5 py-1 text-start text-fg-muted transition-colors
+                    inline-full
+                    hover:bg-surface-raised hover:text-fg
+                  "
                 >
                   <div className="flex items-center gap-2">
-                    <ArrowCounterClockwise className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+                    <ArrowCounterClockwise className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                     <span>Reset Default</span>
                   </div>
                   <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
@@ -305,14 +337,19 @@ export function ContextMenuApp() {
             </div>
 
             {/* Auto Arrange Bento Grid Option */}
-            <div className="border-t border-line/40 pt-1">
+            <div className="border-bs border-line/40 pbs-1">
               <button
                 type="button"
                 onClick={handleStartBento}
-                className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                className="
+                  flex cursor-pointer items-center justify-between rounded-lg
+                  px-2.5 py-1.5 text-start text-fg-muted transition-colors
+                  inline-full
+                  hover:bg-surface-raised hover:text-fg
+                "
               >
                 <div className="flex items-center gap-2">
-                  <SquaresFour className="h-3.5 w-3.5 shrink-0 text-accent-500" />
+                  <SquaresFour className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
                   <span>Arrange Bento Grid...</span>
                 </div>
                 <span className="font-mono text-[9px] text-fg-muted/60">Auto</span>
@@ -320,11 +357,11 @@ export function ContextMenuApp() {
             </div>
 
             {/* Quick Color Swatches */}
-            <div className="flex flex-col gap-1 border-t border-line/40 px-2.5 py-1.5">
+            <div className="flex flex-col gap-1 border-bs border-line/40 px-2.5 py-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-medium text-fg-muted">Color</span>
               </div>
-              <div className="flex items-center justify-between pt-0.5">
+              <div className="flex items-center justify-between pbs-0.5">
                 {WIDGET_COLOR_OPTIONS.map((c) => {
                   const active = widgetColor === c.value;
                   return (
@@ -335,11 +372,16 @@ export function ContextMenuApp() {
                         patchSettings({ widgetColor: c.value });
                         handleClose();
                       }}
-                      className={`h-3.5 w-3.5 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-125 ${
-                        active
-                          ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface"
-                          : ""
-                      }`}
+                      className={`
+                        shrink-0 cursor-pointer rounded-full
+                        transition-transform block-3.5 inline-3.5
+                        hover:scale-125
+                        ${
+                          active
+                            ? `scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface`
+                            : ""
+                        }
+                      `}
                       style={{ backgroundColor: c.hex }}
                       title={c.label}
                     />
@@ -354,11 +396,17 @@ export function ContextMenuApp() {
                   return (
                     <label
                       title={isCustomActive ? `Custom Color (${widgetColor})` : "Pick custom color"}
-                      className={`relative flex h-3.5 w-3.5 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
-                        isCustomActive
-                          ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface"
-                          : "border border-line/60"
-                      }`}
+                      className={`
+                        relative flex shrink-0 cursor-pointer items-center
+                        justify-center rounded-full transition-transform
+                        block-3.5 inline-3.5
+                        hover:scale-125
+                        ${
+                          isCustomActive
+                            ? `scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface`
+                            : "border border-line/60"
+                        }
+                      `}
                       style={
                         isCustomActive
                           ? { backgroundColor: widgetColor }
@@ -379,7 +427,7 @@ export function ContextMenuApp() {
                           patchSettings({ widgetColor: e.target.value });
                           handleClose();
                         }}
-                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                        className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
                       />
                     </label>
                   );
@@ -394,13 +442,17 @@ export function ContextMenuApp() {
                 handleClose();
                 void openSettingsWindow(instance.id);
               }}
-              className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+                text-start text-fg-muted transition-colors inline-full
+                hover:bg-surface-raised hover:text-fg
+              "
             >
-              <Gear className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+              <Gear className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
               <span>Settings...</span>
             </button>
 
-            <div className="my-1 border-t border-line/60" />
+            <div className="my-1 border-bs border-line/60" />
 
             {/* Delete / Remove Widget */}
             <button
@@ -409,9 +461,14 @@ export function ContextMenuApp() {
                 handleClose();
                 void removeWidget(instance.id);
               }}
-              className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-error/10 hover:text-error dark:hover:bg-error/20"
+              className="
+                flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+                text-start text-fg-muted transition-colors inline-full
+                hover:bg-error/10 hover:text-error
+                dark:hover:bg-error/20
+              "
             >
-              <Trash className="h-3.5 w-3.5 shrink-0" />
+              <Trash className="shrink-0 block-3.5 inline-3.5" />
               <span className="font-medium">Delete Widget</span>
             </button>
           </>

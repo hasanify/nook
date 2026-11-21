@@ -25,7 +25,11 @@ export function StatusDot({ status, title, className = "" }: StatusDotProps) {
 
   return (
     <span
-      className={`inline-block h-2 w-2 shrink-0 rounded-full ${colorClass} ${className}`}
+      className={`
+        inline-block shrink-0 rounded-full block-2 inline-2
+        ${colorClass}
+        ${className}
+      `}
       title={title ?? status}
       aria-label={title ?? status}
     />

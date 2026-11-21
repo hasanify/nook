@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
 import { CircleNotch } from "@phosphor-icons/react";
-import type { SettingsField } from "../core/types";
-import { Toggle } from "./Toggle";
+import { useEffect, useRef, useState } from "react";
+
+import { listVercelProjects, type VercelProjectSummary } from "@/core/ipc";
+import type { SettingsField } from "@/core/types";
+
 import { CustomSelect } from "./CustomSelect";
-import { listVercelProjects, type VercelProjectSummary } from "../core/ipc";
+import { Toggle } from "./Toggle";
 
 interface SettingsFormProps {
   fields: SettingsField[];
@@ -64,7 +66,7 @@ function VercelProjectInput({
     : projects;
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className="relative inline-full">
       <div className="relative">
         <input
           id={id}
@@ -80,17 +82,22 @@ function VercelProjectInput({
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+          className="
+            rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg
+            transition-colors outline-none inline-full
+            placeholder:text-fg-muted/50
+            focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20
+          "
         />
         {loading && (
-          <div className="pointer-events-none absolute top-2 right-2.5">
-            <CircleNotch className="h-3.5 w-3.5 animate-spin text-fg-muted" />
+          <div className="pointer-events-none absolute inset-e-2.5 inset-bs-2">
+            <CircleNotch className="animate-spin text-fg-muted block-3.5 inline-3.5" />
           </div>
         )}
       </div>
 
       {isOpen && filtered.length > 0 && (
-        <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-line bg-surface-raised p-1 shadow-card backdrop-blur-md">
+        <div className="absolute z-50 mbs-1 overflow-y-auto rounded-lg border border-line bg-surface-raised p-1 shadow-card backdrop-blur-md inline-full max-block-48">
           {filtered.slice(0, 8).map((p) => (
             <button
               key={p.id}
@@ -99,14 +106,24 @@ function VercelProjectInput({
                 onChange(p.name);
                 setIsOpen(false);
               }}
-              className="group flex w-full cursor-pointer items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-surface hover:text-accent-500"
+              className="
+                group flex cursor-pointer items-center justify-between
+                rounded-md px-2.5 py-1.5 text-start text-xs transition-colors
+                inline-full
+                hover:bg-surface hover:text-accent-500
+              "
             >
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="truncate font-medium text-fg group-hover:text-accent-500">
+              <div className="flex items-center gap-2 min-inline-0">
+                <span
+                  className="
+                  truncate font-medium text-fg
+                  group-hover:text-accent-500
+                "
+                >
                   {p.name}
                 </span>
                 {p.framework && (
-                  <span className="rounded bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                  <span className="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
                     {p.framework}
                   </span>
                 )}
@@ -170,7 +187,13 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                   placeholder={field.placeholder}
                   value={String(val ?? "")}
                   onChange={(e) => onChange(field.key, e.target.value)}
-                  className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                  className="
+                    rounded-lg border border-line bg-surface px-3 py-1.5 text-xs
+                    text-fg transition-colors outline-none
+                    placeholder:text-fg-muted/50
+                    focus:border-accent-500 focus:ring-2
+                    focus:ring-accent-500/20
+                  "
                 />
               ))}
 
@@ -184,7 +207,12 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 step={field.step}
                 value={Number(val ?? 0)}
                 onChange={(e) => onChange(field.key, Number(e.target.value))}
-                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                className="
+                  rounded-lg border border-line bg-surface px-3 py-1.5 text-xs
+                  text-fg transition-colors outline-none
+                  placeholder:text-fg-muted/50
+                  focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20
+                "
               />
             )}
 
@@ -194,7 +222,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 value={(val as string | number) ?? ""}
                 onChange={(newVal) => onChange(field.key, newVal)}
                 options={field.options ?? []}
-                className="w-full"
+                className="inline-full"
               />
             )}
 
@@ -209,7 +237,12 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
                 placeholder={field.placeholder ?? "••••••••••••••••"}
                 value={String(val ?? "")}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
+                className="
+                  rounded-lg border border-line bg-surface px-3 py-1.5 text-xs
+                  text-fg transition-colors outline-none
+                  placeholder:text-fg-muted/50
+                  focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20
+                "
               />
             )}
           </div>

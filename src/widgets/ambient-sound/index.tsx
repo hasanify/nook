@@ -1,18 +1,20 @@
-import { useEffect, useState, useRef, useCallback, type ComponentType } from "react";
 import {
-  Play,
-  Pause,
-  SpeakerLow,
-  SpeakerHigh,
   CloudRain,
   Coffee,
   Flower,
-  Lightning,
   type IconProps,
+  Lightning,
+  Pause,
+  Play,
+  SpeakerHigh,
+  SpeakerLow,
 } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
+import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -190,20 +192,23 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="Ambient Sound">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line/40 pb-1 text-xs">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex block-2 inline-2">
               <span
-                className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isPlaying ? "animate-ping bg-accent-400" : "bg-fg-muted"
-                }`}
+                className={`
+                  absolute inline-flex rounded-full opacity-75 block-full
+                  inline-full
+                  ${isPlaying ? "animate-ping bg-accent-400" : "bg-fg-muted"}
+                `}
               />
               <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${
-                  isPlaying ? "bg-accent-500" : "bg-fg-muted"
-                }`}
+                className={`
+                  relative inline-flex rounded-full block-2 inline-2
+                  ${isPlaying ? "bg-accent-500" : "bg-fg-muted"}
+                `}
               />
             </span>
             <span>Ambient Sound</span>
@@ -222,15 +227,22 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
                 key={p.id}
                 type="button"
                 onClick={() => selectSound(p.id)}
-                className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2 text-left transition-all ${
-                  isSelected
-                    ? "border-accent-500 bg-accent-500/10 text-fg shadow-xs"
-                    : "border-line/40 bg-surface/50 text-fg-muted hover:bg-surface-raised"
-                }`}
+                className={`
+                  flex cursor-pointer items-center gap-2 rounded-lg border p-2
+                  text-start transition-all
+                  ${
+                    isSelected
+                      ? "border-accent-500 bg-accent-500/10 text-fg shadow-xs"
+                      : `
+                      border-line/40 bg-surface/50 text-fg-muted
+                      hover:bg-surface-raised
+                    `
+                  }
+                `}
               >
-                <Icon className="h-4 w-4 shrink-0" weight="duotone" />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-xs leading-tight font-semibold">{p.label}</div>
+                <Icon className="shrink-0 block-4 inline-4" weight="duotone" />
+                <div className="flex-1 min-inline-0">
+                  <div className="truncate text-xs/tight font-semibold">{p.label}</div>
                   <div className="truncate text-[9px] leading-tight text-fg-muted/80">{p.desc}</div>
                 </div>
               </button>
@@ -239,33 +251,44 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* Playback & Volume Control Bar */}
-        <div className="flex items-center justify-between gap-3 border-t border-line/40 pt-1">
+        <div className="flex items-center justify-between gap-3 border-bs border-line/40 pbs-1">
           {/* Main Play / Pause Button */}
           <button
             type="button"
             onClick={togglePlay}
-            className={`flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-semibold shadow-sm transition-all active:scale-95 ${
-              isPlaying
-                ? "bg-accent-500 text-white hover:bg-accent-600"
-                : "border border-line bg-surface-raised text-fg hover:bg-surface-raised/80"
-            }`}
+            className={`
+              flex cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs
+              font-semibold shadow-sm transition-all block-8
+              active:scale-95
+              ${
+                isPlaying
+                  ? `
+                  bg-accent-500 text-white
+                  hover:bg-accent-600
+                `
+                  : `
+                  border border-line bg-surface-raised text-fg
+                  hover:bg-surface-raised/80
+                `
+              }
+            `}
           >
             {isPlaying ? (
               <>
-                <Pause className="h-3.5 w-3.5" weight="fill" />
+                <Pause className="block-3.5 inline-3.5" weight="fill" />
                 <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="h-3.5 w-3.5" weight="fill" />
+                <Play className="block-3.5 inline-3.5" weight="fill" />
                 <span>Play {activePreset?.label}</span>
               </>
             )}
           </button>
 
           {/* Volume Slider */}
-          <div className="flex max-w-[120px] flex-1 items-center gap-1.5">
-            <SpeakerLow className="h-3 w-3 shrink-0 text-fg-muted" />
+          <div className="flex flex-1 items-center gap-1.5 max-inline-[120px]">
+            <SpeakerLow className="shrink-0 text-fg-muted block-3 inline-3" />
             <input
               type="range"
               min="0"
@@ -273,10 +296,10 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
               step="0.05"
               value={volume}
               onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="h-1.5 w-full cursor-pointer accent-accent-500"
+              className="cursor-pointer accent-accent-500 block-1.5 inline-full"
               title={`Volume: ${Math.round(volume * 100)}%`}
             />
-            <SpeakerHigh className="h-3 w-3 shrink-0 text-fg-muted" />
+            <SpeakerHigh className="shrink-0 text-fg-muted block-3 inline-3" />
           </div>
         </div>
       </div>

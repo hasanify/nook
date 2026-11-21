@@ -1,12 +1,14 @@
+import "./styles/theme.css";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./styles/theme.css";
-import { SettingsApp } from "./settings/SettingsApp";
+
 import { ContextMenuApp } from "./components/ContextMenuApp";
-import { getWidgetModule } from "./widgets/registry";
-import { useInstance } from "./core/use-instance";
 import { useEditMode } from "./core/use-edit-mode";
+import { useInstance } from "./core/use-instance";
 import { useTheme } from "./core/use-theme";
+import { SettingsApp } from "./settings/SettingsApp";
+import { getWidgetModule } from "./widgets/registry";
 
 function WidgetHost({ id }: { id: string }) {
   const { instance, loading, error, patchState, patchSettings } = useInstance(id);
@@ -14,7 +16,7 @@ function WidgetHost({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted select-none">
+      <div className="flex items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted select-none block-full inline-full">
         Loading widget...
       </div>
     );
@@ -22,7 +24,7 @@ function WidgetHost({ id }: { id: string }) {
 
   if (error || !instance) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none">
+      <div className="flex items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none block-full inline-full">
         {error || "Widget not found"}
       </div>
     );
@@ -32,7 +34,7 @@ function WidgetHost({ id }: { id: string }) {
   const mod = getWidgetModule(widgetKind ?? "") ?? getWidgetModule("placeholder");
   if (!mod) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none">
+      <div className="flex items-center justify-center rounded-card border border-error bg-surface p-4 text-xs text-error select-none block-full inline-full">
         Unknown widget type: {widgetKind}
       </div>
     );
@@ -70,10 +72,10 @@ function App() {
   }
 
   return (
-    <main className="flex h-full w-full items-center justify-center p-4">
+    <main className="flex items-center justify-center p-4 block-full inline-full">
       <div className="rounded-card border border-line bg-surface p-6 text-center shadow-card">
         <h1 className="text-lg font-semibold text-fg">Nook</h1>
-        <p className="mt-1 text-sm text-fg-muted">Waiting for widget parameters...</p>
+        <p className="mbs-1 text-sm text-fg-muted">Waiting for widget parameters...</p>
       </div>
     </main>
   );

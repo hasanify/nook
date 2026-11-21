@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Minus, Plus, NotePencil, Play, Pause, ArrowCounterClockwise } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { timerSchedule, timerCancel } from "../../core/ipc";
+import { ArrowCounterClockwise, Minus, NotePencil, Pause, Play, Plus } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import { timerCancel, timerSchedule } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -380,7 +382,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-col justify-between select-none">
+      <div className="flex flex-col justify-between select-none min-block-full">
         {/* Mode Selector */}
         <div className="flex rounded-lg border border-line/50 bg-surface-raised/70 p-0.5 text-xs">
           {(["pomodoro", "countdown", "stopwatch"] as const).map((m) => (
@@ -388,11 +390,18 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               key={m}
               type="button"
               onClick={() => handleSwitchMode(m)}
-              className={`flex-1 rounded-md py-1 text-center font-medium capitalize transition-all ${
-                mode === m
-                  ? "bg-surface font-semibold text-fg shadow-xs"
-                  : "text-fg-muted hover:text-fg"
-              }`}
+              className={`
+                flex-1 rounded-md py-1 text-center font-medium capitalize
+                transition-all
+                ${
+                  mode === m
+                    ? "bg-surface font-semibold text-fg shadow-xs"
+                    : `
+                    text-fg-muted
+                    hover:text-fg
+                  `
+                }
+              `}
             >
               {m}
             </button>
@@ -407,10 +416,16 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                 <button
                   type="button"
                   onClick={(e) => adjustDuration(-1, e)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-line/60 bg-surface-raised/40 text-fg-muted transition-colors hover:border-accent-500/60 hover:text-accent-500 active:scale-95"
+                  className="
+                    flex items-center justify-center rounded-lg border
+                    border-line/60 bg-surface-raised/40 text-fg-muted
+                    transition-colors block-7 inline-7
+                    hover:border-accent-500/60 hover:text-accent-500
+                    active:scale-95
+                  "
                   title="Decrease 1 min (Shift for 5 min)"
                 >
-                  <Minus className="h-3 w-3" weight="bold" />
+                  <Minus className="block-3 inline-3" weight="bold" />
                 </button>
 
                 {isEditing ? (
@@ -426,10 +441,15 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                       onKeyDown={(e) => {
                         if (e.key === "Escape") setIsEditing(false);
                       }}
-                      className="w-20 rounded-md border border-accent-500 bg-surface px-1.5 py-0.5 text-center font-mono text-3xl font-light text-fg outline-none focus:ring-1 focus:ring-accent-500"
+                      className="
+                        rounded-md border border-accent-500 bg-surface px-1.5
+                        py-0.5 text-center font-mono text-3xl font-light text-fg
+                        outline-none inline-20
+                        focus:ring-1 focus:ring-accent-500
+                      "
                       autoFocus
                     />
-                    <span className="ml-1 font-mono text-xs text-fg-muted">m</span>
+                    <span className="ms-1 font-mono text-xs text-fg-muted">m</span>
                   </form>
                 ) : (
                   <div
@@ -437,26 +457,43 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                       setEditValue(String(currentDurationMins));
                       setIsEditing(true);
                     }}
-                    className="group flex cursor-pointer items-center gap-1 rounded-lg px-2 py-0.5 font-mono text-4xl font-light tracking-tight text-fg tabular-nums transition-colors hover:bg-surface-raised/80"
+                    className="
+                      group flex cursor-pointer items-center gap-1 rounded-lg
+                      px-2 py-0.5 font-mono text-4xl font-light tracking-tight
+                      text-fg tabular-nums transition-colors
+                      hover:bg-surface-raised/80
+                    "
                     title="Click to type custom duration"
                   >
                     <span>{display.main}</span>
-                    <NotePencil className="h-3 w-3 text-fg-muted opacity-0 transition-opacity group-hover:opacity-70" />
+                    <NotePencil
+                      className="
+                      text-fg-muted opacity-0 transition-opacity block-3
+                      inline-3
+                      group-hover:opacity-70
+                    "
+                    />
                   </div>
                 )}
 
                 <button
                   type="button"
                   onClick={(e) => adjustDuration(1, e)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-line/60 bg-surface-raised/40 text-fg-muted transition-colors hover:border-accent-500/60 hover:text-accent-500 active:scale-95"
+                  className="
+                    flex items-center justify-center rounded-lg border
+                    border-line/60 bg-surface-raised/40 text-fg-muted
+                    transition-colors block-7 inline-7
+                    hover:border-accent-500/60 hover:text-accent-500
+                    active:scale-95
+                  "
                   title="Increase 1 min (Shift for 5 min)"
                 >
-                  <Plus className="h-3 w-3" weight="bold" />
+                  <Plus className="block-3 inline-3" weight="bold" />
                 </button>
               </div>
 
               {mode === "pomodoro" && (
-                <div className="mt-0.5 text-xs text-fg-muted capitalize">
+                <div className="mbs-0.5 text-xs text-fg-muted capitalize">
                   {phase === "work"
                     ? "Focus Session"
                     : phase === "break"
@@ -466,7 +503,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               )}
 
               {/* Preset Pills */}
-              <div className="mt-2 flex max-w-full flex-wrap items-center justify-center gap-1">
+              <div className="mbs-2 flex flex-wrap items-center justify-center gap-1 max-inline-full">
                 {presets.map((preset) => {
                   const isCurrent = preset === currentDurationMins;
                   return (
@@ -474,11 +511,18 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                       key={preset}
                       type="button"
                       onClick={() => applyDuration(preset)}
-                      className={`rounded px-1.5 py-0.5 font-mono text-[10px] transition-colors ${
-                        isCurrent
-                          ? "border border-accent-500/30 bg-accent-500/20 font-semibold text-accent-500"
-                          : "bg-surface-raised/50 text-fg-muted hover:bg-surface-raised hover:text-fg"
-                      }`}
+                      className={`
+                        rounded-sm px-1.5 py-0.5 font-mono text-[10px]
+                        transition-colors
+                        ${
+                          isCurrent
+                            ? `border border-accent-500/30 bg-accent-500/20 font-semibold text-accent-500`
+                            : `
+                            bg-surface-raised/50 text-fg-muted
+                            hover:bg-surface-raised hover:text-fg
+                          `
+                        }
+                      `}
                     >
                       {preset}m
                     </button>
@@ -492,7 +536,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                 {display.main}
               </div>
               {mode === "pomodoro" && (
-                <div className="mt-1 text-xs text-fg-muted capitalize">
+                <div className="mbs-1 text-xs text-fg-muted capitalize">
                   {phase === "work"
                     ? "Focus Session"
                     : phase === "break"
@@ -503,9 +547,9 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
 
               {/* Progress Bar (countdown & pomodoro) */}
               {mode !== "stopwatch" && targetDuration > 0 && (
-                <div className="mt-2.5 h-1 w-32 overflow-hidden rounded-full bg-surface-raised">
+                <div className="mbs-2.5 overflow-hidden rounded-full bg-surface-raised block-1 inline-32">
                   <div
-                    className="h-full bg-accent-500 transition-all duration-300"
+                    className="bg-accent-500 transition-all duration-300 block-full"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -515,23 +559,33 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-1.5 pb-2">
+        <div className="flex items-center gap-1.5 pbe-2">
           {status === "running" ? (
             <button
               type="button"
               onClick={handlePause}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface-raised py-1.5 text-xs font-medium text-fg transition-colors hover:bg-surface"
+              className="
+                flex flex-1 items-center justify-center gap-1.5 rounded-lg
+                border border-line bg-surface-raised py-1.5 text-xs font-medium
+                text-fg transition-colors
+                hover:bg-surface
+              "
             >
-              <Pause className="h-3 w-3" weight="fill" />
+              <Pause className="block-3 inline-3" weight="fill" />
               <span>Pause</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={handleStart}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-accent-500 py-1.5 text-xs font-medium text-white shadow-xs transition-colors hover:bg-accent-600"
+              className="
+                flex flex-1 items-center justify-center gap-1.5 rounded-lg
+                bg-accent-500 py-1.5 text-xs font-medium text-white shadow-xs
+                transition-colors
+                hover:bg-accent-600
+              "
             >
-              <Play className="h-3 w-3" weight="fill" />
+              <Play className="block-3 inline-3" weight="fill" />
               <span>{status === "paused" ? "Resume" : "Start"}</span>
             </button>
           )}
@@ -542,7 +596,12 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               <button
                 type="button"
                 onClick={() => handleAddMinutes(1)}
-                className="flex items-center justify-center rounded-lg border border-line bg-surface-raised px-2 py-1.5 font-mono text-xs font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:text-fg"
+                className="
+                  flex items-center justify-center rounded-lg border border-line
+                  bg-surface-raised px-2 py-1.5 font-mono text-xs font-medium
+                  text-fg-muted transition-colors
+                  hover:border-accent-500/50 hover:text-fg
+                "
                 title="Add 1 minute"
               >
                 +1m
@@ -550,7 +609,12 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
               <button
                 type="button"
                 onClick={() => handleAddMinutes(5)}
-                className="flex items-center justify-center rounded-lg border border-line bg-surface-raised px-2 py-1.5 font-mono text-xs font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:text-fg"
+                className="
+                  flex items-center justify-center rounded-lg border border-line
+                  bg-surface-raised px-2 py-1.5 font-mono text-xs font-medium
+                  text-fg-muted transition-colors
+                  hover:border-accent-500/50 hover:text-fg
+                "
                 title="Add 5 minutes"
               >
                 +5m
@@ -562,10 +626,16 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
             type="button"
             onClick={handleReset}
             disabled={status === "idle" && (state.accumulatedMs || 0) === 0}
-            className="flex items-center justify-center gap-1 rounded-lg border border-line bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-fg disabled:opacity-40"
+            className="
+              flex items-center justify-center gap-1 rounded-lg border
+              border-line bg-surface-raised px-3 py-1.5 text-xs font-medium
+              text-fg-muted transition-colors
+              hover:text-fg
+              disabled:opacity-40
+            "
             title="Reset timer"
           >
-            <ArrowCounterClockwise className="h-3 w-3" />
+            <ArrowCounterClockwise className="block-3 inline-3" />
             <span>Reset</span>
           </button>
         </div>

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
 import { Lightning } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { getBatteryStatus, type BatteryStatus } from "../../core/ipc";
+import { useEffect, useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import { type BatteryStatus, getBatteryStatus } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -69,20 +71,23 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="Battery Monitor">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line/40 pb-1">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex block-2 inline-2">
               <span
-                className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isCharging ? "animate-ping bg-emerald-400" : "bg-accent-400"
-                }`}
+                className={`
+                  absolute inline-flex rounded-full opacity-75 block-full
+                  inline-full
+                  ${isCharging ? "animate-ping bg-emerald-400" : "bg-accent-400"}
+                `}
               />
               <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${
-                  isCharging ? "bg-emerald-500" : "bg-accent-500"
-                }`}
+                className={`
+                  relative inline-flex rounded-full block-2 inline-2
+                  ${isCharging ? "bg-emerald-500" : "bg-accent-500"}
+                `}
               />
             </span>
             Power & Battery
@@ -97,35 +102,35 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
           {/* Gauge Graphic */}
           <div className="flex items-center">
             {/* Battery Body */}
-            <div className="relative flex h-14 w-28 items-center rounded-xl border-2 border-line/80 bg-surface/50 p-1 shadow-inner">
+            <div className="relative flex items-center rounded-xl border-2 border-line/80 bg-surface/50 p-1 shadow-inner block-14 inline-28">
               {/* Fill */}
               <div
-                className={`h-full rounded-lg transition-all duration-500 ${getBatteryBg(
-                  percent,
-                  isCharging,
-                )}`}
+                className={`
+                  rounded-lg transition-all duration-500 block-full
+                  ${getBatteryBg(percent, isCharging)}
+                `}
                 style={{ width: `${Math.max(5, Math.min(100, percent))}%` }}
               />
 
               {/* Charging Bolt Overlay */}
               {isCharging && (
-                <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow">
-                  <Lightning className="h-6 w-6 animate-pulse" weight="fill" />
+                <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow-sm">
+                  <Lightning className="animate-pulse block-6 inline-6" weight="fill" />
                 </div>
               )}
             </div>
             {/* Battery Tip */}
-            <div className="-ml-[1px] h-5 w-1.5 rounded-r bg-line/80" />
+            <div className="-ms-px rounded-e bg-line/80 block-5 inline-1.5" />
           </div>
 
           {/* Value and Status */}
           <div className="flex flex-col items-end">
             <div className="flex items-baseline gap-0.5">
               <span
-                className={`font-mono text-2xl font-bold tracking-tight ${getBatteryColor(
-                  percent,
-                  isCharging,
-                )}`}
+                className={`
+                  font-mono text-2xl font-bold tracking-tight
+                  ${getBatteryColor(percent, isCharging)}
+                `}
               >
                 {hasBattery ? percent : "100"}
               </span>
@@ -147,14 +152,14 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* Footer info pills */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="rounded-full bg-emerald-500 block-1.5 inline-1.5" />
             <span>Health: Good</span>
           </div>
 
           {battery?.battery_saver && (
-            <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-amber-400">
+            <span className="rounded-sm bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-amber-400">
               Battery Saver
             </span>
           )}

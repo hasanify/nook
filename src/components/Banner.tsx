@@ -27,7 +27,12 @@ export function Banner({
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-xs font-medium ${typeStyles} ${className}`}
+      className={`
+        flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5
+        text-xs font-medium
+        ${typeStyles}
+        ${className}
+      `}
     >
       <span className="truncate" title={message}>
         {message}
@@ -36,7 +41,11 @@ export function Banner({
         <button
           type="button"
           onClick={onAction}
-          className="shrink-0 cursor-pointer underline hover:opacity-80 active:opacity-60"
+          className="
+            shrink-0 cursor-pointer underline
+            hover:opacity-80
+            active:opacity-60
+          "
         >
           {actionText}
         </button>

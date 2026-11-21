@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
-import { WidgetShell } from "../../components/WidgetShell";
+import { useEffect, useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -50,9 +52,9 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
     >
-      <div className="flex min-h-full flex-col justify-between pt-1 pb-2 select-none">
+      <div className="flex flex-col justify-between pbs-1 pbe-2 select-none min-block-full">
         {/* Main Clock Display */}
-        <div className="flex flex-col items-center justify-center pt-2">
+        <div className="flex flex-col items-center justify-center pbs-2">
           <div className="flex items-baseline gap-1 font-mono tracking-tight text-fg">
             <span className="text-4xl font-bold tracking-tight">
               {pad(hours)}:{pad(minutes)}
@@ -61,14 +63,14 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
               <span className="text-xl font-medium text-fg-muted">:{pad(seconds)}</span>
             )}
             {is12h && (
-              <span className="ml-1 text-xs font-semibold tracking-wider text-accent-500">
+              <span className="ms-1 text-xs font-semibold tracking-wider text-accent-500">
                 {ampm}
               </span>
             )}
           </div>
 
           {showDate && (
-            <div className="mt-2 flex items-center gap-1.5 text-xs text-fg-muted">
+            <div className="mbs-2 flex items-center gap-1.5 text-xs text-fg-muted">
               <span className="font-semibold text-fg/90">{dayOfWeek}</span>
               <span>•</span>
               <span>{fullDate}</span>
@@ -78,14 +80,14 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
 
         {/* Day progress indicator */}
         {showDayProgress && (
-          <div className="flex flex-col gap-1 px-2 pt-2 pb-1">
+          <div className="flex flex-col gap-1 px-2 pbs-2 pbe-1">
             <div className="flex justify-between text-[10px] text-fg-muted">
               <span>Day progress</span>
               <span className="font-mono">{dayProgressPercent.toFixed(0)}%</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-raised">
+            <div className="overflow-hidden rounded-full bg-surface-raised block-1.5 inline-full">
               <div
-                className="h-full rounded-full bg-accent-500 transition-all duration-500"
+                className="rounded-full bg-accent-500 transition-all duration-500 block-full"
                 style={{ width: `${dayProgressPercent}%` }}
               />
             </div>

@@ -1,19 +1,21 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
-  ArrowSquareOut,
   ArrowClockwise,
-  Star,
+  ArrowSquareOut,
   GitFork,
-  WarningCircle,
+  Star,
   Tag,
+  WarningCircle,
 } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { StatusDot } from "../../components/StatusDot";
-import { Banner } from "../../components/Banner";
-import { useProvider } from "../../core/use-provider";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { StatusDot } from "@/components/StatusDot";
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+import { useProvider } from "@/core/use-provider";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -232,11 +234,15 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 e.stopPropagation();
                 handleOpenLink(`https://github.com/${repo}`);
               }}
-              className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised/80 hover:text-accent-500"
+              className="
+                flex cursor-pointer items-center justify-center rounded-sm
+                text-fg-muted transition-colors block-5 inline-5
+                hover:bg-surface-raised/80 hover:text-accent-500
+              "
               title={`Open ${repo} on GitHub`}
               aria-label={`Open ${repo} on GitHub`}
             >
-              <ArrowSquareOut className="h-3 w-3" />
+              <ArrowSquareOut className="block-3 inline-3" />
             </button>
             <button
               type="button"
@@ -245,12 +251,20 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 void handleManualRefresh();
               }}
               disabled={isRefreshing}
-              className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted transition-colors hover:bg-surface-raised/80 hover:text-fg disabled:opacity-50"
+              className="
+                flex cursor-pointer items-center justify-center rounded-sm
+                text-fg-muted transition-colors block-5 inline-5
+                hover:bg-surface-raised/80 hover:text-fg
+                disabled:opacity-50
+              "
               title={isRefreshing ? "Refreshing..." : "Refresh repository data"}
               aria-label="Refresh repository data"
             >
               <ArrowClockwise
-                className={`h-3 w-3 ${isRefreshing ? "animate-spin text-accent-500" : ""}`}
+                className={`
+                  block-3 inline-3
+                  ${isRefreshing ? `animate-spin text-accent-500` : ""}
+                `}
               />
             </button>
           </div>
@@ -267,22 +281,33 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-col gap-2.5 select-none">
+      <div className="flex flex-col gap-2.5 select-none min-block-full">
         {/* Badges / Meta bar (Stars, Release, Forks, Issues) */}
         {((showStars && data?.stars !== undefined) ||
           (showForks && data?.forks !== undefined && data.forks > 0) ||
           (showIssues && data?.open_issues !== undefined) ||
           (showRelease && data?.latest_release)) && (
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-line/40 pb-2 text-[11px]">
+          <div className="flex flex-wrap items-center gap-1.5 border-be border-line/40 pbe-2 text-[11px]">
             {showStars && data?.stars !== undefined && (
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/stargazers`)}
-                className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                className="
+                  group flex cursor-pointer items-center gap-1 rounded-md border
+                  border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium
+                  text-fg-muted transition-colors
+                  hover:border-accent-500/50 hover:bg-surface
+                  hover:text-accent-500
+                "
                 title="GitHub Stars"
               >
-                <Star className="h-3 w-3 text-amber-500" weight="fill" />
-                <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
+                <Star className="text-amber-500 block-3 inline-3" weight="fill" />
+                <span
+                  className="
+                  font-mono text-[10px] text-fg
+                  group-hover:text-accent-500
+                "
+                >
                   {formatCount(data.stars)}
                 </span>
               </button>
@@ -292,11 +317,22 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/network/members`)}
-                className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                className="
+                  group flex cursor-pointer items-center gap-1 rounded-md border
+                  border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium
+                  text-fg-muted transition-colors
+                  hover:border-accent-500/50 hover:bg-surface
+                  hover:text-accent-500
+                "
                 title="Forks"
               >
-                <GitFork className="h-3 w-3" />
-                <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
+                <GitFork className="block-3 inline-3" />
+                <span
+                  className="
+                  font-mono text-[10px] text-fg
+                  group-hover:text-accent-500
+                "
+                >
                   {formatCount(data.forks)}
                 </span>
               </button>
@@ -306,11 +342,22 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(`https://github.com/${repo}/issues`)}
-                className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
+                className="
+                  group flex cursor-pointer items-center gap-1 rounded-md border
+                  border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium
+                  text-fg-muted transition-colors
+                  hover:border-accent-500/50 hover:bg-surface
+                  hover:text-accent-500
+                "
                 title="Open Issues"
               >
-                <WarningCircle className="h-3 w-3 text-emerald-500" />
-                <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
+                <WarningCircle className="text-emerald-500 block-3 inline-3" />
+                <span
+                  className="
+                  font-mono text-[10px] text-fg
+                  group-hover:text-accent-500
+                "
+                >
                   {formatCount(data.open_issues)} issues
                 </span>
               </button>
@@ -320,10 +367,16 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               <button
                 type="button"
                 onClick={() => handleOpenLink(data.latest_release!.url)}
-                className="group flex max-w-[140px] cursor-pointer items-center gap-1 truncate rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 font-medium text-accent-500 transition-colors hover:bg-accent-500/20"
+                className="
+                  group flex cursor-pointer items-center gap-1 truncate
+                  rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5
+                  py-0.5 font-medium text-accent-500 transition-colors
+                  max-inline-[140px]
+                  hover:bg-accent-500/20
+                "
                 title={`Latest Release: ${data.latest_release.name || data.latest_release.tag_name}`}
               >
-                <Tag className="h-3 w-3 shrink-0" />
+                <Tag className="shrink-0 block-3 inline-3" />
                 <span className="truncate font-mono text-[10px]">
                   {data.latest_release.tag_name}
                 </span>
@@ -354,15 +407,25 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                     key={run.id}
                     type="button"
                     onClick={() => handleOpenLink(run.url)}
-                    className="group flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                    className="
+                      group flex cursor-pointer items-center justify-between
+                      gap-2 rounded-lg px-2 py-1 text-start text-xs
+                      transition-colors
+                      hover:bg-surface-raised/80
+                    "
                   >
-                    <div className="flex min-w-0 items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 min-inline-0">
                       <StatusDot status={s} />
-                      <span className="truncate font-medium text-fg group-hover:text-accent-500">
+                      <span
+                        className="
+                        truncate font-medium text-fg
+                        group-hover:text-accent-500
+                      "
+                      >
                         {run.name}
                       </span>
                       {run.branch && (
-                        <span className="py-0.2 truncate rounded bg-surface-raised px-1 font-mono text-[9px] text-fg-muted">
+                        <span className="truncate rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-[9px] text-fg-muted">
                           {run.branch}
                         </span>
                       )}
@@ -383,24 +446,33 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
             <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
               Commits
             </span>
-            <div className="flex flex-col gap-1 pr-1 pb-2">
+            <div className="flex flex-col gap-1 pe-1 pbe-2">
               {data?.commits && data.commits.length > 0 ? (
                 data.commits.map((c) => (
                   <button
                     key={c.sha}
                     type="button"
                     onClick={() => handleOpenLink(c.url)}
-                    className="group flex cursor-pointer flex-col rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-raised/80"
+                    className="
+                      group flex cursor-pointer flex-col rounded-lg px-2 py-1.5
+                      text-start text-xs transition-colors
+                      hover:bg-surface-raised/80
+                    "
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-medium text-fg group-hover:text-accent-500">
+                      <span
+                        className="
+                        truncate font-medium text-fg
+                        group-hover:text-accent-500
+                      "
+                      >
                         {c.message}
                       </span>
-                      <span className="shrink-0 rounded border border-line/50 bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-accent-500">
+                      <span className="shrink-0 rounded-sm border border-line/50 bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-accent-500">
                         {c.sha}
                       </span>
                     </div>
-                    <div className="mt-0.5 flex items-center justify-between text-[10px] text-fg-muted">
+                    <div className="mbs-0.5 flex items-center justify-between text-[10px] text-fg-muted">
                       <span>{c.author}</span>
                       <span>{formatRelativeTime(c.date)}</span>
                     </div>

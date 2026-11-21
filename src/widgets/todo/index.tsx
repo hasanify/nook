@@ -1,8 +1,10 @@
-import { useState } from "react";
 import { Check, X } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
+import { useState } from "react";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -70,7 +72,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
     >
-      <div className="flex min-h-full flex-col gap-2 select-none">
+      <div className="flex flex-col gap-2 select-none min-block-full">
         {/* Add Task Input Form */}
         <form onSubmit={handleAddTodo} className="flex gap-1.5">
           <input
@@ -82,19 +84,30 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
             placeholder="Add task... (Press Enter)"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            className="flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5 py-1 text-xs text-fg transition-colors outline-none placeholder:text-fg-muted/50 focus:border-accent-500 focus:bg-surface focus:ring-1 focus:ring-accent-500/20"
+            className="
+              flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5
+              py-1 text-xs text-fg transition-colors outline-none
+              placeholder:text-fg-muted/50
+              focus:border-accent-500 focus:bg-surface focus:ring-1
+              focus:ring-accent-500/20
+            "
           />
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="rounded-lg bg-accent-500/15 px-2.5 py-1 text-xs font-semibold text-accent-500 transition-colors hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-40"
+            className="
+              rounded-lg bg-accent-500/15 px-2.5 py-1 text-xs font-semibold
+              text-accent-500 transition-colors
+              hover:bg-accent-500/25
+              disabled:cursor-not-allowed disabled:opacity-40
+            "
           >
             +
           </button>
         </form>
 
         {/* Task List */}
-        <div className="flex flex-col gap-1 pr-1 pb-2">
+        <div className="flex flex-col gap-1 pe-1 pbe-2">
           {displayedTodos.length === 0 ? (
             <div className="flex flex-1 items-center justify-center py-6 text-xs text-fg-muted italic">
               {todos.length === 0 ? "No tasks yet. Type above to add." : "All tasks completed!"}
@@ -103,26 +116,38 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
             displayedTodos.map((todo) => (
               <div
                 key={todo.id}
-                className="group flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-xs transition-colors hover:bg-surface-raised/60"
+                className="
+                  group flex items-center justify-between gap-2 rounded-lg px-2
+                  py-1 text-xs transition-colors
+                  hover:bg-surface-raised/60
+                "
               >
                 <button
                   type="button"
                   onClick={() => handleToggle(todo.id)}
-                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                  className="flex flex-1 items-center gap-2 text-start min-inline-0"
                 >
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                      todo.done
-                        ? "border-accent-500 bg-accent-500 text-white"
-                        : "border-line bg-surface group-hover:border-fg-muted"
-                    }`}
+                    className={`
+                      flex shrink-0 items-center justify-center rounded-sm
+                      border transition-colors block-4 inline-4
+                      ${
+                        todo.done
+                          ? "border-accent-500 bg-accent-500 text-white"
+                          : `
+                          border-line bg-surface
+                          group-hover:border-fg-muted
+                        `
+                      }
+                    `}
                   >
-                    {todo.done && <Check className="h-2.5 w-2.5" weight="bold" />}
+                    {todo.done && <Check className="block-2.5 inline-2.5" weight="bold" />}
                   </span>
                   <span
-                    className={`truncate transition-all ${
-                      todo.done ? "text-fg-muted line-through" : "text-fg"
-                    }`}
+                    className={`
+                      truncate transition-all
+                      ${todo.done ? "text-fg-muted line-through" : "text-fg"}
+                    `}
                   >
                     {todo.text}
                   </span>
@@ -131,10 +156,19 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
                 <button
                   type="button"
                   onClick={() => handleDelete(todo.id)}
-                  className="opacity-0 transition-opacity group-hover:opacity-100 hover:text-error"
+                  className="
+                    opacity-0 transition-opacity
+                    group-hover:opacity-100
+                    hover:text-error
+                  "
                   title="Delete task"
                 >
-                  <X className="h-3 w-3 text-fg-muted hover:text-error" />
+                  <X
+                    className="
+                    text-fg-muted block-3 inline-3
+                    hover:text-error
+                  "
+                  />
                 </button>
               </div>
             ))
@@ -142,7 +176,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1.5 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1.5 text-[10px] text-fg-muted">
           <span>
             {remainingCount} {remainingCount === 1 ? "task" : "tasks"} remaining
           </span>
@@ -150,7 +184,10 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
             <button
               type="button"
               onClick={handleClearCompleted}
-              className="text-fg-muted transition-colors hover:text-fg hover:underline"
+              className="
+                text-fg-muted transition-colors
+                hover:text-fg hover:underline
+              "
             >
               Clear completed
             </button>

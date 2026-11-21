@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -163,9 +165,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             onClick={handleShuffle}
             disabled={loading}
             title="Random wonder"
-            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+            className="
+              flex cursor-pointer items-center justify-center rounded-sm
+              text-fg-muted block-5 inline-5
+              hover:bg-surface-raised hover:text-fg
+              disabled:opacity-40
+            "
           >
-            <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            <ArrowClockwise
+              className={`
+              block-3 inline-3
+              ${loading ? "animate-spin" : ""}
+            `}
+            />
           </button>
         </div>
       }
@@ -175,7 +187,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Main Card Content */}
         <div className="flex flex-1 flex-col gap-1.5">
           <div className="flex items-center justify-between">
@@ -185,23 +197,27 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             <button
               type="button"
               onClick={handleCopy}
-              className="flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted transition-colors hover:text-fg"
+              className="
+                flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+                transition-colors
+                hover:text-fg
+              "
             >
               {copied ? (
                 <>
-                  <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                  <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                   <span className="text-ok">Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-3 w-3" />
+                  <Copy className="block-3 inline-3" />
                   <span>Copy</span>
                 </>
               )}
             </button>
           </div>
 
-          <p className="text-xs leading-relaxed text-fg select-text">
+          <p className="text-xs/relaxed text-fg select-text">
             {loading ? (
               <span className="text-fg-muted italic">Consulting the wonder mirror…</span>
             ) : (
@@ -211,7 +227,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         </div>
 
         {/* Bottom Bar: Ask custom concept or toggle input */}
-        <div className="border-t border-line/40 pt-1.5">
+        <div className="border-bs border-line/40 pbs-1.5">
           {showInput ? (
             <div className="flex gap-1.5">
               <input
@@ -227,7 +243,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                   }
                 }}
                 placeholder="Type topic & press Enter…"
-                className="flex-1 rounded-md border border-line bg-surface-raised/40 px-2 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+                className="
+                  flex-1 rounded-md border border-line bg-surface-raised/40 px-2
+                  py-1 text-xs text-fg
+                  placeholder:text-fg-muted/50
+                  focus:border-accent-500 focus:outline-none
+                "
               />
               <button
                 type="button"
@@ -248,7 +269,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                   setInputVal(topic);
                   setShowInput(true);
                 }}
-                className="cursor-pointer text-accent-500 hover:underline"
+                className="
+                  cursor-pointer text-accent-500
+                  hover:underline
+                "
               >
                 Ask custom
               </button>

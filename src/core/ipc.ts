@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { AppConfig, WidgetInstance } from "./types";
+
+import type { AppConfig, ProviderPayload, WidgetInstance } from "./types";
 
 export interface ConfigChangedPayload {
   ids: string[];
@@ -263,23 +264,23 @@ export async function getBatteryStatus(): Promise<BatteryStatus> {
 
 export async function getProviderSnapshot<T = unknown>(
   widgetId: string,
-): Promise<import("./types").ProviderPayload<T> | null> {
-  return invoke<import("./types").ProviderPayload<T> | null>("get_provider_snapshot", { widgetId });
+): Promise<ProviderPayload<T> | null> {
+  return invoke<ProviderPayload<T> | null>("get_provider_snapshot", { widgetId });
 }
 
 export async function refreshWidgetProvider<T = unknown>(
   widgetId: string,
-): Promise<import("./types").ProviderPayload<T> | null> {
-  return invoke<import("./types").ProviderPayload<T> | null>("refresh_widget_provider", {
+): Promise<ProviderPayload<T> | null> {
+  return invoke<ProviderPayload<T> | null>("refresh_widget_provider", {
     widgetId,
   });
 }
 
 export function onProviderData<T = unknown>(
   widgetId: string,
-  callback: (payload: import("./types").ProviderPayload<T>) => void,
+  callback: (payload: ProviderPayload<T>) => void,
 ): Promise<UnlistenFn> {
-  return listen<import("./types").ProviderPayload<T>>(`provider-data-${widgetId}`, (event) => {
+  return listen<ProviderPayload<T>>(`provider-data-${widgetId}`, (event) => {
     callback(event.payload);
   });
 }

@@ -1,7 +1,9 @@
-import { useRef, useEffect } from "react";
 import { DotsSixVertical } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
+
+import type { Rect } from "@/core/types";
+
 import { WidgetIcon } from "./WidgetIcon";
-import type { Rect } from "../core/types";
 
 interface EditOverlayProps {
   id: string;
@@ -254,17 +256,29 @@ export function EditOverlay({
               }
             : undefined
         }
-        className={`flex h-8 touch-none items-center justify-between rounded-t-[inherit] border-b px-3 text-xs transition-colors select-none ${
-          editMode
-            ? "cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500 hover:bg-accent-500/20 active:cursor-grabbing"
-            : `cursor-default text-fg-muted ${headerClass ?? "border-line/40 bg-surface-raised/40"}`
-        }`}
+        className={`
+          flex touch-none items-center justify-between rounded-t-[inherit]
+          border-be px-3 text-xs transition-colors select-none block-8
+          ${
+            editMode
+              ? `
+              cursor-grab border-accent-500/40 bg-accent-500/15 text-accent-500
+              hover:bg-accent-500/20
+              active:cursor-grabbing
+            `
+              : `
+              cursor-default text-fg-muted
+              ${headerClass ?? `border-line/40 bg-surface-raised/40`}
+            `
+          }
+        `}
         onPointerDown={editMode ? handleDragStart : undefined}
       >
         <div
-          className={`flex min-w-0 flex-1 items-center gap-2 font-medium ${
-            editMode ? "pointer-events-none" : ""
-          }`}
+          className={`
+            flex flex-1 items-center gap-2 font-medium min-inline-0
+            ${editMode ? "pointer-events-none" : ""}
+          `}
         >
           <span
             className="flex shrink-0 items-center justify-center transition-colors"
@@ -277,7 +291,9 @@ export function EditOverlay({
                 : undefined
             }
           >
-            {icon ?? <WidgetIcon kind={kind} className="h-3.5 w-3.5 shrink-0 text-accent-500" />}
+            {icon ?? (
+              <WidgetIcon kind={kind} className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
+            )}
           </span>
           <span className="truncate text-[11px] font-semibold tracking-tight text-fg/90">
             {title}
@@ -298,7 +314,11 @@ export function EditOverlay({
                     e.stopPropagation();
                     onResetToFit();
                   }}
-                  className="cursor-pointer rounded px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                  className="
+                    cursor-pointer rounded-sm px-1.5 py-0.5 font-mono text-[9px]
+                    font-medium text-fg-muted transition-colors
+                    hover:bg-surface-raised hover:text-fg
+                  "
                   title="Fit to minimum compact size"
                 >
                   Fit
@@ -311,20 +331,28 @@ export function EditOverlay({
                     e.stopPropagation();
                     onResetToDefault();
                   }}
-                  className="cursor-pointer rounded px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+                  className="
+                    cursor-pointer rounded-sm px-1.5 py-0.5 font-mono text-[9px]
+                    font-medium text-fg-muted transition-colors
+                    hover:bg-surface-raised hover:text-fg
+                  "
                   title="Reset to default manifest size"
                 >
                   Default
                 </button>
               )}
-              <div className="mx-0.5 h-3 w-px bg-line/60" />
+              <div className="mx-0.5 bg-line/60 block-3 inline-px" />
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleEditMode();
                 }}
-                className="cursor-pointer rounded bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-500 transition-colors hover:bg-accent-500/30"
+                className="
+                  cursor-pointer rounded-sm bg-accent-500/20 px-1.5 py-0.5
+                  text-[10px] font-medium text-accent-500 transition-colors
+                  hover:bg-accent-500/30
+                "
               >
                 Done
               </button>
@@ -338,11 +366,17 @@ export function EditOverlay({
       {/* Resize Grip Corner (ONLY rendered when in Edit Mode and Resizable) */}
       {editMode && resizable && (
         <div
-          className="absolute right-0 bottom-0 z-50 flex h-7 w-7 cursor-se-resize touch-none items-end justify-end rounded-br-[inherit] p-1.5 text-accent-500 select-none hover:text-accent-400 active:text-accent-600"
+          className="
+            absolute inset-e-0 inset-be-0 z-50 flex cursor-se-resize touch-none
+            items-end justify-end rounded-ee-[inherit] p-1.5 text-accent-500
+            select-none block-7 inline-7
+            hover:text-accent-400
+            active:text-accent-600
+          "
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >
-          <DotsSixVertical className="h-3 w-3" />
+          <DotsSixVertical className="block-3 inline-3" />
         </div>
       )}
     </>

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { getProviderSnapshot, refreshWidgetProvider, onProviderData } from "./ipc";
+import { useCallback, useEffect, useState } from "react";
+
+import { getProviderSnapshot, onProviderData, refreshWidgetProvider } from "./ipc";
 import type { ProviderPayload } from "./types";
 
 export function useProvider<T = unknown>(widgetId: string) {

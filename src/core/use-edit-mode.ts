@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import {
   getEditMode,
-  setEditMode as ipcSetEditMode,
-  onEditMode,
   getWidgetEditMode,
-  setWidgetEditMode,
+  onEditMode,
   onWidgetEditMode,
+  setEditMode as ipcSetEditMode,
+  setWidgetEditMode,
 } from "./ipc";
 
 export function useEditMode(widgetId?: string) {

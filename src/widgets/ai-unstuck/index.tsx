@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { Check } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -137,7 +139,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Input Row */}
         <div className="flex gap-1.5">
           <input
@@ -149,13 +151,23 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             }}
             onKeyDown={handleKeyDown}
             placeholder="What task are you dreading? (Enter)"
-            className="flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5 py-1 text-xs text-fg placeholder:text-fg-muted/50 focus:border-accent-500 focus:outline-none"
+            className="
+              flex-1 rounded-lg border border-line bg-surface-raised/40 px-2.5
+              py-1 text-xs text-fg
+              placeholder:text-fg-muted/50
+              focus:border-accent-500 focus:outline-none
+            "
           />
           <button
             type="button"
             onClick={() => void handleBreakTask()}
             disabled={loading || !task.trim()}
-            className="cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px] font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="
+              cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px]
+              font-medium text-white transition-opacity
+              hover:opacity-90
+              disabled:cursor-not-allowed disabled:opacity-40
+            "
           >
             {loading ? "…" : "Break"}
           </button>
@@ -164,7 +176,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         {/* 4 Micro Steps Checklist */}
         <div className="flex flex-1 flex-col justify-around gap-1">
           {loading ? (
-            <div className="flex h-full items-center justify-center text-xs text-fg-muted italic">
+            <div className="flex items-center justify-center text-xs text-fg-muted italic block-full">
               Breaking down inertia…
             </div>
           ) : (
@@ -172,37 +184,54 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               <div
                 key={step.id}
                 onClick={() => toggleStep(step.id)}
-                className={`flex cursor-pointer items-center gap-2 rounded-lg border p-1.5 transition-all select-none ${
-                  step.done
-                    ? "border-ok/30 bg-ok/5"
-                    : "border-line bg-surface-raised/40 hover:bg-surface-raised"
-                }`}
+                className={`
+                  flex cursor-pointer items-center gap-2 rounded-lg border p-1.5
+                  transition-all select-none
+                  ${
+                    step.done
+                      ? "border-ok/30 bg-ok/5"
+                      : `
+                      border-line bg-surface-raised/40
+                      hover:bg-surface-raised
+                    `
+                  }
+                `}
               >
                 {/* Checkbox */}
                 <div
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                    step.done
-                      ? "border-ok bg-ok text-white"
-                      : "border-line bg-surface hover:border-accent-500"
-                  }`}
+                  className={`
+                    flex shrink-0 items-center justify-center rounded-sm border
+                    transition-colors block-4 inline-4
+                    ${
+                      step.done
+                        ? "border-ok bg-ok text-white"
+                        : `
+                        border-line bg-surface
+                        hover:border-accent-500
+                      `
+                    }
+                  `}
                 >
-                  {step.done && <Check className="h-3 w-3" weight="bold" />}
+                  {step.done && <Check className="block-3" weight="bold" />}
                 </div>
 
                 {/* Minute badge */}
                 <span
-                  className={`py-0.2 shrink-0 rounded px-1 font-mono text-[9px] font-bold ${
-                    step.done ? "bg-ok/10 text-ok" : "bg-accent-500/10 text-accent-500"
-                  }`}
+                  className={`
+                    shrink-0 rounded-sm px-1 py-0.5 font-mono text-[9px]
+                    font-bold
+                    ${step.done ? "bg-ok/10 text-ok" : `bg-accent-500/10 text-accent-500`}
+                  `}
                 >
                   {step.time}
                 </span>
 
                 {/* Step text */}
                 <span
-                  className={`flex-1 text-[11px] leading-tight select-text ${
-                    step.done ? "text-fg-muted line-through" : "font-medium text-fg"
-                  }`}
+                  className={`
+                    flex-1 text-[11px] leading-tight select-text
+                    ${step.done ? "text-fg-muted line-through" : `font-medium text-fg`}
+                  `}
                 >
                   {step.text}
                 </span>
@@ -212,16 +241,16 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         </div>
 
         {/* Progress Bar & Footer */}
-        <div className="flex flex-col gap-1 border-t border-line/40 pt-1.5">
+        <div className="flex flex-col gap-1 border-bs border-line/40 pbs-1.5">
           <div className="flex items-center justify-between text-[10px] text-fg-muted">
             <span>
               {completedCount} of {steps.length} steps completed
             </span>
             <span className="font-mono font-semibold">{progressPercent}%</span>
           </div>
-          <div className="h-1 w-full overflow-hidden rounded-full bg-surface-raised">
+          <div className="overflow-hidden rounded-full bg-surface-raised block-1 inline-full">
             <div
-              className="h-full bg-ok transition-all duration-300"
+              className="bg-ok transition-all duration-300 block-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

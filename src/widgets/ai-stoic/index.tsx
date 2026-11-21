@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -171,9 +173,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           onClick={() => void handleFetch()}
           disabled={loading}
           title="New reflection"
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          className="
+            flex cursor-pointer items-center justify-center rounded-sm
+            text-fg-muted block-5 inline-5
+            hover:bg-surface-raised hover:text-fg
+            disabled:opacity-40
+          "
         >
-          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+          <ArrowClockwise
+            className={`
+            block-3 inline-3
+            ${loading ? "animate-spin" : ""}
+          `}
+          />
         </button>
       }
       banner={
@@ -182,17 +194,17 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Quote Section */}
         <div className="flex flex-1 flex-col justify-center gap-1 select-text">
-          <p className="font-serif text-xs leading-relaxed text-fg italic">
+          <p className="font-serif text-xs/relaxed text-fg italic">
             {loading ? (
               <span className="font-sans text-fg-muted not-italic">Reflecting…</span>
             ) : (
               `“${insight.quote}”`
             )}
           </p>
-          <span className="text-right font-sans text-[11px] font-medium text-fg-muted">
+          <span className="text-end font-sans text-[11px] font-medium text-fg-muted">
             — {insight.author}
           </span>
         </div>
@@ -200,23 +212,36 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         {/* Action Chip / Micro Challenge */}
         <div
           onClick={toggleCompleted}
-          className={`flex cursor-pointer items-start gap-2 rounded-lg border p-2 transition-all ${
-            completed
-              ? "border-ok/40 bg-ok/10"
-              : "border-line bg-surface-raised/40 hover:bg-surface-raised"
-          }`}
+          className={`
+            flex cursor-pointer items-start gap-2 rounded-lg border p-2
+            transition-all
+            ${
+              completed
+                ? "border-ok/40 bg-ok/10"
+                : `
+                border-line bg-surface-raised/40
+                hover:bg-surface-raised
+              `
+            }
+          `}
         >
-          <div className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border border-line bg-surface">
-            {completed && <Check className="h-2.5 w-2.5 text-ok" weight="bold" />}
+          <div className="mbs-0.5 flex shrink-0 items-center justify-center rounded-sm border border-line bg-surface block-3.5 inline-3.5">
+            {completed && <Check className="text-ok block-2.5 inline-2.5" weight="bold" />}
           </div>
           <div className="flex flex-1 flex-col gap-0.5">
             <span
-              className={`font-mono text-[9px] font-semibold ${completed ? "text-ok line-through" : "text-accent-500"}`}
+              className={`
+                font-mono text-[9px] font-semibold
+                ${completed ? `text-ok line-through` : `text-accent-500`}
+              `}
             >
               TODAY'S MICRO-ACTION
             </span>
             <p
-              className={`text-[11px] leading-tight select-text ${completed ? "text-fg-muted line-through" : "text-fg"}`}
+              className={`
+                text-[11px] leading-tight select-text
+                ${completed ? `text-fg-muted line-through` : `text-fg`}
+              `}
             >
               {insight.focus}
             </p>
@@ -224,21 +249,24 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>~15 in / ~40 out tokens</span>
           <button
             type="button"
             onClick={handleCopy}
-            className="flex cursor-pointer items-center gap-1 text-fg-muted hover:text-fg"
+            className="
+              flex cursor-pointer items-center gap-1 text-fg-muted
+              hover:text-fg
+            "
           >
             {copied ? (
               <>
-                <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                 <span className="text-ok">Copied</span>
               </>
             ) : (
               <>
-                <Copy className="h-3 w-3" />
+                <Copy className="block-3 inline-3" />
                 <span>Copy</span>
               </>
             )}

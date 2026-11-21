@@ -1,32 +1,33 @@
-import type { WidgetModule } from "../core/types";
-import notesModule from "./notes";
-import timerModule from "./timer";
-import githubRepoModule from "./github-repo";
-import vercelProjectModule from "./vercel-project";
-import clockModule from "./clock";
-import weatherModule from "./weather";
-import todoModule from "./todo";
-import placeholderModule from "./placeholder";
-import aiToneModule from "./ai-tone";
-import aiReplyModule from "./ai-reply";
-import aiEli5Module from "./ai-eli5";
+import type { WidgetModule } from "@/core/types";
+
 import aiBookNuggetModule from "./ai-book-nugget";
+import aiEli5Module from "./ai-eli5";
 import aiHistoryModule from "./ai-history";
+import aiJournalPromptModule from "./ai-journal-prompt";
+import aiReplyModule from "./ai-reply";
 import aiStoicModule from "./ai-stoic";
 import aiStretchModule from "./ai-stretch";
-import aiJournalPromptModule from "./ai-journal-prompt";
+import aiToneModule from "./ai-tone";
 import aiUnstuckModule from "./ai-unstuck";
 import aiVocabModule from "./ai-vocab";
-import portSentinelModule from "./port-sentinel";
-import apiHealthModule from "./api-health";
-import githubPrsModule from "./github-prs";
-import systemVitalsModule from "./system-vitals";
-import nowPlayingModule from "./now-playing";
-import batteryMonitorModule from "./battery-monitor";
-import worldClockModule from "./world-clock";
-import habitsModule from "./habits";
 import ambientSoundModule from "./ambient-sound";
+import apiHealthModule from "./api-health";
+import batteryMonitorModule from "./battery-monitor";
+import clockModule from "./clock";
+import githubPrsModule from "./github-prs";
+import githubRepoModule from "./github-repo";
+import habitsModule from "./habits";
 import newsFeedModule from "./news-feed";
+import notesModule from "./notes";
+import nowPlayingModule from "./now-playing";
+import placeholderModule from "./placeholder";
+import portSentinelModule from "./port-sentinel";
+import systemVitalsModule from "./system-vitals";
+import timerModule from "./timer";
+import todoModule from "./todo";
+import vercelProjectModule from "./vercel-project";
+import weatherModule from "./weather";
+import worldClockModule from "./world-clock";
 
 export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   clock: clockModule,

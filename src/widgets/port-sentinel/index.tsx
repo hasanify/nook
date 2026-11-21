@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
 import { ArrowClockwise, X } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { getListeningPorts, killPortProcess, type PortInfo } from "../../core/ipc";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { getListeningPorts, killPortProcess, type PortInfo } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -125,7 +127,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
 
       headerActions={
         <div className="flex items-center gap-1">
-          <span className="py-0.2 rounded-full bg-surface-raised px-1.5 font-mono text-[9px] font-bold text-fg-muted">
+          <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] font-bold text-fg-muted">
             {filteredPorts.length}
           </span>
           <button
@@ -136,9 +138,19 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
             }}
             disabled={loading}
             title="Scan ports"
-            className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+            className="
+              flex cursor-pointer items-center justify-center rounded-sm
+              text-fg-muted block-5 inline-5
+              hover:bg-surface-raised hover:text-fg
+              disabled:opacity-40
+            "
           >
-            <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            <ArrowClockwise
+              className={`
+              block-3 inline-3
+              ${loading ? "animate-spin" : ""}
+            `}
+            />
           </button>
         </div>
       }
@@ -148,7 +160,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-none">
+      <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Search Bar */}
         <div className="relative">
           <input
@@ -156,15 +168,24 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter by port or process (e.g. 3000, node)…"
-            className="w-full rounded-md border border-line bg-surface-raised/40 px-2 py-1 text-[11px] text-fg placeholder:text-fg-muted/40 focus:border-accent-500 focus:outline-none"
+            className="
+              rounded-md border border-line bg-surface-raised/40 px-2 py-1
+              text-[11px] text-fg inline-full
+              placeholder:text-fg-muted/40
+              focus:border-accent-500 focus:outline-none
+            "
           />
           {search && (
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute top-1/2 right-1.5 -translate-y-1/2 cursor-pointer text-fg-muted hover:text-fg"
+              className="
+                absolute inset-e-1.5 inset-bs-1/2 -translate-y-1/2
+                cursor-pointer text-fg-muted
+                hover:text-fg
+              "
             >
-              <X className="h-3 w-3" />
+              <X className="block-3 inline-3" />
             </button>
           )}
         </div>
@@ -186,14 +207,20 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
               return (
                 <div
                   key={`${p.port}-${p.pid}`}
-                  className="flex items-center justify-between rounded-lg border border-line bg-surface-raised/40 px-2 py-1.5 transition-colors hover:bg-surface-raised"
+                  className="
+                    flex items-center justify-between rounded-lg border
+                    border-line bg-surface-raised/40 px-2 py-1.5
+                    transition-colors
+                    hover:bg-surface-raised
+                  "
                 >
                   {/* Left: Port & Protocol */}
                   <div className="flex items-center gap-2">
                     <span
-                      className={`font-mono text-xs font-bold ${
-                        isDev ? "text-accent-500" : "text-fg"
-                      }`}
+                      className={`
+                        font-mono text-xs font-bold
+                        ${isDev ? "text-accent-500" : "text-fg"}
+                      `}
                     >
                       :{p.port}
                     </span>
@@ -212,7 +239,12 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
                       onClick={() => void handleKill(p)}
                       disabled={isKilling}
                       title={`Terminate ${p.process_name} (PID ${p.pid})`}
-                      className="cursor-pointer rounded bg-error/15 px-1.5 py-0.5 text-[9px] font-semibold text-error transition-colors hover:bg-error hover:text-white disabled:opacity-40"
+                      className="
+                        cursor-pointer rounded-sm bg-error/15 px-1.5 py-0.5
+                        text-[9px] font-semibold text-error transition-colors
+                        hover:bg-error hover:text-white
+                        disabled:opacity-40
+                      "
                     >
                       {isKilling ? "…" : "Kill"}
                     </button>
@@ -224,7 +256,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>{ports.length} total listening</span>
           <span>{devPortsOnly ? "Dev ports filter: ON" : "TCP Radar"}</span>
         </div>

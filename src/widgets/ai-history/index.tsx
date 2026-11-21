@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -150,9 +152,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           onClick={() => void handleFetch(date)}
           disabled={loading}
           title="Refresh history event"
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          className="
+            flex cursor-pointer items-center justify-center rounded-sm
+            text-fg-muted block-5 inline-5
+            hover:bg-surface-raised hover:text-fg
+            disabled:opacity-40
+          "
         >
-          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+          <ArrowClockwise
+            className={`
+            block-3 inline-3
+            ${loading ? "animate-spin" : ""}
+          `}
+          />
         </button>
       }
       banner={
@@ -161,11 +173,11 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-2 p-1">
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Header Badges */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="rounded bg-accent-500/10 px-2 py-0.5 font-mono text-[11px] font-bold text-accent-500">
+            <span className="rounded-sm bg-accent-500/10 px-2 py-0.5 font-mono text-[11px] font-bold text-accent-500">
               {historyItem.year}
             </span>
             <span className="text-[11px] font-medium text-fg-muted">{currentDate.display}</span>
@@ -173,16 +185,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <button
             type="button"
             onClick={handleCopy}
-            className="flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted hover:text-fg"
+            className="
+              flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+              hover:text-fg
+            "
           >
             {copied ? (
               <>
-                <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                 <span className="text-ok">Copied</span>
               </>
             ) : (
               <>
-                <Copy className="h-3 w-3" />
+                <Copy className="block-3 inline-3" />
                 <span>Copy</span>
               </>
             )}
@@ -191,7 +206,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
         {/* Event Body */}
         <div className="flex flex-1 flex-col justify-center gap-2 select-text">
-          <p className="text-xs leading-relaxed font-medium text-fg">
+          <p className="text-xs/relaxed font-medium text-fg">
             {loading ? (
               <span className="text-fg-muted italic">Consulting historical archives…</span>
             ) : (
@@ -200,7 +215,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           </p>
 
           <div className="rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="mb-0.5 block font-mono text-[9px] font-semibold text-ok">
+            <span className="mbe-0.5 block font-mono text-[9px] font-semibold text-ok">
               MODERN IMPACT
             </span>
             <p className="text-[11px] leading-relaxed text-fg-muted">
@@ -210,7 +225,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>~15 in / ~50 out tokens</span>
           <span className="font-mono">{date}</span>
         </div>

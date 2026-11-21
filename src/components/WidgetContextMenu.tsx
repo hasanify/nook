@@ -1,12 +1,12 @@
-import { useRef, useEffect, useLayoutEffect, useState } from "react";
 import {
-  Check,
-  NotePencil,
-  ArrowsInCardinal,
   ArrowCounterClockwise,
+  ArrowsInCardinal,
+  Check,
   Gear,
+  NotePencil,
   Trash,
 } from "@phosphor-icons/react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export interface ContextMenuPosition {
   x: number;
@@ -120,7 +120,7 @@ export function WidgetContextMenu({
         maxWidth: "calc(100vw - 12px)",
         maxHeight: "calc(100vh - 12px)",
       }}
-      className="fixed z-[999999] flex max-w-[calc(100vw-12px)] min-w-[204px] animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none"
+      className="fixed z-999999 flex animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none max-inline-[calc(100vw-12px)] min-inline-[204px]"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -134,25 +134,29 @@ export function WidgetContextMenu({
           onClose();
           onToggleEditMode();
         }}
-        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+        className="
+          flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+          text-start text-fg-muted transition-colors inline-full
+          hover:bg-surface-raised hover:text-fg
+        "
       >
         {isEditMode ? (
           <>
-            <Check className="h-3.5 w-3.5 shrink-0 text-accent-500" weight="bold" />
+            <Check className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="bold" />
             <span className="font-medium text-accent-500">Done Editing</span>
           </>
         ) : (
           <>
-            <NotePencil className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+            <NotePencil className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
             <span>Edit Widget</span>
-            <span className="ml-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
+            <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
           </>
         )}
       </button>
 
       {/* Quick Size Reset options */}
       {(onResetToFit || onResetToDefault) && (
-        <div className="flex flex-col gap-0.5 border-t border-line/40 pt-1">
+        <div className="flex flex-col gap-0.5 border-bs border-line/40 pbs-1">
           {onResetToFit && (
             <button
               type="button"
@@ -160,10 +164,15 @@ export function WidgetContextMenu({
                 onClose();
                 onResetToFit();
               }}
-              className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                flex cursor-pointer items-center justify-between rounded-lg
+                px-2.5 py-1 text-start text-fg-muted transition-colors
+                inline-full
+                hover:bg-surface-raised hover:text-fg
+              "
             >
               <div className="flex items-center gap-2">
-                <ArrowsInCardinal className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+                <ArrowsInCardinal className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Fit Size</span>
               </div>
               <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
@@ -176,10 +185,15 @@ export function WidgetContextMenu({
                 onClose();
                 onResetToDefault();
               }}
-              className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+              className="
+                flex cursor-pointer items-center justify-between rounded-lg
+                px-2.5 py-1 text-start text-fg-muted transition-colors
+                inline-full
+                hover:bg-surface-raised hover:text-fg
+              "
             >
               <div className="flex items-center gap-2">
-                <ArrowCounterClockwise className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+                <ArrowCounterClockwise className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Reset Default</span>
               </div>
               <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
@@ -190,11 +204,11 @@ export function WidgetContextMenu({
 
       {/* Quick Color Swatches */}
       {onSelectColor && (
-        <div className="flex flex-col gap-1 border-t border-line/40 px-2.5 py-1.5">
+        <div className="flex flex-col gap-1 border-bs border-line/40 px-2.5 py-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-medium text-fg-muted">Color</span>
           </div>
-          <div className="flex items-center justify-between pt-0.5">
+          <div className="flex items-center justify-between pbs-0.5">
             {WIDGET_COLOR_OPTIONS.map((c) => {
               const active = (currentColor || "") === c.value;
               return (
@@ -205,9 +219,12 @@ export function WidgetContextMenu({
                     onSelectColor(c.value);
                     onClose();
                   }}
-                  className={`h-3.5 w-3.5 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-125 ${
-                    active ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface" : ""
-                  }`}
+                  className={`
+                    shrink-0 cursor-pointer rounded-full transition-transform
+                    block-3.5 inline-3.5
+                    hover:scale-125
+                    ${active ? `scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface` : ""}
+                  `}
                   style={{ backgroundColor: c.hex }}
                   title={c.label}
                 />
@@ -222,11 +239,17 @@ export function WidgetContextMenu({
               return (
                 <label
                   title={isCustomActive ? `Custom Color (${currentColor})` : "Pick custom color"}
-                  className={`relative flex h-3.5 w-3.5 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-125 ${
-                    isCustomActive
-                      ? "scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface"
-                      : "border border-line/60"
-                  }`}
+                  className={`
+                    relative flex shrink-0 cursor-pointer items-center
+                    justify-center rounded-full transition-transform block-3.5
+                    inline-3.5
+                    hover:scale-125
+                    ${
+                      isCustomActive
+                        ? `scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface`
+                        : "border border-line/60"
+                    }
+                  `}
                   style={
                     isCustomActive
                       ? { backgroundColor: currentColor }
@@ -243,7 +266,7 @@ export function WidgetContextMenu({
                       onSelectColor(e.target.value);
                       onClose();
                     }}
-                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
                   />
                 </label>
               );
@@ -260,14 +283,18 @@ export function WidgetContextMenu({
             onClose();
             onOpenSettings();
           }}
-          className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg"
+          className="
+            flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+            text-start text-fg-muted transition-colors inline-full
+            hover:bg-surface-raised hover:text-fg
+          "
         >
-          <Gear className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+          <Gear className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
           <span>Settings...</span>
         </button>
       )}
 
-      <div className="my-1 border-t border-line/60" />
+      <div className="my-1 border-bs border-line/60" />
 
       {/* Delete / Remove Widget */}
       <button
@@ -276,9 +303,14 @@ export function WidgetContextMenu({
           onClose();
           onDelete();
         }}
-        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-fg-muted transition-colors hover:bg-error/10 hover:text-error dark:hover:bg-error/20"
+        className="
+          flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+          text-start text-fg-muted transition-colors inline-full
+          hover:bg-error/10 hover:text-error
+          dark:hover:bg-error/20
+        "
       >
-        <Trash className="h-3.5 w-3.5 shrink-0" />
+        <Trash className="shrink-0 block-3.5 inline-3.5" />
         <span className="font-medium">Delete Widget</span>
       </button>
     </div>

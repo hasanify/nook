@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { getSystemVitals, type SystemVitals } from "../../core/ipc";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import { getSystemVitals, type SystemVitals } from "@/core/ipc";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -22,7 +24,7 @@ function getStatusColor(percent: number): string {
 
 function MiniSparkline({ history, colorClass }: { history: number[]; colorClass: string }) {
   if (history.length < 2) {
-    return <div className="h-6 w-full rounded bg-surface/30" />;
+    return <div className="rounded-sm bg-surface/30 block-6 inline-full" />;
   }
   const max = 100;
   const w = 100;
@@ -37,7 +39,7 @@ function MiniSparkline({ history, colorClass }: { history: number[]; colorClass:
 
   return (
     <svg
-      className="h-6 w-full overflow-hidden"
+      className="overflow-hidden block-6 inline-full"
       viewBox={`0 0 ${w} ${h}`}
       preserveAspectRatio="none"
     >
@@ -98,12 +100,12 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="System Vitals">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
-        <div className="flex items-center justify-between border-b border-line/40 pb-1">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="relative flex block-2 inline-2">
+              <span className="absolute inline-flex animate-ping rounded-full bg-emerald-400 opacity-75 block-full inline-full" />
+              <span className="relative inline-flex rounded-full bg-emerald-500 block-2 inline-2" />
             </span>
             System Vitals
           </div>
@@ -113,15 +115,18 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
         <div className="my-1 grid grid-cols-2 gap-2">
           {/* CPU */}
           <div className="flex flex-col justify-between rounded-lg border border-line/40 bg-surface/50 p-2">
-            <div className="mb-1 flex items-center justify-between text-xs">
+            <div className="mbe-1 flex items-center justify-between text-xs">
               <span className="text-[11px] font-medium text-fg-muted">CPU</span>
               <span
-                className={`font-mono font-semibold ${getStatusColor(vitals?.cpu_percent ?? 0)}`}
+                className={`
+                  font-mono font-semibold
+                  ${getStatusColor(vitals?.cpu_percent ?? 0)}
+                `}
               >
                 {vitals ? `${vitals.cpu_percent}%` : "--"}
               </span>
             </div>
-            <div className="w-full">
+            <div className="inline-full">
               <MiniSparkline
                 history={cpuHistory.length > 0 ? cpuHistory : [0, 0]}
                 colorClass={getStatusColor(vitals?.cpu_percent ?? 0)}
@@ -131,15 +136,18 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
 
           {/* RAM */}
           <div className="flex flex-col justify-between rounded-lg border border-line/40 bg-surface/50 p-2">
-            <div className="mb-1 flex items-center justify-between text-xs">
+            <div className="mbe-1 flex items-center justify-between text-xs">
               <span className="text-[11px] font-medium text-fg-muted">RAM</span>
               <span
-                className={`font-mono font-semibold ${getStatusColor(vitals?.memory_percent ?? 0)}`}
+                className={`
+                  font-mono font-semibold
+                  ${getStatusColor(vitals?.memory_percent ?? 0)}
+                `}
               >
                 {vitals ? `${vitals.memory_percent}%` : "--"}
               </span>
             </div>
-            <div className="w-full">
+            <div className="inline-full">
               <MiniSparkline
                 history={ramHistory.length > 0 ? ramHistory : [0, 0]}
                 colorClass={getStatusColor(vitals?.memory_percent ?? 0)}
@@ -152,7 +160,7 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
         <div className="space-y-1.5 text-[11px]">
           {/* RAM Bar */}
           <div>
-            <div className="mb-0.5 flex justify-between text-fg-muted">
+            <div className="mbe-0.5 flex justify-between text-fg-muted">
               <span>Memory</span>
               <span className="font-mono">
                 {vitals
@@ -160,9 +168,9 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
                   : "--"}
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full border border-line/40 bg-surface-raised">
+            <div className="overflow-hidden rounded-full border border-line/40 bg-surface-raised block-1.5 inline-full">
               <div
-                className="h-full rounded-full transition-all duration-300"
+                className="rounded-full transition-all duration-300 block-full"
                 style={{
                   width: `${Math.min(100, Math.max(0, vitals?.memory_percent ?? 0))}%`,
                   backgroundColor:
@@ -178,7 +186,7 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
 
           {/* Disk Bar */}
           <div>
-            <div className="mb-0.5 flex justify-between text-fg-muted">
+            <div className="mbe-0.5 flex justify-between text-fg-muted">
               <span>Disk (C:)</span>
               <span className="font-mono">
                 {vitals
@@ -186,9 +194,9 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
                   : "--"}
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full border border-line/40 bg-surface-raised">
+            <div className="overflow-hidden rounded-full border border-line/40 bg-surface-raised block-1.5 inline-full">
               <div
-                className="h-full rounded-full transition-all duration-300"
+                className="rounded-full transition-all duration-300 block-full"
                 style={{
                   width: `${Math.min(100, Math.max(0, vitals?.disk_percent ?? 0))}%`,
                   backgroundColor:

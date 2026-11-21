@@ -1,20 +1,107 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "react", "import"],
+  "plugins": ["typescript", "react", "import", "unicorn"],
+  "jsPlugins": ["eslint-plugin-better-tailwindcss", "eslint-plugin-simple-import-sort"],
   "categories": { "correctness": "error", "suspicious": "warn" },
   "rules": {
     "no-console": "warn",
+    "eqeqeq": ["error", "always"],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "typescript/no-explicit-any": "error",
+    "typescript/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "typescript/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
     "react/react-in-jsx-scope": "off",
-    "import/no-unassigned-import": "off"
+    "react/jsx-no-useless-fragment": "warn",
+    "react/self-closing-comp": "warn",
+    "import/no-relative-parent-imports": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["../*"],
+            "message": "Use aliased imports (@/...) instead of relative parent imports."
+          }
+        ]
+      }
+    ],
+    "import/no-duplicates": "error",
+    "import/no-self-import": "error",
+    "import/no-cycle": "warn",
+    "import/first": "error",
+    "import/newline-after-import": "warn",
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ],
+    "sort-imports": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "unicorn/prefer-node-protocol": "warn",
+    "unicorn/consistent-function-scoping": "off",
+    "better-tailwindcss/enforce-consistent-class-order": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/enforce-consistent-important-position": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/enforce-consistent-line-wrapping": [
+      "error",
+      { "entryPoint": "src/styles/theme.css", "printWidth": 0 }
+    ],
+    "better-tailwindcss/enforce-consistent-variant-order": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/enforce-consistent-variable-syntax": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/enforce-logical-properties": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/enforce-shorthand-classes": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/no-concatenated-classes": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/no-conflicting-classes": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/no-deprecated-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
+    "better-tailwindcss/no-duplicate-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
+    "better-tailwindcss/no-restricted-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
+    "better-tailwindcss/no-unnecessary-whitespace": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ],
+    "better-tailwindcss/no-unknown-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
+    "better-tailwindcss/enforce-canonical-classes": [
+      "error",
+      { "entryPoint": "src/styles/theme.css" }
+    ]
   },
   "overrides": [
     {
       "files": ["scripts/**/*.mjs"],
       "rules": {
-        "no-console": "off"
+        "no-console": "off",
+        "import/no-relative-parent-imports": "off",
+        "no-restricted-imports": "off"
       }
     }
   ],

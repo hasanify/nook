@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
-import { Banner } from "../../components/Banner";
-import { callAI } from "../../core/ai";
+import { useCallback, useState } from "react";
+
+import { Banner } from "@/components/Banner";
+import { WidgetShell } from "@/components/WidgetShell";
+import { callAI } from "@/core/ai";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -211,9 +213,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           onClick={() => void handleFetch()}
           disabled={loading}
           title="Next word"
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded text-fg-muted hover:bg-surface-raised hover:text-fg disabled:opacity-40"
+          className="
+            flex cursor-pointer items-center justify-center rounded-sm
+            text-fg-muted block-5 inline-5
+            hover:bg-surface-raised hover:text-fg
+            disabled:opacity-40
+          "
         >
-          <ArrowClockwise className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+          <ArrowClockwise
+            className={`
+            block-3 inline-3
+            ${loading ? "animate-spin" : ""}
+          `}
+          />
         </button>
       }
       banner={
@@ -222,7 +234,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
     >
-      <div className="flex min-h-full flex-1 flex-col justify-between gap-1.5 p-1 select-text">
+      <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-text min-block-full">
         {/* Word Title & Pronunciation Header */}
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center justify-between">
@@ -230,16 +242,19 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             <button
               type="button"
               onClick={handleCopy}
-              className="flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted hover:text-fg"
+              className="
+                flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+                hover:text-fg
+              "
             >
               {copied ? (
                 <>
-                  <Check className="h-3 w-3 shrink-0 text-ok" weight="bold" />
+                  <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                   <span className="text-ok">Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-3 w-3" />
+                  <Copy className="block-3 inline-3" />
                   <span>Copy</span>
                 </>
               )}
@@ -248,7 +263,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <div className="flex items-center gap-2 text-[11px] text-fg-muted">
             <span className="font-mono text-accent-500">{vocab.phonetic}</span>
             {vocab.pos && (
-              <span className="py-0.2 rounded bg-surface-raised px-1.5 font-mono text-[9px] font-medium text-fg-muted">
+              <span className="rounded-sm bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted">
                 {vocab.pos}
               </span>
             )}
@@ -258,10 +273,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         {/* Definition */}
         <div className="flex flex-1 flex-col justify-center gap-1.5">
           <div className="rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="mb-0.5 block font-mono text-[9px] font-semibold text-fg-muted">
+            <span className="mbe-0.5 block font-mono text-[9px] font-semibold text-fg-muted">
               MEANING
             </span>
-            <p className="text-xs leading-relaxed text-fg">
+            <p className="text-xs/relaxed text-fg">
               {loading ? (
                 <span className="text-fg-muted italic">Discovering rare word…</span>
               ) : (
@@ -272,17 +287,17 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
           {/* Real World Usage */}
           <div className="rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="mb-0.5 block font-mono text-[9px] font-semibold text-ok">
+            <span className="mbe-0.5 block font-mono text-[9px] font-semibold text-ok">
               IN CONTEXT
             </span>
-            <p className="text-xs leading-relaxed text-fg italic">
+            <p className="text-xs/relaxed text-fg italic">
               {loading ? <span className="text-fg-muted not-italic">…</span> : `“${vocab.use}”`}
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>~15 in / ~45 out tokens</span>
           <span>Daily lexicon</span>
         </div>

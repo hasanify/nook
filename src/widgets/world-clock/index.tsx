@@ -1,8 +1,10 @@
+import { Globe, Moon, Sun } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import { Globe, Sun, Moon } from "@phosphor-icons/react";
-import { WidgetShell } from "../../components/WidgetShell";
+
+import { WidgetShell } from "@/components/WidgetShell";
+import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
+
 import manifestJson from "./manifest.json";
-import type { WidgetModule, WidgetProps, Manifest } from "../../core/types";
 
 const manifest = manifestJson as Manifest;
 
@@ -124,11 +126,11 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
 
   return (
     <WidgetShell instance={instance} editMode={editMode} title="World Clock">
-      <div className="flex min-h-full flex-col justify-between p-1.5 select-none">
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line/40 pb-1 text-xs">
+        <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <Globe className="h-3.5 w-3.5 text-accent-500" />
+            <Globe className="text-accent-500 block-3.5 inline-3.5" />
             World Clocks
           </div>
           <span className="font-mono text-[10px] text-fg-muted">
@@ -137,7 +139,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* City rows */}
-        <div className="my-1.5 space-y-1.5 pr-0.5">
+        <div className="my-1.5 space-y-1.5 pe-0.5">
           {DEFAULT_CITIES.map((city) => {
             const { timeStr, period, isDay, offsetHours, dayDiff } = getTimeInZone(
               now,
@@ -149,20 +151,28 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
             return (
               <div
                 key={city.id}
-                className="flex items-center justify-between rounded-lg border border-line/40 bg-surface/50 px-2.5 py-1.5 transition-colors hover:bg-surface-raised"
+                className="
+                  flex items-center justify-between rounded-lg border
+                  border-line/40 bg-surface/50 px-2.5 py-1.5 transition-colors
+                  hover:bg-surface-raised
+                "
               >
                 {/* Left: Flag, City, Offset */}
                 <div className="flex items-center gap-2">
                   <span className="flex items-center text-sm">
-                    {city.flag === "🌐" ? <Globe className="h-4 w-4 text-fg-muted" /> : city.flag}
+                    {city.flag === "🌐" ? (
+                      <Globe className="text-fg-muted block-4 inline-4" />
+                    ) : (
+                      city.flag
+                    )}
                   </span>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-semibold text-fg">{city.name}</span>
                       {isDay ? (
-                        <Sun className="h-3 w-3 text-amber-500" weight="fill" />
+                        <Sun className="text-amber-500 block-3 inline-3" weight="fill" />
                       ) : (
-                        <Moon className="text-indigo-400 h-3 w-3" weight="fill" />
+                        <Moon className="text-indigo-400 block-3 inline-3" weight="fill" />
                       )}
                     </div>
                     <div className="flex items-center gap-1 text-[10px] text-fg-muted">
@@ -196,11 +206,11 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
+        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
           <span>{DEFAULT_CITIES.length} timezones active</span>
           <span className="flex items-center gap-1">
-            <Sun className="h-2.5 w-2.5 text-amber-500" weight="fill" /> Day /{" "}
-            <Moon className="text-indigo-400 h-2.5 w-2.5" weight="fill" /> Night
+            <Sun className="text-amber-500 block-2.5 inline-2.5" weight="fill" /> Day /{" "}
+            <Moon className="text-indigo-400 block-2.5 inline-2.5" weight="fill" /> Night
           </span>
         </div>
       </div>
