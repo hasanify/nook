@@ -1,3 +1,9 @@
+## [0.38.3](https://github.com/hasanify/nook/compare/v0.38.2...v0.38.3) (2026-11-21)
+
+### Bug Fixes
+
+- **banner:** wrap full message without clipping and align with widget body ([57b6e74](https://github.com/hasanify/nook/commit/57b6e7405e81a0dc8eb7244e67ed715d010f8ec1))
+
 ## [0.38.2](https://github.com/hasanify/nook/compare/v0.38.1...v0.38.2) (2026-11-21)
 
 ### Bug Fixes
