@@ -1,3 +1,9 @@
+# [0.41.0](https://github.com/hasanify/nook/compare/v0.40.0...v0.41.0) (2026-11-21)
+
+### Features
+
+- **widgets:** add desktop shortcuts, pinned snippets, and crypto ticker widgets ([3a251fa](https://github.com/hasanify/nook/commit/3a251fa87c0fbbdd48d9c9da474c8ddfa1086b3f))
+
 # [0.40.0](https://github.com/hasanify/nook/compare/v0.39.0...v0.40.0) (2026-11-21)
 
 ### Bug Fixes
