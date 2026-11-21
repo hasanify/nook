@@ -1,3 +1,9 @@
+# [0.33.0](https://github.com/hasanify/nook/compare/v0.32.0...v0.33.0) (2026-11-21)
+
+### Features
+
+- **ui:** replace inline svgs and unicode icons with phosphor icons ([b24898b](https://github.com/hasanify/nook/commit/b24898ba229db548d8d119e9c6e34a78b89741e5))
+
 # [0.32.0](https://github.com/hasanify/nook/compare/v0.31.0...v0.32.0) (2026-11-21)
 
 ### Bug Fixes
