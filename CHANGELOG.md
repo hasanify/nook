@@ -1,3 +1,9 @@
+## [0.38.2](https://github.com/hasanify/nook/compare/v0.38.1...v0.38.2) (2026-11-21)
+
+### Bug Fixes
+
+- **updater:** launch installer via ShellExecute with runas elevation and fix typo ([9141e09](https://github.com/hasanify/nook/commit/9141e09a93f1ce3eea73c79f280eaa4e2f2be00e))
+
 ## [0.38.1](https://github.com/hasanify/nook/compare/v0.38.0...v0.38.1) (2026-11-21)
 
 ### Bug Fixes
