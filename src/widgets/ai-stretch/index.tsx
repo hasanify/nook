@@ -1,4 +1,4 @@
-import { ArrowClockwise } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -193,7 +193,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             disabled:opacity-40
           "
         >
-          <ArrowClockwise
+          <ArrowClockwiseIcon
             className={`
             block-3 inline-3
             ${loading ? "animate-spin" : ""}

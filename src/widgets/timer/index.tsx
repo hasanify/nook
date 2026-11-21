@@ -1,4 +1,11 @@
-import { ArrowCounterClockwise, Minus, NotePencil, Pause, Play, Plus } from "@phosphor-icons/react";
+import {
+  ArrowCounterClockwiseIcon,
+  MinusIcon,
+  NotePencilIcon,
+  PauseIcon,
+  PlayIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -425,7 +432,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                   "
                   title="Decrease 1 min (Shift for 5 min)"
                 >
-                  <Minus className="block-3 inline-3" weight="bold" />
+                  <MinusIcon className="block-3 inline-3" weight="bold" />
                 </button>
 
                 {isEditing ? (
@@ -466,7 +473,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                     title="Click to type custom duration"
                   >
                     <span>{display.main}</span>
-                    <NotePencil
+                    <NotePencilIcon
                       className="
                       text-fg-muted opacity-0 transition-opacity block-3
                       inline-3
@@ -488,7 +495,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                   "
                   title="Increase 1 min (Shift for 5 min)"
                 >
-                  <Plus className="block-3 inline-3" weight="bold" />
+                  <PlusIcon className="block-3 inline-3" weight="bold" />
                 </button>
               </div>
 
@@ -571,8 +578,8 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                 hover:bg-surface
               "
             >
-              <Pause className="block-3 inline-3" weight="fill" />
-              <span>Pause</span>
+              <PauseIcon className="block-3 inline-3" weight="fill" />
+              <span>PauseIcon</span>
             </button>
           ) : (
             <button
@@ -585,7 +592,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                 hover:bg-accent-600
               "
             >
-              <Play className="block-3 inline-3" weight="fill" />
+              <PlayIcon className="block-3 inline-3" weight="fill" />
               <span>{status === "paused" ? "Resume" : "Start"}</span>
             </button>
           )}
@@ -635,7 +642,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
             "
             title="Reset timer"
           >
-            <ArrowCounterClockwise className="block-3 inline-3" />
+            <ArrowCounterClockwiseIcon className="block-3 inline-3" />
             <span>Reset</span>
           </button>
         </div>

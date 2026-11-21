@@ -1,4 +1,4 @@
-import { ArrowClockwise, ChatCircle } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, ChatCircleIcon } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 
@@ -213,7 +213,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
             disabled:opacity-40
           "
         >
-          <ArrowClockwise
+          <ArrowClockwiseIcon
             className={`
             block-3 inline-3
             ${loading ? "animate-spin" : ""}
@@ -355,7 +355,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
                   <div className="flex items-center gap-2">
                     {pr.comments > 0 && (
                       <span className="flex items-center gap-0.5">
-                        <ChatCircle className="block-3 inline-3" /> {pr.comments}
+                        <ChatCircleIcon className="block-3 inline-3" /> {pr.comments}
                       </span>
                     )}
                     <span>{formatRelativeTime(pr.updated_at)}</span>

@@ -1,4 +1,12 @@
-import { Cloud, CloudRain, CloudSnow, Drop, Moon, Sun, Wind } from "@phosphor-icons/react";
+import {
+  CloudIcon,
+  CloudRainIcon,
+  CloudSnowIcon,
+  DropIcon,
+  MoonIcon,
+  SunIcon,
+  WindIcon,
+} from "@phosphor-icons/react";
 import { useEffect } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -68,25 +76,25 @@ function getWeatherDescription(code: number): string {
 function WeatherIcon({ code, isDay }: { code: number; isDay: number }) {
   if (code === 0) {
     return isDay ? (
-      <Sun className="text-amber-500 block-9 inline-9" weight="fill" />
+      <SunIcon className="text-amber-500 block-9 inline-9" weight="fill" />
     ) : (
-      <Moon className="text-indigo-400 block-9 inline-9" weight="fill" />
+      <MoonIcon className="text-indigo-400 block-9 inline-9" weight="fill" />
     );
   }
 
   if (code >= 1 && code <= 3) {
-    return <Cloud className="text-neutral-400 block-9 inline-9" weight="fill" />;
+    return <CloudIcon className="text-neutral-400 block-9 inline-9" weight="fill" />;
   }
 
   if ((code >= 51 && code <= 65) || (code >= 80 && code <= 82)) {
-    return <CloudRain className="text-accent-500 block-9 inline-9" weight="fill" />;
+    return <CloudRainIcon className="text-accent-500 block-9 inline-9" weight="fill" />;
   }
 
   if (code >= 71 && code <= 75) {
-    return <CloudSnow className="text-sky-300 block-9 inline-9" weight="fill" />;
+    return <CloudSnowIcon className="text-sky-300 block-9 inline-9" weight="fill" />;
   }
 
-  return <Sun className="text-amber-500 block-9" weight="fill" />;
+  return <SunIcon className="text-amber-500 block-9" weight="fill" />;
 }
 
 export function WeatherWidget({ instance, editMode }: WidgetProps) {
@@ -137,14 +145,14 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
         weather ? (
           <div className="grid grid-cols-2 gap-2 text-[11px] inline-full">
             <div className="flex items-center gap-1.5 text-fg-muted">
-              <Drop className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="fill" />
+              <DropIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="fill" />
               <span>Humidity:</span>
               <span className="font-mono font-medium text-fg">{weather.humidity}%</span>
             </div>
 
             <div className="flex items-center gap-1.5 text-fg-muted">
-              <Wind className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
-              <span>Wind:</span>
+              <WindIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
+              <span>WindIcon:</span>
               <span className="font-mono font-medium text-fg">
                 {windSpeed} {windUnit}
               </span>

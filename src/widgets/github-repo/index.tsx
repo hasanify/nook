@@ -1,10 +1,10 @@
 import {
-  ArrowClockwise,
-  ArrowSquareOut,
-  GitFork,
-  Star,
-  Tag,
-  WarningCircle,
+  ArrowClockwiseIcon,
+  ArrowSquareOutIcon,
+  GitForkIcon,
+  StarIcon,
+  TagIcon,
+  WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -242,7 +242,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               title={`Open ${repo} on GitHub`}
               aria-label={`Open ${repo} on GitHub`}
             >
-              <ArrowSquareOut className="block-3 inline-3" />
+              <ArrowSquareOutIcon className="block-3 inline-3" />
             </button>
             <button
               type="button"
@@ -260,7 +260,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
               title={isRefreshing ? "Refreshing..." : "Refresh repository data"}
               aria-label="Refresh repository data"
             >
-              <ArrowClockwise
+              <ArrowClockwiseIcon
                 className={`
                   block-3 inline-3
                   ${isRefreshing ? `animate-spin text-accent-500` : ""}
@@ -301,7 +301,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 "
                 title="GitHub Stars"
               >
-                <Star className="text-amber-500 block-3 inline-3" weight="fill" />
+                <StarIcon className="text-amber-500 block-3 inline-3" weight="fill" />
                 <span
                   className="
                   font-mono text-[10px] text-fg
@@ -326,7 +326,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 "
                 title="Forks"
               >
-                <GitFork className="block-3 inline-3" />
+                <GitForkIcon className="block-3 inline-3" />
                 <span
                   className="
                   font-mono text-[10px] text-fg
@@ -351,7 +351,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 "
                 title="Open Issues"
               >
-                <WarningCircle className="text-emerald-500 block-3 inline-3" />
+                <WarningCircleIcon className="text-emerald-500 block-3 inline-3" />
                 <span
                   className="
                   font-mono text-[10px] text-fg
@@ -376,7 +376,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 "
                 title={`Latest Release: ${data.latest_release.name || data.latest_release.tag_name}`}
               >
-                <Tag className="shrink-0 block-3 inline-3" />
+                <TagIcon className="shrink-0 block-3 inline-3" />
                 <span className="truncate font-mono text-[10px]">
                   {data.latest_release.tag_name}
                 </span>

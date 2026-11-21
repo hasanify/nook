@@ -1,13 +1,13 @@
 import {
-  CloudRain,
-  Coffee,
-  Flower,
+  CloudRainIcon,
+  CoffeeIcon,
+  FlowerIcon,
   type IconProps,
-  Lightning,
-  Pause,
-  Play,
-  SpeakerHigh,
-  SpeakerLow,
+  LightningIcon,
+  PauseIcon,
+  PlayIcon,
+  SpeakerHighIcon,
+  SpeakerLowIcon,
 } from "@phosphor-icons/react";
 import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 
@@ -28,10 +28,10 @@ interface SoundPreset {
 }
 
 const PRESETS: SoundPreset[] = [
-  { id: "rain", label: "Gentle Rain", icon: CloudRain, desc: "Soothing natural rainfall" },
-  { id: "brown", label: "Deep Brown", icon: Coffee, desc: "Warm cozy low-frequency rumble" },
-  { id: "pink", label: "Pink Noise", icon: Flower, desc: "Balanced focus & sleep noise" },
-  { id: "white", label: "White Noise", icon: Lightning, desc: "Crisp sound masking & privacy" },
+  { id: "rain", label: "Gentle Rain", icon: CloudRainIcon, desc: "Soothing natural rainfall" },
+  { id: "brown", label: "Deep Brown", icon: CoffeeIcon, desc: "Warm cozy low-frequency rumble" },
+  { id: "pink", label: "Pink Noise", icon: FlowerIcon, desc: "Balanced focus & sleep noise" },
+  { id: "white", label: "White Noise", icon: LightningIcon, desc: "Crisp sound masking & privacy" },
 ];
 
 export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
@@ -197,7 +197,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
       title="Ambient Sound"
       footer={
         <div className="flex items-center justify-between gap-3 inline-full">
-          {/* Main Play / Pause Button */}
+          {/* Main PlayIcon / PauseIcon Button */}
           <button
             type="button"
             onClick={togglePlay}
@@ -220,20 +220,20 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
           >
             {isPlaying ? (
               <>
-                <Pause className="block-3 inline-3" weight="fill" />
-                <span>Pause</span>
+                <PauseIcon className="block-3 inline-3" weight="fill" />
+                <span>PauseIcon</span>
               </>
             ) : (
               <>
-                <Play className="block-3 inline-3" weight="fill" />
-                <span>Play {activePreset?.label}</span>
+                <PlayIcon className="block-3 inline-3" weight="fill" />
+                <span>PlayIcon {activePreset?.label}</span>
               </>
             )}
           </button>
 
           {/* Volume Slider */}
           <div className="flex flex-1 items-center gap-1.5 max-inline-[120px]">
-            <SpeakerLow className="shrink-0 text-fg-muted block-3 inline-3" />
+            <SpeakerLowIcon className="shrink-0 text-fg-muted block-3 inline-3" />
             <input
               type="range"
               min="0"
@@ -244,7 +244,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
               className="cursor-pointer accent-accent-500 block-1.5 inline-full"
               title={`Volume: ${Math.round(volume * 100)}%`}
             />
-            <SpeakerHigh className="shrink-0 text-fg-muted block-3 inline-3" />
+            <SpeakerHighIcon className="shrink-0 text-fg-muted block-3 inline-3" />
           </div>
         </div>
       }
@@ -253,7 +253,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <SpeakerHigh
+            <SpeakerHighIcon
               className={`block-3.5 inline-3.5 ${isPlaying ? "text-accent-500" : "text-fg-muted"}`}
             />
             <span>Ambient Sound</span>

@@ -1,4 +1,4 @@
-import { Check } from "@phosphor-icons/react";
+import { CheckIcon } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -228,7 +228,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                     }
                   `}
                 >
-                  {step.done && <Check className="block-3" weight="bold" />}
+                  {step.done && <CheckIcon className="block-3" weight="bold" />}
                 </div>
 
                 {/* Minute badge */}

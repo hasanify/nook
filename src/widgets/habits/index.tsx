@@ -1,4 +1,4 @@
-import { Flame, Lightning, X } from "@phosphor-icons/react";
+import { FlameIcon, LightningIcon, XIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -151,7 +151,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <Lightning className="text-accent-500 block-3.5 inline-3.5" weight="fill" />
+            <LightningIcon className="text-accent-500 block-3.5 inline-3.5" weight="fill" />
             <span>Habits</span>
           </div>
 
@@ -229,7 +229,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                     <span className="truncate text-xs font-semibold text-fg">{habit.title}</span>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center gap-1 rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warn">
-                        <Flame className="text-warn block-3 inline-3" weight="fill" />
+                        <FlameIcon className="text-warn block-3 inline-3" weight="fill" />
                         <span>{streak}</span>
                       </span>
                       <button
@@ -243,7 +243,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                           hover:text-error
                         "
                       >
-                        <X className="block-3 inline-3" />
+                        <XIcon className="block-3 inline-3" />
                       </button>
                     </div>
                   </div>

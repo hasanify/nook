@@ -1,4 +1,4 @@
-import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -193,7 +193,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               disabled:opacity-40
             "
           >
-            <ArrowClockwise
+            <ArrowClockwiseIcon
               className={`
               block-3 inline-3
               ${loading ? "animate-spin" : ""}
@@ -277,13 +277,13 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           >
             {copied ? (
               <>
-                <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
+                <CheckIcon className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                 <span className="text-ok">Copied</span>
               </>
             ) : (
               <>
-                <Copy className="block-3 inline-3" />
-                <span>Copy</span>
+                <CopyIcon className="block-3 inline-3" />
+                <span>CopyIcon</span>
               </>
             )}
           </button>

@@ -1,4 +1,4 @@
-import { CaretDown, Check, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { CaretDownIcon, CheckIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 export interface SelectOption<T extends string | number = string | number> {
@@ -216,7 +216,7 @@ export function CustomSelect<T extends string | number = string | number>({
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
           <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         </span>
-        <CaretDown
+        <CaretDownIcon
           className={`
             shrink-0 text-fg-muted transition-transform duration-200 block-3.5
             inline-3.5
@@ -255,7 +255,7 @@ export function CustomSelect<T extends string | number = string | number>({
                 focus-within:ring-accent-500/20
               "
               >
-                <MagnifyingGlass
+                <MagnifyingGlassIcon
                   className="shrink-0 text-fg-muted block-3 inline-3"
                   aria-hidden="true"
                 />
@@ -294,7 +294,7 @@ export function CustomSelect<T extends string | number = string | number>({
                     "
                     aria-label="Clear search"
                   >
-                    <X className="block-3 inline-3" />
+                    <XIcon className="block-3 inline-3" />
                   </button>
                 )}
               </div>
@@ -349,7 +349,7 @@ export function CustomSelect<T extends string | number = string | number>({
                       </div>
                     </div>
                     {isSelected && (
-                      <Check
+                      <CheckIcon
                         className="shrink-0 text-accent-500 block-3.5 inline-3.5"
                         weight="bold"
                         aria-hidden="true"

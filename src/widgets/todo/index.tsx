@@ -1,4 +1,4 @@
-import { Check, X } from "@phosphor-icons/react";
+import { CheckIcon, XIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -160,7 +160,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
                       }
                     `}
                   >
-                    {todo.done && <Check className="block-2.5 inline-2.5" weight="bold" />}
+                    {todo.done && <CheckIcon className="block-2.5 inline-2.5" weight="bold" />}
                   </span>
                   <span
                     className={`
@@ -182,7 +182,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
                   "
                   title="Delete task"
                 >
-                  <X
+                  <XIcon
                     className="
                     text-fg-muted block-3 inline-3
                     hover:text-error

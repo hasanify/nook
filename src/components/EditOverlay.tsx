@@ -1,4 +1,4 @@
-import { DotsSixVertical } from "@phosphor-icons/react";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
 
 import type { Rect } from "@/core/types";
@@ -376,7 +376,7 @@ export function EditOverlay({
           onPointerDown={handleResizeStart}
           title="Drag to resize"
         >
-          <DotsSixVertical className="block-3 inline-3" />
+          <DotsSixVerticalIcon className="block-3 inline-3" />
         </div>
       )}
     </>

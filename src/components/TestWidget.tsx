@@ -1,4 +1,4 @@
-import { Check, DotsSixVertical } from "@phosphor-icons/react";
+import { CheckIcon, DotsSixVerticalIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -331,7 +331,7 @@ export function TestWidget({ id }: TestWidgetProps) {
             {isAttached ? (
               <>
                 <span>Attached to Host</span>
-                <Check className="text-ok block-3 inline-3" weight="bold" />
+                <CheckIcon className="text-ok block-3 inline-3" weight="bold" />
               </>
             ) : (
               "Top-level"
@@ -400,7 +400,7 @@ export function TestWidget({ id }: TestWidgetProps) {
           "
           onPointerDown={handleResizeStart}
         >
-          <DotsSixVertical className="block-3 inline-3" />
+          <DotsSixVerticalIcon className="block-3 inline-3" />
         </div>
       )}
 

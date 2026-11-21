@@ -1,4 +1,4 @@
-import { ArrowClockwise } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -154,7 +154,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
             disabled:opacity-40
           "
         >
-          <ArrowClockwise
+          <ArrowClockwiseIcon
             className={`
             block-3 inline-3
             ${loading ? "animate-spin" : ""}

@@ -1,24 +1,24 @@
 import {
-  ArrowClockwise,
-  Brain,
-  Check,
-  Cloud,
-  Desktop,
-  GithubLogo,
-  Globe,
-  Info,
-  Lightning,
-  LockKey,
-  Moon,
-  PaintBrush,
-  Plus,
-  SlidersHorizontal,
-  Sparkle,
-  SquaresFour,
-  Sun,
-  Trash,
-  Triangle,
-  User,
+  ArrowClockwiseIcon,
+  BrainIcon,
+  CheckIcon,
+  CloudIcon,
+  DesktopIcon,
+  GithubLogoIcon,
+  GlobeIcon,
+  InfoIcon,
+  LightningIcon,
+  LockKeyIcon,
+  MoonIcon,
+  PaintBrushIcon,
+  PlusIcon,
+  SlidersHorizontalIcon,
+  SparkleIcon,
+  SquaresFourIcon,
+  SunIcon,
+  TrashIcon,
+  TriangleIcon,
+  UserIcon,
 } from "@phosphor-icons/react";
 import { listen } from "@tauri-apps/api/event";
 import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
@@ -83,7 +83,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-proj-••••••••••••••••••••••••",
     desc: "Powers GPT-4o, GPT-4o-mini, and OpenAI models.",
     defaultModel: "gpt-4o-mini",
-    icon: <Sparkle className="text-accent-500 block-4 inline-4" weight="fill" />,
+    icon: <SparkleIcon className="text-accent-500 block-4 inline-4" weight="fill" />,
   },
   {
     id: "openrouter",
@@ -91,7 +91,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-or-v1-••••••••••••••••••••••••",
     desc: "Single unified API to 100+ AI models (Claude, Llama, DeepSeek, Gemini).",
     defaultModel: "openai/gpt-4o-mini",
-    icon: <Globe className="text-accent-500 block-4 inline-4" />,
+    icon: <GlobeIcon className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "gemini",
@@ -99,7 +99,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "AIzaSy••••••••••••••••••••••••",
     desc: "Generous free tier powering ultra-fast Gemini 2.0 Flash.",
     defaultModel: "gemini-2.0-flash",
-    icon: <Sparkle className="text-accent-500 block-4 inline-4" />,
+    icon: <SparkleIcon className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "anthropic",
@@ -107,7 +107,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "sk-ant-api••••••••••••••••••••••••",
     desc: "Direct access to Claude 3.5 Sonnet and Claude 3.5 Haiku.",
     defaultModel: "claude-3-5-haiku-20241022",
-    icon: <Brain className="text-accent-500 block-4 inline-4" />,
+    icon: <BrainIcon className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "bedrock",
@@ -115,7 +115,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "Bedrock API key or Bearer token...",
     desc: "AWS Bedrock runtime or custom OpenAI-compatible gateway.",
     defaultModel: "anthropic.claude-3-5-haiku-20241022-v1:0",
-    icon: <Cloud className="text-accent-500 block-4 inline-4" />,
+    icon: <CloudIcon className="text-accent-500 block-4 inline-4" />,
   },
   {
     id: "groq",
@@ -123,7 +123,7 @@ const AI_PROVIDER_LIST: AIProviderItem[] = [
     placeholder: "gsk_••••••••••••••••••••••••",
     desc: "Near-instant LPU inference powering Llama 3.3 70B.",
     defaultModel: "llama-3.3-70b-versatile",
-    icon: <Lightning className="text-accent-500 block-4 inline-4" weight="fill" />,
+    icon: <LightningIcon className="text-accent-500 block-4 inline-4" weight="fill" />,
   },
 ];
 
@@ -670,7 +670,7 @@ export function SettingsApp() {
             }
           `}
         >
-          <SlidersHorizontal className="block-3.5 inline-3.5" />
+          <SlidersHorizontalIcon className="block-3.5 inline-3.5" />
           <span>General</span>
         </button>
         <button
@@ -689,7 +689,7 @@ export function SettingsApp() {
             }
           `}
         >
-          <SquaresFour className="block-3.5 inline-3.5" />
+          <SquaresFourIcon className="block-3.5 inline-3.5" />
           <span>Widgets</span>
           <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-fg-muted">
             {config?.widgets.length ?? 0}
@@ -711,7 +711,7 @@ export function SettingsApp() {
             }
           `}
         >
-          <User className="block-3.5 inline-3.5" />
+          <UserIcon className="block-3.5 inline-3.5" />
           <span>Accounts</span>
         </button>
         <button
@@ -730,7 +730,7 @@ export function SettingsApp() {
             }
           `}
         >
-          <PaintBrush className="block-3.5 inline-3.5" />
+          <PaintBrushIcon className="block-3.5 inline-3.5" />
           <span>Appearance</span>
         </button>
         <button
@@ -749,7 +749,7 @@ export function SettingsApp() {
             }
           `}
         >
-          <Info className="block-3.5 inline-3.5" />
+          <InfoIcon className="block-3.5 inline-3.5" />
           <span>About</span>
           {updateResult?.has_update && (
             <span
@@ -766,9 +766,9 @@ export function SettingsApp() {
         {activeTab === "general" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
-              {/* Desktop & Interaction Settings */}
+              {/* DesktopIcon & Interaction Settings */}
               <div className="flex flex-col gap-4 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
-                <span className="font-semibold text-fg">Desktop & Interaction</span>
+                <span className="font-semibold text-fg">DesktopIcon & Interaction</span>
 
                 {/* Edit Mode Toggle */}
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
@@ -805,7 +805,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
-                      Check for updates in the background and prompt when ready to install
+                      CheckIcon for updates in the background and prompt when ready to install
                     </div>
                   </div>
                   <Toggle
@@ -857,17 +857,17 @@ export function SettingsApp() {
                     {
                       id: "system" as const,
                       label: "System",
-                      icon: <Desktop className="block-4" />,
+                      icon: <DesktopIcon className="block-4" />,
                     },
                     {
                       id: "light" as const,
                       label: "Light",
-                      icon: <Sun className="block-4 inline-4" />,
+                      icon: <SunIcon className="block-4 inline-4" />,
                     },
                     {
                       id: "dark" as const,
                       label: "Dark",
-                      icon: <Moon className="block-4 inline-4" />,
+                      icon: <MoonIcon className="block-4 inline-4" />,
                     },
                   ].map((item) => (
                     <button
@@ -1003,7 +1003,7 @@ export function SettingsApp() {
                               }
                             `}
                           >
-                            <Check className="block-2.5 inline-2.5" weight="bold" />
+                            <CheckIcon className="block-2.5 inline-2.5" weight="bold" />
                           </div>
                         </div>
                       </button>
@@ -1016,7 +1016,7 @@ export function SettingsApp() {
                   <div className="mbe-4 flex items-center justify-between">
                     <div>
                       <h4 className="flex items-center gap-2 text-sm font-semibold text-fg">
-                        <PaintBrush className="text-accent-500 block-4 inline-4" />
+                        <PaintBrushIcon className="text-accent-500 block-4 inline-4" />
                         Custom Appearance Studio
                       </h4>
                       <p className="mbs-0.5 text-xs text-fg-muted">
@@ -1025,7 +1025,7 @@ export function SettingsApp() {
                     </div>
                     {(config?.app?.widgetPreset || "default") === "custom" ? (
                       <span className="flex items-center gap-1.5 rounded-full bg-accent-500/15 px-2.5 py-1 text-[11px] font-semibold text-accent-500">
-                        <Check className="block-3 inline-3" weight="bold" /> Active Profile
+                        <CheckIcon className="block-3 inline-3" weight="bold" /> Active Profile
                       </span>
                     ) : (
                       <button
@@ -1231,7 +1231,7 @@ export function SettingsApp() {
                                 className={`flex items-center justify-between px-3 py-2 ${previewPreset.headerClass}`}
                               >
                                 <div className="flex items-center gap-1.5">
-                                  <Sparkle
+                                  <SparkleIcon
                                     className="text-accent-500 block-3.5 inline-3.5"
                                     weight="fill"
                                   />
@@ -1289,7 +1289,7 @@ export function SettingsApp() {
                 <div className="flex flex-col gap-1.5 rounded-lg border border-line/60 bg-surface-raised/60 p-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-semibold text-fg">
-                      <SquaresFour className="text-accent-500 block-3.5 inline-3.5" />
+                      <SquaresFourIcon className="text-accent-500 block-3.5 inline-3.5" />
                       Bento Grid
                     </span>
 
@@ -1485,7 +1485,7 @@ export function SettingsApp() {
                       disabled:cursor-not-allowed disabled:opacity-50
                     "
                   >
-                    <Plus className="block-3.5 inline-3.5" weight="bold" />
+                    <PlusIcon className="block-3.5 inline-3.5" weight="bold" />
                     <span>Add</span>
                   </button>
                 </div>
@@ -1609,7 +1609,7 @@ export function SettingsApp() {
                             style={{ backgroundColor: c.hex }}
                           >
                             {isSelected && (
-                              <Check
+                              <CheckIcon
                                 className="pointer-events-none text-white drop-shadow-sm block-3.5 inline-3.5"
                                 weight="bold"
                               />
@@ -1671,12 +1671,12 @@ export function SettingsApp() {
                               className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
                             />
                             {isCustomSelected ? (
-                              <Check
+                              <CheckIcon
                                 className="pointer-events-none text-white drop-shadow-sm block-3.5 inline-3.5"
                                 weight="bold"
                               />
                             ) : (
-                              <Plus
+                              <PlusIcon
                                 className="pointer-events-none text-white drop-shadow-sm block-3 inline-3"
                                 weight="bold"
                               />
@@ -1711,7 +1711,7 @@ export function SettingsApp() {
                         hover:bg-error/20
                       "
                     >
-                      <Trash className="block-3.5 inline-3.5" />
+                      <TrashIcon className="block-3.5 inline-3.5" />
                       <span>Remove Widget</span>
                     </button>
                   </div>
@@ -1730,7 +1730,7 @@ export function SettingsApp() {
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
               <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
-                <LockKey className="shrink-0 text-accent-500 block-4 inline-4" />
+                <LockKeyIcon className="shrink-0 text-accent-500 block-4 inline-4" />
                 <span>
                   Tokens are stored securely in Windows Credential Manager and never logged or
                   exported.
@@ -1741,7 +1741,7 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <GithubLogo className="text-fg block-4 inline-4" weight="fill" />
+                    <GithubLogoIcon className="text-fg block-4 inline-4" weight="fill" />
                     <label htmlFor="gh-token-input" className="font-semibold text-fg">
                       GitHub Personal Access Token
                     </label>
@@ -1813,7 +1813,7 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Triangle className="text-fg block-3.5 inline-3.5" weight="fill" />
+                    <TriangleIcon className="text-fg block-3.5 inline-3.5" weight="fill" />
                     <label htmlFor="vercel-token-input" className="font-semibold text-fg">
                       Vercel API Token
                     </label>
@@ -1885,7 +1885,7 @@ export function SettingsApp() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex items-center justify-center rounded-lg bg-accent-500/15 text-accent-500 block-7 inline-7">
-                      <Sparkle className="block-4" />
+                      <SparkleIcon className="block-4" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-fg">AI Models & API Keys</h3>
@@ -2134,7 +2134,7 @@ export function SettingsApp() {
                 </div>
               </div>
 
-              {/* Developer & Project Info */}
+              {/* Developer & Project InfoIcon */}
               <div
                 className="
                 grid grid-cols-1 gap-4
@@ -2230,13 +2230,13 @@ export function SettingsApp() {
                       disabled:cursor-not-allowed disabled:opacity-50
                     "
                   >
-                    <ArrowClockwise
+                    <ArrowClockwiseIcon
                       className={`
                         block-3.5 inline-3.5
                         ${checkingUpdate ? "animate-spin" : ""}
                       `}
                     />
-                    <span>{checkingUpdate ? "Checking..." : "Check for Updates"}</span>
+                    <span>{checkingUpdate ? "Checking..." : "CheckIcon for Updates"}</span>
                   </button>
                 </div>
 
@@ -2245,7 +2245,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
-                      Check for updates in the background and prompt when ready to install
+                      CheckIcon for updates in the background and prompt when ready to install
                     </div>
                   </div>
                   <Toggle
@@ -2264,7 +2264,7 @@ export function SettingsApp() {
 
                 {updateResult && !updateResult.has_update && !updateError && (
                   <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-[11px] text-ok">
-                    <Check className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
+                    <CheckIcon className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
                     <span>You are running the latest version of Nook.</span>
                   </div>
                 )}

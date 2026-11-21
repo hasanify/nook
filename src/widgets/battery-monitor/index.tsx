@@ -1,4 +1,4 @@
-import { BatteryCharging, BatteryHigh, Lightning } from "@phosphor-icons/react";
+import { BatteryChargingIcon, BatteryHighIcon, LightningIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -94,9 +94,12 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
         <div className="flex items-center justify-between border-be border-line/40 pbe-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
             {isCharging ? (
-              <BatteryCharging className="text-emerald-400 block-3.5 inline-3.5" weight="fill" />
+              <BatteryChargingIcon
+                className="text-emerald-400 block-3.5 inline-3.5"
+                weight="fill"
+              />
             ) : (
-              <BatteryHigh className="text-accent-500 block-3.5 inline-3.5" />
+              <BatteryHighIcon className="text-accent-500 block-3.5 inline-3.5" />
             )}
             Power & Battery
           </div>
@@ -123,7 +126,7 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
               {/* Charging Bolt Overlay */}
               {isCharging && (
                 <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow-sm">
-                  <Lightning className="animate-pulse block-6 inline-6" weight="fill" />
+                  <LightningIcon className="animate-pulse block-6 inline-6" weight="fill" />
                 </div>
               )}
             </div>

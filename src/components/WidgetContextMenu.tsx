@@ -1,10 +1,10 @@
 import {
-  ArrowCounterClockwise,
-  ArrowsInCardinal,
-  Check,
-  Gear,
-  NotePencil,
-  Trash,
+  ArrowCounterClockwiseIcon,
+  ArrowsInCardinalIcon,
+  CheckIcon,
+  GearIcon,
+  NotePencilIcon,
+  TrashIcon,
 } from "@phosphor-icons/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -142,12 +142,12 @@ export function WidgetContextMenu({
       >
         {isEditMode ? (
           <>
-            <Check className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="bold" />
+            <CheckIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="bold" />
             <span className="font-medium text-accent-500">Done Editing</span>
           </>
         ) : (
           <>
-            <NotePencil className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+            <NotePencilIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
             <span>Edit Widget</span>
             <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
           </>
@@ -172,7 +172,7 @@ export function WidgetContextMenu({
               "
             >
               <div className="flex items-center gap-2">
-                <ArrowsInCardinal className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+                <ArrowsInCardinalIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Fit Size</span>
               </div>
               <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
@@ -193,7 +193,7 @@ export function WidgetContextMenu({
               "
             >
               <div className="flex items-center gap-2">
-                <ArrowCounterClockwise className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+                <ArrowCounterClockwiseIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Reset Default</span>
               </div>
               <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
@@ -289,7 +289,7 @@ export function WidgetContextMenu({
             hover:bg-surface-raised hover:text-fg
           "
         >
-          <Gear className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+          <GearIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
           <span>Settings...</span>
         </button>
       )}
@@ -310,7 +310,7 @@ export function WidgetContextMenu({
           dark:hover:bg-error/20
         "
       >
-        <Trash className="shrink-0 block-3.5 inline-3.5" />
+        <TrashIcon className="shrink-0 block-3.5 inline-3.5" />
         <span className="font-medium">Delete Widget</span>
       </button>
     </div>

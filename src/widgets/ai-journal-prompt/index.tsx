@@ -1,4 +1,4 @@
-import { ArrowClockwise, Check, Flame } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, CheckIcon, FlameIcon } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -150,7 +150,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
       headerActions={
         <div className="flex items-center gap-1.5">
-          {/* Streak Flame Badge */}
+          {/* Streak FlameIcon Badge */}
           <div
             className={`
               flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]
@@ -159,7 +159,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             `}
             title={`${streak} day streak`}
           >
-            <Flame className="text-amber-500 block-3 inline-3" weight="fill" />
+            <FlameIcon className="text-amber-500 block-3 inline-3" weight="fill" />
             <span>{streak}</span>
           </div>
 
@@ -175,7 +175,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               disabled:opacity-40
             "
           >
-            <ArrowClockwise
+            <ArrowClockwiseIcon
               className={`
               block-3 inline-3
               ${loading ? "animate-spin" : ""}
@@ -217,7 +217,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             <div className="flex flex-col gap-1 rounded-lg border border-ok/30 bg-ok/5 p-2">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="flex items-center gap-1 font-semibold text-ok">
-                  <Check className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
+                  <CheckIcon className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
                   <span>Logged today</span>
                 </span>
                 <button

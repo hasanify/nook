@@ -1,4 +1,4 @@
-import { Check, CircleNotch, Sparkle } from "@phosphor-icons/react";
+import { CheckIcon, CircleNotchIcon, SparkleIcon } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -156,12 +156,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             >
               {loading ? (
                 <>
-                  <CircleNotch className="animate-spin block-3 inline-3" />
+                  <CircleNotchIcon className="animate-spin block-3 inline-3" />
                   <span>Polishing…</span>
                 </>
               ) : (
                 <>
-                  <Sparkle className="block-3 inline-3" weight="fill" />
+                  <SparkleIcon className="block-3 inline-3" weight="fill" />
                   <span>Polish</span>
                 </>
               )}
@@ -193,7 +193,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               >
                 {copiedKey === "pro" ? (
                   <>
-                    <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
+                    <CheckIcon className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -228,7 +228,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               >
                 {copiedKey === "con" ? (
                   <>
-                    <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
+                    <CheckIcon className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (
@@ -263,7 +263,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               >
                 {copiedKey === "wrm" ? (
                   <>
-                    <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
+                    <CheckIcon className="shrink-0 text-ok block-3 inline-3" weight="bold" />
                     <span className="font-medium text-ok">Copied!</span>
                   </>
                 ) : (

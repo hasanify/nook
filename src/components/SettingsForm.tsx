@@ -1,4 +1,4 @@
-import { CircleNotch } from "@phosphor-icons/react";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
 import { listVercelProjects, type VercelProjectSummary } from "@/core/ipc";
@@ -91,7 +91,7 @@ function VercelProjectInput({
         />
         {loading && (
           <div className="pointer-events-none absolute inset-e-2.5 inset-bs-2">
-            <CircleNotch className="animate-spin text-fg-muted block-3.5 inline-3.5" />
+            <CircleNotchIcon className="animate-spin text-fg-muted block-3.5 inline-3.5" />
           </div>
         )}
       </div>

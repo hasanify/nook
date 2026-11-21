@@ -1,4 +1,4 @@
-import { Globe, Moon, Sun } from "@phosphor-icons/react";
+import { GlobeIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -133,8 +133,8 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         <div className="flex items-center justify-between inline-full">
           <span>{DEFAULT_CITIES.length} timezones active</span>
           <span className="flex items-center gap-1">
-            <Sun className="text-amber-500 block-2.5 inline-2.5" weight="fill" /> Day /{" "}
-            <Moon className="text-indigo-400 block-2.5 inline-2.5" weight="fill" /> Night
+            <SunIcon className="text-amber-500 block-2.5 inline-2.5" weight="fill" /> Day /{" "}
+            <MoonIcon className="text-indigo-400 block-2.5 inline-2.5" weight="fill" /> Night
           </span>
         </div>
       }
@@ -143,7 +143,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <Globe className="text-accent-500 block-3.5 inline-3.5" />
+            <GlobeIcon className="text-accent-500 block-3.5 inline-3.5" />
             World Clocks
           </div>
           <span className="font-mono text-[10px] text-fg-muted">
@@ -174,7 +174,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
                 <div className="flex items-center gap-2">
                   <span className="flex items-center text-sm">
                     {city.flag === "🌐" ? (
-                      <Globe className="text-fg-muted block-4 inline-4" />
+                      <GlobeIcon className="text-fg-muted block-4 inline-4" />
                     ) : (
                       city.flag
                     )}
@@ -183,9 +183,9 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-semibold text-fg">{city.name}</span>
                       {isDay ? (
-                        <Sun className="text-amber-500 block-3 inline-3" weight="fill" />
+                        <SunIcon className="text-amber-500 block-3 inline-3" weight="fill" />
                       ) : (
-                        <Moon className="text-indigo-400 block-3 inline-3" weight="fill" />
+                        <MoonIcon className="text-indigo-400 block-3 inline-3" weight="fill" />
                       )}
                     </div>
                     <div className="flex items-center gap-1 text-[10px] text-fg-muted">

@@ -1,12 +1,12 @@
 import {
-  MusicNote,
-  Pause,
-  Play,
-  SkipBack,
-  SkipForward,
-  SpeakerHigh,
-  SpeakerLow,
-  SpeakerSimpleNone,
+  MusicNoteIcon,
+  PauseIcon,
+  PlayIcon,
+  SkipBackIcon,
+  SkipForwardIcon,
+  SpeakerHighIcon,
+  SpeakerLowIcon,
+  SpeakerSimpleNoneIcon,
 } from "@phosphor-icons/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -89,7 +89,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
         {/* Header / Player Badge */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-fg">
-            <MusicNote
+            <MusicNoteIcon
               className={`block-3.5 inline-3.5 ${isPlaying ? "text-accent-500" : "text-fg-muted"}`}
               weight={isPlaying ? "fill" : "regular"}
             />
@@ -170,7 +170,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
                 hover:bg-surface-raised hover:text-fg
               "
             >
-              <SpeakerLow className="block-3.5 inline-3.5" weight="fill" />
+              <SpeakerLowIcon className="block-3.5 inline-3.5" weight="fill" />
             </button>
             <button
               type="button"
@@ -181,7 +181,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
                 hover:bg-surface-raised hover:text-fg
               "
             >
-              <SpeakerHigh className="block-3.5 inline-3.5" weight="fill" />
+              <SpeakerHighIcon className="block-3.5 inline-3.5" weight="fill" />
             </button>
           </div>
 
@@ -198,14 +198,14 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
                 hover:bg-surface-raised hover:text-fg
               "
             >
-              <SkipBack className="block-4 inline-4" weight="fill" />
+              <SkipBackIcon className="block-4 inline-4" weight="fill" />
             </button>
 
-            {/* Play/Pause */}
+            {/* PlayIcon/PauseIcon */}
             <button
               type="button"
               onClick={() => void handleAction("play_pause")}
-              title={isPlaying ? "Pause" : "Play"}
+              title={isPlaying ? "PauseIcon" : "PlayIcon"}
               className="
                 flex cursor-pointer items-center justify-center rounded-full
                 bg-accent-500 text-white shadow-md transition-all block-8
@@ -215,9 +215,9 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
               "
             >
               {isPlaying ? (
-                <Pause className="block-4 inline-4" weight="fill" />
+                <PauseIcon className="block-4 inline-4" weight="fill" />
               ) : (
-                <Play className="translate-x-0.5 block-4 inline-4" weight="fill" />
+                <PlayIcon className="translate-x-0.5 block-4 inline-4" weight="fill" />
               )}
             </button>
 
@@ -232,7 +232,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
                 hover:bg-surface-raised hover:text-fg
               "
             >
-              <SkipForward className="block-4 inline-4" weight="fill" />
+              <SkipForwardIcon className="block-4 inline-4" weight="fill" />
             </button>
           </div>
 
@@ -246,7 +246,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
               hover:bg-surface-raised hover:text-fg
             "
           >
-            <SpeakerSimpleNone className="block-3.5 inline-3.5" weight="bold" />
+            <SpeakerSimpleNoneIcon className="block-3.5 inline-3.5" weight="bold" />
           </button>
         </div>
       </div>

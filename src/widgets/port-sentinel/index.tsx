@@ -1,4 +1,4 @@
-import { ArrowClockwise, X } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, XIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -145,7 +145,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
               disabled:opacity-40
             "
           >
-            <ArrowClockwise
+            <ArrowClockwiseIcon
               className={`
               block-3 inline-3
               ${loading ? "animate-spin" : ""}
@@ -191,7 +191,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
                 hover:text-fg
               "
             >
-              <X className="block-3 inline-3" />
+              <XIcon className="block-3 inline-3" />
             </button>
           )}
         </div>

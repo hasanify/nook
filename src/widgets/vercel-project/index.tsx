@@ -1,4 +1,4 @@
-import { ArrowSquareOut, GithubLogo, Globe } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon, GithubLogoIcon, GlobeIcon } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useMemo } from "react";
 
@@ -174,7 +174,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
             title={`Open https://${primaryDomain}`}
             aria-label={`Open https://${primaryDomain}`}
           >
-            <ArrowSquareOut className="block-3 inline-3" />
+            <ArrowSquareOutIcon className="block-3 inline-3" />
           </button>
         ) : undefined
       }
@@ -201,7 +201,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
           >
             <div className="flex items-center gap-2 min-inline-0">
               <div className="flex shrink-0 items-center justify-center rounded-sm bg-accent-500/10 text-accent-500 block-5 inline-5">
-                <Globe className="block-3 inline-3" />
+                <GlobeIcon className="block-3 inline-3" />
               </div>
               <div className="flex flex-col min-inline-0">
                 <span className="text-[9px] font-semibold tracking-wider text-fg-muted uppercase">
@@ -218,7 +218,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                   title={`Open https://${primaryDomain}`}
                 >
                   <span className="truncate">{primaryDomain}</span>
-                  <ArrowSquareOut
+                  <ArrowSquareOutIcon
                     className="
                     opacity-60 transition-opacity block-2.5 inline-2.5
                     group-hover:opacity-100
@@ -245,7 +245,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                   "
                   title={`Open GitHub: ${data.meta.git_repo}`}
                 >
-                  <GithubLogo className="block-2.5 inline-2.5" weight="fill" />
+                  <GithubLogoIcon className="block-2.5 inline-2.5" weight="fill" />
                 </button>
               )}
             </div>

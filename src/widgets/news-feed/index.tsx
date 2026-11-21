@@ -1,4 +1,4 @@
-import { ArrowClockwise, ArrowUp, ChatCircle } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, ArrowUpIcon, ChatCircleIcon } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -262,7 +262,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                 disabled:opacity-40
               "
             >
-              <ArrowClockwise
+              <ArrowClockwiseIcon
                 className={`
                 block-3 inline-3
                 ${loading ? "animate-spin" : ""}
@@ -312,7 +312,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                       {story.domain}
                     </span>
                     <span className="flex items-center gap-0.5 font-mono font-medium text-amber-400">
-                      <ArrowUp className="block-2.5 inline-2.5" weight="bold" />
+                      <ArrowUpIcon className="block-2.5 inline-2.5" weight="bold" />
                       {story.score}
                     </span>
                     <span>by {story.by}</span>
@@ -326,7 +326,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                         hover:text-accent-500
                       "
                     >
-                      <ChatCircle className="block-3 inline-3" />
+                      <ChatCircleIcon className="block-3 inline-3" />
                       <span>{story.comments}</span>
                     </button>
                   </div>
