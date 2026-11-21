@@ -1,3 +1,9 @@
+# [0.39.0](https://github.com/hasanify/nook/compare/v0.38.3...v0.39.0) (2026-11-21)
+
+### Features
+
+- **bento:** add customizable widget gap option starting from 0px ([698f990](https://github.com/hasanify/nook/commit/698f990f1cab365846de56c0384239725b4d5987))
+
 ## [0.38.3](https://github.com/hasanify/nook/compare/v0.38.2...v0.38.3) (2026-11-21)
 
 ### Bug Fixes
