@@ -663,7 +663,7 @@ export function SettingsApp() {
             transition-all
             ${
               activeTab === "general"
-                ? "border-accent-500 font-semibold text-fg"
+                ? "border-accent-500 text-fg"
                 : `
                 border-transparent text-fg-muted
                 hover:text-fg
@@ -682,7 +682,7 @@ export function SettingsApp() {
             transition-all
             ${
               activeTab === "widgets"
-                ? "border-accent-500 font-semibold text-fg"
+                ? "border-accent-500 text-fg"
                 : `
                 border-transparent text-fg-muted
                 hover:text-fg
@@ -704,7 +704,7 @@ export function SettingsApp() {
             transition-all
             ${
               activeTab === "accounts"
-                ? "border-accent-500 font-semibold text-fg"
+                ? "border-accent-500 text-fg"
                 : `
                 border-transparent text-fg-muted
                 hover:text-fg
@@ -723,7 +723,7 @@ export function SettingsApp() {
             transition-all
             ${
               activeTab === "appearance"
-                ? "border-accent-500 font-semibold text-fg"
+                ? "border-accent-500 text-fg"
                 : `
                 border-transparent text-fg-muted
                 hover:text-fg
@@ -742,7 +742,7 @@ export function SettingsApp() {
             transition-all
             ${
               activeTab === "about"
-                ? "border-accent-500 font-semibold text-fg"
+                ? "border-accent-500 text-fg"
                 : `
                 border-transparent text-fg-muted
                 hover:text-fg
@@ -2249,7 +2249,7 @@ export function SettingsApp() {
                         ${checkingUpdate ? "animate-spin" : ""}
                       `}
                     />
-                    <span>{checkingUpdate ? "Checking..." : "CheckIcon for Updates"}</span>
+                    <span>Check for Updates</span>
                   </button>
                 </div>
 
