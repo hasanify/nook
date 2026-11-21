@@ -121,31 +121,35 @@ export function WidgetShell({
       ? instance.settings.widgetColor
       : undefined;
 
-  const { preset: globalPresetId } = useTheme();
+  const { theme, preset: globalPresetId } = useTheme();
   const preset = getWidgetPreset(globalPresetId);
 
-  const colorStyle: React.CSSProperties = widgetColor
-    ? ({
-        "--widget-accent": widgetColor,
-        "--color-accent-500": widgetColor,
-        "--color-accent-400": `color-mix(in srgb, ${widgetColor} 80%, white)`,
-        "--color-accent-600": `color-mix(in srgb, ${widgetColor} 80%, black)`,
-        "--focus": widgetColor,
-        borderColor: effectiveEditMode
-          ? widgetColor
-          : `color-mix(in srgb, ${widgetColor} 32%, var(--line))`,
-        background: `radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, ${widgetColor} 8%, transparent) 0%, transparent 85%), var(--surface)`,
-        boxShadow: `0 8px 24px -4px color-mix(in srgb, ${widgetColor} 16%, transparent), 0 2px 6px -1px color-mix(in srgb, ${widgetColor} 8%, transparent)`,
-      } as React.CSSProperties)
-    : {};
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  const presetStyle = preset.getShellStyle(widgetColor, isDark, effectiveEditMode);
+
+  const mergedStyle: React.CSSProperties = {
+    ...(widgetColor
+      ? ({
+          "--widget-accent": widgetColor,
+          "--color-accent-500": widgetColor,
+          "--color-accent-400": `color-mix(in srgb, ${widgetColor} 80%, white)`,
+          "--color-accent-600": `color-mix(in srgb, ${widgetColor} 80%, black)`,
+          "--focus": widgetColor,
+        } as React.CSSProperties)
+      : {}),
+    ...presetStyle,
+    opacity: widgetOpacity,
+  };
 
   return (
     <div
       onContextMenu={handleContextMenu}
-      style={{
-        ...colorStyle,
-        opacity: widgetOpacity,
-      }}
+      style={mergedStyle}
       className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden transition-[border-color,opacity,box-shadow] duration-150 select-none before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px ${
         widgetColor
           ? ""

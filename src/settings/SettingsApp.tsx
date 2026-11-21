@@ -803,16 +803,16 @@ export function SettingsApp() {
         {/* APPEARANCE TAB */}
         {activeTab === "appearance" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
-            <div className="my-3 flex w-full flex-col gap-5 pb-4">
+            <div className="my-3 flex w-full flex-col gap-5 pb-6">
               {/* Color Theme */}
-              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-4 backdrop-blur-xs">
                 <div>
                   <div className="font-semibold text-fg">Color Theme</div>
                   <div className="text-[11px] text-fg-muted">
                     Choose whether Nook follows your system color scheme or stays light / dark
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   {[
                     {
                       id: "system" as const,
@@ -880,7 +880,7 @@ export function SettingsApp() {
                       key={item.id}
                       type="button"
                       onClick={() => handleThemeChange(item.id)}
-                      className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border p-3 text-center transition-all ${
+                      className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border p-2.5 text-center text-xs font-medium transition-all ${
                         config?.app?.theme === item.id
                           ? "border-accent-500 bg-accent-500/15 font-semibold text-accent-500 shadow-xs"
                           : "border-line/60 bg-surface text-fg-muted hover:border-line hover:text-fg"
@@ -894,7 +894,7 @@ export function SettingsApp() {
               </div>
 
               {/* Widget Style Presets */}
-              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
+              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-4 backdrop-blur-xs">
                 <div>
                   <div className="font-semibold text-fg">Widget Style Presets</div>
                   <div className="text-[11px] text-fg-muted">
@@ -902,15 +902,22 @@ export function SettingsApp() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3.5 pt-1">
+                <div className="grid grid-cols-2 gap-3 pt-1">
                   {WIDGET_PRESETS.map((preset) => {
                     const isSelected = (config?.app?.widgetPreset || "default") === preset.id;
+                    const isDarkTheme =
+                      config?.app?.theme === "dark" ||
+                      (config?.app?.theme === "system" &&
+                        typeof window !== "undefined" &&
+                        window.matchMedia("(prefers-color-scheme: dark)").matches);
+                    const previewStyle = preset.getShellStyle(undefined, isDarkTheme, false);
+
                     return (
                       <button
                         key={preset.id}
                         type="button"
                         onClick={() => handlePresetChange(preset.id)}
-                        className={`group relative flex cursor-pointer flex-col gap-3 rounded-xl border p-4 text-left transition-all ${
+                        className={`group relative flex cursor-pointer flex-col gap-2.5 rounded-xl border p-3.5 text-left transition-all ${
                           isSelected
                             ? "border-accent-500 bg-accent-500/[0.08] shadow-xs ring-1 ring-accent-500/40"
                             : "border-line/70 bg-surface/80 hover:border-line hover:bg-surface"
@@ -924,6 +931,7 @@ export function SettingsApp() {
                           {/* The Mini Widget Box */}
                           <div
                             className={`relative flex h-full w-full flex-col overflow-hidden transition-all duration-200 ${preset.containerClass}`}
+                            style={previewStyle}
                           >
                             {/* Mini Header Bar */}
                             <div
@@ -948,28 +956,30 @@ export function SettingsApp() {
 
                         {/* Text and Selection Meta */}
                         <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-fg">{preset.name}</span>
-                              <span className="rounded-md bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-fg-muted">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate text-xs font-semibold text-fg">
+                                {preset.name}
+                              </span>
+                              <span className="shrink-0 rounded-md bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
                                 {preset.tagline}
                               </span>
                             </div>
-                            <div className="mt-1 text-[11px] leading-relaxed text-fg-muted">
+                            <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-fg-muted">
                               {preset.description}
                             </div>
                           </div>
 
                           {/* Active Indicator Icon */}
                           <div
-                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                            className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full transition-colors ${
                               isSelected
                                 ? "bg-accent-500 text-white"
                                 : "border border-line/60 bg-surface-raised text-transparent group-hover:border-line"
                             }`}
                           >
                             <svg
-                              className="h-3 w-3"
+                              className="h-2.5 w-2.5"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
