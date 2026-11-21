@@ -3,6 +3,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getInstance, onConfigChanged, updateSettings, updateState } from "./ipc";
 import type { WidgetInstance } from "./types";
 
+/**
+ * Manages reactive state and configuration for a single desktop widget instance.
+ *
+ * Synchronizes local state changes optimistically for instant UI feedback,
+ * debouncing backend persistence IPC calls (500ms) to prevent disk/registry thrashing
+ * on rapid updates (e.g. active timers, note typing).
+ */
 export function useInstance(id: string) {
   const [instance, setInstance] = useState<WidgetInstance | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +51,10 @@ export function useInstance(id: string) {
     };
   }, [id, fetchInstance]);
 
-  // Patch state (debounced 500ms)
+  /**
+   * Optimistically applies state patches to the local instance and queues
+   * a debounced backend synchronization payload.
+   */
   const patchState = useCallback(
     (patch: Record<string, unknown>) => {
       setInstance((prev) => {
@@ -73,7 +83,9 @@ export function useInstance(id: string) {
     [id],
   );
 
-  // Patch settings
+  /**
+   * Immediately updates widget settings and sends the configuration patch via IPC.
+   */
   const patchSettings = useCallback(
     (patch: Record<string, unknown>) => {
       setInstance((prev) => {

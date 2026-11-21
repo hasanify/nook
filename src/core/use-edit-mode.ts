@@ -9,24 +9,27 @@ import {
   setWidgetEditMode,
 } from "./ipc";
 
+/**
+ * Tracks and manages desktop edit mode state.
+ *
+ * Supports both global edit mode (toggled via Ctrl+Alt+E or tray menu) and
+ * single-widget target edit mode (toggled from a widget's context menu).
+ */
 export function useEditMode(widgetId?: string) {
   const [globalEditMode, setGlobalEditMode] = useState(false);
   const [singleEditMode, setSingleEditMode] = useState(false);
 
   useEffect(() => {
-    // Initial fetch of global edit mode
     getEditMode()
       .then((on) => setGlobalEditMode(on))
       .catch(() => {});
 
-    // If widgetId provided, check if this widget has single edit mode active
     if (widgetId) {
       getWidgetEditMode(widgetId)
         .then((on) => setSingleEditMode(on))
         .catch(() => {});
     }
 
-    // Listen to global changes
     let unlistenGlobal: (() => void) | undefined;
     onEditMode((payload) => {
       setGlobalEditMode(payload.on);
@@ -37,7 +40,6 @@ export function useEditMode(widgetId?: string) {
       unlistenGlobal = fn;
     });
 
-    // Listen to individual widget edit mode changes
     let unlistenWidget: (() => void) | undefined;
     onWidgetEditMode((payload) => {
       if (!widgetId || payload.id === widgetId) {

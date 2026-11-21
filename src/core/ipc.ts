@@ -1,3 +1,11 @@
+/**
+ * Centralized Tauri IPC bridge for Nook desktop operations.
+ *
+ * Encapsulates window lifecycle, Win32 desktop reparenting bounds, credential storage,
+ * native hardware monitor telemetry, and real-time event subscriptions between the Rust backend
+ * and React widgets.
+ */
+
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 

@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 
 import { getAppConfig, onConfigChanged } from "./ipc";
 
+/**
+ * Subscribes to application theme preferences (system, light, dark) and visual presets.
+ * Automatically synchronizes with OS system dark-mode shifts and broadcasts changes.
+ */
 export function useTheme() {
   const [theme, setTheme] = useState<"system" | "light" | "dark">("system");
   const [preset, setPreset] = useState<string>("default");
 
   useEffect(() => {
-    // Initial fetch
     getAppConfig()
       .then((cfg) => {
         if (cfg.app?.theme) setTheme(cfg.app.theme);
@@ -15,7 +18,6 @@ export function useTheme() {
       })
       .catch(() => {});
 
-    // Listen to config changes
     let unlisten: (() => void) | undefined;
     onConfigChanged((payload) => {
       if (payload.app || !payload.ids || payload.ids.length === 0) {

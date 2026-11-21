@@ -3,6 +3,10 @@ import { useCallback, useEffect, useState } from "react";
 import { getProviderSnapshot, onProviderData, refreshWidgetProvider } from "./ipc";
 import type { ProviderPayload } from "./types";
 
+/**
+ * Connects a widget to its backend background provider data stream.
+ * Manages initial snapshot hydration, real-time Tauri event subscriptions, and manual refresh requests.
+ */
 export function useProvider<T = unknown>(widgetId: string) {
   const [payload, setPayload] = useState<ProviderPayload<T> | null>(null);
   const [loading, setLoading] = useState(true);
