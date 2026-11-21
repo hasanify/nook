@@ -24,11 +24,29 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
     let p_habits = MenuItem::with_id(app, "add:habits", "Habit Tracker", true, None::<&str>)
         .map_err(|e| e.to_string())?;
+    let p_shortcuts = MenuItem::with_id(
+        app,
+        "add:shortcuts",
+        "Desktop Shortcuts",
+        true,
+        None::<&str>,
+    )
+    .map_err(|e| e.to_string())?;
+    let p_clipboard =
+        MenuItem::with_id(app, "add:clipboard", "Pinned Snippets", true, None::<&str>)
+            .map_err(|e| e.to_string())?;
     let sub_prod = Submenu::with_items(
         app,
         "Productivity",
         true,
-        &[&p_todo, &p_notes, &p_timer, &p_habits],
+        &[
+            &p_todo,
+            &p_notes,
+            &p_timer,
+            &p_habits,
+            &p_shortcuts,
+            &p_clipboard,
+        ],
     )
     .map_err(|e| e.to_string())?;
 
@@ -98,12 +116,21 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
     let u_news = MenuItem::with_id(app, "add:news-feed", "Tech News", true, None::<&str>)
         .map_err(|e| e.to_string())?;
+    let u_crypto = MenuItem::with_id(
+        app,
+        "add:crypto-ticker",
+        "Crypto Ticker",
+        true,
+        None::<&str>,
+    )
+    .map_err(|e| e.to_string())?;
     let sub_utils = Submenu::with_items(
         app,
         "Utilities & System",
         true,
         &[
             &u_clock, &u_world, &u_weather, &u_vitals, &u_battery, &u_music, &u_ambient, &u_news,
+            &u_crypto,
         ],
     )
     .map_err(|e| e.to_string())?;

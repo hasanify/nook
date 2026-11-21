@@ -31,20 +31,22 @@
 
 ## Available Widgets
 
-Nook includes 27 built-in widgets categorized across productivity, development, and AI reflection:
+Nook includes 30 built-in widgets categorized across productivity, development, and AI reflection:
 
 ### Productivity & Focus
 
-| Widget             | ID              | Description                                                                        |
-| ------------------ | --------------- | ---------------------------------------------------------------------------------- |
-| **Clock & Date**   | `clock`         | Digital clock with date, 12/24h formats, seconds toggle, and day progress          |
-| **World Clock**    | `world-clock`   | Multi-timezone glance with daylight markers and UTC hour offsets                   |
-| **Focus Timer**    | `timer`         | Pomodoro intervals, custom countdowns, and stopwatch with native notifications     |
-| **Quick Tasks**    | `todo`          | Minimalist desktop checklist with quick completion toggles                         |
-| **Notes**          | `notes`         | Scratchpad with automatic local persistence and word counting                      |
-| **Habits Tracker** | `habits`        | 7-day visual habit streak grid with daily completion toggles and streak counters   |
-| **Weather**        | `weather`       | Current temperature, humidity, wind, and atmospheric forecasts via Open-Meteo      |
-| **Ambient Sound**  | `ambient-sound` | Offline synthesized white noise, pink noise, deep brown rumble, and rain generator |
+| Widget                | ID              | Description                                                                        |
+| --------------------- | --------------- | ---------------------------------------------------------------------------------- |
+| **Clock & Date**      | `clock`         | Digital clock with date, 12/24h formats, seconds toggle, and day progress          |
+| **World Clock**       | `world-clock`   | Multi-timezone glance with daylight markers and UTC hour offsets                   |
+| **Focus Timer**       | `timer`         | Pomodoro intervals, custom countdowns, and stopwatch with native notifications     |
+| **Quick Tasks**       | `todo`          | Minimalist desktop checklist with quick completion toggles                         |
+| **Notes**             | `notes`         | Scratchpad with automatic local persistence and word counting                      |
+| **Desktop Shortcuts** | `shortcuts`     | Quick launch apps, folders, and web bookmarks with one click                       |
+| **Pinned Snippets**   | `clipboard`     | Quick-copy frequently used code snippets, tokens, and templates                    |
+| **Habits Tracker**    | `habits`        | 7-day visual habit streak grid with daily completion toggles and streak counters   |
+| **Weather**           | `weather`       | Current temperature, humidity, wind, and atmospheric forecasts via Open-Meteo      |
+| **Ambient Sound**     | `ambient-sound` | Offline synthesized white noise, pink noise, deep brown rumble, and rain generator |
 
 ### Developer & System Utilities
 
@@ -53,6 +55,7 @@ Nook includes 27 built-in widgets categorized across productivity, development, 
 | **System Vitals**     | `system-vitals`   | Real-time CPU, RAM, and disk utilization sparklines with configurable polling          |
 | **Port Sentinel**     | `port-sentinel`   | Active port radar with PID mapping and one-click process termination                   |
 | **API Health**        | `api-health`      | Custom HTTP endpoint and latency ping monitor with rolling uptime history              |
+| **Crypto Ticker**     | `crypto-ticker`   | Real-time cryptocurrency prices with 24h market performance                            |
 | **Battery Monitor**   | `battery-monitor` | Laptop battery charge percentage, charging state, and discharge rates                  |
 | **GitHub Repository** | `github-repo`     | Live commit history, stars, forks, release tags, and GitHub Actions CI workflow status |
 | **GitHub PRs**        | `github-prs`      | Review queue and assigned pull requests across repositories with real-time status      |

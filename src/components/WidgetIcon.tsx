@@ -4,10 +4,12 @@ import {
   BookBookmarkIcon,
   BroadcastIcon,
   CheckSquareIcon,
+  ClipboardTextIcon,
   ClockIcon,
   CloudSunIcon,
   CompassIcon,
   CpuIcon,
+  CurrencyBtcIcon,
   FlameIcon,
   GitBranchIcon,
   GitPullRequestIcon,
@@ -21,6 +23,7 @@ import {
   NotePencilIcon,
   PenNibIcon,
   PersonSimpleWalkIcon,
+  RocketLaunchIcon,
   SlidersHorizontalIcon,
   SpeakerHighIcon,
   SquaresFourIcon,
@@ -73,6 +76,12 @@ export function WidgetIcon({ kind = "", className = "h-3.5 w-3.5" }: WidgetIconP
       return <SpeakerHighIcon className={className} />;
     case "news-feed":
       return <NewspaperIcon className={className} />;
+    case "shortcuts":
+      return <RocketLaunchIcon className={className} />;
+    case "clipboard":
+      return <ClipboardTextIcon className={className} />;
+    case "crypto-ticker":
+      return <CurrencyBtcIcon className={className} />;
     case "ai-tone":
       return <SlidersHorizontalIcon className={className} />;
     case "ai-reply":

@@ -1,0 +1,46 @@
+{
+  "id": "crypto-ticker",
+  "name": "Crypto Ticker",
+  "description": "Real-time cryptocurrency prices with 24h market performance",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 220 },
+  "minSize": { "w": 220, "h": 160 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "coins",
+      "label": "Tracked Assets",
+      "type": "select",
+      "defaultValue": "top3",
+      "options": [
+        { "label": "BTC, ETH, SOL", "value": "top3" },
+        { "label": "BTC, ETH", "value": "top2" },
+        { "label": "Top 5 (BTC, ETH, SOL, BNB, XRP)", "value": "top5" }
+      ]
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "select",
+      "defaultValue": "usd",
+      "options": [
+        { "label": "USD ($)", "value": "usd" },
+        { "label": "EUR (€)", "value": "eur" },
+        { "label": "GBP (£)", "value": "gbp" }
+      ]
+    },
+    {
+      "key": "refreshInterval",
+      "label": "Auto Refresh",
+      "type": "select",
+      "defaultValue": "3",
+      "options": [
+        { "label": "Every minute", "value": "1" },
+        { "label": "Every 3 minutes", "value": "3" },
+        { "label": "Every 5 minutes", "value": "5" },
+        { "label": "Every 15 minutes", "value": "15" }
+      ]
+    }
+  ]
+}

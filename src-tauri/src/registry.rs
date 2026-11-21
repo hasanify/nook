@@ -186,6 +186,21 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
+        let shortcuts_json = include_str!("../../src/widgets/shortcuts/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(shortcuts_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
+        let clipboard_json = include_str!("../../src/widgets/clipboard/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(clipboard_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
+        let crypto_ticker_json = include_str!("../../src/widgets/crypto-ticker/manifest.json");
+        if let Ok(m) = serde_json::from_str::<WidgetManifest>(crypto_ticker_json) {
+            manifests.insert(m.id.clone(), m);
+        }
+
         Self { manifests }
     }
 

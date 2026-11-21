@@ -1,0 +1,18 @@
+{
+  "id": "clipboard",
+  "name": "Pinned Snippets",
+  "description": "Quick-copy frequently used code snippets, tokens, and templates",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 260 },
+  "minSize": { "w": 220, "h": 180 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "showSearch",
+      "label": "Show Search Filter",
+      "type": "boolean",
+      "defaultValue": true
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "shortcuts",
+  "name": "Desktop Shortcuts",
+  "description": "Quick launch apps, folders, and web bookmarks with one click",
+  "version": "1.0.0",
+  "author": "Nook",
+  "defaultSize": { "w": 280, "h": 220 },
+  "minSize": { "w": 220, "h": 160 },
+  "resizable": true,
+  "settingsSchema": [
+    {
+      "key": "columns",
+      "label": "Grid Columns",
+      "type": "select",
+      "defaultValue": "2",
+      "options": [
+        { "label": "2 Columns", "value": "2" },
+        { "label": "3 Columns", "value": "3" },
+        { "label": "4 Columns", "value": "4" }
+      ]
+    },
+    {
+      "key": "showLabels",
+      "label": "Show Labels",
+      "type": "boolean",
+      "defaultValue": true
+    }
+  ]
+}

@@ -13,7 +13,9 @@ import aiVocabModule from "./ai-vocab";
 import ambientSoundModule from "./ambient-sound";
 import apiHealthModule from "./api-health";
 import batteryMonitorModule from "./battery-monitor";
+import clipboardModule from "./clipboard";
 import clockModule from "./clock";
+import cryptoTickerModule from "./crypto-ticker";
 import githubPrsModule from "./github-prs";
 import githubRepoModule from "./github-repo";
 import habitsModule from "./habits";
@@ -22,6 +24,7 @@ import notesModule from "./notes";
 import nowPlayingModule from "./now-playing";
 import placeholderModule from "./placeholder";
 import portSentinelModule from "./port-sentinel";
+import shortcutsModule from "./shortcuts";
 import systemVitalsModule from "./system-vitals";
 import timerModule from "./timer";
 import todoModule from "./todo";
@@ -35,6 +38,9 @@ export const WIDGET_REGISTRY: Record<string, WidgetModule> = {
   todo: todoModule,
   notes: notesModule,
   timer: timerModule,
+  shortcuts: shortcutsModule,
+  clipboard: clipboardModule,
+  "crypto-ticker": cryptoTickerModule,
   "github-repo": githubRepoModule,
   "vercel-project": vercelProjectModule,
   "ai-tone": aiToneModule,
