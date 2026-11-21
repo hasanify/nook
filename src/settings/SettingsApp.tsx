@@ -30,7 +30,12 @@ import { CustomSelect } from "@/components/CustomSelect";
 import { SettingsForm } from "@/components/SettingsForm";
 import { Toggle } from "@/components/Toggle";
 import { WIDGET_COLOR_OPTIONS } from "@/components/WidgetContextMenu";
-import { applyBentoLayout, type BentoCoverage, computeBentoLayout } from "@/core/bento";
+import {
+  applyBentoLayout,
+  type BentoCoverage,
+  computeBentoLayout,
+  DEFAULT_BENTO_GAP,
+} from "@/core/bento";
 import {
   addWidget,
   checkForUpdates,
@@ -554,8 +559,81 @@ export function SettingsApp() {
     }
     return "auto";
   });
+  const [bentoGap, setBentoGap] = useState<number>(() => {
+    if (typeof window === "undefined") return DEFAULT_BENTO_GAP;
+    try {
+      const saved = localStorage.getItem("nook_bento_gap");
+      if (saved !== null) {
+        const parsed = Number(saved);
+        if (!isNaN(parsed) && parsed >= 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Ignore
+    }
+    return DEFAULT_BENTO_GAP;
+  });
+  const bentoGapDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isBentoPreviewing, setIsBentoPreviewing] = useState(false);
   const originalBentoWidgetsRef = useRef<WidgetInstance[] | null>(null);
+
+  const handleSetBentoGap = useCallback(
+    (gap: number, immediate = false) => {
+      const safeGap = Math.max(0, gap);
+      setBentoGap(safeGap);
+      try {
+        localStorage.setItem("nook_bento_gap", String(safeGap));
+      } catch {
+        // Ignore
+      }
+
+      if (bentoGapDebounceRef.current) {
+        clearTimeout(bentoGapDebounceRef.current);
+        bentoGapDebounceRef.current = null;
+      }
+
+      if (!isBentoPreviewing || !originalBentoWidgetsRef.current) {
+        return;
+      }
+
+      const applyLayout = async () => {
+        let workArea = {
+          x: 0,
+          y: 0,
+          w: window.screen.availWidth || 1920,
+          h: window.screen.availHeight || 1080,
+        };
+        try {
+          const area = await getDesktopWorkArea();
+          if (area && area.w > 0 && area.h > 0) {
+            workArea = area;
+          }
+        } catch {
+          // Ignore
+        }
+        if (originalBentoWidgetsRef.current) {
+          const layout = computeBentoLayout(
+            originalBentoWidgetsRef.current,
+            bentoLayoutIdx,
+            workArea,
+            bentoCoverage,
+            safeGap,
+          );
+          await applyBentoLayout(layout.widgets);
+        }
+      };
+
+      if (immediate) {
+        void applyLayout();
+      } else {
+        bentoGapDebounceRef.current = setTimeout(() => {
+          void applyLayout();
+        }, 40);
+      }
+    },
+    [isBentoPreviewing, bentoLayoutIdx, bentoCoverage],
+  );
 
   const handleSetBentoCoverage = useCallback(
     async (coverage: BentoCoverage) => {
@@ -585,11 +663,12 @@ export function SettingsApp() {
           bentoLayoutIdx,
           workArea,
           coverage,
+          bentoGap,
         );
         await applyBentoLayout(layout.widgets);
       }
     },
-    [isBentoPreviewing, bentoLayoutIdx],
+    [isBentoPreviewing, bentoLayoutIdx, bentoGap],
   );
 
   const handleCycleSettingsBento = useCallback(async () => {
@@ -619,9 +698,10 @@ export function SettingsApp() {
       nextIdx,
       workArea,
       bentoCoverage,
+      bentoGap,
     );
     await applyBentoLayout(layout.widgets);
-  }, [config, isBentoPreviewing, bentoLayoutIdx, bentoCoverage]);
+  }, [config, isBentoPreviewing, bentoLayoutIdx, bentoCoverage, bentoGap]);
 
   const handleDoneSettingsBento = useCallback(() => {
     originalBentoWidgetsRef.current = null;
@@ -1328,6 +1408,48 @@ export function SettingsApp() {
                         {item.label}
                       </button>
                     ))}
+                  </div>
+
+                  {/* Widget Gap Selector */}
+                  <div className="flex flex-col gap-1.5 pbs-0.5">
+                    <div className="flex items-center justify-between text-2xs">
+                      <span className="font-medium text-fg-muted">Widget Gap</span>
+                      <span className="font-mono font-semibold text-accent-500">{bentoGap}px</span>
+                    </div>
+
+                    {/* Quick Preset Buttons starting from 0px */}
+                    <div className="grid grid-cols-5 rounded-lg border border-line/60 bg-surface/70 p-0.5 text-center text-3xs">
+                      {([0, 4, 8, 12, 16] as const).map((gapVal) => (
+                        <button
+                          key={gapVal}
+                          type="button"
+                          onClick={() => handleSetBentoGap(gapVal, true)}
+                          title={`${gapVal}px gap`}
+                          className={`
+                            cursor-pointer rounded-md py-1 font-mono font-medium transition-all
+                            ${
+                              bentoGap === gapVal
+                                ? "bg-accent-500 font-semibold text-white shadow-2xs"
+                                : "text-fg-muted hover:bg-surface-raised hover:text-fg"
+                            }
+                          `}
+                        >
+                          {gapVal}px
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Range slider for selecting arbitrary px gap from 0px to 32px */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="32"
+                      step="1"
+                      value={bentoGap}
+                      onChange={(e) => handleSetBentoGap(Number(e.target.value), false)}
+                      aria-label="Widget gap in pixels"
+                      className="cursor-pointer accent-accent-500 inline-full"
+                    />
                   </div>
 
                   {/* Action Buttons */}

@@ -10,6 +10,7 @@ export interface BentoLayoutResult {
   name: string;
   description: string;
   widgets: WidgetInstance[];
+  gap?: number;
 }
 
 export interface WorkArea {
@@ -342,12 +343,15 @@ function partitionIntoColumns(items: WidgetInstance[], columnCount: number): Wid
   return cols;
 }
 
+export const DEFAULT_BENTO_GAP = 12;
+
 export function computeBentoLayout(
   widgets: WidgetInstance[],
   layoutIndex: number,
   workAreaOrWidth?: WorkArea | number,
   screenHeightOrCoverage?: number | BentoCoverage,
-  explicitCoverage?: BentoCoverage,
+  explicitCoverageOrGap?: BentoCoverage | number,
+  customGap?: number,
 ): BentoLayoutResult {
   if (widgets.length === 0) {
     return {
@@ -355,14 +359,22 @@ export function computeBentoLayout(
       name: "Empty",
       description: "No active widgets to arrange",
       widgets: [],
+      gap: 0,
     };
   }
 
   let coverage: BentoCoverage = "auto";
-  if (typeof explicitCoverage === "string") {
-    coverage = explicitCoverage;
+  if (typeof explicitCoverageOrGap === "string") {
+    coverage = explicitCoverageOrGap;
   } else if (typeof screenHeightOrCoverage === "string") {
     coverage = screenHeightOrCoverage;
+  }
+
+  let gap = DEFAULT_BENTO_GAP;
+  if (typeof customGap === "number" && !isNaN(customGap)) {
+    gap = Math.max(0, customGap);
+  } else if (typeof explicitCoverageOrGap === "number" && !isNaN(explicitCoverageOrGap)) {
+    gap = Math.max(0, explicitCoverageOrGap);
   }
 
   let baseArea: WorkArea;
@@ -380,8 +392,8 @@ export function computeBentoLayout(
   const cycle = Math.max(0, layoutIndex);
   const { area, coverageName } = getEffectiveBentoArea(baseArea, coverage, cycle, widgets.length);
 
-  const EDGE = 12;
-  const GAP = 12;
+  const GAP = gap;
+  const EDGE = GAP;
   const availW = Math.max(area.w - EDGE * 2, 280);
   const availH = Math.max(area.h - EDGE * 2, 200);
 
@@ -393,7 +405,7 @@ export function computeBentoLayout(
     return {
       index: cycle,
       name: `${coverageName} (Single Widget)`,
-      description: `Single widget formatted to ${coverage} monitor work area`,
+      description: `Single widget formatted to ${coverage} monitor work area (${GAP}px gap)`,
       widgets: [
         {
           ...w,
@@ -405,6 +417,7 @@ export function computeBentoLayout(
           },
         },
       ],
+      gap: GAP,
     };
   }
 
@@ -899,7 +912,8 @@ export function computeBentoLayout(
   return {
     index: cycle,
     name: `${layoutName} • ${coverageName}`,
-    description: `${layoutDesc} (${coverage} monitor coverage)`,
+    description: `${layoutDesc} (${coverage} monitor coverage, ${GAP}px gap)`,
     widgets: updated,
+    gap: GAP,
   };
 }
