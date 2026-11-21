@@ -1,3 +1,9 @@
+# [0.38.0](https://github.com/hasanify/nook/compare/v0.37.0...v0.38.0) (2026-11-21)
+
+### Features
+
+- **installer:** configure perMachine admin install and robust port process termination ([c381a18](https://github.com/hasanify/nook/commit/c381a1877479dd76450fdcc413a1e7344b9ed4fd))
+
 # [0.37.0](https://github.com/hasanify/nook/compare/v0.36.1...v0.37.0) (2026-11-21)
 
 ### Features
