@@ -1,3 +1,15 @@
+# [0.40.0](https://github.com/hasanify/nook/compare/v0.39.0...v0.40.0) (2026-11-21)
+
+### Bug Fixes
+
+- **widgets:** improve habits midnight rollover, world clock regions and battery desktop display ([f18fe92](https://github.com/hasanify/nook/commit/f18fe928ac2efea46e821d49a0ea159b5d7c5b0b))
+- **widgets:** restore corrupted user-facing icon text and labels ([8264271](https://github.com/hasanify/nook/commit/826427118d0fa1b7c7358b4d2c29f205b41f7772))
+
+### Features
+
+- **ai-widgets:** auto-fetch daily reflection and quote content on mount and day change ([fd4ba72](https://github.com/hasanify/nook/commit/fd4ba72edc8450b33468fdb89aefbe5b2a93c9ba))
+- **desktop:** add always-on-top and duplicate to context menu, expand tray widget catalog ([70805ac](https://github.com/hasanify/nook/commit/70805acfde2fe37d4093a57080a0800a160c02ff))
+
 # [0.39.0](https://github.com/hasanify/nook/compare/v0.38.3...v0.39.0) (2026-11-21)
 
 ### Features
