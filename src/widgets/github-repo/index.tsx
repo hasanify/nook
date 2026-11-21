@@ -294,7 +294,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 className="group flex cursor-pointer items-center gap-1 rounded-md border border-line/60 bg-surface-raised px-1.5 py-0.5 font-medium text-fg-muted transition-colors hover:border-accent-500/50 hover:bg-surface hover:text-accent-500"
                 title="GitHub Stars"
               >
-                <svg className="text-amber-500 h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="h-3 w-3 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
                 <span className="font-mono text-[10px] text-fg group-hover:text-accent-500">
@@ -337,7 +337,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 title="Open Issues"
               >
                 <svg
-                  className="text-emerald-500 h-3 w-3"
+                  className="h-3 w-3 text-emerald-500"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

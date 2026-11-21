@@ -1597,8 +1597,8 @@ export function SettingsApp() {
                       {preferredAi === "auto" ? " (Auto-picked)" : " (Pinned)"}
                     </span>
                   ) : (
-                    <span className="text-amber-400 flex items-center gap-1.5">
-                      <span className="bg-amber-400 h-2 w-2 rounded-full" />
+                    <span className="flex items-center gap-1.5 text-amber-400">
+                      <span className="h-2 w-2 rounded-full bg-amber-400" />
                       None configured yet – add any API key below to activate
                     </span>
                   )}

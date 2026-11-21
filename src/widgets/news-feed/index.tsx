@@ -227,7 +227,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line/40 pb-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span className="bg-amber-500 flex h-4 w-4 items-center justify-center rounded text-[10px] font-bold text-white">
+            <span className="flex h-4 w-4 items-center justify-center rounded bg-amber-500 text-[10px] font-bold text-white">
               Y
             </span>
             <span>Hacker News</span>
@@ -278,7 +278,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                     <span className="py-0.2 max-w-[110px] truncate rounded bg-surface-raised px-1 font-mono text-[9px] text-fg-muted/90">
                       {story.domain}
                     </span>
-                    <span className="text-amber-400 font-mono font-medium">▲ {story.score}</span>
+                    <span className="font-mono font-medium text-amber-400">▲ {story.score}</span>
                     <span>by {story.by}</span>
                     <button
                       type="button"

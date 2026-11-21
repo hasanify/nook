@@ -75,7 +75,7 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
             <span className="relative flex h-2 w-2">
               <span
                 className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isCharging ? "bg-emerald-400 animate-ping" : "bg-accent-400"
+                  isCharging ? "animate-ping bg-emerald-400" : "bg-accent-400"
                 }`}
               />
               <span
@@ -150,12 +150,12 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
         {/* Footer info pills */}
         <div className="flex items-center justify-between border-t border-line/40 pt-1 text-[10px] text-fg-muted">
           <div className="flex items-center gap-1.5">
-            <span className="bg-emerald-500 h-1.5 w-1.5 rounded-full" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             <span>Health: Good</span>
           </div>
 
           {battery?.battery_saver && (
-            <span className="bg-amber-500/15 text-amber-400 rounded px-1.5 py-0.5 text-[9px] font-semibold">
+            <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-amber-400">
               Battery Saver
             </span>
           )}

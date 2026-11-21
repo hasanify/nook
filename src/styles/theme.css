@@ -31,6 +31,12 @@
   --color-warn: oklch(0.78 0.13 80);
   --color-danger: oklch(0.63 0.17 25);
   --color-error: oklch(0.63 0.17 25);
+  --color-amber-400: oklch(0.82 0.15 85);
+  --color-amber-500: oklch(0.75 0.16 75);
+  --color-red-400: oklch(0.7 0.19 25);
+  --color-red-500: oklch(0.63 0.22 25);
+  --color-emerald-400: oklch(0.76 0.15 155);
+  --color-emerald-500: oklch(0.68 0.16 155);
   --color-white: #ffffff;
   --color-black: #000000;
 

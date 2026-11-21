@@ -198,7 +198,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                   <div className="mb-1.5 flex items-center justify-between">
                     <span className="truncate text-xs font-semibold text-fg">{habit.title}</span>
                     <div className="flex items-center gap-2">
-                      <span className="bg-amber-500/15 text-amber-400 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold">
+                      <span className="flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-400">
                         🔥 {streak}
                       </span>
                       <button

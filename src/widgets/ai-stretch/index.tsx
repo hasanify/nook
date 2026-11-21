@@ -220,7 +220,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               type="button"
               onClick={toggleTimer}
               className={`cursor-pointer rounded px-2 py-0.5 text-[10px] font-medium text-white transition-colors ${
-                timerRunning ? "bg-amber-500 hover:bg-amber-600" : "bg-ok hover:bg-ok/90"
+                timerRunning ? "hover:bg-amber-600 bg-amber-500" : "bg-ok hover:bg-ok/90"
               }`}
             >
               {timerRunning ? "Pause" : secondsLeft === 0 ? "Restart" : "Start"}

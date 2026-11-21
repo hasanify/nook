@@ -66,7 +66,7 @@ function WeatherIcon({ code, isDay }: { code: number; isDay: number }) {
   if (code === 0) {
     return isDay ? (
       <svg
-        className="text-amber-500 h-9 w-9"
+        className="h-9 w-9 text-amber-500"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -148,7 +148,7 @@ function WeatherIcon({ code, isDay }: { code: number; isDay: number }) {
 
   return (
     <svg
-      className="text-amber-500 h-9 w-9"
+      className="h-9 w-9 text-amber-500"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

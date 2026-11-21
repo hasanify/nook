@@ -102,8 +102,8 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
         <div className="flex items-center justify-between border-b border-line/40 pb-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
             <span className="relative flex h-2 w-2">
-              <span className="bg-emerald-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-              <span className="bg-emerald-500 relative inline-flex h-2 w-2 rounded-full" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
             System Vitals
           </div>
@@ -167,9 +167,9 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
                   width: `${Math.min(100, Math.max(0, vitals?.memory_percent ?? 0))}%`,
                   backgroundColor:
                     vitals && vitals.memory_percent >= 90
-                      ? "rgb(248 113 113)"
+                      ? "var(--color-red-400, #f87171)"
                       : vitals && vitals.memory_percent >= 75
-                        ? "rgb(251 191 36)"
+                        ? "var(--color-amber-400, #fbbf24)"
                         : "var(--color-accent-500, #38bdf8)",
                 }}
               />
@@ -193,9 +193,9 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
                   width: `${Math.min(100, Math.max(0, vitals?.disk_percent ?? 0))}%`,
                   backgroundColor:
                     vitals && vitals.disk_percent >= 90
-                      ? "rgb(248 113 113)"
+                      ? "var(--color-red-400, #f87171)"
                       : vitals && vitals.disk_percent >= 80
-                        ? "rgb(251 191 36)"
+                        ? "var(--color-amber-400, #fbbf24)"
                         : "var(--color-accent-500, #38bdf8)",
                 }}
               />

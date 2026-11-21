@@ -255,7 +255,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             className="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-line bg-surface-raised/50 p-2.5 transition-all hover:border-accent-500/50 hover:bg-surface-raised"
           >
             <div className="flex items-center justify-between">
-              <span className="bg-amber-500/10 text-amber-500 rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold">
+              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-500">
                 WRM • Warm
               </span>
               <span className="flex items-center gap-1 text-[10px] text-fg-muted opacity-0 transition-opacity group-hover:opacity-100">
