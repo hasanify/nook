@@ -1,3 +1,9 @@
+# [0.31.0](https://github.com/hasanify/nook/compare/v0.30.0...v0.31.0) (2026-11-21)
+
+### Features
+
+- **updates:** auto-install background updates and unify widget vertical scrolling ([96c01d7](https://github.com/hasanify/nook/commit/96c01d7c0c064c2ead6420607741af6c7e007020))
+
 # [0.30.0](https://github.com/hasanify/nook/compare/v0.29.0...v0.30.0) (2026-11-20)
 
 ### Features
