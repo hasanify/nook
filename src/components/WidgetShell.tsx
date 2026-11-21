@@ -230,7 +230,7 @@ export function WidgetShell({
         onResetToFit={handleResetToFit}
       />
 
-      {banner && <div className="shrink-0 px-3 pbs-2">{banner}</div>}
+      {banner && <div className="shrink-0 px-3.5 pbs-2">{banner}</div>}
 
       {/* Scrollable Content Body with adequate bottom breathing room */}
       <div

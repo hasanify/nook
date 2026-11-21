@@ -1,3 +1,5 @@
+import { XIcon } from "@phosphor-icons/react";
+
 interface BannerProps {
   message: string;
   type?: "warn" | "error" | "info";
@@ -28,28 +30,38 @@ export function Banner({
   return (
     <div
       className={`
-        flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5
+        flex items-start justify-between gap-2 rounded-lg border px-2.5 py-1.5
         text-xs font-medium
         ${typeStyles}
         ${className}
       `}
     >
-      <span className="truncate" title={message}>
-        {message}
-      </span>
-      {actionText && onAction && (
+      <span className="flex-1 leading-relaxed wrap-break-word select-text">{message}</span>
+      {actionText && onAction ? (
         <button
           type="button"
           onClick={onAction}
           className="
-            shrink-0 cursor-pointer underline
+            shrink-0 cursor-pointer text-xs underline
             hover:opacity-80
             active:opacity-60
           "
         >
           {actionText}
         </button>
-      )}
+      ) : onAction ? (
+        <button
+          type="button"
+          onClick={onAction}
+          aria-label="Dismiss banner"
+          className="
+            mbs-0.5 shrink-0 cursor-pointer opacity-60 transition-opacity
+            hover:opacity-100
+          "
+        >
+          <XIcon className="block-3.5 inline-3.5" />
+        </button>
+      ) : null}
     </div>
   );
 }
