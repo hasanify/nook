@@ -178,7 +178,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
         </div>
 
         {/* Port List */}
-        <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
+        <div className="flex flex-col gap-1">
           {filteredPorts.length === 0 ? (
             <div className="flex flex-1 items-center justify-center text-xs text-fg-muted">
               {devPortsOnly

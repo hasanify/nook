@@ -179,7 +179,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
         )}
 
         {/* Table / List */}
-        <div className="my-1.5 flex-1 space-y-2 overflow-y-auto pr-0.5">
+        <div className="my-1.5 space-y-2 pr-0.5">
           {habits.length === 0 ? (
             <div className="py-6 text-center text-xs text-fg-muted">
               No habits tracked yet. Click + Habit to start!

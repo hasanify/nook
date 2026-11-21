@@ -256,7 +256,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
         )}
 
         {/* Stories list */}
-        <div className="my-1.5 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
+        <div className="my-1.5 space-y-1.5 pr-0.5">
           {stories.map((story, idx) => (
             <div
               key={story.id}

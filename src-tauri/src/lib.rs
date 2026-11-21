@@ -66,6 +66,23 @@ fn start_auto_update_loop(app: tauri::AppHandle) {
                                 res.latest_version
                             );
                             let _ = app.emit("update-available", &res);
+
+                            if let Some(download_url) = res.download_url {
+                                info!(
+                                    "Automatic update enabled: auto-installing version {} from {}...",
+                                    res.latest_version, download_url
+                                );
+                                let asset_name = res.asset_name.unwrap_or_default();
+                                if let Err(e) =
+                                    commands::install_update(app.clone(), download_url, asset_name)
+                                        .await
+                                {
+                                    tracing::error!(
+                                        "Failed to automatically install background update: {}",
+                                        e
+                                    );
+                                }
+                            }
                         }
                     }
                     Err(e) => {

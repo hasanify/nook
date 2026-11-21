@@ -767,8 +767,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
-                      Periodically check for new releases in the background and notify when
-                      available
+                      Automatically check, download, and install new releases in the background
                     </div>
                   </div>
                   <Toggle
@@ -1877,7 +1876,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
-                      Periodically check for new releases in the background
+                      Automatically download and install new releases in the background
                     </div>
                   </div>
                   <Toggle

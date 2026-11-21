@@ -136,7 +136,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* City rows */}
-        <div className="my-1.5 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
+        <div className="my-1.5 space-y-1.5 pr-0.5">
           {DEFAULT_CITIES.map((city) => {
             const { timeStr, period, isDay, offsetHours, dayDiff } = getTimeInZone(
               now,

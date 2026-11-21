@@ -264,7 +264,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
         </div>
 
         {/* PR List */}
-        <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
+        <div className="flex flex-col gap-1.5">
           {prs.length === 0 ? (
             <div className="flex flex-1 items-center justify-center text-xs text-fg-muted">
               {loading ? "Fetching PRs…" : "No open pull requests found"}

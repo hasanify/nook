@@ -572,24 +572,35 @@ pub async fn check_for_updates(app: AppHandle) -> Result<UpdateCheckResult, Stri
     })
 }
 
+static IS_INSTALLING_UPDATE: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+
 #[tauri::command]
 pub async fn install_update(
     app: AppHandle,
     download_url: String,
     asset_name: String,
 ) -> Result<(), String> {
+    if IS_INSTALLING_UPDATE.swap(true, std::sync::atomic::Ordering::SeqCst) {
+        info!("Update installation is already in progress, skipping duplicate call.");
+        return Ok(());
+    }
+
     let client = reqwest::Client::builder()
         .user_agent("Nook-App")
         .build()
-        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+        .map_err(|e| {
+            IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+            format!("Failed to create HTTP client: {}", e)
+        })?;
 
-    let mut resp = client
-        .get(&download_url)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to start update download: {}", e))?;
+    let mut resp = client.get(&download_url).send().await.map_err(|e| {
+        IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+        format!("Failed to start update download: {}", e)
+    })?;
 
     if !resp.status().is_success() {
+        IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
         return Err(format!("Download failed with status: {}", resp.status()));
     }
 
@@ -603,17 +614,20 @@ pub async fn install_update(
 
     let total_size = resp.content_length().unwrap_or(0);
     let mut downloaded: u64 = 0;
-    let mut file = std::fs::File::create(&dest_path)
-        .map_err(|e| format!("Failed to create temporary file: {}", e))?;
+    let mut file = std::fs::File::create(&dest_path).map_err(|e| {
+        IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+        format!("Failed to create temporary file: {}", e)
+    })?;
 
     use std::io::Write;
-    while let Some(chunk) = resp
-        .chunk()
-        .await
-        .map_err(|e| format!("Error while downloading: {}", e))?
-    {
-        file.write_all(&chunk)
-            .map_err(|e| format!("Failed to write to file: {}", e))?;
+    while let Some(chunk) = resp.chunk().await.map_err(|e| {
+        IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+        format!("Error while downloading: {}", e)
+    })? {
+        if let Err(e) = file.write_all(&chunk) {
+            IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+            return Err(format!("Failed to write to file: {}", e));
+        }
         downloaded += chunk.len() as u64;
 
         if total_size > 0 {
@@ -635,7 +649,10 @@ pub async fn install_update(
     {
         std::process::Command::new(&dest_path)
             .spawn()
-            .map_err(|e| format!("Failed to launch installer: {}", e))?;
+            .map_err(|e| {
+                IS_INSTALLING_UPDATE.store(false, std::sync::atomic::Ordering::SeqCst);
+                format!("Failed to launch installer: {}", e)
+            })?;
 
         tokio::time::sleep(std::time::Duration::from_millis(500)).await;
         app.exit(0);
