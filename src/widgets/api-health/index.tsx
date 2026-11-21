@@ -59,7 +59,9 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
 
       setPings((prev) => {
         const next = [...prev.slice(-15), newRecord];
-        patchState({ pings: next });
+        queueMicrotask(() => {
+          patchState({ pings: next });
+        });
         return next;
       });
 
@@ -87,7 +89,9 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
           };
           setPings((prev) => {
             const next = [...prev.slice(-15), newRecord];
-            patchState({ pings: next });
+            queueMicrotask(() => {
+              patchState({ pings: next });
+            });
             return next;
           });
           if (!res.ok && res.error) {

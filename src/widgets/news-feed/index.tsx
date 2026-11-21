@@ -64,6 +64,63 @@ function getDomain(url?: string): string {
   }
 }
 
+async function fetchHackerNewsStories(
+  feedType: string,
+  count: number,
+  signal?: AbortSignal,
+): Promise<StoryItem[]> {
+  const endpointMap: Record<string, string> = {
+    top: "topstories",
+    best: "beststories",
+    new: "newstories",
+    show: "showstories",
+  };
+  const cat = endpointMap[feedType] || "topstories";
+  const fetchOptions: RequestInit = signal ? { signal } : {};
+  const listRes = await fetch(`https://hacker-news.firebaseio.com/v0/${cat}.json`, fetchOptions);
+  if (!listRes.ok) {
+    throw new Error(`HN API responded with ${listRes.status}`);
+  }
+
+  const idList = (await listRes.json()) as number[];
+  const targetIds = idList.slice(0, Math.min(10, Math.max(3, count)));
+
+  const items = await Promise.all(
+    targetIds.map(async (id) => {
+      try {
+        const res = await fetch(
+          `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
+          fetchOptions,
+        );
+        if (!res.ok) return null;
+        const data = (await res.json()) as {
+          id: number;
+          title: string;
+          by: string;
+          score?: number;
+          time: number;
+          url?: string;
+          descendants?: number;
+        };
+        return {
+          id: data.id,
+          title: data.title,
+          by: data.by || "anon",
+          score: data.score || 0,
+          time: data.time || Math.floor(Date.now() / 1000),
+          url: data.url,
+          comments: data.descendants || 0,
+          domain: getDomain(data.url),
+        } as StoryItem;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  return items.filter((s): s is StoryItem => s !== null);
+}
+
 export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) {
   const cachedStories = useMemo(() => {
     const raw = instance.state.stories;
@@ -81,54 +138,17 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
 
   const feedType = (instance.settings.feedType as string) || "top";
   const count = parseInt((instance.settings.storyCount as string) || "5", 10);
+  const refreshIntervalMin = parseInt((instance.settings.refreshInterval as string) || "15", 10);
 
   const fetchFeed = useCallback(async () => {
     setLoading(true);
     setBanner(null);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
     try {
-      const endpointMap: Record<string, string> = {
-        top: "topstories",
-        best: "beststories",
-        new: "newstories",
-        show: "showstories",
-      };
-      const cat = endpointMap[feedType] || "topstories";
-      const listRes = await fetch(`https://hacker-news.firebaseio.com/v0/${cat}.json`);
-      if (!listRes.ok) {
-        throw new Error(`HN API responded with ${listRes.status}`);
-      }
-
-      const idList = (await listRes.json()) as number[];
-      const targetIds = idList.slice(0, Math.min(10, Math.max(3, count)));
-
-      const items = await Promise.all(
-        targetIds.map(async (id) => {
-          const res = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
-          if (!res.ok) return null;
-          const data = (await res.json()) as {
-            id: number;
-            title: string;
-            by: string;
-            score?: number;
-            time: number;
-            url?: string;
-            descendants?: number;
-          };
-          return {
-            id: data.id,
-            title: data.title,
-            by: data.by || "anon",
-            score: data.score || 0,
-            time: data.time || Math.floor(Date.now() / 1000),
-            url: data.url,
-            comments: data.descendants || 0,
-            domain: getDomain(data.url),
-          } as StoryItem;
-        }),
-      );
-
-      const validStories = items.filter((s): s is StoryItem => s !== null);
+      const validStories = await fetchHackerNewsStories(feedType, count, controller.signal);
       if (validStories.length > 0) {
         setStories(validStories);
         patchState({ stories: validStories });
@@ -139,6 +159,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
         type: "warn",
       });
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   }, [count, feedType, patchState]);
@@ -147,72 +168,41 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
     let active = true;
 
     const load = async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
       try {
-        const endpointMap: Record<string, string> = {
-          top: "topstories",
-          best: "beststories",
-          new: "newstories",
-          show: "showstories",
-        };
-        const cat = endpointMap[feedType] || "topstories";
-        const listRes = await fetch(`https://hacker-news.firebaseio.com/v0/${cat}.json`);
-        if (!listRes.ok || !active) return;
-
-        const idList = (await listRes.json()) as number[];
-        const targetIds = idList.slice(0, Math.min(10, Math.max(3, count)));
-
-        const items = await Promise.all(
-          targetIds.map(async (id) => {
-            const res = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
-            if (!res.ok) return null;
-            const data = (await res.json()) as {
-              id: number;
-              title: string;
-              by: string;
-              score?: number;
-              time: number;
-              url?: string;
-              descendants?: number;
-            };
-            return {
-              id: data.id,
-              title: data.title,
-              by: data.by || "anon",
-              score: data.score || 0,
-              time: data.time || Math.floor(Date.now() / 1000),
-              url: data.url,
-              comments: data.descendants || 0,
-              domain: getDomain(data.url),
-            } as StoryItem;
-          }),
-        );
-
+        const valid = await fetchHackerNewsStories(feedType, count, controller.signal);
         if (!active) return;
-        const valid = items.filter((s): s is StoryItem => s !== null);
         if (valid.length > 0) {
           setStories(valid);
           patchState({ stories: valid });
         }
       } catch {
         // Ignored
+      } finally {
+        clearTimeout(timeout);
       }
     };
 
     void load();
 
-    // Auto-refresh every 15 minutes
-    const interval = setInterval(
-      () => {
-        void load();
-      },
-      15 * 60 * 1000,
-    );
+    if (refreshIntervalMin > 0) {
+      const interval = setInterval(
+        () => {
+          void load();
+        },
+        refreshIntervalMin * 60 * 1000,
+      );
+      return () => {
+        active = false;
+        clearInterval(interval);
+      };
+    }
 
     return () => {
       active = false;
-      clearInterval(interval);
     };
-  }, [count, feedType, patchState]);
+  }, [count, feedType, refreshIntervalMin, patchState]);
 
   const handleOpenStory = (story: StoryItem) => {
     const targetUrl = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
@@ -346,6 +336,7 @@ const newsFeedModule: WidgetModule = {
   defaultSettings: {
     feedType: "top",
     storyCount: "5",
+    refreshInterval: "15",
   },
   defaultState: {
     stories: SAMPLE_STORIES,

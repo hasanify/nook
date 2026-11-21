@@ -30,6 +30,19 @@
         { "label": "8 Stories", "value": "8" },
         { "label": "10 Stories", "value": "10" }
       ]
+    },
+    {
+      "key": "refreshInterval",
+      "label": "Auto Refresh",
+      "type": "select",
+      "defaultValue": "15",
+      "options": [
+        { "label": "Every 5 minutes", "value": "5" },
+        { "label": "Every 15 minutes", "value": "15" },
+        { "label": "Every 30 minutes", "value": "30" },
+        { "label": "Every hour", "value": "60" },
+        { "label": "Manual only", "value": "0" }
+      ]
     }
   ]
 }
