@@ -79,7 +79,7 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-end font-mono text-[9px] text-fg-muted select-none inline-full">
+        <div className="flex items-center justify-end font-mono text-3xs text-fg-muted select-none inline-full">
           <span>
             {wordCount} {wordCount === 1 ? "word" : "words"}
           </span>

@@ -151,7 +151,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
             <span className="truncate text-xs font-semibold text-fg select-text">
               {hasTrack ? media.title : "No Track Active"}
             </span>
-            <span className="truncate text-[11px] text-fg-muted select-text">
+            <span className="truncate text-sub text-fg-muted select-text">
               {hasTrack ? media.artist : "Desktop media controls ready"}
             </span>
           </div>

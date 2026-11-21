@@ -153,7 +153,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           {/* Streak FlameIcon Badge */}
           <div
             className={`
-              flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]
+              flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs
               font-bold
               ${streak > 0 ? "bg-amber-500/15 text-amber-500" : `bg-surface-raised text-fg-muted`}
             `}
@@ -190,7 +190,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>Daily Reflection</span>
           <span>1 sentence micro-log</span>
         </div>
@@ -199,7 +199,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Daily Question */}
         <div className="flex flex-1 flex-col justify-center gap-1 select-text">
-          <span className="font-mono text-[9px] font-semibold text-accent-500">
+          <span className="font-mono text-3xs font-semibold text-accent-500">
             TODAY&apos;S REFLECTION
           </span>
           <p className="text-xs/relaxed font-medium text-fg">
@@ -215,7 +215,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         <div className="border-bs border-line/40 pbs-2">
           {isAnsweredToday && !isEditing ? (
             <div className="flex flex-col gap-1 rounded-lg border border-ok/30 bg-ok/5 p-2">
-              <div className="flex items-center justify-between text-[10px]">
+              <div className="flex items-center justify-between text-2xs">
                 <span className="flex items-center gap-1 font-semibold text-ok">
                   <CheckIcon className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
                   <span>Logged today</span>
@@ -263,7 +263,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 disabled={!answerInput.trim()}
                 className="
                   cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1
-                  text-[11px] font-medium text-white transition-opacity
+                  text-sub font-medium text-white transition-opacity
                   hover:opacity-90
                   disabled:cursor-not-allowed disabled:opacity-40
                 "

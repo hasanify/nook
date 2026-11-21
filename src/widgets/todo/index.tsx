@@ -72,7 +72,7 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>
             {remainingCount} {remainingCount === 1 ? "task" : "tasks"} remaining
           </span>

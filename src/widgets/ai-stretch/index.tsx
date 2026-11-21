@@ -207,7 +207,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>Desk Wellness</span>
           <span>45-sec micro-break</span>
         </div>
@@ -230,7 +230,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               type="button"
               onClick={toggleTimer}
               className={`
-                cursor-pointer rounded-sm px-2 py-0.5 text-[10px] font-medium
+                cursor-pointer rounded-sm px-2 py-0.5 text-2xs font-medium
                 text-white transition-colors
                 ${
                   timerRunning
@@ -252,7 +252,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 type="button"
                 onClick={resetTimer}
                 className="
-                  cursor-pointer text-[10px] text-fg-muted
+                  cursor-pointer text-2xs text-fg-muted
                   hover:text-fg
                 "
               >
@@ -272,7 +272,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 key={idx}
                 className="flex items-start gap-2 rounded-lg border border-line bg-surface-raised/40 p-2"
               >
-                <span className="flex shrink-0 items-center justify-center rounded-full bg-surface text-[9px] font-bold text-accent-500 shadow-2xs block-4 inline-4">
+                <span className="flex shrink-0 items-center justify-center rounded-full bg-surface text-3xs font-bold text-accent-500 shadow-2xs block-4 inline-4">
                   {idx + 1}
                 </span>
                 <p className="text-xs/relaxed text-fg">{step}.</p>

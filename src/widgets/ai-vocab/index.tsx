@@ -234,7 +234,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>Word of the day</span>
           <span>Daily lexicon</span>
         </div>
@@ -249,7 +249,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               type="button"
               onClick={handleCopy}
               className="
-                flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+                flex cursor-pointer items-center gap-1 text-2xs text-fg-muted
                 hover:text-fg
               "
             >
@@ -266,10 +266,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               )}
             </button>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-fg-muted">
+          <div className="flex items-center gap-2 text-sub text-fg-muted">
             <span className="font-mono text-accent-500">{vocab.phonetic}</span>
             {vocab.pos && (
-              <span className="rounded-sm bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted">
+              <span className="rounded-sm bg-surface-raised px-1.5 py-0.5 font-mono text-3xs font-medium text-fg-muted">
                 {vocab.pos}
               </span>
             )}
@@ -279,7 +279,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         {/* Definition */}
         <div className="flex flex-1 flex-col justify-center gap-1.5">
           <div className="rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="mbe-0.5 block font-mono text-[9px] font-semibold text-fg-muted">
+            <span className="mbe-0.5 block font-mono text-3xs font-semibold text-fg-muted">
               MEANING
             </span>
             <p className="text-xs/relaxed text-fg">
@@ -293,7 +293,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
           {/* Real World Usage */}
           <div className="rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="mbe-0.5 block font-mono text-[9px] font-semibold text-ok">
+            <span className="mbe-0.5 block font-mono text-3xs font-semibold text-ok">
               IN CONTEXT
             </span>
             <p className="text-xs/relaxed text-fg italic">

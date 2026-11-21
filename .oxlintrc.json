@@ -84,7 +84,18 @@
     ],
     "better-tailwindcss/no-deprecated-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
     "better-tailwindcss/no-duplicate-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
-    "better-tailwindcss/no-restricted-classes": ["error", { "entryPoint": "src/styles/theme.css" }],
+    "better-tailwindcss/no-restricted-classes": [
+      "error",
+      {
+        "entryPoint": "src/styles/theme.css",
+        "restrict": [
+          {
+            "pattern": "\\[[^\\]]+\\]",
+            "message": "Arbitrary classes with [values] are restricted. Define and use design tokens in src/styles/theme.css instead."
+          }
+        ]
+      }
+    ],
     "better-tailwindcss/no-unnecessary-whitespace": [
       "error",
       { "entryPoint": "src/styles/theme.css" }

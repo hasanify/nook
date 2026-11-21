@@ -75,14 +75,14 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
       editMode={editMode}
       title="Battery Monitor"
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <div className="flex items-center gap-1.5">
             <span className="rounded-full bg-ok block-1.5 inline-1.5" />
             <span>Health: Good</span>
           </div>
 
           {battery?.battery_saver && (
-            <span className="rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-warn">
+            <span className="rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-3xs font-semibold text-warn">
               Battery Saver
             </span>
           )}
@@ -103,7 +103,7 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
             )}
             Power & Battery
           </div>
-          <span className="font-mono text-[10px] text-fg-muted">
+          <span className="font-mono text-2xs text-fg-muted">
             {isAcPlugged ? "AC Connected" : "Battery Mode"}
           </span>
         </div>
@@ -148,7 +148,7 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
               <span className="font-mono text-xs text-fg-muted">%</span>
             </div>
 
-            <span className="text-[11px] font-medium text-fg">
+            <span className="text-sub font-medium text-fg">
               {!hasBattery
                 ? "Desktop (No Battery)"
                 : isCharging
@@ -158,7 +158,7 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
                     : "Discharging"}
             </span>
 
-            {timeText && <span className="font-mono text-[10px] text-fg-muted">{timeText}</span>}
+            {timeText && <span className="font-mono text-2xs text-fg-muted">{timeText}</span>}
           </div>
         </div>
       </div>

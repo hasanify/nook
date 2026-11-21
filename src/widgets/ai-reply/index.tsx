@@ -142,7 +142,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             onClick={() => void handleGenerate()}
             disabled={loading || !message.trim()}
             className="
-              cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px]
+              cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-sub
               font-medium text-white transition-opacity
               hover:opacity-90
               disabled:cursor-not-allowed disabled:opacity-40
@@ -165,10 +165,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               hover:border-ok/40 hover:bg-surface-raised
             "
           >
-            <span className="shrink-0 rounded-sm bg-ok/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
+            <span className="shrink-0 rounded-sm bg-ok/15 px-1.5 py-0.5 font-mono text-3xs font-semibold text-ok">
               {copiedKey === "accept" ? "COPIED" : "ACCEPT"}
             </span>
-            <span className="flex-1 text-[11px] leading-tight text-fg select-text">
+            <span className="flex-1 text-sub/tight text-fg select-text">
               {replies.accept || <span className="text-fg-muted italic">Waiting for text…</span>}
             </span>
           </button>
@@ -184,10 +184,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               hover:border-error/40 hover:bg-surface-raised
             "
           >
-            <span className="shrink-0 rounded-sm bg-error/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-error">
+            <span className="shrink-0 rounded-sm bg-error/15 px-1.5 py-0.5 font-mono text-3xs font-semibold text-error">
               {copiedKey === "decline" ? "COPIED" : "DECLINE"}
             </span>
-            <span className="flex-1 text-[11px] leading-tight text-fg select-text">
+            <span className="flex-1 text-sub/tight text-fg select-text">
               {replies.decline || <span className="text-fg-muted italic">Waiting for text…</span>}
             </span>
           </button>
@@ -203,10 +203,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               hover:border-accent-500/40 hover:bg-surface-raised
             "
           >
-            <span className="shrink-0 rounded-sm bg-accent-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
+            <span className="shrink-0 rounded-sm bg-accent-500/15 px-1.5 py-0.5 font-mono text-3xs font-semibold text-accent-500">
               {copiedKey === "counter" ? "COPIED" : "COUNTER"}
             </span>
-            <span className="flex-1 text-[11px] leading-tight text-fg select-text">
+            <span className="flex-1 text-sub/tight text-fg select-text">
               {replies.counter || <span className="text-fg-muted italic">Waiting for text…</span>}
             </span>
           </button>

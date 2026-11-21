@@ -692,7 +692,7 @@ export function SettingsApp() {
         >
           <SquaresFourIcon className="block-3.5 inline-3.5" />
           <span>Widgets</span>
-          <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-fg-muted">
+          <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-2xs text-fg-muted">
             {config?.widgets.length ?? 0}
           </span>
         </button>
@@ -775,7 +775,7 @@ export function SettingsApp() {
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Edit Layout</div>
-                    <div className="text-[11px] text-fg-muted">
+                    <div className="text-sub text-fg-muted">
                       Show drag bars and resize handles on all desktop widgets (Ctrl+Alt+E)
                     </div>
                   </div>
@@ -790,7 +790,7 @@ export function SettingsApp() {
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Launch on Startup</div>
-                    <div className="text-[11px] text-fg-muted">
+                    <div className="text-sub text-fg-muted">
                       Automatically start Nook when Windows boots
                     </div>
                   </div>
@@ -805,7 +805,7 @@ export function SettingsApp() {
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
-                    <div className="text-[11px] text-fg-muted">
+                    <div className="text-sub text-fg-muted">
                       CheckIcon for updates in the background and prompt when ready to install
                     </div>
                   </div>
@@ -820,7 +820,7 @@ export function SettingsApp() {
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-4">
                   <div>
                     <div className="font-medium text-fg">Grid Snap</div>
-                    <div className="text-[11px] text-fg-muted">
+                    <div className="text-sub text-fg-muted">
                       Snap widget position and size during drag (0 for free movement)
                     </div>
                   </div>
@@ -849,7 +849,7 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-4 backdrop-blur-xs">
                 <div>
                   <div className="font-semibold text-fg">Color Theme</div>
-                  <div className="text-[11px] text-fg-muted">
+                  <div className="text-sub text-fg-muted">
                     Choose whether Nook follows your system color scheme or stays light / dark
                   </div>
                 </div>
@@ -900,7 +900,7 @@ export function SettingsApp() {
               <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-4 backdrop-blur-xs">
                 <div>
                   <div className="font-semibold text-fg">Widget Style Presets</div>
-                  <div className="text-[11px] text-fg-muted">
+                  <div className="text-sub text-fg-muted">
                     Apply a cohesive visual styling across all active desktop widgets
                   </div>
                 </div>
@@ -956,7 +956,7 @@ export function SettingsApp() {
                             >
                               <div className="flex items-center gap-1">
                                 <div className="rounded-full bg-accent-500 block-1.5" />
-                                <span className="font-mono text-[9px] font-medium text-fg/80">
+                                <span className="font-mono text-3xs font-medium text-fg/80">
                                   Widget
                                 </span>
                               </div>
@@ -978,11 +978,11 @@ export function SettingsApp() {
                               <span className="truncate text-xs font-semibold text-fg">
                                 {preset.name}
                               </span>
-                              <span className="shrink-0 rounded-md bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                              <span className="shrink-0 rounded-md bg-surface-raised px-1.5 py-0.5 font-mono text-3xs text-fg-muted">
                                 {preset.tagline}
                               </span>
                             </div>
-                            <div className="mbs-1 line-clamp-2 text-[11px] leading-relaxed text-fg-muted">
+                            <div className="mbs-1 line-clamp-2 text-sub/relaxed text-fg-muted">
                               {preset.description}
                             </div>
                           </div>
@@ -1025,7 +1025,7 @@ export function SettingsApp() {
                       </p>
                     </div>
                     {(config?.app?.widgetPreset || "default") === "custom" ? (
-                      <span className="flex items-center gap-1.5 rounded-full bg-accent-500/15 px-2.5 py-1 text-[11px] font-semibold text-accent-500">
+                      <span className="flex items-center gap-1.5 rounded-full bg-accent-500/15 px-2.5 py-1 text-sub font-semibold text-accent-500">
                         <CheckIcon className="block-3 inline-3" weight="bold" /> Active Profile
                       </span>
                     ) : (
@@ -1068,7 +1068,7 @@ export function SettingsApp() {
                                 }`}
                               >
                                 <div className="text-xs font-medium">{f.label}</div>
-                                <div className="font-mono text-[10px] opacity-75">{f.sub}</div>
+                                <div className="font-mono text-2xs opacity-75">{f.sub}</div>
                               </button>
                             );
                           })}
@@ -1136,7 +1136,7 @@ export function SettingsApp() {
                                 }`}
                               >
                                 <div className="text-xs font-medium">{b.label}</div>
-                                <div className="text-[10px] opacity-75">{b.sub}</div>
+                                <div className="text-2xs opacity-75">{b.sub}</div>
                               </button>
                             );
                           })}
@@ -1240,7 +1240,7 @@ export function SettingsApp() {
                                     Preview Widget
                                   </span>
                                 </div>
-                                <span className="font-mono text-[10px] text-fg-muted">Active</span>
+                                <span className="font-mono text-2xs text-fg-muted">Active</span>
                               </div>
                               {/* Content */}
                               <div className="flex flex-col gap-2 p-3 text-xs">
@@ -1248,16 +1248,16 @@ export function SettingsApp() {
                                   This is how widgets render with your custom appearance preset.
                                 </p>
                                 <div className="flex items-center gap-1.5">
-                                  <span className="rounded-full border border-accent-500/30 bg-accent-500/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-accent-500">
+                                  <span className="rounded-full border border-accent-500/30 bg-accent-500/15 px-2 py-0.5 font-mono text-2xs font-semibold text-accent-500">
                                     {customPreset.font}
                                   </span>
-                                  <span className="text-[11px] text-fg-muted">
+                                  <span className="text-sub text-fg-muted">
                                     {customPreset.radius} • {customPreset.backdrop}
                                   </span>
                                 </div>
                               </div>
                               {/* Sticky Footer */}
-                              <div className="flex items-center justify-between border-bs border-line/40 bg-surface/85 px-3 py-1.5 text-[10px] text-fg-muted">
+                              <div className="flex items-center justify-between border-bs border-line/40 bg-surface/85 px-3 py-1.5 text-2xs text-fg-muted">
                                 <span>Sticky footer</span>
                                 <span className="font-mono text-ok">100% OK</span>
                               </div>
@@ -1280,7 +1280,7 @@ export function SettingsApp() {
             <div className="my-3 flex shrink-0 flex-col gap-2.5 border-e border-line/60 pe-4 inline-56">
               <div className="flex items-center justify-between font-medium text-fg">
                 <span>Active Widgets</span>
-                <span className="font-mono text-[11px] text-fg-muted">
+                <span className="font-mono text-sub text-fg-muted">
                   {config?.widgets.length ?? 0}
                 </span>
               </div>
@@ -1295,14 +1295,14 @@ export function SettingsApp() {
                       <span>Bento Grid</span>
                     </span>
                     {isBentoPreviewing && (
-                      <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-[10px] font-medium text-accent-500">
+                      <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-2xs font-medium text-accent-500">
                         Previewing
                       </span>
                     )}
                   </div>
 
                   {/* Coverage Area Selector */}
-                  <div className="grid grid-cols-4 rounded-lg border border-line/60 bg-surface/70 p-0.5 text-center text-[10px]">
+                  <div className="grid grid-cols-4 rounded-lg border border-line/60 bg-surface/70 p-0.5 text-center text-2xs">
                     {(
                       [
                         { id: "auto", label: "Auto", title: "Auto (adapts to widget count)" },
@@ -1354,7 +1354,7 @@ export function SettingsApp() {
                           onClick={handleDoneSettingsBento}
                           className="
                             flex cursor-pointer items-center justify-center gap-1 rounded-lg
-                            bg-accent-500/15 py-1 text-center text-[11px] font-semibold
+                            bg-accent-500/15 py-1 text-center text-sub font-semibold
                             text-accent-500 transition-colors
                             hover:bg-accent-500/25
                             active:scale-95
@@ -1369,7 +1369,7 @@ export function SettingsApp() {
                           onClick={() => void handleRevertSettingsBento()}
                           className="
                             flex cursor-pointer items-center justify-center gap-1 rounded-lg
-                            border border-line bg-surface py-1 text-center text-[11px]
+                            border border-line bg-surface py-1 text-center text-sub
                             font-medium text-fg-muted transition-colors
                             hover:bg-surface-raised hover:text-fg
                             active:scale-95
@@ -1464,7 +1464,7 @@ export function SettingsApp() {
 
               {/* Add Widget */}
               <div className="mbs-auto flex shrink-0 flex-col gap-1.5 border-bs border-line/60 pbs-3 pbe-2">
-                <span className="text-[11px] font-medium text-fg-muted">Add new widget:</span>
+                <span className="text-sub font-medium text-fg-muted">Add new widget:</span>
                 <div className="flex items-center gap-1.5">
                   <CustomSelect<string>
                     value={widgetToAdd}
@@ -1521,7 +1521,7 @@ export function SettingsApp() {
                   <div className="flex items-center justify-between border-bs border-line/60 pbs-3">
                     <div>
                       <div className="font-medium text-fg">Always on Top</div>
-                      <div className="text-[11px] text-fg-muted">
+                      <div className="text-sub text-fg-muted">
                         Detach from desktop layer to float above all windows
                       </div>
                     </div>
@@ -1591,7 +1591,7 @@ export function SettingsApp() {
                   <div className="flex flex-col gap-2 border-bs border-line/60 pbs-3">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-fg">Widget Accent Color</span>
-                      <span className="text-[11px] text-fg-muted">
+                      <span className="text-sub text-fg-muted">
                         Customize badge, highlight, and focus tint
                       </span>
                     </div>
@@ -1742,7 +1742,7 @@ export function SettingsApp() {
         {activeTab === "accounts" && (
           <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-none px-6 py-0">
             <div className="my-3 flex flex-col gap-5 pbe-4 inline-full">
-              <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-[11px] text-fg-muted backdrop-blur-xs">
+              <div className="flex items-center gap-2.5 rounded-2xl border border-line/60 bg-surface-raised/40 p-4 text-sub text-fg-muted backdrop-blur-xs">
                 <LockKeyIcon className="shrink-0 text-accent-500 block-4 inline-4" />
                 <span>
                   Tokens are stored securely in Windows Credential Manager and never logged or
@@ -1771,7 +1771,7 @@ export function SettingsApp() {
                     </span>
                   </div>
                 </div>
-                <p className="text-[11px] text-fg-muted">
+                <p className="text-sub text-fg-muted">
                   Required for private repository commits and CI workflow runs. Public repos do not
                   strictly require a token.
                 </p>
@@ -1843,7 +1843,7 @@ export function SettingsApp() {
                     </span>
                   </div>
                 </div>
-                <p className="text-[11px] text-fg-muted">
+                <p className="text-sub text-fg-muted">
                   Used to query deployment pipeline states and build status.
                 </p>
                 <div className="flex gap-2 pbs-1">
@@ -1902,7 +1902,7 @@ export function SettingsApp() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-fg">AI Models & API Keys</h3>
-                      <p className="text-[11px] text-fg-muted">
+                      <p className="text-sub text-fg-muted">
                         Powers all 10 desktop AI widgets. Nook auto-detects and connects to
                         whichever provider is configured.
                       </p>
@@ -1929,7 +1929,7 @@ export function SettingsApp() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 border-bs border-line/40 pbs-2 text-[11px]">
+                <div className="flex items-center gap-2 border-bs border-line/40 pbs-2 text-sub">
                   <span className="text-fg-muted">Active Endpoint:</span>
                   {activeAiProvider ? (
                     <span className="flex items-center gap-1.5 font-semibold text-ok">
@@ -1979,7 +1979,7 @@ export function SettingsApp() {
                             {provider.name}
                           </label>
                           {isCurrentActive && (
-                            <span className="rounded-sm bg-accent-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-accent-500 uppercase">
+                            <span className="rounded-sm bg-accent-500/15 px-1.5 py-0.5 text-3xs font-semibold text-accent-500 uppercase">
                               Active
                             </span>
                           )}
@@ -1998,7 +1998,7 @@ export function SettingsApp() {
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-fg-muted">{provider.desc}</p>
+                      <p className="text-sub text-fg-muted">{provider.desc}</p>
 
                       <div className="flex gap-2 pbs-0.5">
                         <input
@@ -2058,14 +2058,14 @@ export function SettingsApp() {
                       {/* Special custom endpoint for Bedrock */}
                       {provider.id === "bedrock" && (
                         <div className="flex flex-col gap-1.5 border-bs border-line/30 pbs-2">
-                          <div className="flex items-center justify-between text-[11px]">
+                          <div className="flex items-center justify-between text-sub">
                             <label
                               htmlFor="bedrock-endpoint-input"
                               className="font-medium text-fg-muted"
                             >
                               Custom Gateway / Endpoint (Optional)
                             </label>
-                            <span className="font-mono text-[10px] text-fg-muted">
+                            <span className="font-mono text-2xs text-fg-muted">
                               {bedrockEndpointConfigured
                                 ? "Custom Endpoint Active"
                                 : "Default AWS Runtime"}
@@ -2156,7 +2156,7 @@ export function SettingsApp() {
               >
                 <div className="flex flex-col gap-2 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                   <span className="font-semibold text-fg">Developer</span>
-                  <p className="text-[11px] leading-relaxed text-fg-muted">
+                  <p className="text-sub/relaxed text-fg-muted">
                     Crafted with care by <span className="font-medium text-fg">Hasan</span> (
                     <button
                       type="button"
@@ -2189,7 +2189,7 @@ export function SettingsApp() {
 
                 <div className="flex flex-col gap-2 rounded-2xl border border-line/70 bg-surface-raised/40 p-5 backdrop-blur-xs">
                   <span className="font-semibold text-fg">Links & Support</span>
-                  <div className="flex flex-col items-start gap-1.5 text-[11px]">
+                  <div className="flex flex-col items-start gap-1.5 text-sub">
                     <button
                       type="button"
                       onClick={() => void openUrl("https://github.com/hasanify/nook/issues")}
@@ -2224,7 +2224,7 @@ export function SettingsApp() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-semibold text-fg">Software Updates</div>
-                    <div className="text-[11px] text-fg-muted">
+                    <div className="text-sub text-fg-muted">
                       Installed version:{" "}
                       <span className="font-mono font-medium text-fg">
                         {appVersion ? `v${appVersion}` : "..."}
@@ -2257,7 +2257,7 @@ export function SettingsApp() {
                 <div className="flex items-center justify-between border-bs border-line/40 pbs-3">
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
-                    <div className="text-[11px] text-fg-muted">
+                    <div className="text-sub text-fg-muted">
                       CheckIcon for updates in the background and prompt when ready to install
                     </div>
                   </div>
@@ -2270,13 +2270,13 @@ export function SettingsApp() {
 
                 {/* Status messages */}
                 {updateError && (
-                  <div className="rounded-xl border border-error/40 bg-error/10 p-3 text-[11px] text-error">
+                  <div className="rounded-xl border border-error/40 bg-error/10 p-3 text-sub text-error">
                     {updateError}
                   </div>
                 )}
 
                 {updateResult && !updateResult.has_update && !updateError && (
-                  <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-[11px] text-ok">
+                  <div className="flex items-center gap-2 rounded-xl border border-ok/30 bg-ok/10 p-3 text-sub text-ok">
                     <CheckIcon className="shrink-0 text-ok block-3.5 inline-3.5" weight="bold" />
                     <span>You are running the latest version of Nook.</span>
                   </div>
@@ -2296,7 +2296,7 @@ export function SettingsApp() {
                           type="button"
                           onClick={() => void openUrl(updateResult.release_url)}
                           className="
-                            cursor-pointer text-[11px] text-accent-500 underline
+                            cursor-pointer text-sub text-accent-500 underline
                             underline-offset-2
                             hover:text-accent-600
                           "
@@ -2308,7 +2308,7 @@ export function SettingsApp() {
 
                     {downloadingUpdate ? (
                       <div className="flex flex-col gap-1.5">
-                        <div className="flex justify-between text-[11px] text-fg-muted">
+                        <div className="flex justify-between text-sub text-fg-muted">
                           <span>Downloading update...</span>
                           <span>{downloadPercent}%</span>
                         </div>
@@ -2318,7 +2318,7 @@ export function SettingsApp() {
                             style={{ width: `${downloadPercent}%` }}
                           />
                         </div>
-                        <div className="text-[10px] text-fg-muted">
+                        <div className="text-2xs text-fg-muted">
                           Nook will restart once installation begins.
                         </div>
                       </div>
@@ -2357,7 +2357,7 @@ export function SettingsApp() {
                     )}
 
                     {installError && (
-                      <div className="text-[11px] text-error">Install error: {installError}</div>
+                      <div className="text-sub text-error">Install error: {installError}</div>
                     )}
                   </div>
                 )}

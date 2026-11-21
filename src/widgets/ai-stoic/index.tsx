@@ -194,7 +194,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>Daily Stoic Reflection</span>
           <button
             type="button"
@@ -229,7 +229,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               `“${insight.quote}”`
             )}
           </p>
-          <span className="text-end font-sans text-[11px] font-medium text-fg-muted">
+          <span className="text-end font-sans text-sub font-medium text-fg-muted">
             — {insight.author}
           </span>
         </div>
@@ -256,7 +256,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <div className="flex flex-1 flex-col gap-0.5">
             <span
               className={`
-                font-mono text-[9px] font-semibold
+                font-mono text-3xs font-semibold
                 ${completed ? `text-ok line-through` : `text-accent-500`}
               `}
             >
@@ -264,7 +264,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             </span>
             <p
               className={`
-                text-[11px] leading-tight select-text
+                text-sub/tight select-text
                 ${completed ? `text-fg-muted line-through` : `text-fg`}
               `}
             >

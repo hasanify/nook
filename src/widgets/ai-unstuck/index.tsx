@@ -140,7 +140,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
       }
       footer={
         <div className="flex flex-col gap-1 inline-full">
-          <div className="flex items-center justify-between text-[10px] text-fg-muted">
+          <div className="flex items-center justify-between text-2xs text-fg-muted">
             <span>
               {completedCount} of {steps.length} steps completed
             </span>
@@ -179,7 +179,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             onClick={() => void handleBreakTask()}
             disabled={loading || !task.trim()}
             className="
-              cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-[11px]
+              cursor-pointer rounded-lg bg-accent-500 px-2.5 py-1 text-sub
               font-medium text-white transition-opacity
               hover:opacity-90
               disabled:cursor-not-allowed disabled:opacity-40
@@ -234,7 +234,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 {/* Minute badge */}
                 <span
                   className={`
-                    shrink-0 rounded-sm px-1 py-0.5 font-mono text-[9px]
+                    shrink-0 rounded-sm px-1 py-0.5 font-mono text-3xs
                     font-bold
                     ${step.done ? "bg-ok/10 text-ok" : `bg-accent-500/10 text-accent-500`}
                   `}
@@ -245,7 +245,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 {/* Step text */}
                 <span
                   className={`
-                    flex-1 text-[11px] leading-tight select-text
+                    flex-1 text-sub/tight select-text
                     ${step.done ? "text-fg-muted line-through" : `font-medium text-fg`}
                   `}
                 >

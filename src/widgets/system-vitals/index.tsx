@@ -103,10 +103,10 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
       instance={instance}
       editMode={editMode}
       title="System Vitals"
-      headerSlot={<span className="font-mono text-[10px] text-fg-muted">{intervalSec}s poll</span>}
+      headerSlot={<span className="font-mono text-2xs text-fg-muted">{intervalSec}s poll</span>}
       footer={
         <div className="flex flex-col gap-1 inline-full">
-          <div className="flex justify-between text-[10px] text-fg-muted">
+          <div className="flex justify-between text-2xs text-fg-muted">
             <span>Disk (C:)</span>
             <span className="font-mono">
               {vitals
@@ -136,7 +136,7 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
           {/* CPU */}
           <div className="flex flex-col justify-between rounded-lg border border-line/40 bg-surface/50 p-2">
             <div className="mbe-1 flex items-center justify-between text-xs">
-              <span className="text-[11px] font-medium text-fg-muted">CPU</span>
+              <span className="text-sub font-medium text-fg-muted">CPU</span>
               <span
                 className={`
                   font-mono font-semibold
@@ -157,7 +157,7 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
           {/* RAM */}
           <div className="flex flex-col justify-between rounded-lg border border-line/40 bg-surface/50 p-2">
             <div className="mbe-1 flex items-center justify-between text-xs">
-              <span className="text-[11px] font-medium text-fg-muted">RAM</span>
+              <span className="text-sub font-medium text-fg-muted">RAM</span>
               <span
                 className={`
                   font-mono font-semibold
@@ -177,7 +177,7 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
         </div>
 
         {/* Detail Bars */}
-        <div className="space-y-1.5 text-[11px]">
+        <div className="space-y-1.5 text-sub">
           {/* RAM Bar */}
           <div>
             <div className="mbe-0.5 flex justify-between text-fg-muted">

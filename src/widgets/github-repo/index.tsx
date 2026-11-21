@@ -222,7 +222,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
           <div className="flex items-center gap-1.5 text-fg-muted">
             {lastUpdatedText && (
               <span
-                className="cursor-default font-mono text-[10px] text-fg-muted/70 select-none"
+                className="cursor-default font-mono text-2xs text-fg-muted/70 select-none"
                 title={exactUpdatedTime ? `Updated at ${exactUpdatedTime}` : undefined}
               >
                 {lastUpdatedText}
@@ -287,7 +287,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
           (showForks && data?.forks !== undefined && data.forks > 0) ||
           (showIssues && data?.open_issues !== undefined) ||
           (showRelease && data?.latest_release)) && (
-          <div className="flex flex-wrap items-center gap-1.5 border-be border-line/40 pbe-2 text-[11px]">
+          <div className="flex flex-wrap items-center gap-1.5 border-be border-line/40 pbe-2 text-sub">
             {showStars && data?.stars !== undefined && (
               <button
                 type="button"
@@ -304,7 +304,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 <StarIcon className="text-amber-500 block-3 inline-3" weight="fill" />
                 <span
                   className="
-                  font-mono text-[10px] text-fg
+                  font-mono text-2xs text-fg
                   group-hover:text-accent-500
                 "
                 >
@@ -329,7 +329,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 <GitForkIcon className="block-3 inline-3" />
                 <span
                   className="
-                  font-mono text-[10px] text-fg
+                  font-mono text-2xs text-fg
                   group-hover:text-accent-500
                 "
                 >
@@ -354,7 +354,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                 <WarningCircleIcon className="text-emerald-500 block-3 inline-3" />
                 <span
                   className="
-                  font-mono text-[10px] text-fg
+                  font-mono text-2xs text-fg
                   group-hover:text-accent-500
                 "
                 >
@@ -371,15 +371,13 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                   group flex cursor-pointer items-center gap-1 truncate
                   rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5
                   py-0.5 font-medium text-accent-500 transition-colors
-                  max-inline-[140px]
+                  max-inline-35
                   hover:bg-accent-500/20
                 "
                 title={`Latest Release: ${data.latest_release.name || data.latest_release.tag_name}`}
               >
                 <TagIcon className="shrink-0 block-3 inline-3" />
-                <span className="truncate font-mono text-[10px]">
-                  {data.latest_release.tag_name}
-                </span>
+                <span className="truncate font-mono text-2xs">{data.latest_release.tag_name}</span>
               </button>
             )}
           </div>
@@ -388,7 +386,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
         {/* Workflow Runs Section */}
         {showRuns && data?.runs && data.runs.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+            <span className="text-2xs font-semibold tracking-wider text-fg-muted uppercase">
               Actions
             </span>
             <div className="flex flex-col gap-1">
@@ -425,12 +423,12 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                         {run.name}
                       </span>
                       {run.branch && (
-                        <span className="truncate rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-[9px] text-fg-muted">
+                        <span className="truncate rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-3xs text-fg-muted">
                           {run.branch}
                         </span>
                       )}
                     </div>
-                    <span className="shrink-0 text-[10px] text-fg-muted">
+                    <span className="shrink-0 text-2xs text-fg-muted">
                       {formatRelativeTime(run.updated_at)}
                     </span>
                   </button>
@@ -443,7 +441,7 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
         {/* Commits Section */}
         {showCommits && (
           <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+            <span className="text-2xs font-semibold tracking-wider text-fg-muted uppercase">
               Commits
             </span>
             <div className="flex flex-col gap-1 pe-1 pbe-2">
@@ -468,11 +466,11 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
                       >
                         {c.message}
                       </span>
-                      <span className="shrink-0 rounded-sm border border-line/50 bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] text-accent-500">
+                      <span className="shrink-0 rounded-sm border border-line/50 bg-surface-raised px-1.5 py-0.5 font-mono text-3xs text-accent-500">
                         {c.sha}
                       </span>
                     </div>
-                    <div className="mbs-0.5 flex items-center justify-between text-[10px] text-fg-muted">
+                    <div className="mbs-0.5 flex items-center justify-between text-2xs text-fg-muted">
                       <span>{c.author}</span>
                       <span>{formatRelativeTime(c.date)}</span>
                     </div>

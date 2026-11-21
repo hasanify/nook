@@ -123,14 +123,12 @@ function VercelProjectInput({
                   {p.name}
                 </span>
                 {p.framework && (
-                  <span className="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                  <span className="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-3xs text-fg-muted">
                     {p.framework}
                   </span>
                 )}
               </div>
-              <span className="shrink-0 font-mono text-[10px] text-fg-muted">
-                {p.id.slice(0, 10)}
-              </span>
+              <span className="shrink-0 font-mono text-2xs text-fg-muted">{p.id.slice(0, 10)}</span>
             </button>
           ))}
         </div>
@@ -166,7 +164,7 @@ export function SettingsForm({ fields, values, onChange }: SettingsFormProps) {
               )}
             </div>
 
-            {field.description && <p className="text-[11px] text-fg-muted">{field.description}</p>}
+            {field.description && <p className="text-sub text-fg-muted">{field.description}</p>}
 
             {field.type === "text" &&
               (isVercelAutocomplete ? (

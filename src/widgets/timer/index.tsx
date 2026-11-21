@@ -383,7 +383,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
       defaultSize={manifest.defaultSize}
       headerSlot={
         mode === "pomodoro" ? (
-          <span className="font-mono text-[9px] font-semibold tracking-wider text-accent-500 uppercase">
+          <span className="font-mono text-3xs font-semibold tracking-wider text-accent-500 uppercase">
             {phase} • {cycle}/{cyclesBeforeLong}
           </span>
         ) : undefined
@@ -519,7 +519,7 @@ export function TimerWidget({ instance, editMode, patchState, patchSettings }: W
                       type="button"
                       onClick={() => applyDuration(preset)}
                       className={`
-                        rounded-sm px-1.5 py-0.5 font-mono text-[10px]
+                        rounded-sm px-1.5 py-0.5 font-mono text-2xs
                         transition-colors
                         ${
                           isCurrent

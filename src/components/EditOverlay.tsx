@@ -257,7 +257,7 @@ export function EditOverlay({
             : undefined
         }
         className={`
-          flex touch-none items-center justify-between rounded-t-[inherit]
+          flex touch-none items-center justify-between rounded-t-inherit
           border-be px-3 text-xs transition-colors select-none block-8
           ${
             editMode
@@ -295,9 +295,7 @@ export function EditOverlay({
               <WidgetIcon kind={kind} className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
             )}
           </span>
-          <span className="truncate text-[11px] font-semibold tracking-tight text-fg/90">
-            {title}
-          </span>
+          <span className="truncate text-sub font-semibold tracking-tight text-fg/90">{title}</span>
           {headerSlot && <div className="flex shrink-0 items-center gap-1.5">{headerSlot}</div>}
         </div>
         <div
@@ -315,7 +313,7 @@ export function EditOverlay({
                     onResetToFit();
                   }}
                   className="
-                    cursor-pointer rounded-sm px-1.5 py-0.5 font-mono text-[9px]
+                    cursor-pointer rounded-sm px-1.5 py-0.5 font-mono text-3xs
                     font-medium text-fg-muted transition-colors
                     hover:bg-surface-raised hover:text-fg
                   "
@@ -332,7 +330,7 @@ export function EditOverlay({
                     onResetToDefault();
                   }}
                   className="
-                    cursor-pointer rounded-sm px-1.5 py-0.5 font-mono text-[9px]
+                    cursor-pointer rounded-sm px-1.5 py-0.5 font-mono text-3xs
                     font-medium text-fg-muted transition-colors
                     hover:bg-surface-raised hover:text-fg
                   "
@@ -350,7 +348,7 @@ export function EditOverlay({
                 }}
                 className="
                   cursor-pointer rounded-sm bg-accent-500/20 px-1.5 py-0.5
-                  text-[10px] font-medium text-accent-500 transition-colors
+                  text-2xs font-medium text-accent-500 transition-colors
                   hover:bg-accent-500/30
                 "
               >
@@ -368,7 +366,7 @@ export function EditOverlay({
         <div
           className="
             absolute inset-e-0 inset-be-0 z-50 flex cursor-se-resize touch-none
-            items-end justify-end rounded-ee-[inherit] p-1.5 text-accent-500
+            items-end justify-end rounded-ee-inherit p-1.5 text-accent-500
             select-none block-7 inline-7
             hover:text-accent-400
             active:text-accent-600

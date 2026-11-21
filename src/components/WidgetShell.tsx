@@ -184,7 +184,7 @@ export function WidgetShell({
       style={mergedStyle}
       className={`
         relative flex flex-col overflow-hidden
-        transition-[border-color,opacity,box-shadow] duration-150 select-none
+        transition-widget duration-150 select-none
         block-full inline-full min-block-0
         before:pointer-events-none before:absolute before:inset-x-6
         before:inset-bs-0 before:block-px
@@ -246,7 +246,7 @@ export function WidgetShell({
 
       {/* Sticky Bottom Footer */}
       {footer && (
-        <div className="shrink-0 border-bs border-line/40 bg-surface/85 px-3.5 py-1.5 text-[10px] text-fg-muted backdrop-blur-md">
+        <div className="shrink-0 border-bs border-line/40 bg-surface/85 px-3.5 py-1.5 text-2xs text-fg-muted backdrop-blur-md">
           {footer}
         </div>
       )}

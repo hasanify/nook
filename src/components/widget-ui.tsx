@@ -17,7 +17,7 @@ export function WidgetFooter({ children, className = "", leftSlot, rightSlot }: 
       className={`
         sticky inset-be-0 z-10 mbs-auto flex shrink-0 items-center
         justify-between border-bs border-line/40 bg-surface/85 px-3 py-1.5
-        text-[10px] text-fg-muted backdrop-blur-md
+        text-2xs text-fg-muted backdrop-blur-md
         ${className}
       `}
     >
@@ -71,7 +71,7 @@ export function WidgetBadge({
   return (
     <span
       className={`
-        inline-flex items-center rounded-full px-2 py-0.5 text-[9px]
+        inline-flex items-center rounded-full px-2 py-0.5 text-3xs
         font-medium transition-colors
         ${mono ? "font-mono" : ""}
         ${variantStyles}
@@ -133,10 +133,10 @@ export function WidgetStat({
 }: WidgetStatProps) {
   return (
     <div className={`flex flex-col ${className}`}>
-      <span className="text-[10px] font-medium text-fg-muted">{label}</span>
+      <span className="text-2xs font-medium text-fg-muted">{label}</span>
       <div className="flex items-baseline gap-1">
         <span className={`font-mono text-sm font-bold tracking-tight ${colorClass}`}>{value}</span>
-        {subValue && <span className="font-mono text-[10px] text-fg-muted">{subValue}</span>}
+        {subValue && <span className="font-mono text-2xs text-fg-muted">{subValue}</span>}
       </div>
     </div>
   );

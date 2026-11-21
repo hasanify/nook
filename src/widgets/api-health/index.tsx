@@ -168,7 +168,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>Poll every {intervalSec}s</span>
           <span>HTTP Sentinel</span>
         </div>
@@ -177,12 +177,12 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
       <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Endpoint URL Pill */}
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate font-mono text-[10px] text-fg-muted" title={endpoint}>
+          <span className="truncate font-mono text-2xs text-fg-muted" title={endpoint}>
             {method} {endpoint.replace(/^https?:\/\//, "")}
           </span>
           <span
             className={`
-              shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold
+              shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-3xs font-bold
               ${isHealthy ? "bg-ok/15 text-ok" : "bg-error/15 text-error"}
             `}
           >
@@ -193,7 +193,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
         {/* Latency & Uptime Stat Callout */}
         <div className="flex items-baseline justify-between rounded-lg border border-line bg-surface-raised/40 px-3 py-2">
           <div>
-            <span className="block font-mono text-[9px] font-semibold text-fg-muted">LATENCY</span>
+            <span className="block font-mono text-3xs font-semibold text-fg-muted">LATENCY</span>
             <span
               className={`
                 font-mono text-xl font-bold tracking-tight
@@ -213,7 +213,7 @@ export function ApiHealthWidget({ instance, editMode, patchState }: WidgetProps)
           </div>
 
           <div className="text-end">
-            <span className="block font-mono text-[9px] font-semibold text-fg-muted">UPTIME</span>
+            <span className="block font-mono text-3xs font-semibold text-fg-muted">UPTIME</span>
             <span
               className={`
                 font-mono text-base font-bold

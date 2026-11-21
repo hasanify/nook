@@ -127,7 +127,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
 
       headerActions={
         <div className="flex items-center gap-1">
-          <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-[9px] font-bold text-fg-muted">
+          <span className="rounded-full bg-surface-raised px-1.5 py-0.5 font-mono text-3xs font-bold text-fg-muted">
             {filteredPorts.length}
           </span>
           <button
@@ -160,7 +160,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>{ports.length} total listening</span>
           <span>{devPortsOnly ? "Dev ports filter: ON" : "TCP Radar"}</span>
         </div>
@@ -176,7 +176,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
             placeholder="Filter by port or process (e.g. 3000, node)…"
             className="
               rounded-md border border-line bg-surface-raised/40 px-2 py-1
-              text-[11px] text-fg inline-full
+              text-sub text-fg inline-full
               placeholder:text-fg-muted/40
               focus:border-accent-500 focus:outline-none
             "
@@ -230,14 +230,14 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
                     >
                       :{p.port}
                     </span>
-                    <span className="truncate text-[11px] font-medium text-fg-muted select-text">
+                    <span className="truncate text-sub font-medium text-fg-muted select-text">
                       {p.process_name}
                     </span>
                   </div>
 
                   {/* Right: PID & Kill Button */}
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-[9px] text-fg-muted/60 select-text">
+                    <span className="font-mono text-3xs text-fg-muted/60 select-text">
                       PID {p.pid}
                     </span>
                     <button
@@ -247,7 +247,7 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
                       title={`Terminate ${p.process_name} (PID ${p.pid})`}
                       className="
                         cursor-pointer rounded-sm bg-error/15 px-1.5 py-0.5
-                        text-[9px] font-semibold text-error transition-colors
+                        text-3xs font-semibold text-error transition-colors
                         hover:bg-error hover:text-white
                         disabled:opacity-40
                       "

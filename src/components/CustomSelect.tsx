@@ -342,9 +342,7 @@ export function CustomSelect<T extends string | number = string | number>({
                       <div className="flex flex-1 flex-col min-inline-0">
                         <span className="truncate">{opt.label}</span>
                         {opt.description && (
-                          <span className="truncate text-[10px] text-fg-muted">
-                            {opt.description}
-                          </span>
+                          <span className="truncate text-2xs text-fg-muted">{opt.description}</span>
                         )}
                       </div>
                     </div>

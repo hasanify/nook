@@ -54,7 +54,7 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
       footer={
         showDayProgress ? (
           <div className="flex flex-col gap-1 inline-full">
-            <div className="flex justify-between text-[10px] text-fg-muted">
+            <div className="flex justify-between text-2xs text-fg-muted">
               <span>Day progress</span>
               <span className="font-mono">{dayProgressPercent.toFixed(0)}%</span>
             </div>

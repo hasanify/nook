@@ -75,7 +75,7 @@ export function buildCustomPreset(config: CustomPresetConfig): WidgetPreset {
       md: "rounded-lg",
       lg: "rounded-2xl",
       xl: "rounded-3xl",
-      full: "rounded-[32px]",
+      full: "rounded-3xl",
     }[config.radius] ?? "rounded-2xl";
 
   const fontClass =
@@ -414,7 +414,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     font: "font-tech",
     containerClass: "rounded-xl ring-1 ring-inset backdrop-blur-xl",
     headerClass:
-      "border-b border-accent-500/30 bg-surface-raised/60 tracking-wider text-[11px] uppercase",
+      "border-b border-accent-500/30 bg-surface-raised/60 tracking-wider text-sub uppercase",
     highlightClass: "before:via-accent-500/40",
     getShellStyle: (color, isDark, isEditMode) => {
       const accent = color || "#06b6d4";

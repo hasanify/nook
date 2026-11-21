@@ -227,7 +227,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>{prs.length} pull requests</span>
           <button
             type="button"
@@ -244,7 +244,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
     >
       <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 border-be border-line/40 pbe-1 text-[10px]">
+        <div className="flex items-center gap-1 border-be border-line/40 pbe-1 text-2xs">
           <button
             type="button"
             onClick={() => setActiveTab("review-requested")}
@@ -322,7 +322,7 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="shrink-0 font-mono text-[10px] font-bold text-accent-500">
+                    <span className="shrink-0 font-mono text-2xs font-bold text-accent-500">
                       #{pr.number}
                     </span>
                     <span
@@ -335,19 +335,19 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
                     </span>
                   </div>
                   {pr.draft ? (
-                    <span className="shrink-0 rounded-sm bg-fg-muted/15 px-1 py-0.5 font-mono text-[9px] text-fg-muted">
+                    <span className="shrink-0 rounded-sm bg-fg-muted/15 px-1 py-0.5 font-mono text-3xs text-fg-muted">
                       Draft
                     </span>
                   ) : (
-                    <span className="shrink-0 rounded-sm bg-ok/15 px-1 py-0.5 font-mono text-[9px] font-semibold text-ok">
+                    <span className="shrink-0 rounded-sm bg-ok/15 px-1 py-0.5 font-mono text-3xs font-semibold text-ok">
                       Open
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-fg-muted">
+                <div className="flex items-center justify-between text-2xs text-fg-muted">
                   <div className="flex items-center gap-2">
-                    <span className="truncate rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[9px] font-medium text-fg-muted">
+                    <span className="truncate rounded-sm bg-surface px-1.5 py-0.5 font-mono text-3xs font-medium text-fg-muted">
                       {pr.repo}
                     </span>
                     <span>by {pr.author}</span>

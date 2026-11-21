@@ -232,7 +232,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
           </button>
 
           {/* Volume Slider */}
-          <div className="flex flex-1 items-center gap-1.5 max-inline-[120px]">
+          <div className="flex flex-1 items-center gap-1.5 max-inline-30">
             <SpeakerLowIcon className="shrink-0 text-fg-muted block-3 inline-3" />
             <input
               type="range"
@@ -259,7 +259,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
             <span>Ambient Sound</span>
           </div>
 
-          <span className="font-mono text-[10px] text-fg-muted">100% Offline Synth</span>
+          <span className="font-mono text-2xs text-fg-muted">100% Offline Synth</span>
         </div>
 
         {/* Sound Selection Grid */}
@@ -288,7 +288,7 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
                 <Icon className="shrink-0 block-4 inline-4" weight="duotone" />
                 <div className="flex-1 min-inline-0">
                   <div className="truncate text-xs/tight font-semibold">{p.label}</div>
-                  <div className="truncate text-[9px] leading-tight text-fg-muted/80">{p.desc}</div>
+                  <div className="truncate text-3xs/tight text-fg-muted/80">{p.desc}</div>
                 </div>
               </button>
             );

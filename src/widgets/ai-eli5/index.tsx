@@ -216,13 +216,13 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 onClick={() => {
                   if (inputVal.trim()) void handleExplain(inputVal.trim());
                 }}
-                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-[10px] font-medium text-white"
+                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-2xs font-medium text-white"
               >
                 Go
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between text-[10px] text-fg-muted">
+            <div className="flex items-center justify-between text-2xs text-fg-muted">
               <span>2 sentences • max 45 words</span>
               <button
                 type="button"
@@ -251,7 +251,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               type="button"
               onClick={handleCopy}
               className="
-                flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+                flex cursor-pointer items-center gap-1 text-2xs text-fg-muted
                 transition-colors
                 hover:text-fg
               "

@@ -141,7 +141,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
       editMode={editMode}
       title="Habits Tracker"
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>{habits.length} habits active</span>
           <span>7-Day Rolling Streak</span>
         </div>
@@ -160,7 +160,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
               type="button"
               onClick={() => setShowInput((v) => !v)}
               className="
-                cursor-pointer text-[11px] font-medium text-accent-500
+                cursor-pointer text-sub font-medium text-accent-500
                 transition-colors
                 hover:text-accent-400
               "
@@ -228,7 +228,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                   <div className="mbe-1.5 flex items-center justify-between">
                     <span className="truncate text-xs font-semibold text-fg">{habit.title}</span>
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1 rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warn">
+                      <span className="flex items-center gap-1 rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-2xs font-semibold text-warn">
                         <FlameIcon className="text-warn block-3 inline-3" weight="fill" />
                         <span>{streak}</span>
                       </span>
@@ -272,8 +272,8 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                             }
                           `}
                         >
-                          <span className="text-[9px] tracking-wider uppercase">{day.label}</span>
-                          <span className="mbs-0.5 font-mono text-[10px] leading-none">
+                          <span className="text-3xs tracking-wider uppercase">{day.label}</span>
+                          <span className="mbs-0.5 font-mono text-2xs leading-none">
                             {day.dayNum}
                           </span>
                         </button>

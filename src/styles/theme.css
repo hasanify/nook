@@ -61,6 +61,12 @@
   --font-rounded: "Quicksand", "Nunito", system-ui, sans-serif;
   --font-tech: "Space Mono", "Cascadia Code", "Consolas", monospace;
 
+  --text-3xs: 0.5625rem;
+  --text-3xs--line-height: 0.75rem;
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+  --text-sub: 0.6875rem;
+  --text-sub--line-height: 1rem;
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.1rem;
   --text-sm: 0.8125rem;
@@ -72,12 +78,19 @@
   --text-display: 2rem;
   --text-display--line-height: 2.25rem;
 
+  --radius-inherit: inherit;
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 0.875rem;
   --radius-2xl: 1rem;
+  --radius-3xl: 2rem;
   --radius-card: 1rem;
+
+  --spacing-menu-min: 12.75rem;
+  --spacing-badge-max: 6.875rem;
+
+  --transition-property-widget: border-color, opacity, box-shadow;
 
   --shadow-card: 0 8px 30px -4px oklch(0 0 0 / 0.22), 0 2px 6px -1px oklch(0 0 0 / 0.12);
   --shadow-glow: 0 0 24px -2px oklch(0.63 0.16 255 / 0.35);

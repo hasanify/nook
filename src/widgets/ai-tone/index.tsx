@@ -141,14 +141,14 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-fg-muted">Select tone preset</span>
+            <span className="text-2xs text-fg-muted">Select tone preset</span>
             <button
               type="button"
               onClick={() => void handleGenerate()}
               disabled={loading || !draft.trim()}
               className="
                 flex cursor-pointer items-center gap-1.5 rounded-md
-                bg-accent-500 px-2.5 py-1 text-[11px] font-medium text-white
+                bg-accent-500 px-2.5 py-1 text-sub font-medium text-white
                 transition-opacity
                 hover:opacity-90
                 disabled:cursor-not-allowed disabled:opacity-40
@@ -181,12 +181,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             "
           >
             <div className="flex items-center justify-between">
-              <span className="rounded-sm bg-accent-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-accent-500">
+              <span className="rounded-sm bg-accent-500/10 px-1.5 py-0.5 font-mono text-3xs font-semibold text-accent-500">
                 PRO • Professional
               </span>
               <span
                 className="
-                flex items-center gap-1 text-[10px] text-fg-muted opacity-0
+                flex items-center gap-1 text-2xs text-fg-muted opacity-0
                 transition-opacity
                 group-hover:opacity-100
               "
@@ -216,12 +216,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             "
           >
             <div className="flex items-center justify-between">
-              <span className="rounded-sm bg-ok/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-ok">
+              <span className="rounded-sm bg-ok/10 px-1.5 py-0.5 font-mono text-3xs font-semibold text-ok">
                 CON • Concise
               </span>
               <span
                 className="
-                flex items-center gap-1 text-[10px] text-fg-muted opacity-0
+                flex items-center gap-1 text-2xs text-fg-muted opacity-0
                 transition-opacity
                 group-hover:opacity-100
               "
@@ -251,12 +251,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             "
           >
             <div className="flex items-center justify-between">
-              <span className="rounded-sm bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-500">
+              <span className="rounded-sm bg-amber-500/10 px-1.5 py-0.5 font-mono text-3xs font-semibold text-amber-500">
                 WRM • Warm
               </span>
               <span
                 className="
-                flex items-center gap-1 text-[10px] text-fg-muted opacity-0
+                flex items-center gap-1 text-2xs text-fg-muted opacity-0
                 transition-opacity
                 group-hover:opacity-100
               "

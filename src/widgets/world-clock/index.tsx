@@ -146,7 +146,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
             <GlobeIcon className="text-accent-500 block-3.5 inline-3.5" />
             World Clocks
           </div>
-          <span className="font-mono text-[10px] text-fg-muted">
+          <span className="font-mono text-2xs text-fg-muted">
             {is24h ? "24H Mode" : "12H Mode"}
           </span>
         </div>
@@ -188,7 +188,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
                         <MoonIcon className="text-indigo-400 block-3 inline-3" weight="fill" />
                       )}
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] text-fg-muted">
+                    <div className="flex items-center gap-1 text-2xs text-fg-muted">
                       <span>{dayDiff}</span>
                       <span>•</span>
                       <span>
@@ -208,9 +208,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
                     {timeStr}
                   </span>
                   {period && (
-                    <span className="text-[10px] font-medium text-fg-muted uppercase">
-                      {period}
-                    </span>
+                    <span className="text-2xs font-medium text-fg-muted uppercase">{period}</span>
                   )}
                 </div>
               </div>

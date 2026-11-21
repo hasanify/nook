@@ -275,7 +275,7 @@ export function TestWidget({ id }: TestWidgetProps) {
         </div>
         <div className="flex items-center gap-2">
           {editMode ? (
-            <span className="text-[10px] font-semibold tracking-wide text-accent-500 uppercase">
+            <span className="text-2xs font-semibold tracking-wide text-accent-500 uppercase">
               Drag to Move
             </span>
           ) : null}
@@ -340,7 +340,7 @@ export function TestWidget({ id }: TestWidgetProps) {
         </div>
 
         {/* Bounds & Edit Controls */}
-        <div className="border-bs border-line pbs-2 text-[11px] text-fg-muted">
+        <div className="border-bs border-line pbs-2 text-sub text-fg-muted">
           <div className="flex justify-between">
             <span>
               Pos: {displayedBounds.x}, {displayedBounds.y}
@@ -356,7 +356,7 @@ export function TestWidget({ id }: TestWidgetProps) {
                 <button
                   type="button"
                   className={`
-                    rounded-sm border px-2 py-0.5 text-[10px] font-medium
+                    rounded-sm border px-2 py-0.5 text-2xs font-medium
                     ${
                       isAlwaysOnTop
                         ? "border-accent-500 bg-accent-500/10 text-accent-500"
@@ -376,7 +376,7 @@ export function TestWidget({ id }: TestWidgetProps) {
               type="button"
               className="
                 rounded-sm border border-line bg-surface-raised px-2 py-0.5
-                text-[10px] font-medium text-fg-muted
+                text-2xs font-medium text-fg-muted
                 hover:text-fg
               "
               onClick={() => {
@@ -395,7 +395,7 @@ export function TestWidget({ id }: TestWidgetProps) {
         <div
           className="
             absolute inset-e-0 inset-be-0 flex cursor-se-resize items-end
-            justify-end p-1 text-[11px] text-accent-500 block-5 inline-5
+            justify-end p-1 text-sub text-accent-500 block-5 inline-5
             hover:scale-110
           "
           onPointerDown={handleResizeStart}

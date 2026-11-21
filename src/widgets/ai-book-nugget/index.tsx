@@ -236,13 +236,13 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
                 onClick={() => {
                   if (inputVal.trim()) void handleFetch(inputVal.trim());
                 }}
-                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-[10px] font-medium text-white"
+                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-2xs font-medium text-white"
               >
                 Go
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between text-[10px] text-fg-muted">
+            <div className="flex items-center justify-between text-2xs text-fg-muted">
               <span>Daily Book Wisdom</span>
               <button
                 type="button"
@@ -270,7 +270,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             type="button"
             onClick={handleCopy}
             className="
-              flex shrink-0 cursor-pointer items-center gap-1 text-[10px]
+              flex shrink-0 cursor-pointer items-center gap-1 text-2xs
               text-fg-muted
               hover:text-fg
             "
@@ -292,7 +292,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         {/* Content sections */}
         <div className="flex flex-1 flex-col justify-center gap-2 select-text">
           <div className="flex flex-col gap-0.5 rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="font-mono text-[9px] font-semibold text-fg-muted">CORE MODEL</span>
+            <span className="font-mono text-3xs font-semibold text-fg-muted">CORE MODEL</span>
             <p className="text-xs/relaxed text-fg">
               {loading ? (
                 <span className="text-fg-muted italic">Extracting capsule…</span>
@@ -303,7 +303,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           </div>
 
           <div className="flex flex-col gap-0.5 rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="font-mono text-[9px] font-semibold text-ok">HOW TO APPLY TODAY</span>
+            <span className="font-mono text-3xs font-semibold text-ok">HOW TO APPLY TODAY</span>
             <p className="text-xs/relaxed text-fg">
               {loading ? <span className="text-fg-muted italic">…</span> : nugget.apply}
             </p>

@@ -174,7 +174,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         ) : undefined
       }
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>Today in History</span>
           <span className="font-mono">{date}</span>
         </div>
@@ -185,13 +185,13 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <WidgetBadge variant="accent">{historyItem.year}</WidgetBadge>
-            <span className="text-[11px] font-medium text-fg-muted">{currentDate.display}</span>
+            <span className="text-sub font-medium text-fg-muted">{currentDate.display}</span>
           </div>
           <button
             type="button"
             onClick={handleCopy}
             className="
-              flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+              flex cursor-pointer items-center gap-1 text-2xs text-fg-muted
               hover:text-fg
             "
           >
@@ -220,10 +220,10 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           </p>
 
           <div className="rounded-lg border border-line bg-surface-raised/40 p-2">
-            <span className="mbe-0.5 block font-mono text-[9px] font-semibold text-ok">
+            <span className="mbe-0.5 block font-mono text-3xs font-semibold text-ok">
               MODERN IMPACT
             </span>
-            <p className="text-[11px] leading-relaxed text-fg-muted">
+            <p className="text-sub/relaxed text-fg-muted">
               {loading ? <span className="italic">…</span> : historyItem.impact}
             </p>
           </div>

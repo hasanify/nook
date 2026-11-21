@@ -143,7 +143,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
       defaultSize={manifest.defaultSize}
       footer={
         weather ? (
-          <div className="grid grid-cols-2 gap-2 text-[11px] inline-full">
+          <div className="grid grid-cols-2 gap-2 text-sub inline-full">
             <div className="flex items-center gap-1.5 text-fg-muted">
               <DropIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="fill" />
               <span>Humidity:</span>
@@ -169,7 +169,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
               type="button"
               onClick={() => void refresh()}
               className="
-                mbs-2 rounded-sm bg-surface-raised px-2 py-1 text-[11px] text-fg
+                mbs-2 rounded-sm bg-surface-raised px-2 py-1 text-sub text-fg
                 hover:bg-line/40
               "
             >
@@ -194,7 +194,7 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
                 <span className="text-xs font-medium text-fg/80">
                   {getWeatherDescription(weatherCode)}
                 </span>
-                <span className="text-[10px] text-fg-muted">
+                <span className="text-2xs text-fg-muted">
                   Feels like {apparentTemperature}
                   {weather.unit}
                 </span>

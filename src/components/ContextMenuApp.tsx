@@ -169,7 +169,7 @@ export function ContextMenuApp() {
             <>
               <NotePencilIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
               <span>Edit Widget</span>
-              <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
+              <span className="ms-auto font-mono text-3xs text-fg-muted/60">Ctrl+Alt+E</span>
             </>
           )}
         </button>
@@ -190,7 +190,7 @@ export function ContextMenuApp() {
               <ArrowsInCardinalIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
               <span>Fit Size</span>
             </div>
-            <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
+            <span className="font-mono text-3xs text-fg-muted/60">Compact</span>
           </button>
           {manifest?.defaultSize && (
             <button
@@ -207,7 +207,7 @@ export function ContextMenuApp() {
                 <ArrowCounterClockwiseIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Reset Default</span>
               </div>
-              <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
+              <span className="font-mono text-3xs text-fg-muted/60">Default</span>
             </button>
           )}
         </div>
@@ -215,7 +215,7 @@ export function ContextMenuApp() {
         {/* Quick Color Swatches */}
         <div className="flex flex-col gap-1 border-bs border-line/40 px-2.5 py-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium text-fg-muted">Color</span>
+            <span className="text-2xs font-medium text-fg-muted">Color</span>
           </div>
           <div className="flex items-center justify-between pbs-0.5">
             {WIDGET_COLOR_OPTIONS.map((c) => {

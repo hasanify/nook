@@ -120,7 +120,7 @@ export function WidgetContextMenu({
         maxWidth: "calc(100vw - 12px)",
         maxHeight: "calc(100vh - 12px)",
       }}
-      className="fixed z-999999 flex animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none max-inline-[calc(100vw-12px)] min-inline-[204px]"
+      className="fixed z-999999 flex animate-appear flex-col overflow-y-auto rounded-xl border border-line/80 bg-surface/95 p-1 text-xs text-fg shadow-card backdrop-blur-md select-none min-inline-menu-min"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -149,7 +149,7 @@ export function WidgetContextMenu({
           <>
             <NotePencilIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
             <span>Edit Widget</span>
-            <span className="ms-auto font-mono text-[9px] text-fg-muted/60">Ctrl+Alt+E</span>
+            <span className="ms-auto font-mono text-3xs text-fg-muted/60">Ctrl+Alt+E</span>
           </>
         )}
       </button>
@@ -175,7 +175,7 @@ export function WidgetContextMenu({
                 <ArrowsInCardinalIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Fit Size</span>
               </div>
-              <span className="font-mono text-[9px] text-fg-muted/60">Compact</span>
+              <span className="font-mono text-3xs text-fg-muted/60">Compact</span>
             </button>
           )}
           {onResetToDefault && (
@@ -196,7 +196,7 @@ export function WidgetContextMenu({
                 <ArrowCounterClockwiseIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                 <span>Reset Default</span>
               </div>
-              <span className="font-mono text-[9px] text-fg-muted/60">Default</span>
+              <span className="font-mono text-3xs text-fg-muted/60">Default</span>
             </button>
           )}
         </div>
@@ -206,7 +206,7 @@ export function WidgetContextMenu({
       {onSelectColor && (
         <div className="flex flex-col gap-1 border-bs border-line/40 px-2.5 py-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium text-fg-muted">Color</span>
+            <span className="text-2xs font-medium text-fg-muted">Color</span>
           </div>
           <div className="flex items-center justify-between pbs-0.5">
             {WIDGET_COLOR_OPTIONS.map((c) => {

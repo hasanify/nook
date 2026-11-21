@@ -204,7 +204,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                 <GlobeIcon className="block-3 inline-3" />
               </div>
               <div className="flex flex-col min-inline-0">
-                <span className="text-[9px] font-semibold tracking-wider text-fg-muted uppercase">
+                <span className="text-3xs font-semibold tracking-wider text-fg-muted uppercase">
                   Primary Domain
                 </span>
                 <button
@@ -212,7 +212,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                   onClick={() => handleOpenLink(primaryDomain)}
                   className="
                     group flex cursor-pointer items-center gap-1 text-start
-                    font-mono text-[11px] font-medium text-fg transition-colors
+                    font-mono text-sub font-medium text-fg transition-colors
                     hover:text-accent-500
                   "
                   title={`Open https://${primaryDomain}`}
@@ -229,7 +229,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               {showFramework && data?.meta?.framework && (
-                <span className="rounded-sm border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-[9px] text-fg-muted">
+                <span className="rounded-sm border border-line/50 bg-surface px-1.5 py-0.5 font-mono text-3xs text-fg-muted">
                   {data.meta.framework}
                 </span>
               )}
@@ -252,7 +252,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
           </div>
         )}
 
-        <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+        <span className="text-2xs font-semibold tracking-wider text-fg-muted uppercase">
           Deployments
         </span>
         <div className="flex flex-col gap-1.5 pe-1 pbe-2">
@@ -285,7 +285,7 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                       {dep.target && (
                         <span
                           className={`
-                            rounded-full px-1.5 py-0.5 font-mono text-[9px]
+                            rounded-full px-1.5 py-0.5 font-mono text-3xs
                             font-medium uppercase
                             ${
                               dep.target === "production"
@@ -298,12 +298,12 @@ export function VercelProjectWidget({ instance, editMode }: WidgetProps) {
                         </span>
                       )}
                     </div>
-                    <span className="shrink-0 text-[10px] text-fg-muted">
+                    <span className="shrink-0 text-2xs text-fg-muted">
                       {formatRelativeTimeMs(dep.created)}
                     </span>
                   </div>
 
-                  <div className="mbs-1 flex items-center justify-between truncate text-[10px] text-fg-muted">
+                  <div className="mbs-1 flex items-center justify-between truncate text-2xs text-fg-muted">
                     <span className="truncate">
                       {dep.commit_msg || dep.branch || "Manual deploy"}
                     </span>

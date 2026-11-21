@@ -230,7 +230,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
       editMode={editMode}
       title="Tech News Feed"
       footer={
-        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+        <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <span>{stories.length} stories</span>
           <span>Click story to open</span>
         </div>
@@ -240,11 +240,11 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span className="flex items-center justify-center rounded-sm bg-amber-500 text-[10px] font-bold text-white block-4 inline-4">
+            <span className="flex items-center justify-center rounded-sm bg-amber-500 text-2xs font-bold text-white block-4 inline-4">
               Y
             </span>
             <span>Hacker News</span>
-            <span className="font-mono text-[10px] tracking-wider text-fg-muted uppercase">
+            <span className="font-mono text-2xs tracking-wider text-fg-muted uppercase">
               {feedType}
             </span>
           </div>
@@ -256,7 +256,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
               disabled={loading}
               title="Refresh stories"
               className="
-                flex cursor-pointer items-center gap-1 text-[11px] font-medium
+                flex cursor-pointer items-center gap-1 text-sub font-medium
                 text-accent-500 transition-colors
                 hover:text-accent-400
                 disabled:opacity-40
@@ -292,7 +292,7 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
               "
             >
               <div className="flex items-start gap-2">
-                <span className="mbs-0.5 font-mono text-[11px] font-bold text-fg-muted/60">
+                <span className="mbs-0.5 font-mono text-sub font-bold text-fg-muted/60">
                   #{idx + 1}
                 </span>
 
@@ -307,8 +307,8 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                   </h4>
 
                   {/* Metadata Row */}
-                  <div className="mbs-1 flex items-center gap-2 text-[10px] text-fg-muted">
-                    <span className="truncate rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-[9px] text-fg-muted/90 max-inline-[110px]">
+                  <div className="mbs-1 flex items-center gap-2 text-2xs text-fg-muted">
+                    <span className="truncate rounded-sm bg-surface-raised px-1 py-0.5 font-mono text-3xs text-fg-muted/90 max-inline-badge-max">
                       {story.domain}
                     </span>
                     <span className="flex items-center gap-0.5 font-mono font-medium text-amber-400">
