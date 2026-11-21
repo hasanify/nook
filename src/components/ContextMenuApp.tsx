@@ -2,14 +2,23 @@ import {
   ArrowCounterClockwiseIcon,
   ArrowsInCardinalIcon,
   CheckIcon,
+  CopySimpleIcon,
   GearIcon,
   NotePencilIcon,
+  PushPinIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { hideContextMenu, openSettingsWindow, removeWidget, setBounds } from "@/core/ipc";
+import {
+  duplicateWidget,
+  hideContextMenu,
+  openSettingsWindow,
+  removeWidget,
+  setAlwaysOnTop,
+  setBounds,
+} from "@/core/ipc";
 import { useEditMode } from "@/core/use-edit-mode";
 import { useInstance } from "@/core/use-instance";
 import { getWidgetModule } from "@/widgets/registry";
@@ -138,6 +147,8 @@ export function ContextMenuApp() {
       ? instance.settings.widgetColor
       : "";
 
+  const isAlwaysOnTop = Boolean(instance.alwaysOnTop ?? instance.always_on_top);
+
   return (
     <div className="flex items-start justify-start p-1.5 select-none block-full inline-full">
       <div
@@ -172,6 +183,53 @@ export function ContextMenuApp() {
               <span className="ms-auto font-mono text-3xs text-fg-muted/60">Ctrl+Alt+E</span>
             </>
           )}
+        </button>
+
+        {/* Pin Always on Top */}
+        <button
+          type="button"
+          onClick={() => {
+            handleClose();
+            void setAlwaysOnTop(instance.id, !isAlwaysOnTop);
+          }}
+          className="
+                flex cursor-pointer items-center justify-between rounded-lg
+                px-2.5 py-1.5 text-start text-fg-muted transition-colors
+                inline-full
+                hover:bg-surface-raised hover:text-fg
+              "
+        >
+          <div className="flex items-center gap-2">
+            <PushPinIcon
+              className={`shrink-0 block-3.5 inline-3.5 ${
+                isAlwaysOnTop ? "text-accent-500" : "text-fg-muted"
+              }`}
+              weight={isAlwaysOnTop ? "fill" : "regular"}
+            />
+            <span>{isAlwaysOnTop ? "Unpin from Top" : "Pin Always on Top"}</span>
+          </div>
+          {isAlwaysOnTop && (
+            <span className="rounded-xs bg-accent-500/10 px-1 py-0.5 font-mono text-3xs font-medium text-accent-500">
+              Pinned
+            </span>
+          )}
+        </button>
+
+        {/* Duplicate Widget */}
+        <button
+          type="button"
+          onClick={() => {
+            handleClose();
+            void duplicateWidget(instance.id);
+          }}
+          className="
+                flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5
+                text-start text-fg-muted transition-colors inline-full
+                hover:bg-surface-raised hover:text-fg
+              "
+        >
+          <CopySimpleIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
+          <span>Duplicate Widget</span>
         </button>
 
         {/* Quick Size Reset options */}
