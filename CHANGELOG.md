@@ -1,3 +1,9 @@
+## [0.36.1](https://github.com/hasanify/nook/compare/v0.36.0...v0.36.1) (2026-11-21)
+
+### Bug Fixes
+
+- **settings:** eliminate tab header layout shift and prevent update button resizing ([17797c1](https://github.com/hasanify/nook/commit/17797c1df12e9cdd25895dcef389b24d41146b35))
+
 # [0.36.0](https://github.com/hasanify/nook/compare/v0.35.0...v0.36.0) (2026-11-21)
 
 ### Features
