@@ -1,5 +1,6 @@
 import { ArrowSquareOutIcon, GithubLogoIcon, GlobeIcon } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useMemo } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -39,14 +40,11 @@ interface VercelData {
 
 function formatRelativeTimeMs(createdMs: number): string {
   if (!createdMs) return "";
-  const diffMs = Date.now() - createdMs;
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
+  try {
+    return formatDistanceToNowStrict(new Date(createdMs), { addSuffix: true });
+  } catch {
+    return "";
+  }
 }
 
 function mapVercelState(state: string) {

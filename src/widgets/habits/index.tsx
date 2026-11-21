@@ -1,4 +1,5 @@
 import { FlameIcon, LightningIcon, XIcon } from "@phosphor-icons/react";
+import { format, isSameDay, startOfDay, subDays } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -21,30 +22,25 @@ const DEFAULT_HABITS: HabitItem[] = [
 ];
 
 function getISODate(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return format(d, "yyyy-MM-dd");
 }
 
 function calculateStreak(completedDays: string[], todayDate: Date): number {
   if (!completedDays || completedDays.length === 0) return 0;
   const set = new Set(completedDays);
 
-  const today = new Date(todayDate);
-  today.setHours(0, 0, 0, 0);
+  const today = startOfDay(todayDate);
   const todayStr = getISODate(today);
 
-  let current = new Date(today);
+  let current = today;
   let streak = 0;
 
   // If today is checked, start from today. If not, check if yesterday was completed to keep streak alive
   if (set.has(todayStr)) {
     streak = 1;
-    current.setDate(current.getDate() - 1);
+    current = subDays(current, 1);
   } else {
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterday = subDays(today, 1);
     if (!set.has(getISODate(yesterday))) {
       return 0;
     }
@@ -53,7 +49,7 @@ function calculateStreak(completedDays: string[], todayDate: Date): number {
 
   while (set.has(getISODate(current))) {
     streak++;
-    current.setDate(current.getDate() - 1);
+    current = subDays(current, 1);
   }
 
   return streak;
@@ -61,13 +57,11 @@ function calculateStreak(completedDays: string[], todayDate: Date): number {
 
 function generateDaysWindow(todayDate: Date) {
   const list = [];
-  const today = new Date(todayDate);
-  today.setHours(0, 0, 0, 0);
+  const today = startOfDay(todayDate);
   const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
+    const d = subDays(today, i);
     const iso = getISODate(d);
     list.push({
       iso,
@@ -85,7 +79,7 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
-      if (now.getDate() !== today.getDate() || now.getMonth() !== today.getMonth()) {
+      if (!isSameDay(now, today)) {
         setToday(now);
       }
     }, 30000);

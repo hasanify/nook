@@ -1,5 +1,6 @@
 import { ArrowClockwiseIcon, ChatCircleIcon } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -62,14 +63,11 @@ const DEFAULT_SAMPLE_PRS: PullRequestItem[] = [
 
 function formatRelativeTime(dateStr: string): string {
   if (!dateStr) return "";
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
+  try {
+    return formatDistanceToNowStrict(new Date(dateStr), { addSuffix: true });
+  } catch {
+    return "";
+  }
 }
 
 export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps) {

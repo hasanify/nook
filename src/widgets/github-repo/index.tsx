@@ -7,6 +7,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -57,28 +58,21 @@ interface GitHubData {
 
 function formatRelativeTime(dateStr: string): string {
   if (!dateStr) return "";
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
+  try {
+    return formatDistanceToNowStrict(new Date(dateStr), { addSuffix: true });
+  } catch {
+    return "";
+  }
 }
 
-function formatLastUpdated(updatedAt: number, now: number): string {
+function formatLastUpdated(updatedAt: number, _now: number): string {
   if (!updatedAt) return "";
   const ms = updatedAt > 1e11 ? updatedAt : updatedAt * 1000;
-  const diffSecs = Math.max(0, Math.floor((now - ms) / 1000));
-  if (diffSecs < 10) return "just now";
-  if (diffSecs < 60) return `${diffSecs}s ago`;
-  const diffMins = Math.floor(diffSecs / 60);
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
+  try {
+    return formatDistanceToNowStrict(new Date(ms), { addSuffix: true });
+  } catch {
+    return "";
+  }
 }
 
 function formatCount(num?: number): string {
@@ -144,7 +138,11 @@ export function GitHubRepoWidget({ instance, editMode }: WidgetProps) {
   const exactUpdatedTime = useMemo(() => {
     if (!updatedAt) return undefined;
     const ms = updatedAt > 1e11 ? updatedAt : updatedAt * 1000;
-    return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    try {
+      return format(new Date(ms), "h:mm a");
+    } catch {
+      return undefined;
+    }
   }, [updatedAt]);
 
   const handleOpenLink = (url: string) => {

@@ -1,4 +1,5 @@
 import { GlobeIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
+import { differenceInCalendarDays, differenceInHours } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -123,7 +124,7 @@ function getTimeInZone(
       date.getMinutes(),
       date.getSeconds(),
     );
-    const offsetHours = Math.round((targetUtc - localUtc) / 3600000);
+    const offsetHours = differenceInHours(new Date(targetUtc), new Date(localUtc));
 
     const targetDayUtc = Date.UTC(
       tMap.year ?? date.getFullYear(),
@@ -131,7 +132,7 @@ function getTimeInZone(
       tMap.day ?? 1,
     );
     const localDayUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-    const dayDiffDays = Math.round((targetDayUtc - localDayUtc) / 86400000);
+    const dayDiffDays = differenceInCalendarDays(new Date(targetDayUtc), new Date(localDayUtc));
     const dayDiff = dayDiffDays > 0 ? "Tomorrow" : dayDiffDays < 0 ? "Yesterday" : "Today";
 
     const timeStr = showSeconds

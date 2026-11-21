@@ -1,4 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, FlameIcon } from "@phosphor-icons/react";
+import { format, subDays } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -29,14 +30,11 @@ const JOURNAL_THEMES = [
 ];
 
 function getTodayKey(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return format(new Date(), "yyyy-MM-dd");
 }
 
 function getYesterdayKey(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return format(subDays(new Date(), 1), "yyyy-MM-dd");
 }
 
 export function AiJournalPromptWidget({ instance, editMode, patchState }: WidgetProps) {
@@ -133,8 +131,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
     void loadDaily();
 
     const timer = setInterval(() => {
-      const now = new Date();
-      const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const currentKey = getTodayKey();
       if (instance.state.lastPromptDate && instance.state.lastPromptDate !== currentKey) {
         void handleFetchPrompt(true);
       }

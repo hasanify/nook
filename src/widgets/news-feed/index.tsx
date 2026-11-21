@@ -1,5 +1,6 @@
 import { ArrowClockwiseIcon, ArrowUpIcon, ChatCircleIcon } from "@phosphor-icons/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -306,6 +307,12 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
                       {story.score}
                     </span>
                     <span>by {story.by}</span>
+                    <span>•</span>
+                    <span>
+                      {formatDistanceToNowStrict(new Date(story.time * 1000), {
+                        addSuffix: true,
+                      })}
+                    </span>
                     <button
                       type="button"
                       onClick={(e) => handleOpenComments(e, story.id)}

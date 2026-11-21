@@ -1,4 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
+import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -42,12 +43,9 @@ const HISTORY_DOMAINS = [
 ];
 
 function getFormattedDate(d = new Date()): { mmDd: string; display: string } {
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const monthName = d.toLocaleString("en-US", { month: "short" });
   return {
-    mmDd: `${mm}-${dd}`,
-    display: `${monthName} ${d.getDate()}`,
+    mmDd: format(d, "MM-dd"),
+    display: format(d, "MMM d"),
   };
 }
 

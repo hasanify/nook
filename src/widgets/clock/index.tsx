@@ -1,3 +1,4 @@
+import { format as formatDate } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -22,25 +23,20 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
   const showDate = instance.settings.showDate !== false;
   const showDayProgress = instance.settings.showDayProgress !== false;
 
-  const hours24 = time.getHours();
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
-
   const is12h = format === "12h";
-  const hours = is12h ? hours24 % 12 || 12 : hours24;
-  const ampm = is12h ? (hours24 >= 12 ? "PM" : "AM") : "";
+  const hours = formatDate(time, is12h ? "hh" : "HH");
+  const minutes = formatDate(time, "mm");
+  const seconds = formatDate(time, "ss");
+  const ampm = is12h ? formatDate(time, "a") : "";
 
-  const pad = (n: number) => n.toString().padStart(2, "0");
-
-  const dayOfWeek = time.toLocaleDateString(undefined, { weekday: "long" });
-  const fullDate = time.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const dayOfWeek = formatDate(time, "EEEE");
+  const fullDate = formatDate(time, "MMM d, yyyy");
 
   // Calculate day progress percentage
-  const totalSecondsToday = hours24 * 3600 + minutes * 60 + seconds;
+  const hours24 = time.getHours();
+  const minutesNum = time.getMinutes();
+  const secondsNum = time.getSeconds();
+  const totalSecondsToday = hours24 * 3600 + minutesNum * 60 + secondsNum;
   const dayProgressPercent = Math.min(100, Math.max(0, (totalSecondsToday / 86400) * 100));
 
   return (
@@ -73,11 +69,9 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
         <div className="flex flex-col items-center justify-center">
           <div className="flex items-baseline gap-1 font-mono tracking-tight text-fg">
             <span className="text-4xl font-bold tracking-tight">
-              {pad(hours)}:{pad(minutes)}
+              {hours}:{minutes}
             </span>
-            {showSeconds && (
-              <span className="text-xl font-medium text-fg-muted">:{pad(seconds)}</span>
-            )}
+            {showSeconds && <span className="text-xl font-medium text-fg-muted">:{seconds}</span>}
             {is12h && (
               <span className="ms-1 text-xs font-semibold tracking-wider text-accent-500">
                 {ampm}

@@ -1,4 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
+import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
@@ -77,8 +78,7 @@ function parseStoicOutput(raw: string): StoicInsight {
 }
 
 function getTodayKey(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return format(new Date(), "yyyy-MM-dd");
 }
 
 export function AiStoicWidget({ instance, editMode, patchState }: WidgetProps) {
