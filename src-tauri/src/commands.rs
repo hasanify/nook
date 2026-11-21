@@ -929,25 +929,118 @@ pub async fn kill_port_process(pid: u32) -> Result<(), String> {
                 .creation_flags(CREATE_NO_WINDOW)
                 .output();
 
+            if let Ok(ref out) = output {
+                if out.status.success() {
+                    return Ok(());
+                }
+            }
+
+            // Attempt 3: If PID is a Windows Service (e.g. AnyDesk, Postgres, Docker), stop the service
+            let service_lookup = std::process::Command::new("powershell")
+                .args([
+                    "-NoProfile",
+                    "-Command",
+                    &format!(
+                        "Get-CimInstance Win32_Service -Filter 'ProcessId = {}' | Select-Object -ExpandProperty Name",
+                        pid
+                    ),
+                ])
+                .creation_flags(CREATE_NO_WINDOW)
+                .output();
+
+            if let Ok(lookup_out) = service_lookup {
+                let service_name = String::from_utf8_lossy(&lookup_out.stdout).trim().to_string();
+                if !service_name.is_empty() {
+                    // Try stopping the service via net.exe
+                    let _ = std::process::Command::new("net")
+                        .args(["stop", &service_name, "/y"])
+                        .creation_flags(CREATE_NO_WINDOW)
+                        .output();
+
+                    // Check if terminated
+                    let still_alive = unsafe {
+                        let h = OpenProcess(0x1000, 0, pid);
+                        if h != 0 {
+                            CloseHandle(h);
+                            true
+                        } else {
+                            false
+                        }
+                    };
+                    if !still_alive {
+                        return Ok(());
+                    }
+
+                    // Try elevated service stop via UAC RunAs
+                    let _ = std::process::Command::new("powershell")
+                        .args([
+                            "-NoProfile",
+                            "-Command",
+                            &format!(
+                                "Start-Process -FilePath 'net.exe' -ArgumentList 'stop \"{}\" /y' -Verb RunAs -Wait -WindowStyle Hidden",
+                                service_name
+                            ),
+                        ])
+                        .creation_flags(CREATE_NO_WINDOW)
+                        .output();
+
+                    let still_alive_elevated = unsafe {
+                        let h = OpenProcess(0x1000, 0, pid);
+                        if h != 0 {
+                            CloseHandle(h);
+                            true
+                        } else {
+                            false
+                        }
+                    };
+                    if !still_alive_elevated {
+                        return Ok(());
+                    }
+                }
+            }
+
+            // Attempt 4: Elevated taskkill fallback via UAC RunAs if running un-elevated
+            let _ = std::process::Command::new("powershell")
+                .args([
+                    "-NoProfile",
+                    "-Command",
+                    &format!(
+                        "Start-Process -FilePath 'taskkill.exe' -ArgumentList '/F /PID {}' -Verb RunAs -Wait -WindowStyle Hidden",
+                        pid
+                    ),
+                ])
+                .creation_flags(CREATE_NO_WINDOW)
+                .output();
+
+            let still_running = unsafe {
+                let h = OpenProcess(0x1000, 0, pid);
+                if h != 0 {
+                    CloseHandle(h);
+                    true
+                } else {
+                    false
+                }
+            };
+
+            if !still_running {
+                return Ok(());
+            }
+
             match output {
                 Ok(out) => {
-                    if out.status.success() {
-                        Ok(())
+                    let stderr = String::from_utf8_lossy(&out.stderr);
+                    let stdout = String::from_utf8_lossy(&out.stdout);
+                    let msg = if !stderr.trim().is_empty() {
+                        stderr.trim().to_string()
+                    } else if !stdout.trim().is_empty() {
+                        stdout.trim().to_string()
                     } else {
-                        let stderr = String::from_utf8_lossy(&out.stderr);
-                        let stdout = String::from_utf8_lossy(&out.stdout);
-                        let msg = if !stderr.trim().is_empty() {
-                            stderr.trim().to_string()
-                        } else if !stdout.trim().is_empty() {
-                            stdout.trim().to_string()
-                        } else {
-                            format!(
-                                "Failed to terminate process {}: Access denied or process not found",
-                                pid
-                            )
-                        };
-                        Err(msg)
-                    }
+                        format!(
+                            "Failed to terminate process {}: Access denied or process not found",
+                            pid
+                        )
+                    };
+                    Err(msg)
                 }
                 Err(e) => Err(format!(
                     "Access denied or process {} not found ({})",
