@@ -677,15 +677,60 @@ pub struct PortInfo {
     pub protocol: String,
 }
 
+#[cfg(windows)]
+fn resolve_process_name(pid: u32) -> String {
+    const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
+
+    extern "system" {
+        fn OpenProcess(dw_desired_access: u32, b_inherit_handle: i32, dw_process_id: u32) -> isize;
+        fn QueryFullProcessImageNameW(
+            h_process: isize,
+            dw_flags: u32,
+            lp_exe_name: *mut u16,
+            lpdw_size: *mut u32,
+        ) -> i32;
+        fn CloseHandle(h_object: isize) -> i32;
+    }
+
+    if pid == 0 {
+        return "System Idle".to_string();
+    }
+    if pid == 4 {
+        return "System".to_string();
+    }
+
+    unsafe {
+        let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if handle != 0 {
+            let mut name_buf = [0u16; 1024];
+            let mut len = 1024u32;
+            let ok = QueryFullProcessImageNameW(handle, 0, name_buf.as_mut_ptr(), &mut len);
+            CloseHandle(handle);
+            if ok != 0 && len > 0 {
+                let full_path = String::from_utf16_lossy(&name_buf[..len as usize]);
+                if let Some(pos) = full_path.rfind('\\') {
+                    full_path[pos + 1..].to_string()
+                } else {
+                    full_path
+                }
+            } else {
+                format!("PID: {}", pid)
+            }
+        } else {
+            format!("PID: {}", pid)
+        }
+    }
+}
+
 #[tauri::command]
 pub async fn get_listening_ports() -> Result<Vec<PortInfo>, String> {
     tokio::task::spawn_blocking(|| {
         #[cfg(windows)]
         {
             const AF_INET: u32 = 2;
+            const AF_INET6: u32 = 23;
             const TCP_TABLE_OWNER_PID_ALL: u32 = 5;
             const MIB_TCP_STATE_LISTEN: u32 = 2;
-            const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
 
             #[repr(C)]
             #[derive(Copy, Clone)]
@@ -698,6 +743,19 @@ pub async fn get_listening_ports() -> Result<Vec<PortInfo>, String> {
                 dw_owning_pid: u32,
             }
 
+            #[repr(C)]
+            #[derive(Copy, Clone)]
+            struct MibTcp6RowOwnerPid {
+                uc_local_addr: [u8; 16],
+                dw_local_scope_id: u32,
+                dw_local_port: u32,
+                uc_remote_addr: [u8; 16],
+                dw_remote_scope_id: u32,
+                dw_remote_port: u32,
+                dw_state: u32,
+                dw_owning_pid: u32,
+            }
+
             extern "system" {
                 fn GetExtendedTcpTable(
                     p_tcp_table: *mut std::ffi::c_void,
@@ -707,23 +765,13 @@ pub async fn get_listening_ports() -> Result<Vec<PortInfo>, String> {
                     table_class: u32,
                     reserved: u32,
                 ) -> u32;
-
-                fn OpenProcess(
-                    dw_desired_access: u32,
-                    b_inherit_handle: i32,
-                    dw_process_id: u32,
-                ) -> isize;
-                fn QueryFullProcessImageNameW(
-                    h_process: isize,
-                    dw_flags: u32,
-                    lp_exe_name: *mut u16,
-                    lpdw_size: *mut u32,
-                ) -> i32;
-                fn CloseHandle(h_object: isize) -> i32;
             }
 
+            let mut ports: Vec<PortInfo> = Vec::new();
+            let mut seen_ports = std::collections::HashSet::new();
+
+            // 1. IPv4 TCP listening ports
             let mut size: u32 = 0;
-            // First call retrieves required buffer size
             unsafe {
                 GetExtendedTcpTable(
                     std::ptr::null_mut(),
@@ -735,81 +783,91 @@ pub async fn get_listening_ports() -> Result<Vec<PortInfo>, String> {
                 );
             }
 
-            if size == 0 {
-                return Ok(Vec::new());
+            if size > 0 {
+                let mut buffer = vec![0u8; size as usize];
+                let ret = unsafe {
+                    GetExtendedTcpTable(
+                        buffer.as_mut_ptr() as *mut std::ffi::c_void,
+                        &mut size,
+                        1,
+                        AF_INET,
+                        TCP_TABLE_OWNER_PID_ALL,
+                        0,
+                    )
+                };
+
+                if ret == 0 {
+                    let num_entries = unsafe { *(buffer.as_ptr() as *const u32) };
+                    let rows_ptr = unsafe { buffer.as_ptr().add(4) as *const MibTcpRowOwnerPid };
+
+                    for i in 0..num_entries {
+                        let row = unsafe { *rows_ptr.add(i as usize) };
+                        if row.dw_state == MIB_TCP_STATE_LISTEN {
+                            let port = u16::from_be((row.dw_local_port & 0xFFFF) as u16);
+                            if port > 0 && !seen_ports.contains(&port) {
+                                seen_ports.insert(port);
+                                let pid = row.dw_owning_pid;
+                                let process_name = resolve_process_name(pid);
+
+                                ports.push(PortInfo {
+                                    port,
+                                    pid,
+                                    process_name,
+                                    protocol: "TCP".to_string(),
+                                });
+                            }
+                        }
+                    }
+                }
             }
 
-            let mut buffer = vec![0u8; size as usize];
-            let ret = unsafe {
+            // 2. IPv6 TCP listening ports
+            let mut size6: u32 = 0;
+            unsafe {
                 GetExtendedTcpTable(
-                    buffer.as_mut_ptr() as *mut std::ffi::c_void,
-                    &mut size,
+                    std::ptr::null_mut(),
+                    &mut size6,
                     1,
-                    AF_INET,
+                    AF_INET6,
                     TCP_TABLE_OWNER_PID_ALL,
                     0,
-                )
-            };
-
-            if ret != 0 {
-                return Ok(Vec::new());
+                );
             }
 
-            let num_entries = unsafe { *(buffer.as_ptr() as *const u32) };
-            let rows_ptr = unsafe { buffer.as_ptr().add(4) as *const MibTcpRowOwnerPid };
+            if size6 > 0 {
+                let mut buffer6 = vec![0u8; size6 as usize];
+                let ret6 = unsafe {
+                    GetExtendedTcpTable(
+                        buffer6.as_mut_ptr() as *mut std::ffi::c_void,
+                        &mut size6,
+                        1,
+                        AF_INET6,
+                        TCP_TABLE_OWNER_PID_ALL,
+                        0,
+                    )
+                };
 
-            let mut ports: Vec<PortInfo> = Vec::new();
-            let mut seen_ports = std::collections::HashSet::new();
+                if ret6 == 0 {
+                    let num_entries6 = unsafe { *(buffer6.as_ptr() as *const u32) };
+                    let rows_ptr6 = unsafe { buffer6.as_ptr().add(4) as *const MibTcp6RowOwnerPid };
 
-            for i in 0..num_entries {
-                let row = unsafe { *rows_ptr.add(i as usize) };
-                if row.dw_state == MIB_TCP_STATE_LISTEN {
-                    // dw_local_port is stored in network byte order in low 16 bits
-                    let port = u16::from_be((row.dw_local_port & 0xFFFF) as u16);
-                    if port > 0 && !seen_ports.contains(&port) {
-                        seen_ports.insert(port);
-                        let pid = row.dw_owning_pid;
+                    for i in 0..num_entries6 {
+                        let row = unsafe { *rows_ptr6.add(i as usize) };
+                        if row.dw_state == MIB_TCP_STATE_LISTEN {
+                            let port = u16::from_be((row.dw_local_port & 0xFFFF) as u16);
+                            if port > 0 && !seen_ports.contains(&port) {
+                                seen_ports.insert(port);
+                                let pid = row.dw_owning_pid;
+                                let process_name = resolve_process_name(pid);
 
-                        let process_name = if pid == 0 {
-                            "System Idle".to_string()
-                        } else if pid == 4 {
-                            "System".to_string()
-                        } else {
-                            unsafe {
-                                let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
-                                if handle != 0 {
-                                    let mut name_buf = [0u16; 1024];
-                                    let mut len = 1024u32;
-                                    let ok = QueryFullProcessImageNameW(
-                                        handle,
-                                        0,
-                                        name_buf.as_mut_ptr(),
-                                        &mut len,
-                                    );
-                                    CloseHandle(handle);
-                                    if ok != 0 && len > 0 {
-                                        let full_path =
-                                            String::from_utf16_lossy(&name_buf[..len as usize]);
-                                        if let Some(pos) = full_path.rfind('\\') {
-                                            full_path[pos + 1..].to_string()
-                                        } else {
-                                            full_path
-                                        }
-                                    } else {
-                                        format!("PID: {}", pid)
-                                    }
-                                } else {
-                                    format!("PID: {}", pid)
-                                }
+                                ports.push(PortInfo {
+                                    port,
+                                    pid,
+                                    process_name,
+                                    protocol: "TCP6".to_string(),
+                                });
                             }
-                        };
-
-                        ports.push(PortInfo {
-                            port,
-                            pid,
-                            process_name,
-                            protocol: "TCP".to_string(),
-                        });
+                        }
                     }
                 }
             }
@@ -834,7 +892,9 @@ pub async fn kill_port_process(pid: u32) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
         #[cfg(windows)]
         {
+            use std::os::windows::process::CommandExt;
             const PROCESS_TERMINATE: u32 = 0x0001;
+            const CREATE_NO_WINDOW: u32 = 0x08000000;
 
             extern "system" {
                 fn OpenProcess(
@@ -846,17 +906,53 @@ pub async fn kill_port_process(pid: u32) -> Result<(), String> {
                 fn CloseHandle(h_object: isize) -> i32;
             }
 
-            unsafe {
+            // Attempt 1: Direct TerminateProcess via standard Win32 API
+            let direct_kill_ok = unsafe {
                 let handle = OpenProcess(PROCESS_TERMINATE, 0, pid);
-                if handle == 0 {
-                    return Err(format!("Access denied or process {} not found", pid));
+                if handle != 0 {
+                    let ok = TerminateProcess(handle, 1);
+                    CloseHandle(handle);
+                    ok != 0
+                } else {
+                    false
                 }
-                let ok = TerminateProcess(handle, 1);
-                CloseHandle(handle);
-                if ok == 0 {
-                    return Err(format!("Failed to terminate process {}", pid));
+            };
+
+            if direct_kill_ok {
+                return Ok(());
+            }
+
+            // Attempt 2: Fallback to official Windows taskkill.exe
+            // Standard system utility handles processes across sessions and trees cleanly
+            let output = std::process::Command::new("taskkill")
+                .args(["/F", "/PID", &pid.to_string()])
+                .creation_flags(CREATE_NO_WINDOW)
+                .output();
+
+            match output {
+                Ok(out) => {
+                    if out.status.success() {
+                        Ok(())
+                    } else {
+                        let stderr = String::from_utf8_lossy(&out.stderr);
+                        let stdout = String::from_utf8_lossy(&out.stdout);
+                        let msg = if !stderr.trim().is_empty() {
+                            stderr.trim().to_string()
+                        } else if !stdout.trim().is_empty() {
+                            stdout.trim().to_string()
+                        } else {
+                            format!(
+                                "Failed to terminate process {}: Access denied or process not found",
+                                pid
+                            )
+                        };
+                        Err(msg)
+                    }
                 }
-                Ok(())
+                Err(e) => Err(format!(
+                    "Access denied or process {} not found ({})",
+                    pid, e
+                )),
             }
         }
         #[cfg(not(windows))]
