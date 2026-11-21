@@ -749,17 +749,13 @@ export function SettingsApp() {
             }
           `}
         >
-          <div className="relative">
-            <Info className="block-3.5 inline-3.5" />
-            {updateResult?.has_update && (
-              <span className="absolute -inset-e-1 -inset-bs-1 rounded-full bg-accent-500 block-2 inline-2" />
-            )}
-          </div>
+          <Info className="block-3.5 inline-3.5" />
           <span>About</span>
           {updateResult?.has_update && (
-            <span className="rounded-full bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-accent-500">
-              Update
-            </span>
+            <span
+              className="rounded-full bg-amber-500 shadow-xs block-2 inline-2"
+              title="Update available"
+            />
           )}
         </button>
       </div>
@@ -809,7 +805,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
-                      Automatically check, download, and install new releases in the background
+                      Check for updates in the background and prompt when ready to install
                     </div>
                   </div>
                   <Toggle
@@ -2249,7 +2245,7 @@ export function SettingsApp() {
                   <div>
                     <div className="font-medium text-fg">Automatic Updates</div>
                     <div className="text-[11px] text-fg-muted">
-                      Automatically download and install new releases in the background
+                      Check for updates in the background and prompt when ready to install
                     </div>
                   </div>
                   <Toggle

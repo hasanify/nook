@@ -46,6 +46,9 @@ pub fn get_app_handle() -> Option<&'static tauri::AppHandle> {
     GLOBAL_APP.get()
 }
 
+static IS_UPDATE_PROMPT_OPEN: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+
 fn start_auto_update_loop(app: tauri::AppHandle) {
     tauri::async_runtime::spawn(async move {
         // Initial grace period after startup before checking
@@ -68,19 +71,77 @@ fn start_auto_update_loop(app: tauri::AppHandle) {
                             let _ = app.emit("update-available", &res);
 
                             if let Some(download_url) = res.download_url {
-                                info!(
-                                    "Automatic update enabled: auto-installing version {} from {}...",
-                                    res.latest_version, download_url
-                                );
-                                let asset_name = res.asset_name.unwrap_or_default();
-                                if let Err(e) =
-                                    commands::install_update(app.clone(), download_url, asset_name)
-                                        .await
+                                if !IS_UPDATE_PROMPT_OPEN
+                                    .swap(true, std::sync::atomic::Ordering::SeqCst)
                                 {
-                                    tracing::error!(
-                                        "Failed to automatically install background update: {}",
-                                        e
-                                    );
+                                    let latest_version = res.latest_version.clone();
+                                    let app_handle = app.clone();
+                                    let asset_name = res.asset_name.unwrap_or_default();
+
+                                    tauri::async_runtime::spawn(async move {
+                                        let should_install = tokio::task::spawn_blocking(move || {
+                                            #[cfg(windows)]
+                                            {
+                                                use ::windows::core::HSTRING;
+                                                use ::windows::Win32::UI::WindowsAndMessaging::{
+                                                    MessageBoxW, IDOK, MB_ICONINFORMATION,
+                                                    MB_OKCANCEL, MB_SETFOREGROUND, MB_TOPMOST,
+                                                };
+
+                                                let title = HSTRING::from("Nook Update Available");
+                                                let text = HSTRING::from(format!(
+                                                    "A new version of Nook (v{}) is available.\n\nWould you like to install it now?",
+                                                    latest_version
+                                                ));
+
+                                                let ret = unsafe {
+                                                    MessageBoxW(
+                                                        None,
+                                                        &text,
+                                                        &title,
+                                                        MB_OKCANCEL
+                                                            | MB_ICONINFORMATION
+                                                            | MB_SETFOREGROUND
+                                                            | MB_TOPMOST,
+                                                    )
+                                                };
+                                                ret == IDOK
+                                            }
+                                            #[cfg(not(windows))]
+                                            {
+                                                false
+                                            }
+                                        })
+                                        .await
+                                        .unwrap_or(false);
+
+                                        IS_UPDATE_PROMPT_OPEN
+                                            .store(false, std::sync::atomic::Ordering::SeqCst);
+
+                                        if should_install {
+                                            info!(
+                                                "User confirmed update prompt: installing version {} from {}...",
+                                                res.latest_version, download_url
+                                            );
+                                            if let Err(e) = commands::install_update(
+                                                app_handle,
+                                                download_url,
+                                                asset_name,
+                                            )
+                                            .await
+                                            {
+                                                tracing::error!(
+                                                    "Failed to install update after confirmation: {}",
+                                                    e
+                                                );
+                                            }
+                                        } else {
+                                            info!(
+                                                "User declined or dismissed update prompt for version {}.",
+                                                res.latest_version
+                                            );
+                                        }
+                                    });
                                 }
                             }
                         }
