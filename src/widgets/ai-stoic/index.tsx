@@ -1,5 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
 import { WidgetShell } from "@/components/WidgetShell";
@@ -76,6 +76,11 @@ function parseStoicOutput(raw: string): StoicInsight {
   };
 }
 
+function getTodayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function AiStoicWidget({ instance, editMode, patchState }: WidgetProps) {
   const savedInsight = instance.state.insight as StoicInsight | undefined;
   const savedCompleted = Boolean(instance.state.completed);
@@ -95,9 +100,11 @@ export function AiStoicWidget({ instance, editMode, patchState }: WidgetProps) {
     typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
 
   const handleFetch = useCallback(
-    async (topic?: string) => {
-      setLoading(true);
-      setErrorBanner(null);
+    async (topic?: string, quiet = false) => {
+      if (!quiet) {
+        setLoading(true);
+        setErrorBanner(null);
+      }
 
       const recentHistory = Array.isArray(instance.state.history)
         ? (instance.state.history as string[])
@@ -134,15 +141,47 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           parsed.quote,
           ...recentHistory.filter((q) => q.toLowerCase() !== parsed.quote.toLowerCase()),
         ].slice(0, 20);
-        patchState({ insight: parsed, completed: false, history: nextHistory });
+        patchState({
+          insight: parsed,
+          completed: false,
+          history: nextHistory,
+          date: getTodayKey(),
+        });
       } catch (err) {
-        setErrorBanner(err instanceof Error ? err.message : String(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!quiet || !msg.includes("No AI API key found")) {
+          setErrorBanner(msg);
+        }
       } finally {
         setLoading(false);
       }
     },
     [philosopher, model, endpoint, apiKey, insight.quote, instance.state.history, patchState],
   );
+
+  useEffect(() => {
+    let active = true;
+    const loadDaily = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      const todayKey = getTodayKey();
+      if (!instance.state.insight || instance.state.date !== todayKey) {
+        void handleFetch(undefined, true);
+      }
+    };
+    void loadDaily();
+
+    const timer = setInterval(() => {
+      const nextKey = getTodayKey();
+      if (instance.state.date && instance.state.date !== nextKey) {
+        void handleFetch(undefined, true);
+      }
+    }, 60000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [instance.state.insight, instance.state.date, handleFetch]);
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(

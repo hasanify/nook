@@ -1,5 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
 import { WidgetBadge } from "@/components/widget-ui";
@@ -82,9 +82,11 @@ export function AiHistoryWidget({ instance, editMode, patchState }: WidgetProps)
     typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
 
   const handleFetch = useCallback(
-    async (targetDate: string) => {
-      setLoading(true);
-      setErrorBanner(null);
+    async (targetDate: string, quiet = false) => {
+      if (!quiet) {
+        setLoading(true);
+        setErrorBanner(null);
+      }
 
       const recentHistory = Array.isArray(instance.state.history)
         ? (instance.state.history as string[])
@@ -122,13 +124,40 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         );
         patchState({ date: targetDate, historyItem: parsed, history: nextHistory });
       } catch (err) {
-        setErrorBanner(err instanceof Error ? err.message : String(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!quiet || !msg.includes("No AI API key found")) {
+          setErrorBanner(msg);
+        }
       } finally {
         setLoading(false);
       }
     },
     [model, endpoint, apiKey, historyItem.year, instance.state.history, patchState],
   );
+
+  useEffect(() => {
+    let active = true;
+    const loadDaily = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      const todayMmDd = getFormattedDate().mmDd;
+      if (!instance.state.historyItem || instance.state.date !== todayMmDd) {
+        void handleFetch(todayMmDd, true);
+      }
+    };
+    void loadDaily();
+
+    const timer = setInterval(() => {
+      const nextDate = getFormattedDate().mmDd;
+      if (nextDate !== date) {
+        void handleFetch(nextDate, true);
+      }
+    }, 60000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [instance.state.historyItem, instance.state.date, date, handleFetch]);
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(

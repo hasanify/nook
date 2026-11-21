@@ -1,5 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
 import { WidgetBadge } from "@/components/widget-ui";
@@ -107,12 +107,14 @@ export function AiBookNuggetWidget({ instance, editMode, patchState }: WidgetPro
     typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
 
   const handleFetch = useCallback(
-    async (targetBook: string) => {
+    async (targetBook: string, quiet = false) => {
       const cleanBook = targetBook.trim();
       if (!cleanBook) return;
 
-      setLoading(true);
-      setErrorBanner(null);
+      if (!quiet) {
+        setLoading(true);
+        setErrorBanner(null);
+      }
 
       const recentHistory = Array.isArray(instance.state.history)
         ? (instance.state.history as string[])
@@ -146,13 +148,31 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
         patchState({ nugget: parsed, history: nextHistory });
         setShowInput(false);
       } catch (err) {
-        setErrorBanner(err instanceof Error ? err.message : String(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!quiet || !msg.includes("No AI API key found")) {
+          setErrorBanner(msg);
+        }
       } finally {
         setLoading(false);
       }
     },
     [model, endpoint, apiKey, nugget.book, instance.state.history, patchState],
   );
+
+  useEffect(() => {
+    let active = true;
+    const loadNugget = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      if (!instance.state.nugget) {
+        void handleFetch(DEFAULT_SAMPLE.book, true);
+      }
+    };
+    void loadNugget();
+    return () => {
+      active = false;
+    };
+  }, [instance.state.nugget, handleFetch]);
 
   const handleShuffle = () => {
     const candidates = CURATED_BOOKS.filter(

@@ -1,5 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, FlameIcon } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
 import { WidgetShell } from "@/components/WidgetShell";
@@ -69,49 +69,81 @@ export function AiJournalPromptWidget({ instance, editMode, patchState }: Widget
   const apiKey =
     typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
 
-  const handleFetchPrompt = useCallback(async () => {
-    setLoading(true);
-    setErrorBanner(null);
+  const handleFetchPrompt = useCallback(
+    async (quiet = false) => {
+      if (!quiet) {
+        setLoading(true);
+        setErrorBanner(null);
+      }
 
-    const recentHistory = Array.isArray(instance.state.history)
-      ? (instance.state.history as string[])
-      : [];
-    const avoidList = [prompt, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
-    const randomTheme =
-      JOURNAL_THEMES[Math.floor(Math.random() * JOURNAL_THEMES.length)] ??
-      "daily progress or gratitude";
+      const recentHistory = Array.isArray(instance.state.history)
+        ? (instance.state.history as string[])
+        : [];
+      const avoidList = [prompt, ...recentHistory].filter(Boolean).slice(0, 15).join(", ");
+      const randomTheme =
+        JOURNAL_THEMES[Math.floor(Math.random() * JOURNAL_THEMES.length)] ??
+        "daily progress or gratitude";
 
-    const chosenTheme = focus && focus !== "any" ? `${focus} (${randomTheme})` : randomTheme;
+      const chosenTheme = focus && focus !== "any" ? `${focus} (${randomTheme})` : randomTheme;
 
-    const userPrompt = `Theme: ${chosenTheme}.
+      const userPrompt = `Theme: ${chosenTheme}.
 Make the question deeply insightful, novel, and concise.
 Do NOT use clichés or ask questions similar to: ${avoidList}.
 Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
-    try {
-      const output = await callAI({
-        systemPrompt: SYSTEM_PROMPT,
-        userPrompt,
-        maxTokens: 50,
-        temperature: 0.95,
-        model,
-        endpoint,
-        apiKey,
-      });
+      try {
+        const output = await callAI({
+          systemPrompt: SYSTEM_PROMPT,
+          userPrompt,
+          maxTokens: 50,
+          temperature: 0.95,
+          model,
+          endpoint,
+          apiKey,
+        });
 
-      const clean = output.trim().replace(/^["'\d.\s]+|["'\s]+$/g, "");
-      setPrompt(clean);
-      const nextHistory = [
-        clean,
-        ...recentHistory.filter((p) => p.toLowerCase() !== clean.toLowerCase()),
-      ].slice(0, 20);
-      patchState({ prompt: clean, history: nextHistory });
-    } catch (err) {
-      setErrorBanner(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [focus, model, endpoint, apiKey, prompt, instance.state.history, patchState]);
+        const clean = output.trim().replace(/^["'\d.\s]+|["'\s]+$/g, "");
+        setPrompt(clean);
+        const nextHistory = [
+          clean,
+          ...recentHistory.filter((p) => p.toLowerCase() !== clean.toLowerCase()),
+        ].slice(0, 20);
+        patchState({ prompt: clean, history: nextHistory, lastPromptDate: todayKey });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!quiet || !msg.includes("No AI API key found")) {
+          setErrorBanner(msg);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [focus, model, endpoint, apiKey, prompt, instance.state.history, patchState, todayKey],
+  );
+
+  useEffect(() => {
+    let active = true;
+    const loadDaily = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      if (!instance.state.prompt || instance.state.lastPromptDate !== todayKey) {
+        void handleFetchPrompt(true);
+      }
+    };
+    void loadDaily();
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      if (instance.state.lastPromptDate && instance.state.lastPromptDate !== currentKey) {
+        void handleFetchPrompt(true);
+      }
+    }, 60000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [instance.state.prompt, instance.state.lastPromptDate, handleFetchPrompt, todayKey]);
 
   const handleLogAnswer = (textToLog: string) => {
     const clean = textToLog.trim();

@@ -1,5 +1,5 @@
 import { ArrowClockwiseIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Banner } from "@/components/Banner";
 import { WidgetShell } from "@/components/WidgetShell";
@@ -116,6 +116,11 @@ function parseVocabOutput(raw: string): VocabItem {
   };
 }
 
+function getTodayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function AiVocabWidget({ instance, editMode, patchState }: WidgetProps) {
   const savedVocab = instance.state.vocab as VocabItem | undefined;
 
@@ -131,64 +136,96 @@ export function AiVocabWidget({ instance, editMode, patchState }: WidgetProps) {
   const apiKey =
     typeof instance.settings.apiKey === "string" ? instance.settings.apiKey : undefined;
 
-  const handleFetch = useCallback(async () => {
-    setLoading(true);
-    setErrorBanner(null);
+  const handleFetch = useCallback(
+    async (quiet = false) => {
+      if (!quiet) {
+        setLoading(true);
+        setErrorBanner(null);
+      }
 
-    const themeList = THEMES_BY_FLAVOR[flavor] ?? THEMES_BY_FLAVOR["all"] ?? [];
-    const chosenTheme =
-      themeList.length > 0
-        ? (themeList[Math.floor(Math.random() * themeList.length)] ?? "expressive word")
-        : "expressive word";
-    const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+      const themeList = THEMES_BY_FLAVOR[flavor] ?? THEMES_BY_FLAVOR["all"] ?? [];
+      const chosenTheme =
+        themeList.length > 0
+          ? (themeList[Math.floor(Math.random() * themeList.length)] ?? "expressive word")
+          : "expressive word";
+      const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
 
-    const recentHistory = Array.isArray(instance.state.history)
-      ? (instance.state.history as string[])
-      : [];
-    const avoidWords = [
-      "sonder",
-      "petrichor",
-      "serendipity",
-      "ephemeral",
-      "defenestration",
-      "mellifluous",
-      vocab.word,
-      ...recentHistory,
-    ]
-      .filter(Boolean)
-      .slice(0, 15)
-      .join(", ");
+      const recentHistory = Array.isArray(instance.state.history)
+        ? (instance.state.history as string[])
+        : [];
+      const avoidWords = [
+        "sonder",
+        "petrichor",
+        "serendipity",
+        "ephemeral",
+        "defenestration",
+        "mellifluous",
+        vocab.word,
+        ...recentHistory,
+      ]
+        .filter(Boolean)
+        .slice(0, 15)
+        .join(", ");
 
-    const userPrompt = `Pick a fresh, uncommon word.
+      const userPrompt = `Pick a fresh, uncommon word.
 Category: ${chosenTheme}.
 Letter hint: starting with or containing '${randomLetter}'.
 Do NOT pick any of these words: ${avoidWords}.
 Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
 
-    try {
-      const output = await callAI({
-        systemPrompt: SYSTEM_PROMPT,
-        userPrompt,
-        maxTokens: 75,
-        temperature: 0.95,
-        model,
-        endpoint,
-        apiKey,
-      });
+      try {
+        const output = await callAI({
+          systemPrompt: SYSTEM_PROMPT,
+          userPrompt,
+          maxTokens: 75,
+          temperature: 0.95,
+          model,
+          endpoint,
+          apiKey,
+        });
 
-      const parsed = parseVocabOutput(output);
-      setVocab(parsed);
-      const nextHistory = [
-        parsed.word,
-        ...recentHistory.filter((w) => w.toLowerCase() !== parsed.word.toLowerCase()),
-      ].slice(0, 20);
-      patchState({ vocab: parsed, history: nextHistory });
-    } catch (err) {
-      setErrorBanner(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [flavor, model, endpoint, apiKey, vocab.word, instance.state.history, patchState]);
+        const parsed = parseVocabOutput(output);
+        setVocab(parsed);
+        const nextHistory = [
+          parsed.word,
+          ...recentHistory.filter((w) => w.toLowerCase() !== parsed.word.toLowerCase()),
+        ].slice(0, 20);
+        patchState({ vocab: parsed, history: nextHistory, date: getTodayKey() });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!quiet || !msg.includes("No AI API key found")) {
+          setErrorBanner(msg);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [flavor, model, endpoint, apiKey, vocab.word, instance.state.history, patchState],
+  );
+
+  useEffect(() => {
+    let active = true;
+    const loadDaily = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      const todayKey = getTodayKey();
+      if (!instance.state.vocab || instance.state.date !== todayKey) {
+        void handleFetch(true);
+      }
+    };
+    void loadDaily();
+
+    const timer = setInterval(() => {
+      const nextKey = getTodayKey();
+      if (instance.state.date && instance.state.date !== nextKey) {
+        void handleFetch(true);
+      }
+    }, 60000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [instance.state.vocab, instance.state.date, handleFetch]);
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(
