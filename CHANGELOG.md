@@ -1,3 +1,9 @@
+# [0.36.0](https://github.com/hasanify/nook/compare/v0.35.0...v0.36.0) (2026-11-21)
+
+### Features
+
+- **updates:** prompt user confirmation dialog before installing and simplify about tab badge ([8911b01](https://github.com/hasanify/nook/commit/8911b011da5c973a35feb21e5c0360a3c65d34b6))
+
 # [0.35.0](https://github.com/hasanify/nook/compare/v0.34.0...v0.35.0) (2026-11-21)
 
 ### Features
