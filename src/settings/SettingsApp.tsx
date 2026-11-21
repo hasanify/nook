@@ -1,5 +1,6 @@
 import {
   ArrowClockwiseIcon,
+  ArrowCounterClockwiseIcon,
   BrainIcon,
   CheckIcon,
   CloudIcon,
@@ -1286,87 +1287,99 @@ export function SettingsApp() {
 
               {/* Bento Grid Arranger Option */}
               {(config?.widgets.length ?? 0) > 0 && (
-                <div className="flex flex-col gap-1.5 rounded-lg border border-line/60 bg-surface-raised/60 p-2 text-xs">
+                <div className="flex flex-col gap-2 rounded-xl border border-line/70 bg-surface-raised/40 p-2.5 text-xs backdrop-blur-xs">
+                  {/* Header Row */}
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-semibold text-fg">
-                      <SquaresFourIcon className="text-accent-500 block-3.5 inline-3.5" />
-                      Bento Grid
+                      <SquaresFourIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
+                      <span>Bento Grid</span>
                     </span>
-
-                    {/* Coverage Area Selector */}
-                    <div className="flex items-center rounded-md border border-line/60 bg-surface/80 p-0.5 text-[10px]">
-                      {(
-                        [
-                          { id: "auto", label: "Auto", title: "Auto (adapts to widget count)" },
-                          { id: "quarter", label: "1/4", title: "Quarter monitor area (25%)" },
-                          { id: "half", label: "1/2", title: "Half monitor area (50%)" },
-                          { id: "full", label: "Full", title: "Full monitor area (100%)" },
-                        ] as const
-                      ).map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => void handleSetBentoCoverage(item.id)}
-                          title={item.title}
-                          className={`
-                            cursor-pointer rounded-sm px-1.5 py-0.5 font-medium transition-all
-                            ${
-                              bentoCoverage === item.id
-                                ? "bg-accent-500 font-semibold text-white shadow-2xs"
-                                : "text-fg-muted hover:text-fg"
-                            }
-                          `}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
+                    {isBentoPreviewing && (
+                      <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-[10px] font-medium text-accent-500">
+                        Previewing
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1.5 pbs-0.5">
+
+                  {/* Coverage Area Selector */}
+                  <div className="grid grid-cols-4 rounded-lg border border-line/60 bg-surface/70 p-0.5 text-center text-[10px]">
+                    {(
+                      [
+                        { id: "auto", label: "Auto", title: "Auto (adapts to widget count)" },
+                        { id: "quarter", label: "1/4", title: "Quarter monitor area (25%)" },
+                        { id: "half", label: "1/2", title: "Half monitor area (50%)" },
+                        { id: "full", label: "Full", title: "Full monitor area (100%)" },
+                      ] as const
+                    ).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => void handleSetBentoCoverage(item.id)}
+                        title={item.title}
+                        className={`
+                          cursor-pointer rounded-md py-1 font-medium transition-all
+                          ${
+                            bentoCoverage === item.id
+                              ? "bg-accent-500 font-semibold text-white shadow-2xs"
+                              : "text-fg-muted hover:bg-surface-raised hover:text-fg"
+                          }
+                        `}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-1.5 pbs-0.5">
                     <button
                       type="button"
                       onClick={() => void handleCycleSettingsBento()}
                       className="
-                        flex-1 cursor-pointer rounded-md bg-accent-500 px-2 py-1
-                        text-center text-[11px] font-semibold text-white
-                        shadow-xs transition-colors
+                        flex cursor-pointer items-center justify-center gap-1.5 rounded-lg
+                        bg-accent-500 px-3 py-1.5 text-center text-xs font-semibold
+                        text-white shadow-xs transition-colors
                         hover:bg-accent-600
                         active:scale-95
                       "
                     >
-                      Cycle Layout
+                      <ArrowClockwiseIcon className="block-3.5 inline-3.5" />
+                      <span>{isBentoPreviewing ? "Next Layout" : "Cycle Layout"}</span>
                     </button>
+
                     {isBentoPreviewing && (
-                      <>
+                      <div className="grid grid-cols-2 gap-1.5">
                         <button
                           type="button"
                           onClick={handleDoneSettingsBento}
                           className="
-                            cursor-pointer rounded-md bg-accent-500/20 px-2.5
-                            py-1 text-[11px] font-semibold text-accent-500
-                            transition-colors
-                            hover:bg-accent-500/30
+                            flex cursor-pointer items-center justify-center gap-1 rounded-lg
+                            bg-accent-500/15 py-1 text-center text-[11px] font-semibold
+                            text-accent-500 transition-colors
+                            hover:bg-accent-500/25
                             active:scale-95
                           "
                           title="Save this layout"
                         >
-                          Done
+                          <CheckIcon className="block-3 inline-3" weight="bold" />
+                          <span>Done</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => void handleRevertSettingsBento()}
                           className="
-                            cursor-pointer rounded-md border border-line
-                            bg-surface px-2 py-1 text-[11px] font-medium
-                            text-fg-muted
-                            hover:text-fg
+                            flex cursor-pointer items-center justify-center gap-1 rounded-lg
+                            border border-line bg-surface py-1 text-center text-[11px]
+                            font-medium text-fg-muted transition-colors
+                            hover:bg-surface-raised hover:text-fg
                             active:scale-95
                           "
                           title="Restore previous layout"
                         >
-                          Revert
+                          <ArrowCounterClockwiseIcon className="block-3 inline-3" />
+                          <span>Revert</span>
                         </button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
