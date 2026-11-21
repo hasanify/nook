@@ -1,5 +1,5 @@
 import { FlameIcon, LightningIcon, XIcon } from "@phosphor-icons/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
 import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
@@ -80,7 +80,17 @@ function generateDaysWindow(todayDate: Date) {
 }
 
 export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
-  const [today] = useState(() => new Date());
+  const [today, setToday] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      if (now.getDate() !== today.getDate() || now.getMonth() !== today.getMonth()) {
+        setToday(now);
+      }
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [today]);
   const initialHabits = useMemo(() => {
     const raw = instance.state.habits;
     if (Array.isArray(raw) && raw.length > 0) {

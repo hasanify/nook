@@ -23,6 +23,31 @@ const DEFAULT_CITIES: CityTimezone[] = [
   { id: "utc", name: "UTC", zone: "UTC", flag: "🌐" },
 ];
 
+const REGION_PRESETS: Record<string, CityTimezone[]> = {
+  major: DEFAULT_CITIES,
+  americas: [
+    { id: "sf", name: "San Francisco", zone: "America/Los_Angeles", flag: "🇺🇸" },
+    { id: "chi", name: "Chicago", zone: "America/Chicago", flag: "🇺🇸" },
+    { id: "nyc", name: "New York", zone: "America/New_York", flag: "🇺🇸" },
+    { id: "sao", name: "São Paulo", zone: "America/Sao_Paulo", flag: "🇧🇷" },
+    { id: "utc", name: "UTC", zone: "UTC", flag: "🌐" },
+  ],
+  emea: [
+    { id: "lon", name: "London", zone: "Europe/London", flag: "🇬🇧" },
+    { id: "par", name: "Paris", zone: "Europe/Paris", flag: "🇫🇷" },
+    { id: "ber", name: "Berlin", zone: "Europe/Berlin", flag: "🇩🇪" },
+    { id: "dxb", name: "Dubai", zone: "Asia/Dubai", flag: "🇦🇪" },
+    { id: "utc", name: "UTC", zone: "UTC", flag: "🌐" },
+  ],
+  apac: [
+    { id: "mum", name: "Mumbai", zone: "Asia/Kolkata", flag: "🇮🇳" },
+    { id: "sin", name: "Singapore", zone: "Asia/Singapore", flag: "🇸🇬" },
+    { id: "tok", name: "Tokyo", zone: "Asia/Tokyo", flag: "🇯🇵" },
+    { id: "syd", name: "Sydney", zone: "Australia/Sydney", flag: "🇦🇺" },
+    { id: "utc", name: "UTC", zone: "UTC", flag: "🌐" },
+  ],
+};
+
 function getTimeInZone(
   date: Date,
   timeZone: string,
@@ -66,29 +91,52 @@ function getTimeInZone(
     const hour24 = parseInt(hour24Formatter.format(date), 10);
     const isDay = hour24 >= 6 && hour24 < 18;
 
-    // Calculate offset relative to local time
-    // Local date string in target timezone vs local timezone
-    const targetDateStr = date.toLocaleString("en-US", { timeZone });
-    const targetDate = new Date(targetDateStr);
-    const localDateStr = date.toLocaleString("en-US");
-    const localDate = new Date(localDateStr);
-    const diffHours = Math.round((targetDate.getTime() - localDate.getTime()) / 3600000);
-
-    // Calculate day diff
-    const targetDay = targetDate.getDate();
-    const localDay = localDate.getDate();
-    let dayDiff = "Today";
-    if (targetDay > localDay || (localDay >= 28 && targetDay === 1)) {
-      dayDiff = "Tomorrow";
-    } else if (targetDay < localDay || (targetDay >= 28 && localDay === 1)) {
-      dayDiff = "Yesterday";
+    // Accurate calculation of target local time & day difference
+    const targetFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    });
+    const tParts = targetFormatter.formatToParts(date);
+    const tMap: Record<string, number> = {};
+    for (const p of tParts) {
+      if (p.type !== "literal") tMap[p.type] = parseInt(p.value, 10);
     }
+    const targetUtc = Date.UTC(
+      tMap.year ?? date.getFullYear(),
+      (tMap.month ?? 1) - 1,
+      tMap.day ?? 1,
+      tMap.hour ?? 0,
+      tMap.minute ?? 0,
+      tMap.second ?? 0,
+    );
+    const localUtc = Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+    );
+    const offsetHours = Math.round((targetUtc - localUtc) / 3600000);
+
+    const targetDayUtc = Date.UTC(
+      tMap.year ?? date.getFullYear(),
+      (tMap.month ?? 1) - 1,
+      tMap.day ?? 1,
+    );
+    const localDayUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const dayDiffDays = Math.round((targetDayUtc - localDayUtc) / 86400000);
+    const dayDiff = dayDiffDays > 0 ? "Tomorrow" : dayDiffDays < 0 ? "Yesterday" : "Today";
 
     const timeStr = showSeconds
       ? `${hour.toString().padStart(2, "0")}:${minute}:${second}`
       : `${hour.toString().padStart(2, "0")}:${minute}`;
-
-    const offsetHours = Math.round(diffHours);
 
     return {
       timeStr,
@@ -111,6 +159,8 @@ function getTimeInZone(
 export function WorldClockWidget({ instance, editMode }: WidgetProps) {
   const [now, setNow] = useState(() => new Date());
 
+  const region = (instance.settings.region as string) || "major";
+  const cities = REGION_PRESETS[region] ?? REGION_PRESETS.major ?? DEFAULT_CITIES;
   const is24h = instance.settings.timeFormat === "24h";
   const showSeconds = Boolean(instance.settings.showSeconds);
 
@@ -131,7 +181,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
       title="World Clock"
       footer={
         <div className="flex items-center justify-between inline-full">
-          <span>{DEFAULT_CITIES.length} timezones active</span>
+          <span>{cities.length} timezones active</span>
           <span className="flex items-center gap-1">
             <SunIcon className="text-amber-500 block-2.5 inline-2.5" weight="fill" /> Day /{" "}
             <MoonIcon className="text-indigo-400 block-2.5 inline-2.5" weight="fill" /> Night
@@ -153,7 +203,7 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
 
         {/* City rows */}
         <div className="my-1.5 space-y-1.5 pe-0.5">
-          {DEFAULT_CITIES.map((city) => {
+          {cities.map((city) => {
             const { timeStr, period, isDay, offsetHours, dayDiff } = getTimeInZone(
               now,
               city.zone,
@@ -224,6 +274,7 @@ const worldClockModule: WidgetModule = {
   manifest,
   component: WorldClockWidget,
   defaultSettings: {
+    region: "major",
     timeFormat: "12h",
     showSeconds: false,
   },

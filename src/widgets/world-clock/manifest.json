@@ -9,6 +9,18 @@
   "resizable": true,
   "settingsSchema": [
     {
+      "key": "region",
+      "label": "Timezone Region",
+      "type": "select",
+      "defaultValue": "major",
+      "options": [
+        { "label": "Major Global Hubs (NYC, London, Tokyo, SF, UTC)", "value": "major" },
+        { "label": "Americas (SF, Chicago, NYC, São Paulo)", "value": "americas" },
+        { "label": "Europe & Middle East (London, Paris, Berlin, Dubai)", "value": "emea" },
+        { "label": "Asia & Pacific (Tokyo, Singapore, Sydney, Mumbai)", "value": "apac" }
+      ]
+    },
+    {
       "key": "timeFormat",
       "label": "Time Format",
       "type": "select",

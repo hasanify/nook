@@ -1,4 +1,10 @@
-import { BatteryChargingIcon, BatteryHighIcon, LightningIcon } from "@phosphor-icons/react";
+import {
+  BatteryChargingIcon,
+  BatteryHighIcon,
+  DesktopIcon,
+  LightningIcon,
+  PlugIcon,
+} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 import { WidgetShell } from "@/components/WidgetShell";
@@ -78,10 +84,10 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
         <div className="flex items-center justify-between text-2xs text-fg-muted inline-full">
           <div className="flex items-center gap-1.5">
             <span className="rounded-full bg-ok block-1.5 inline-1.5" />
-            <span>Health: Good</span>
+            <span>{!hasBattery ? "Power: Direct AC Line" : "Health: Good"}</span>
           </div>
 
-          {battery?.battery_saver && (
+          {hasBattery && battery?.battery_saver && (
             <span className="rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-3xs font-semibold text-warn">
               Battery Saver
             </span>
@@ -93,7 +99,9 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
-            {isCharging ? (
+            {!hasBattery ? (
+              <DesktopIcon className="text-accent-500 block-3.5 inline-3.5" />
+            ) : isCharging ? (
               <BatteryChargingIcon
                 className="text-emerald-400 block-3.5 inline-3.5"
                 weight="fill"
@@ -104,63 +112,69 @@ export function BatteryMonitorWidget({ instance, editMode }: WidgetProps) {
             Power & Battery
           </div>
           <span className="font-mono text-2xs text-fg-muted">
-            {isAcPlugged ? "AC Connected" : "Battery Mode"}
+            {!hasBattery ? "Desktop Workstation" : isAcPlugged ? "AC Connected" : "Battery Mode"}
           </span>
         </div>
 
-        {/* Center Battery Display */}
-        <div className="my-auto flex items-center justify-between gap-3 py-1">
-          {/* Gauge Graphic */}
-          <div className="flex items-center">
-            {/* Battery Body */}
-            <div className="relative flex items-center rounded-xl border-2 border-line/80 bg-surface/50 p-1 shadow-inner block-14 inline-28">
-              {/* Fill */}
-              <div
-                className={`
-                  rounded-lg transition-all duration-500 block-full
-                  ${getBatteryBg(percent, isCharging)}
-                `}
-                style={{ width: `${Math.max(5, Math.min(100, percent))}%` }}
-              />
-
-              {/* Charging Bolt Overlay */}
-              {isCharging && (
-                <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow-sm">
-                  <LightningIcon className="animate-pulse block-6 inline-6" weight="fill" />
-                </div>
-              )}
+        {/* Center Display */}
+        {!hasBattery ? (
+          <div className="my-auto flex items-center gap-3 rounded-xl border border-line/60 bg-surface/50 p-3">
+            <div className="flex items-center justify-center rounded-xl border border-line bg-surface-raised p-2 text-accent-500 block-11 inline-11">
+              <PlugIcon className="block-5 inline-5" weight="fill" />
             </div>
-            {/* Battery Tip */}
-            <div className="-ms-px rounded-e bg-line/80 block-5 inline-1.5" />
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-fg">Continuous AC Power</span>
+              <span className="text-sub text-fg-muted">Direct desktop wall supply active</span>
+            </div>
           </div>
+        ) : (
+          <div className="my-auto flex items-center justify-between gap-3 py-1">
+            {/* Gauge Graphic */}
+            <div className="flex items-center">
+              {/* Battery Body */}
+              <div className="relative flex items-center rounded-xl border-2 border-line/80 bg-surface/50 p-1 shadow-inner block-14 inline-28">
+                {/* Fill */}
+                <div
+                  className={`
+                    rounded-lg transition-all duration-500 block-full
+                    ${getBatteryBg(percent, isCharging)}
+                  `}
+                  style={{ width: `${Math.max(5, Math.min(100, percent))}%` }}
+                />
 
-          {/* Value and Status */}
-          <div className="flex flex-col items-end">
-            <div className="flex items-baseline gap-0.5">
-              <span
-                className={`
-                  font-mono text-2xl font-bold tracking-tight
-                  ${getBatteryColor(percent, isCharging)}
-                `}
-              >
-                {hasBattery ? percent : "100"}
+                {/* Charging Bolt Overlay */}
+                {isCharging && (
+                  <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow-sm">
+                    <LightningIcon className="animate-pulse block-6 inline-6" weight="fill" />
+                  </div>
+                )}
+              </div>
+              {/* Battery Tip */}
+              <div className="-ms-px rounded-e bg-line/80 block-5 inline-1.5" />
+            </div>
+
+            {/* Value and Status */}
+            <div className="flex flex-col items-end">
+              <div className="flex items-baseline gap-0.5">
+                <span
+                  className={`
+                    font-mono text-2xl font-bold tracking-tight
+                    ${getBatteryColor(percent, isCharging)}
+                  `}
+                >
+                  {percent}
+                </span>
+                <span className="font-mono text-xs text-fg-muted">%</span>
+              </div>
+
+              <span className="text-sub font-medium text-fg">
+                {isCharging ? "Charging" : isAcPlugged ? "Full / On AC" : "Discharging"}
               </span>
-              <span className="font-mono text-xs text-fg-muted">%</span>
+
+              {timeText && <span className="font-mono text-2xs text-fg-muted">{timeText}</span>}
             </div>
-
-            <span className="text-sub font-medium text-fg">
-              {!hasBattery
-                ? "Desktop (No Battery)"
-                : isCharging
-                  ? "Charging"
-                  : isAcPlugged
-                    ? "Full / On AC"
-                    : "Discharging"}
-            </span>
-
-            {timeText && <span className="font-mono text-2xs text-fg-muted">{timeText}</span>}
           </div>
-        </div>
+        )}
       </div>
     </WidgetShell>
   );
