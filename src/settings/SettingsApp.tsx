@@ -28,7 +28,7 @@ import { CustomSelect } from "../components/CustomSelect";
 import { WIDGET_COLOR_OPTIONS } from "../components/WidgetContextMenu";
 import { WIDGET_REGISTRY, getWidgetModule } from "../widgets/registry";
 import { WIDGET_PRESETS } from "../core/presets";
-import { computeBentoLayout, applyBentoLayout, BENTO_LAYOUT_NAMES } from "../core/bento";
+import { computeBentoLayout, applyBentoLayout } from "../core/bento";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { AppConfig, WidgetInstance } from "../core/types";
@@ -523,7 +523,6 @@ export function SettingsApp() {
   };
 
   const [bentoLayoutIdx, setBentoLayoutIdx] = useState(0);
-  const [bentoLayoutName, setBentoLayoutName] = useState("");
   const [isBentoPreviewing, setIsBentoPreviewing] = useState(false);
   const originalBentoWidgetsRef = useRef<WidgetInstance[] | null>(null);
 
@@ -550,7 +549,6 @@ export function SettingsApp() {
       // Ignore
     }
     const layout = computeBentoLayout(originalBentoWidgetsRef.current, nextIdx, workArea);
-    setBentoLayoutName(layout.name);
     await applyBentoLayout(layout.widgets);
   }, [config, isBentoPreviewing, bentoLayoutIdx]);
 
@@ -1024,17 +1022,7 @@ export function SettingsApp() {
                       </svg>
                       Bento Grid
                     </span>
-                    <span className="font-mono text-[10px] text-accent-500">
-                      Layout #{bentoLayoutIdx + 1}
-                    </span>
                   </div>
-                  <span className="truncate text-[10px] text-fg-muted">
-                    {bentoLayoutName ||
-                      (
-                        BENTO_LAYOUT_NAMES[bentoLayoutIdx % BENTO_LAYOUT_NAMES.length] ??
-                        BENTO_LAYOUT_NAMES[0]!
-                      ).name}
-                  </span>
                   <div className="flex items-center gap-1.5 pt-0.5">
                     <button
                       type="button"
@@ -1119,24 +1107,6 @@ export function SettingsApp() {
                         />
                         <span className="truncate font-medium text-fg">{title}</span>
                       </div>
-                      <span
-                        className={`ml-2 shrink-0 font-mono text-[10px] ${
-                          isSelected && !wColor
-                            ? "text-accent-500"
-                            : !isSelected
-                              ? "text-fg-muted"
-                              : ""
-                        }`}
-                        style={
-                          isSelected && wColor
-                            ? {
-                                color: wColor,
-                              }
-                            : undefined
-                        }
-                      >
-                        {w.id.slice(0, 5)}
-                      </span>
                     </button>
                   );
                 })}

@@ -141,10 +141,6 @@ export function ContextMenuApp() {
 
   const [isBentoMode, setIsBentoMode] = useState(false);
   const [bentoIdx, setBentoIdx] = useState(0);
-  const [bentoMeta, setBentoMeta] = useState({
-    name: "Full-Width Wall",
-    description: "Edge-to-edge multi-column bento matrix spanning the entire monitor",
-  });
   const originalWidgetsRef = useRef<WidgetInstance[] | null>(null);
 
   const handleStartBento = useCallback(async () => {
@@ -156,7 +152,6 @@ export function ContextMenuApp() {
       setBentoIdx(0);
       const workArea = await getEffectiveWorkArea();
       const layout = computeBentoLayout(cfg.widgets, 0, workArea);
-      setBentoMeta({ name: layout.name, description: layout.description });
       await applyBentoLayout(layout.widgets);
     } catch {
       // Ignore
@@ -169,7 +164,6 @@ export function ContextMenuApp() {
     setBentoIdx(nextIdx);
     const workArea = await getEffectiveWorkArea();
     const layout = computeBentoLayout(originalWidgetsRef.current, nextIdx, workArea);
-    setBentoMeta({ name: layout.name, description: layout.description });
     await applyBentoLayout(layout.widgets);
   }, [bentoIdx]);
 
@@ -231,19 +225,6 @@ export function ContextMenuApp() {
                 </svg>
                 <span>Bento Arranger</span>
               </div>
-              <span className="font-mono text-[10px] text-accent-500">Layout #{bentoIdx + 1}</span>
-            </div>
-
-            <div className="flex flex-col gap-1 rounded-lg border border-line/60 bg-surface-raised p-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-fg">{bentoMeta.name}</span>
-                <span className="rounded bg-accent-500/10 px-1 py-0.5 font-mono text-[9px] text-accent-500">
-                  Bento
-                </span>
-              </div>
-              <span className="text-[10px] leading-tight text-fg-muted">
-                {bentoMeta.description}
-              </span>
             </div>
 
             <button

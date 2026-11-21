@@ -111,6 +111,33 @@ pub fn get_primary_work_area() -> (i32, i32, i32, i32) {
     (0, 0, 1920, 1080)
 }
 
+fn seed_color_from_id(id: &str) -> &'static str {
+    const PALETTE: &[&str] = &[
+        "#10b981", // Emerald
+        "#f59e0b", // Amber
+        "#f43f5e", // Rose
+        "#8b5cf6", // Violet
+        "#06b6d4", // Cyan
+        "#3b82f6", // Blue
+        "#ec4899", // Pink
+        "#14b8a6", // Teal
+        "#6366f1", // Indigo
+        "#f97316", // Orange
+        "#84cc16", // Lime
+        "#a855f7", // Purple
+        "#0ea5e9", // Sky
+        "#e11d48", // Crimson
+        "#d946ef", // Fuchsia
+        "#eab308", // Yellow
+    ];
+
+    let mut hash: u64 = 5381;
+    for b in id.bytes() {
+        hash = hash.wrapping_mul(33).wrapping_add(b as u64);
+    }
+    PALETTE[(hash as usize) % PALETTE.len()]
+}
+
 pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, String> {
     let id = format!("w_{}", uuid::Uuid::new_v4().simple());
     let state = app.state::<AppState>();
@@ -147,6 +174,12 @@ pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, S
         (160 + stagger_offset, 120 + stagger_offset)
     };
 
+    let mut initial_settings = serde_json::Map::new();
+    initial_settings.insert(
+        "widgetColor".to_string(),
+        serde_json::Value::String(seed_color_from_id(&id).to_string()),
+    );
+
     let instance = WidgetInstance {
         id: id.clone(),
         kind: kind.to_string(),
@@ -159,7 +192,7 @@ pub fn spawn_new_widget(app: &AppHandle, kind: &str) -> Result<WidgetInstance, S
         monitor: MonitorRef::default(),
         opacity: 0.95,
         always_on_top: false,
-        settings: serde_json::Map::new(),
+        settings: initial_settings,
         state: serde_json::Map::new(),
     };
 
