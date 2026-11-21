@@ -1,3 +1,9 @@
+# [0.34.0](https://github.com/hasanify/nook/compare/v0.33.0...v0.34.0) (2026-11-21)
+
+### Features
+
+- **widgets:** sticky footers, contrast-safe styling, custom appearance studio, and bundled fonts ([3de4f44](https://github.com/hasanify/nook/commit/3de4f44862407adbbbd8ce6e782551590a5f2302))
+
 # [0.33.0](https://github.com/hasanify/nook/compare/v0.32.0...v0.33.0) (2026-11-21)
 
 ### Features
