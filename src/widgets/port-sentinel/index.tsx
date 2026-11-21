@@ -159,6 +159,12 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
           <Banner message={banner.text} type={banner.type} onAction={() => setBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>{ports.length} total listening</span>
+          <span>{devPortsOnly ? "Dev ports filter: ON" : "TCP Radar"}</span>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Search Bar */}
@@ -253,12 +259,6 @@ export function PortSentinelWidget({ instance, editMode, patchState }: WidgetPro
               );
             })
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>{ports.length} total listening</span>
-          <span>{devPortsOnly ? "Dev ports filter: ON" : "TCP Radar"}</span>
         </div>
       </div>
     </WidgetShell>

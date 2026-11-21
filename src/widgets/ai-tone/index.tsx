@@ -141,7 +141,7 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-fg-muted">~30 in / ~65 out tokens</span>
+            <span className="text-[10px] text-fg-muted">Select tone preset</span>
             <button
               type="button"
               onClick={() => void handleGenerate()}

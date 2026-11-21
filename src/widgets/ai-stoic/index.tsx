@@ -193,6 +193,31 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>Daily Stoic Reflection</span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="
+              flex cursor-pointer items-center gap-1 text-fg-muted
+              hover:text-fg
+            "
+          >
+            {copied ? (
+              <>
+                <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
+                <span className="text-ok">Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy className="block-3 inline-3" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Quote Section */}
@@ -246,31 +271,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               {insight.focus}
             </p>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>~15 in / ~40 out tokens</span>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="
-              flex cursor-pointer items-center gap-1 text-fg-muted
-              hover:text-fg
-            "
-          >
-            {copied ? (
-              <>
-                <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
-                <span className="text-ok">Copied</span>
-              </>
-            ) : (
-              <>
-                <Copy className="block-3 inline-3" />
-                <span>Copy</span>
-              </>
-            )}
-          </button>
         </div>
       </div>
     </WidgetShell>

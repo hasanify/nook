@@ -1,4 +1,16 @@
 @import "tailwindcss";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/newsreader/400.css";
+@import "@fontsource/newsreader/600.css";
+@import "@fontsource/newsreader/400-italic.css";
+@import "@fontsource/quicksand/500.css";
+@import "@fontsource/quicksand/600.css";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
 
 /* class-based dark mode, toggled on <html> by use-theme.ts */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -43,8 +55,11 @@
   --color-white: #ffffff;
   --color-black: #000000;
 
-  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "Cascadia Mono", ui-monospace, monospace;
+  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, monospace;
+  --font-serif: "Newsreader", "Charter", "Georgia", "Times New Roman", serif;
+  --font-rounded: "Quicksand", "Nunito", system-ui, sans-serif;
+  --font-tech: "Space Mono", "Cascadia Code", "Consolas", monospace;
 
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.1rem;
@@ -96,6 +111,10 @@
   --fg-muted: var(--color-neutral-500);
   --line: var(--color-neutral-200);
   --focus: var(--color-accent-500);
+  --ok: oklch(0.48 0.15 150);
+  --warn: oklch(0.52 0.16 75);
+  --error: oklch(0.52 0.2 25);
+  --danger: oklch(0.52 0.2 25);
 }
 .dark {
   --surface: var(--color-neutral-900);
@@ -104,6 +123,10 @@
   --fg-muted: var(--color-neutral-400);
   --line: var(--color-neutral-700);
   --focus: var(--color-accent-400);
+  --ok: oklch(0.74 0.14 150);
+  --warn: oklch(0.78 0.14 80);
+  --error: oklch(0.7 0.18 25);
+  --danger: oklch(0.7 0.18 25);
 }
 
 @theme inline {
@@ -113,6 +136,10 @@
   --color-fg-muted: var(--fg-muted);
   --color-line: var(--line);
   --color-focus: var(--focus);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-error: var(--error);
+  --color-danger: var(--danger);
 }
 
 @layer base {

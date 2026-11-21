@@ -138,6 +138,22 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex flex-col gap-1 inline-full">
+          <div className="flex items-center justify-between text-[10px] text-fg-muted">
+            <span>
+              {completedCount} of {steps.length} steps completed
+            </span>
+            <span className="font-mono font-semibold">{progressPercent}%</span>
+          </div>
+          <div className="overflow-hidden rounded-full bg-surface-raised block-1 inline-full">
+            <div
+              className="bg-ok transition-all duration-300 block-full"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Input Row */}
@@ -238,22 +254,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               </div>
             ))
           )}
-        </div>
-
-        {/* Progress Bar & Footer */}
-        <div className="flex flex-col gap-1 border-bs border-line/40 pbs-1.5">
-          <div className="flex items-center justify-between text-[10px] text-fg-muted">
-            <span>
-              {completedCount} of {steps.length} steps completed
-            </span>
-            <span className="font-mono font-semibold">{progressPercent}%</span>
-          </div>
-          <div className="overflow-hidden rounded-full bg-surface-raised block-1 inline-full">
-            <div
-              className="bg-ok transition-all duration-300 block-full"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
         </div>
       </div>
     </WidgetShell>

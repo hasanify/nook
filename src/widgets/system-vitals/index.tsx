@@ -17,8 +17,8 @@ function formatBytes(bytes: number): string {
 }
 
 function getStatusColor(percent: number): string {
-  if (percent >= 90) return "text-red-400";
-  if (percent >= 75) return "text-amber-400";
+  if (percent >= 90) return "text-error";
+  if (percent >= 75) return "text-warn";
   return "text-accent-500";
 }
 
@@ -99,19 +99,39 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
   }, [intervalSec]);
 
   return (
-    <WidgetShell instance={instance} editMode={editMode} title="System Vitals">
-      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
-        <div className="flex items-center justify-between border-be border-line/40 pbe-1">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
-            <span className="relative flex block-2 inline-2">
-              <span className="absolute inline-flex animate-ping rounded-full bg-emerald-400 opacity-75 block-full inline-full" />
-              <span className="relative inline-flex rounded-full bg-emerald-500 block-2 inline-2" />
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title="System Vitals"
+      headerSlot={<span className="font-mono text-[10px] text-fg-muted">{intervalSec}s poll</span>}
+      footer={
+        <div className="flex flex-col gap-1 inline-full">
+          <div className="flex justify-between text-[10px] text-fg-muted">
+            <span>Disk (C:)</span>
+            <span className="font-mono">
+              {vitals
+                ? `${formatBytes(vitals.disk_used_bytes)} / ${formatBytes(vitals.disk_total_bytes)} (${vitals.disk_percent}%)`
+                : "--"}
             </span>
-            System Vitals
           </div>
-          <span className="font-mono text-[10px] text-fg-muted">{intervalSec}s poll</span>
+          <div className="overflow-hidden rounded-full border border-line/40 bg-surface-raised block-1 inline-full">
+            <div
+              className="rounded-full transition-all duration-300 block-full"
+              style={{
+                width: `${Math.min(100, Math.max(0, vitals?.disk_percent ?? 0))}%`,
+                backgroundColor:
+                  vitals && vitals.disk_percent >= 90
+                    ? "var(--error)"
+                    : vitals && vitals.disk_percent >= 80
+                      ? "var(--warn)"
+                      : "var(--color-accent-500)",
+              }}
+            />
+          </div>
         </div>
-
+      }
+    >
+      <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         <div className="my-1 grid grid-cols-2 gap-2">
           {/* CPU */}
           <div className="flex flex-col justify-between rounded-lg border border-line/40 bg-surface/50 p-2">
@@ -175,36 +195,10 @@ export function SystemVitalsWidget({ instance, editMode }: WidgetProps) {
                   width: `${Math.min(100, Math.max(0, vitals?.memory_percent ?? 0))}%`,
                   backgroundColor:
                     vitals && vitals.memory_percent >= 90
-                      ? "var(--color-red-400, #f87171)"
+                      ? "var(--error)"
                       : vitals && vitals.memory_percent >= 75
-                        ? "var(--color-amber-400, #fbbf24)"
-                        : "var(--color-accent-500, #38bdf8)",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Disk Bar */}
-          <div>
-            <div className="mbe-0.5 flex justify-between text-fg-muted">
-              <span>Disk (C:)</span>
-              <span className="font-mono">
-                {vitals
-                  ? `${formatBytes(vitals.disk_used_bytes)} / ${formatBytes(vitals.disk_total_bytes)} (${vitals.disk_percent}%)`
-                  : "--"}
-              </span>
-            </div>
-            <div className="overflow-hidden rounded-full border border-line/40 bg-surface-raised block-1.5 inline-full">
-              <div
-                className="rounded-full transition-all duration-300 block-full"
-                style={{
-                  width: `${Math.min(100, Math.max(0, vitals?.disk_percent ?? 0))}%`,
-                  backgroundColor:
-                    vitals && vitals.disk_percent >= 90
-                      ? "var(--color-red-400, #f87171)"
-                      : vitals && vitals.disk_percent >= 80
-                        ? "var(--color-amber-400, #fbbf24)"
-                        : "var(--color-accent-500, #38bdf8)",
+                        ? "var(--warn)"
+                        : "var(--color-accent-500)",
                 }}
               />
             </div>

@@ -226,6 +226,21 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>{prs.length} pull requests</span>
+          <button
+            type="button"
+            className="
+              cursor-pointer text-accent-500
+              hover:underline
+            "
+            onClick={() => void fetchPRs()}
+          >
+            Refresh
+          </button>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-none min-block-full">
         {/* Filter Tabs */}
@@ -349,20 +364,6 @@ export function GithubPrsWidget({ instance, editMode, patchState }: WidgetProps)
               </div>
             ))
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>{prs.length} pull requests</span>
-          <span
-            className="
-              cursor-pointer text-accent-500
-              hover:underline
-            "
-            onClick={() => void fetchPRs()}
-          >
-            Refresh
-          </span>
         </div>
       </div>
     </WidgetShell>

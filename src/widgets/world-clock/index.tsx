@@ -125,7 +125,20 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
   }, [showSeconds]);
 
   return (
-    <WidgetShell instance={instance} editMode={editMode} title="World Clock">
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title="World Clock"
+      footer={
+        <div className="flex items-center justify-between inline-full">
+          <span>{DEFAULT_CITIES.length} timezones active</span>
+          <span className="flex items-center gap-1">
+            <Sun className="text-amber-500 block-2.5 inline-2.5" weight="fill" /> Day /{" "}
+            <Moon className="text-indigo-400 block-2.5 inline-2.5" weight="fill" /> Night
+          </span>
+        </div>
+      }
+    >
       <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
@@ -203,15 +216,6 @@ export function WorldClockWidget({ instance, editMode }: WidgetProps) {
               </div>
             );
           })}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>{DEFAULT_CITIES.length} timezones active</span>
-          <span className="flex items-center gap-1">
-            <Sun className="text-amber-500 block-2.5 inline-2.5" weight="fill" /> Day /{" "}
-            <Moon className="text-indigo-400 block-2.5 inline-2.5" weight="fill" /> Night
-          </span>
         </div>
       </div>
     </WidgetShell>

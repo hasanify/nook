@@ -71,6 +71,25 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>
+            {remainingCount} {remainingCount === 1 ? "task" : "tasks"} remaining
+          </span>
+          {hasCompleted && (
+            <button
+              type="button"
+              onClick={handleClearCompleted}
+              className="
+                cursor-pointer text-fg-muted transition-colors
+                hover:text-fg hover:underline
+              "
+            >
+              Clear completed
+            </button>
+          )}
+        </div>
+      }
     >
       <div className="flex flex-col gap-2 select-none min-block-full">
         {/* Add Task Input Form */}
@@ -172,25 +191,6 @@ export function TodoWidget({ instance, editMode, patchState }: WidgetProps) {
                 </button>
               </div>
             ))
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1.5 text-[10px] text-fg-muted">
-          <span>
-            {remainingCount} {remainingCount === 1 ? "task" : "tasks"} remaining
-          </span>
-          {hasCompleted && (
-            <button
-              type="button"
-              onClick={handleClearCompleted}
-              className="
-                text-fg-muted transition-colors
-                hover:text-fg hover:underline
-              "
-            >
-              Clear completed
-            </button>
           )}
         </div>
       </div>

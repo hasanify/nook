@@ -191,26 +191,71 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
   const activePreset = PRESETS.find((p) => p.id === activeSound);
 
   return (
-    <WidgetShell instance={instance} editMode={editMode} title="Ambient Sound">
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title="Ambient Sound"
+      footer={
+        <div className="flex items-center justify-between gap-3 inline-full">
+          {/* Main Play / Pause Button */}
+          <button
+            type="button"
+            onClick={togglePlay}
+            className={`
+              flex cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs
+              font-semibold shadow-sm transition-all block-7
+              active:scale-95
+              ${
+                isPlaying
+                  ? `
+                  bg-accent-500 text-white
+                  hover:bg-accent-600
+                `
+                  : `
+                  border border-line bg-surface-raised text-fg
+                  hover:bg-surface-raised/80
+                `
+              }
+            `}
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="block-3 inline-3" weight="fill" />
+                <span>Pause</span>
+              </>
+            ) : (
+              <>
+                <Play className="block-3 inline-3" weight="fill" />
+                <span>Play {activePreset?.label}</span>
+              </>
+            )}
+          </button>
+
+          {/* Volume Slider */}
+          <div className="flex flex-1 items-center gap-1.5 max-inline-[120px]">
+            <SpeakerLow className="shrink-0 text-fg-muted block-3 inline-3" />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={volume}
+              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+              className="cursor-pointer accent-accent-500 block-1.5 inline-full"
+              title={`Volume: ${Math.round(volume * 100)}%`}
+            />
+            <SpeakerHigh className="shrink-0 text-fg-muted block-3 inline-3" />
+          </div>
+        </div>
+      }
+    >
       <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-fg">
-            <span className="relative flex block-2 inline-2">
-              <span
-                className={`
-                  absolute inline-flex rounded-full opacity-75 block-full
-                  inline-full
-                  ${isPlaying ? "animate-ping bg-accent-400" : "bg-fg-muted"}
-                `}
-              />
-              <span
-                className={`
-                  relative inline-flex rounded-full block-2 inline-2
-                  ${isPlaying ? "bg-accent-500" : "bg-fg-muted"}
-                `}
-              />
-            </span>
+            <SpeakerHigh
+              className={`block-3.5 inline-3.5 ${isPlaying ? "text-accent-500" : "text-fg-muted"}`}
+            />
             <span>Ambient Sound</span>
           </div>
 
@@ -248,59 +293,6 @@ export function AmbientSoundWidget({ instance, editMode }: WidgetProps) {
               </button>
             );
           })}
-        </div>
-
-        {/* Playback & Volume Control Bar */}
-        <div className="flex items-center justify-between gap-3 border-bs border-line/40 pbs-1">
-          {/* Main Play / Pause Button */}
-          <button
-            type="button"
-            onClick={togglePlay}
-            className={`
-              flex cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs
-              font-semibold shadow-sm transition-all block-8
-              active:scale-95
-              ${
-                isPlaying
-                  ? `
-                  bg-accent-500 text-white
-                  hover:bg-accent-600
-                `
-                  : `
-                  border border-line bg-surface-raised text-fg
-                  hover:bg-surface-raised/80
-                `
-              }
-            `}
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="block-3.5 inline-3.5" weight="fill" />
-                <span>Pause</span>
-              </>
-            ) : (
-              <>
-                <Play className="block-3.5 inline-3.5" weight="fill" />
-                <span>Play {activePreset?.label}</span>
-              </>
-            )}
-          </button>
-
-          {/* Volume Slider */}
-          <div className="flex flex-1 items-center gap-1.5 max-inline-[120px]">
-            <SpeakerLow className="shrink-0 text-fg-muted block-3 inline-3" />
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={volume}
-              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="cursor-pointer accent-accent-500 block-1.5 inline-full"
-              title={`Volume: ${Math.round(volume * 100)}%`}
-            />
-            <SpeakerHigh className="shrink-0 text-fg-muted block-3 inline-3" />
-          </div>
         </div>
       </div>
     </WidgetShell>

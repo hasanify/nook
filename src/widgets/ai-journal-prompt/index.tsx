@@ -189,6 +189,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>Daily Reflection</span>
+          <span>1 sentence micro-log</span>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Daily Question */}
@@ -266,12 +272,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               </button>
             </div>
           )}
-        </div>
-
-        {/* Token Budget Note */}
-        <div className="flex items-center justify-between text-[10px] text-fg-muted">
-          <span>~15 in / ~20 out tokens</span>
-          <span>1 sentence micro-log</span>
         </div>
       </div>
     </WidgetShell>

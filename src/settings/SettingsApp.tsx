@@ -51,7 +51,18 @@ import {
   type UpdateCheckResult,
   updateSettings,
 } from "@/core/ipc";
-import { WIDGET_PRESETS } from "@/core/presets";
+import {
+  buildCustomPreset,
+  type CustomPresetConfig,
+  getCustomPresetConfig,
+  type PresetBackdrop,
+  type PresetBorder,
+  type PresetFont,
+  type PresetHeader,
+  type PresetRadius,
+  saveCustomPresetConfig,
+  WIDGET_PRESETS,
+} from "@/core/presets";
 import type { AppConfig, WidgetInstance } from "@/core/types";
 import { useEditMode } from "@/core/use-edit-mode";
 import { getWidgetModule, WIDGET_REGISTRY } from "@/widgets/registry";
@@ -435,6 +446,22 @@ export function SettingsApp() {
     void updateAppConfig({ widgetPreset: presetId });
   };
 
+  const [customPreset, setCustomPreset] = useState<CustomPresetConfig>(() =>
+    getCustomPresetConfig(),
+  );
+
+  const handleCustomPresetFieldChange = <K extends keyof CustomPresetConfig>(
+    field: K,
+    value: CustomPresetConfig[K],
+  ) => {
+    const updated = { ...customPreset, [field]: value };
+    setCustomPreset(updated);
+    saveCustomPresetConfig(updated);
+    if ((config?.app?.widgetPreset || "default") !== "custom") {
+      handlePresetChange("custom");
+    }
+  };
+
   const handleGridSnapChange = (gridSnap: number) => {
     if (!config) return;
     setConfig({
@@ -673,7 +700,7 @@ export function SettingsApp() {
           <div className="relative">
             <Info className="block-3.5 inline-3.5" />
             {updateResult?.has_update && (
-              <span className="absolute -inset-e-1 -inset-bs-1 animate-pulse rounded-full bg-accent-500 block-2 inline-2" />
+              <span className="absolute -inset-e-1 -inset-bs-1 rounded-full bg-accent-500 block-2 inline-2" />
             )}
           </div>
           <span>About</span>
@@ -934,6 +961,263 @@ export function SettingsApp() {
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Custom Appearance Studio */}
+                <div className="rounded-2xl border border-line/60 bg-surface/70 p-5 shadow-xs">
+                  <div className="mbe-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="flex items-center gap-2 text-sm font-semibold text-fg">
+                        <PaintBrush className="text-accent-500 block-4 inline-4" />
+                        Custom Appearance Studio
+                      </h4>
+                      <p className="mbs-0.5 text-xs text-fg-muted">
+                        Customize typography, corner radius, glass materials, and border styles.
+                      </p>
+                    </div>
+                    {(config?.app?.widgetPreset || "default") === "custom" ? (
+                      <span className="flex items-center gap-1.5 rounded-full bg-accent-500/15 px-2.5 py-1 text-[11px] font-semibold text-accent-500">
+                        <Check className="block-3 inline-3" weight="bold" /> Active Profile
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handlePresetChange("custom")}
+                        className="cursor-pointer rounded-lg bg-surface-raised px-3 py-1 text-xs font-medium text-fg transition-colors hover:bg-accent-500 hover:text-white"
+                      >
+                        Apply Custom
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {/* Controls Column 1: Typography & Radius */}
+                    <div className="flex flex-col gap-4">
+                      {/* Font selector */}
+                      <div>
+                        <span className="text-xs font-semibold text-fg">Typography (Font)</span>
+                        <div className="mbs-2 grid grid-cols-2 gap-1.5">
+                          {[
+                            { id: "sans", label: "Sans", sub: "Inter" },
+                            { id: "mono", label: "Mono", sub: "JetBrains" },
+                            { id: "serif", label: "Serif", sub: "Newsreader" },
+                            { id: "rounded", label: "Rounded", sub: "Quicksand" },
+                            { id: "tech", label: "Tech", sub: "Space Mono" },
+                          ].map((f) => {
+                            const isCur = customPreset.font === f.id;
+                            return (
+                              <button
+                                key={f.id}
+                                type="button"
+                                onClick={() =>
+                                  handleCustomPresetFieldChange("font", f.id as PresetFont)
+                                }
+                                className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-start transition-all ${
+                                  isCur
+                                    ? "border-accent-500 bg-accent-500/10 text-accent-500 ring-1 ring-accent-500"
+                                    : "border-line/60 bg-surface-raised/40 text-fg-muted hover:border-line hover:text-fg"
+                                }`}
+                              >
+                                <div className="text-xs font-medium">{f.label}</div>
+                                <div className="font-mono text-[10px] opacity-75">{f.sub}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Corner Radius */}
+                      <div>
+                        <span className="text-xs font-semibold text-fg">Corner Radius</span>
+                        <div className="mbs-2 flex flex-wrap gap-1.5">
+                          {[
+                            { id: "none", label: "0px" },
+                            { id: "sm", label: "6px" },
+                            { id: "md", label: "10px" },
+                            { id: "lg", label: "16px" },
+                            { id: "xl", label: "24px" },
+                            { id: "full", label: "32px" },
+                          ].map((r) => {
+                            const isCur = customPreset.radius === r.id;
+                            return (
+                              <button
+                                key={r.id}
+                                type="button"
+                                onClick={() =>
+                                  handleCustomPresetFieldChange("radius", r.id as PresetRadius)
+                                }
+                                className={`cursor-pointer rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${
+                                  isCur
+                                    ? "border-accent-500 bg-accent-500 text-white shadow-xs"
+                                    : "border-line/60 bg-surface-raised/50 text-fg-muted hover:text-fg"
+                                }`}
+                              >
+                                {r.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Controls Column 2: Material & Borders */}
+                    <div className="flex flex-col gap-4">
+                      {/* Material / Backdrop */}
+                      <div>
+                        <span className="text-xs font-semibold text-fg">Surface Material</span>
+                        <div className="mbs-2 grid grid-cols-2 gap-1.5">
+                          {[
+                            { id: "glass", label: "Frosted Glass", sub: "Deep blur" },
+                            { id: "sheer", label: "Floating Sheer", sub: "12px blur" },
+                            { id: "solid", label: "Solid Surface", sub: "Opaque card" },
+                            { id: "oled", label: "OLED Black", sub: "Pitch-black" },
+                          ].map((b) => {
+                            const isCur = customPreset.backdrop === b.id;
+                            return (
+                              <button
+                                key={b.id}
+                                type="button"
+                                onClick={() =>
+                                  handleCustomPresetFieldChange("backdrop", b.id as PresetBackdrop)
+                                }
+                                className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-start transition-all ${
+                                  isCur
+                                    ? "border-accent-500 bg-accent-500/10 text-accent-500 ring-1 ring-accent-500"
+                                    : "border-line/60 bg-surface-raised/40 text-fg-muted hover:border-line hover:text-fg"
+                                }`}
+                              >
+                                <div className="text-xs font-medium">{b.label}</div>
+                                <div className="text-[10px] opacity-75">{b.sub}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Border & Shadow */}
+                      <div>
+                        <span className="text-xs font-semibold text-fg">Border & Glow</span>
+                        <div className="mbs-2 grid grid-cols-3 gap-1.5">
+                          {[
+                            { id: "hairline", label: "Hairline" },
+                            { id: "solid", label: "Solid" },
+                            { id: "thick", label: "Thick 2px" },
+                            { id: "glow", label: "Neon Glow" },
+                            { id: "none", label: "None" },
+                          ].map((b) => {
+                            const isCur = customPreset.border === b.id;
+                            return (
+                              <button
+                                key={b.id}
+                                type="button"
+                                onClick={() =>
+                                  handleCustomPresetFieldChange("border", b.id as PresetBorder)
+                                }
+                                className={`cursor-pointer rounded-lg border px-2 py-1 text-center text-xs font-medium transition-all ${
+                                  isCur
+                                    ? "border-accent-500 bg-accent-500 text-white"
+                                    : "border-line/60 bg-surface-raised/50 text-fg-muted hover:text-fg"
+                                }`}
+                              >
+                                {b.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Column 3: Header & Live Interactive Preview */}
+                    <div className="flex flex-col gap-3">
+                      <div>
+                        <span className="text-xs font-semibold text-fg">Header Divider</span>
+                        <div className="mbs-1.5 flex flex-wrap gap-1.5">
+                          {[
+                            { id: "hairline", label: "Hairline" },
+                            { id: "seamless", label: "Seamless" },
+                            { id: "tinted", label: "Tinted" },
+                            { id: "bold", label: "Bold" },
+                          ].map((h) => {
+                            const isCur = customPreset.header === h.id;
+                            return (
+                              <button
+                                key={h.id}
+                                type="button"
+                                onClick={() =>
+                                  handleCustomPresetFieldChange("header", h.id as PresetHeader)
+                                }
+                                className={`cursor-pointer rounded-lg border px-2.5 py-0.5 text-xs font-medium transition-all ${
+                                  isCur
+                                    ? "border-accent-500 bg-accent-500 text-white"
+                                    : "border-line/60 bg-surface-raised/50 text-fg-muted hover:text-fg"
+                                }`}
+                              >
+                                {h.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Live Interactive Preview Card */}
+                      <div className="mbs-1">
+                        <span className="mbe-1.5 block text-xs font-semibold text-fg">
+                          Live Interactive Preview
+                        </span>
+                        {(() => {
+                          const previewPreset = buildCustomPreset(customPreset);
+                          const currentAppTheme = config?.app?.theme ?? "system";
+                          const isDark =
+                            currentAppTheme === "dark" ||
+                            (currentAppTheme === "system" &&
+                              typeof window !== "undefined" &&
+                              window.matchMedia("(prefers-color-scheme: dark)").matches);
+                          const shellStyle = previewPreset.getShellStyle(undefined, isDark, false);
+                          return (
+                            <div
+                              className={`overflow-hidden transition-all ${previewPreset.containerClass}`}
+                              style={shellStyle}
+                            >
+                              {/* Header */}
+                              <div
+                                className={`flex items-center justify-between px-3 py-2 ${previewPreset.headerClass}`}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <Sparkle
+                                    className="text-accent-500 block-3.5 inline-3.5"
+                                    weight="fill"
+                                  />
+                                  <span className="text-xs font-semibold text-fg">
+                                    Preview Widget
+                                  </span>
+                                </div>
+                                <span className="font-mono text-[10px] text-fg-muted">Active</span>
+                              </div>
+                              {/* Content */}
+                              <div className="flex flex-col gap-2 p-3 text-xs">
+                                <p className="text-fg-muted">
+                                  This is how widgets render with your custom appearance preset.
+                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="rounded-full border border-accent-500/30 bg-accent-500/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-accent-500">
+                                    {customPreset.font}
+                                  </span>
+                                  <span className="text-[11px] text-fg-muted">
+                                    {customPreset.radius} • {customPreset.backdrop}
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Sticky Footer */}
+                              <div className="flex items-center justify-between border-bs border-line/40 bg-surface/85 px-3 py-1.5 text-[10px] text-fg-muted">
+                                <span>Sticky footer</span>
+                                <span className="font-mono text-ok">100% OK</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1559,7 +1843,7 @@ export function SettingsApp() {
                   <span className="text-fg-muted">Active Endpoint:</span>
                   {activeAiProvider ? (
                     <span className="flex items-center gap-1.5 font-semibold text-ok">
-                      <span className="animate-pulse rounded-full bg-ok block-2 inline-2" />
+                      <span className="rounded-full bg-ok block-2 inline-2" />
                       {AI_PROVIDER_LIST.find((p) => p.id === activeAiProvider)?.name ||
                         activeAiProvider}
                       {preferredAi === "auto" ? " (Auto-picked)" : " (Pinned)"}

@@ -2,6 +2,7 @@ import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
+import { WidgetBadge } from "@/components/widget-ui";
 import { WidgetShell } from "@/components/WidgetShell";
 import { callAI } from "@/core/ai";
 import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
@@ -186,48 +187,8 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
-    >
-      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
-        {/* Main Card Content */}
-        <div className="flex flex-1 flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <span className="rounded-full bg-accent-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-accent-500">
-              {topic}
-            </span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="
-                flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
-                transition-colors
-                hover:text-fg
-              "
-            >
-              {copied ? (
-                <>
-                  <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
-                  <span className="text-ok">Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="block-3 inline-3" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <p className="text-xs/relaxed text-fg select-text">
-            {loading ? (
-              <span className="text-fg-muted italic">Consulting the wonder mirror…</span>
-            ) : (
-              explanation
-            )}
-          </p>
-        </div>
-
-        {/* Bottom Bar: Ask custom concept or toggle input */}
-        <div className="border-bs border-line/40 pbs-1.5">
+      footer={
+        <div className="inline-full">
           {showInput ? (
             <div className="flex gap-1.5">
               <input
@@ -278,6 +239,44 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               </button>
             </div>
           )}
+        </div>
+      }
+    >
+      <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
+        {/* Main Card Content */}
+        <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <WidgetBadge variant="accent">{topic}</WidgetBadge>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="
+                flex cursor-pointer items-center gap-1 text-[10px] text-fg-muted
+                transition-colors
+                hover:text-fg
+              "
+            >
+              {copied ? (
+                <>
+                  <Check className="shrink-0 text-ok block-3 inline-3" weight="bold" />
+                  <span className="text-ok">Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="block-3 inline-3" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <p className="text-xs/relaxed text-fg select-text">
+            {loading ? (
+              <span className="text-fg-muted italic">Consulting the wonder mirror…</span>
+            ) : (
+              explanation
+            )}
+          </p>
         </div>
       </div>
     </WidgetShell>

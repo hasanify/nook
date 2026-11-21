@@ -1,4 +1,5 @@
 import {
+  MusicNote,
   Pause,
   Play,
   SkipBack,
@@ -88,21 +89,10 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
         {/* Header / Player Badge */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-fg">
-            <span className="relative flex block-2 inline-2">
-              <span
-                className={`
-                  absolute inline-flex rounded-full opacity-75 block-full
-                  inline-full
-                  ${isPlaying ? "animate-ping bg-accent-400" : "bg-fg-muted"}
-                `}
-              />
-              <span
-                className={`
-                  relative inline-flex rounded-full block-2 inline-2
-                  ${isPlaying ? "bg-accent-500" : "bg-fg-muted"}
-                `}
-              />
-            </span>
+            <MusicNote
+              className={`block-3.5 inline-3.5 ${isPlaying ? "text-accent-500" : "text-fg-muted"}`}
+              weight={isPlaying ? "fill" : "regular"}
+            />
             <span>{media?.player || "Windows Media"}</span>
           </div>
 

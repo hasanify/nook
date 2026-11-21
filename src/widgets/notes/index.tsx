@@ -78,6 +78,13 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-end font-mono text-[9px] text-fg-muted select-none inline-full">
+          <span>
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between min-block-full">
         <textarea
@@ -92,11 +99,6 @@ export function NotesWidget({ instance, editMode, patchState }: WidgetProps) {
             ${lineWrapping ? "whitespace-pre-wrap" : `overflow-x-auto whitespace-pre`}
           `}
         />
-        <div className="mbs-auto flex items-center justify-end border-bs border-line/20 pbs-1 pbe-1 font-mono text-[9px] text-fg-muted/50 select-none">
-          <span>
-            {wordCount} {wordCount === 1 ? "word" : "words"}
-          </span>
-        </div>
       </div>
     </WidgetShell>
   );

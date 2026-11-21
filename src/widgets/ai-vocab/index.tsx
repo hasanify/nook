@@ -233,6 +233,12 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>Word of the day</span>
+          <span>Daily lexicon</span>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-1.5 p-1 select-text min-block-full">
         {/* Word Title & Pronunciation Header */}
@@ -294,12 +300,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               {loading ? <span className="text-fg-muted not-italic">…</span> : `“${vocab.use}”`}
             </p>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>~15 in / ~45 out tokens</span>
-          <span>Daily lexicon</span>
         </div>
       </div>
     </WidgetShell>

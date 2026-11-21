@@ -2,6 +2,7 @@ import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
+import { WidgetBadge } from "@/components/widget-ui";
 import { WidgetShell } from "@/components/WidgetShell";
 import { callAI } from "@/core/ai";
 import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
@@ -172,14 +173,18 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>Today in History</span>
+          <span className="font-mono">{date}</span>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Header Badges */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="rounded-sm bg-accent-500/10 px-2 py-0.5 font-mono text-[11px] font-bold text-accent-500">
-              {historyItem.year}
-            </span>
+            <WidgetBadge variant="accent">{historyItem.year}</WidgetBadge>
             <span className="text-[11px] font-medium text-fg-muted">{currentDate.display}</span>
           </div>
           <button
@@ -222,12 +227,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               {loading ? <span className="italic">…</span> : historyItem.impact}
             </p>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>~15 in / ~50 out tokens</span>
-          <span className="font-mono">{date}</span>
         </div>
       </div>
     </WidgetShell>

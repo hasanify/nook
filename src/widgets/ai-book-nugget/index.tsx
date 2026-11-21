@@ -2,6 +2,7 @@ import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { Banner } from "@/components/Banner";
+import { WidgetBadge } from "@/components/widget-ui";
 import { WidgetShell } from "@/components/WidgetShell";
 import { callAI } from "@/core/ai";
 import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
@@ -206,13 +207,65 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="inline-full">
+          {showInput ? (
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                autoFocus
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && inputVal.trim()) {
+                    void handleFetch(inputVal.trim());
+                  } else if (e.key === "Escape") {
+                    setShowInput(false);
+                  }
+                }}
+                placeholder="Enter book title or author… (Enter)"
+                className="
+                  flex-1 rounded-md border border-line bg-surface-raised/40 px-2
+                  py-1 text-xs text-fg
+                  placeholder:text-fg-muted/50
+                  focus:border-accent-500 focus:outline-none
+                "
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (inputVal.trim()) void handleFetch(inputVal.trim());
+                }}
+                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-[10px] font-medium text-white"
+              >
+                Go
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between text-[10px] text-fg-muted">
+              <span>Daily Book Wisdom</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setInputVal("");
+                  setShowInput(true);
+                }}
+                className="
+                  cursor-pointer text-accent-500
+                  hover:underline
+                "
+              >
+                Search book
+              </button>
+            </div>
+          )}
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Book Header Tag */}
         <div className="flex items-center justify-between">
-          <span className="truncate rounded-md bg-accent-500/10 px-2 py-0.5 text-[10px] font-medium text-accent-500">
-            {nugget.book}
-          </span>
+          <WidgetBadge variant="accent">{nugget.book}</WidgetBadge>
           <button
             type="button"
             onClick={handleCopy}
@@ -255,60 +308,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               {loading ? <span className="text-fg-muted italic">…</span> : nugget.apply}
             </p>
           </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-bs border-line/40 pbs-1.5">
-          {showInput ? (
-            <div className="flex gap-1.5">
-              <input
-                type="text"
-                autoFocus
-                value={inputVal}
-                onChange={(e) => setInputVal(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && inputVal.trim()) {
-                    void handleFetch(inputVal.trim());
-                  } else if (e.key === "Escape") {
-                    setShowInput(false);
-                  }
-                }}
-                placeholder="Enter book title or author… (Enter)"
-                className="
-                  flex-1 rounded-md border border-line bg-surface-raised/40 px-2
-                  py-1 text-xs text-fg
-                  placeholder:text-fg-muted/50
-                  focus:border-accent-500 focus:outline-none
-                "
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (inputVal.trim()) void handleFetch(inputVal.trim());
-                }}
-                className="cursor-pointer rounded-md bg-accent-500 px-2 py-1 text-[10px] font-medium text-white"
-              >
-                Go
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between text-[10px] text-fg-muted">
-              <span>~20 in / ~45 out tokens</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setInputVal("");
-                  setShowInput(true);
-                }}
-                className="
-                  cursor-pointer text-accent-500
-                  hover:underline
-                "
-              >
-                Search book
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </WidgetShell>

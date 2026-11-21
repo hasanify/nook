@@ -225,7 +225,17 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
   };
 
   return (
-    <WidgetShell instance={instance} editMode={editMode} title="Tech News Feed">
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title="Tech News Feed"
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>{stories.length} stories</span>
+          <span>Click story to open</span>
+        </div>
+      }
+    >
       <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1.5 text-xs">
@@ -324,12 +334,6 @@ export function NewsFeedWidget({ instance, editMode, patchState }: WidgetProps) 
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>{stories.length} stories</span>
-          <span>Click story to open</span>
         </div>
       </div>
     </WidgetShell>

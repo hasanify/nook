@@ -2,6 +2,7 @@ import { ArrowClockwise } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Banner } from "@/components/Banner";
+import { WidgetBadge } from "@/components/widget-ui";
 import { WidgetShell } from "@/components/WidgetShell";
 import { callAI } from "@/core/ai";
 import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
@@ -205,13 +206,17 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
           <Banner message={errorBanner} type="warn" onAction={() => setErrorBanner(null)} />
         ) : undefined
       }
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>Desk Wellness</span>
+          <span>45-sec micro-break</span>
+        </div>
+      }
     >
       <div className="flex flex-1 flex-col justify-between gap-2 p-1 min-block-full">
         {/* Name and Timer Bar */}
         <div className="flex items-center justify-between">
-          <span className="truncate rounded-md bg-ok/10 px-2 py-0.5 text-[10px] font-semibold text-ok">
-            {stretch.name}
-          </span>
+          <WidgetBadge variant="ok">{stretch.name}</WidgetBadge>
           <div className="flex items-center gap-1.5">
             <span
               className={`
@@ -274,12 +279,6 @@ Random variation seed: ${Math.floor(Math.random() * 1000000)}.`;
               </div>
             ))
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>~15 in / ~35 out tokens</span>
-          <span>45-sec micro-break</span>
         </div>
       </div>
     </WidgetShell>

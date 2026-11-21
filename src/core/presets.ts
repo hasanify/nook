@@ -1,14 +1,192 @@
 import type React from "react";
 
+export type PresetFont = "sans" | "mono" | "serif" | "rounded" | "tech";
+export type PresetRadius = "none" | "sm" | "md" | "lg" | "xl" | "full";
+export type PresetBackdrop = "solid" | "glass" | "sheer" | "oled";
+export type PresetBorder = "none" | "hairline" | "solid" | "thick" | "glow";
+export type PresetHeader = "hairline" | "seamless" | "tinted" | "bold";
+export type PresetShadow = "none" | "soft" | "deep" | "glow";
+
+export interface CustomPresetConfig {
+  font: PresetFont;
+  radius: PresetRadius;
+  backdrop: PresetBackdrop;
+  border: PresetBorder;
+  header: PresetHeader;
+  shadow: PresetShadow;
+}
+
+export const DEFAULT_CUSTOM_PRESET: CustomPresetConfig = {
+  font: "sans",
+  radius: "lg",
+  backdrop: "glass",
+  border: "hairline",
+  header: "hairline",
+  shadow: "soft",
+};
+
+const CUSTOM_PRESET_STORAGE_KEY = "nook_custom_preset";
+
+export function getCustomPresetConfig(): CustomPresetConfig {
+  if (typeof window === "undefined") return DEFAULT_CUSTOM_PRESET;
+  try {
+    const raw = localStorage.getItem(CUSTOM_PRESET_STORAGE_KEY);
+    if (!raw) return DEFAULT_CUSTOM_PRESET;
+    const parsed = JSON.parse(raw) as Partial<CustomPresetConfig>;
+    return { ...DEFAULT_CUSTOM_PRESET, ...parsed };
+  } catch {
+    return DEFAULT_CUSTOM_PRESET;
+  }
+}
+
+export function saveCustomPresetConfig(config: CustomPresetConfig): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(CUSTOM_PRESET_STORAGE_KEY, JSON.stringify(config));
+    // Broadcast change to other windows/widgets
+    if (typeof BroadcastChannel !== "undefined") {
+      const channel = new BroadcastChannel("nook-appearance");
+      // eslint-disable-next-line unicorn/require-post-message-target-origin
+      channel.postMessage({ type: "custom-preset-updated", config });
+      channel.close();
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export interface WidgetPreset {
   id: string;
   name: string;
   tagline: string;
   description: string;
+  font?: string;
   containerClass: string;
   headerClass: string;
   highlightClass: string;
   getShellStyle: (color?: string, isDark?: boolean, isEditMode?: boolean) => React.CSSProperties;
+}
+
+export function buildCustomPreset(config: CustomPresetConfig): WidgetPreset {
+  const radiusClass =
+    {
+      none: "rounded-none",
+      sm: "rounded-sm",
+      md: "rounded-lg",
+      lg: "rounded-2xl",
+      xl: "rounded-3xl",
+      full: "rounded-[32px]",
+    }[config.radius] ?? "rounded-2xl";
+
+  const fontClass =
+    {
+      sans: "font-sans",
+      mono: "font-mono",
+      serif: "font-serif",
+      rounded: "font-rounded",
+      tech: "font-tech",
+    }[config.font] ?? "font-sans";
+
+  const headerClass =
+    {
+      hairline: "border-b border-line/40 bg-surface-raised/40",
+      seamless: "border-b-0 bg-transparent",
+      tinted: "border-b border-accent-500/30 bg-accent-500/10",
+      bold: "border-b-2 border-line bg-surface-raised/80 font-bold",
+    }[config.header] ?? "border-b border-line/40 bg-surface-raised/40";
+
+  return {
+    id: "custom",
+    name: "Custom Studio",
+    tagline: "Your Personal Signature",
+    description: "Fully customized appearance tailored to your exact taste and typography.",
+    font: fontClass,
+    containerClass: `${radiusClass} ${fontClass} ring-1 ring-inset ring-white/10 dark:ring-white/5`,
+    headerClass,
+    highlightClass: "before:via-white/20",
+    getShellStyle: (color, isDark, isEditMode) => {
+      const accent = color || "var(--color-accent-500)";
+
+      // Backdrop styling
+      let background = "var(--surface)";
+      let backdropFilter: string | undefined;
+
+      switch (config.backdrop) {
+        case "glass":
+          background = isDark ? "rgba(18, 18, 24, 0.75)" : "rgba(255, 255, 255, 0.75)";
+          backdropFilter = "blur(24px) saturate(180%)";
+          break;
+        case "sheer":
+          background = isDark ? "rgba(24, 24, 27, 0.42)" : "rgba(255, 255, 255, 0.45)";
+          backdropFilter = "blur(12px)";
+          break;
+        case "oled":
+          background = "#09090b";
+          break;
+        case "solid":
+        default:
+          background = isDark ? "var(--surface)" : "#ffffff";
+          break;
+      }
+
+      // Border styling
+      let border: string | undefined;
+      let borderColor: string | undefined;
+
+      switch (config.border) {
+        case "none":
+          border = "none";
+          break;
+        case "thick":
+          border = `2px solid ${isEditMode ? accent : isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.18)"}`;
+          break;
+        case "glow":
+          border = `1px solid ${isEditMode ? accent : `color-mix(in srgb, ${accent} 60%, var(--line))`}`;
+          break;
+        case "solid":
+          border = `1px solid ${isEditMode ? accent : "var(--line)"}`;
+          break;
+        case "hairline":
+        default:
+          borderColor = isEditMode
+            ? accent
+            : color
+              ? `color-mix(in srgb, ${color} 30%, var(--line))`
+              : "var(--line)";
+          border = `1px solid ${borderColor}`;
+          break;
+      }
+
+      // Shadow styling
+      let boxShadow: string | undefined;
+      switch (config.shadow) {
+        case "none":
+          boxShadow = "none";
+          break;
+        case "deep":
+          boxShadow = isDark
+            ? "0 20px 40px -8px rgba(0, 0, 0, 0.65)"
+            : "0 20px 40px -8px rgba(0, 0, 0, 0.16)";
+          break;
+        case "glow":
+          boxShadow = `0 0 24px -2px color-mix(in srgb, ${accent} 35%, transparent), 0 0 6px -1px color-mix(in srgb, ${accent} 50%, transparent)`;
+          break;
+        case "soft":
+        default:
+          boxShadow = isDark
+            ? "0 10px 28px -6px rgba(0, 0, 0, 0.4)"
+            : "0 10px 28px -6px rgba(0, 0, 0, 0.08)";
+          break;
+      }
+
+      return {
+        background,
+        border,
+        boxShadow,
+        backdropFilter,
+      };
+    },
+  };
 }
 
 export const WIDGET_PRESETS: WidgetPreset[] = [
@@ -17,6 +195,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     name: "Clean Modern",
     tagline: "Solid & Balanced",
     description: "Solid surface, refined hairline borders, and subtle elevation.",
+    font: "font-sans",
     containerClass:
       "rounded-2xl border border-line/70 bg-surface ring-1 ring-inset ring-white/10 dark:ring-white/5",
     headerClass: "border-b border-line/40 bg-surface-raised/40",
@@ -43,6 +222,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     name: "Frosted Glass",
     tagline: "Refined Translucent",
     description: "Deep translucent backdrop blur with luminous specular edge reflections.",
+    font: "font-sans",
     containerClass: "rounded-2xl backdrop-blur-2xl ring-1 ring-inset",
     headerClass:
       "border-b border-white/20 dark:border-white/10 bg-white/25 dark:bg-white/[0.04] backdrop-blur-md",
@@ -80,6 +260,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     name: "Ghost Minimal",
     tagline: "Ultra-Sheer Float",
     description: "Whisper-thin translucent look that floats naturally on your desktop wallpaper.",
+    font: "font-sans",
     containerClass: "rounded-2xl border border-line/35 backdrop-blur-md",
     headerClass: "border-b border-line/20 bg-surface-raised/20",
     highlightClass: "before:via-transparent",
@@ -98,10 +279,51 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     },
   },
   {
+    id: "editorial",
+    name: "Editorial Serif",
+    tagline: "Literary Elegance",
+    description: "Classic typography with warm paper surface, serif headings, and refined rules.",
+    font: "font-serif",
+    containerClass: "rounded-2xl border border-line/60 bg-surface ring-1 ring-inset ring-line/20",
+    headerClass: "border-b border-line/40 bg-surface-raised/50 font-serif italic",
+    highlightClass: "before:via-transparent",
+    getShellStyle: (color, isDark, isEditMode) => {
+      const accent = color || (isDark ? "#e4e4e7" : "#3f3f46");
+      const bg = isDark ? "#121214" : "#fbfaf6";
+      return {
+        background: bg,
+        borderColor: isEditMode ? accent : isDark ? "#27272a" : "#e5e5e0",
+        boxShadow: isDark
+          ? "0 10px 30px -6px rgba(0,0,0,0.5)"
+          : "0 10px 30px -6px rgba(0,0,0,0.06), 0 2px 6px -1px rgba(0,0,0,0.04)",
+      };
+    },
+  },
+  {
+    id: "minimal-card",
+    name: "Floating Card",
+    tagline: "Soft Frameless",
+    description: "Border-free soft float with generous depth shadow and seamless surface.",
+    font: "font-rounded",
+    containerClass: "rounded-3xl bg-surface",
+    headerClass: "border-b-0 bg-transparent font-medium",
+    highlightClass: "before:via-white/20",
+    getShellStyle: (color, isDark) => {
+      const accent = color || "#3b82f6";
+      return {
+        background: "var(--surface)",
+        boxShadow: isDark
+          ? `0 16px 36px -6px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)`
+          : `0 16px 36px -6px rgba(0,0,0,0.08), 0 2px 8px -2px rgba(0,0,0,0.04), 0 0 0 1px color-mix(in srgb, ${accent} 15%, transparent)`,
+      };
+    },
+  },
+  {
     id: "obsidian",
     name: "Obsidian Glow",
     tagline: "Cyberpunk Aura",
     description: "Pitch-black dark surface with vibrant accent borders and neon glow aura.",
+    font: "font-tech",
     containerClass: "rounded-2xl ring-1 ring-inset",
     headerClass: "border-b border-white/10 bg-black/60",
     highlightClass: "before:via-accent-500/40",
@@ -120,6 +342,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     name: "Warm Paper",
     tagline: "Soft Super-Ellipse",
     description: "Smooth tactile matte cards with generous rounded curves and crisp outlines.",
+    font: "font-rounded",
     containerClass: "rounded-3xl border ring-1 ring-inset ring-line/30",
     headerClass: "border-b border-line/30 bg-surface/50",
     highlightClass: "before:via-transparent",
@@ -147,6 +370,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Bold & High-Contrast",
     description:
       "Sharp 90° corners, thick 2px borders, and solid offset block shadows for maximum punch.",
+    font: "font-mono",
     containerClass: "rounded-none",
     headerClass: "border-b-2 border-fg/80 dark:border-fg/70 bg-surface-raised font-bold",
     highlightClass: "before:via-transparent",
@@ -166,6 +390,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Hacker Console",
     description:
       "Developer console styling with compact corners, scanline accents, and tech grid telemetry.",
+    font: "font-mono",
     containerClass: "rounded-sm border-2 font-mono",
     headerClass: "border-b-2 bg-surface-raised/90 font-mono tracking-tight",
     highlightClass: "before:via-transparent",
@@ -186,6 +411,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Sci-Fi Telemetry",
     description:
       "High-tech HUD console with dual-tone borders, glowing edge accents, and futuristic telemetry.",
+    font: "font-tech",
     containerClass: "rounded-xl ring-1 ring-inset backdrop-blur-xl",
     headerClass:
       "border-b border-accent-500/30 bg-surface-raised/60 tracking-wider text-[11px] uppercase",
@@ -207,6 +433,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Chromatic Shimmer",
     description:
       "Iridescent holographic perimeter glow that gently illuminates surrounding wallpaper.",
+    font: "font-sans",
     containerClass: "rounded-2xl ring-1 ring-inset backdrop-blur-xl",
     headerClass: "border-b border-white/20 dark:border-white/10 bg-surface-raised/40",
     highlightClass: "before:via-white/20",
@@ -225,6 +452,7 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
     tagline: "Utilitarian Dashboard",
     description:
       "High-density compact corners with sharp hairline outlines, built for multi-monitor setups.",
+    font: "font-sans",
     containerClass: "rounded-lg border border-line bg-surface ring-1 ring-inset ring-line/30",
     headerClass: "border-b border-line bg-surface-raised/70",
     highlightClass: "before:via-white/10",
@@ -240,8 +468,25 @@ export const WIDGET_PRESETS: WidgetPreset[] = [
       };
     },
   },
+  {
+    id: "custom",
+    name: "Custom Studio",
+    tagline: "Your Personal Signature",
+    description: "Fully customizable typography, corner radius, glass backdrop, and edge glow.",
+    font: "font-sans",
+    containerClass: "rounded-2xl ring-1 ring-inset backdrop-blur-xl",
+    headerClass: "border-b border-line/40 bg-surface-raised/40",
+    highlightClass: "before:via-white/20",
+    getShellStyle: (color, isDark, isEditMode) => {
+      const livePreset = buildCustomPreset(getCustomPresetConfig());
+      return livePreset.getShellStyle(color, isDark, isEditMode);
+    },
+  },
 ];
 
 export function getWidgetPreset(id?: string): WidgetPreset {
+  if (id === "custom") {
+    return buildCustomPreset(getCustomPresetConfig());
+  }
   return WIDGET_PRESETS.find((p) => p.id === id) ?? WIDGET_PRESETS[0]!;
 }

@@ -16,7 +16,7 @@ export function StatusDot({ status, title, className = "" }: StatusDotProps) {
       case "error":
         return "bg-error";
       case "syncing":
-        return "bg-accent-500 animate-pulse";
+        return "bg-accent-500";
       case "idle":
       default:
         return "bg-fg-muted";

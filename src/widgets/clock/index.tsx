@@ -51,10 +51,26 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
+      footer={
+        showDayProgress ? (
+          <div className="flex flex-col gap-1 inline-full">
+            <div className="flex justify-between text-[10px] text-fg-muted">
+              <span>Day progress</span>
+              <span className="font-mono">{dayProgressPercent.toFixed(0)}%</span>
+            </div>
+            <div className="overflow-hidden rounded-full bg-surface-raised block-1.5 inline-full">
+              <div
+                className="rounded-full bg-accent-500 transition-all duration-500 block-full"
+                style={{ width: `${dayProgressPercent}%` }}
+              />
+            </div>
+          </div>
+        ) : undefined
+      }
     >
-      <div className="flex flex-col justify-between pbs-1 pbe-2 select-none min-block-full">
+      <div className="flex flex-col items-center justify-center p-2 select-none min-block-full">
         {/* Main Clock Display */}
-        <div className="flex flex-col items-center justify-center pbs-2">
+        <div className="flex flex-col items-center justify-center">
           <div className="flex items-baseline gap-1 font-mono tracking-tight text-fg">
             <span className="text-4xl font-bold tracking-tight">
               {pad(hours)}:{pad(minutes)}
@@ -77,22 +93,6 @@ export function ClockWidget({ instance, editMode }: WidgetProps) {
             </div>
           )}
         </div>
-
-        {/* Day progress indicator */}
-        {showDayProgress && (
-          <div className="flex flex-col gap-1 px-2 pbs-2 pbe-1">
-            <div className="flex justify-between text-[10px] text-fg-muted">
-              <span>Day progress</span>
-              <span className="font-mono">{dayProgressPercent.toFixed(0)}%</span>
-            </div>
-            <div className="overflow-hidden rounded-full bg-surface-raised block-1.5 inline-full">
-              <div
-                className="rounded-full bg-accent-500 transition-all duration-500 block-full"
-                style={{ width: `${dayProgressPercent}%` }}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </WidgetShell>
   );

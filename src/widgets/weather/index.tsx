@@ -133,6 +133,25 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
       resizable={manifest.resizable}
       minSize={manifest.minSize}
       defaultSize={manifest.defaultSize}
+      footer={
+        weather ? (
+          <div className="grid grid-cols-2 gap-2 text-[11px] inline-full">
+            <div className="flex items-center gap-1.5 text-fg-muted">
+              <Drop className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="fill" />
+              <span>Humidity:</span>
+              <span className="font-mono font-medium text-fg">{weather.humidity}%</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-fg-muted">
+              <Wind className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
+              <span>Wind:</span>
+              <span className="font-mono font-medium text-fg">
+                {windSpeed} {windUnit}
+              </span>
+            </div>
+          </div>
+        ) : undefined
+      }
     >
       <div className="flex flex-col justify-between select-none min-block-full">
         {error ? (
@@ -175,23 +194,6 @@ export function WeatherWidget({ instance, editMode }: WidgetProps) {
 
               <div className="pe-1">
                 <WeatherIcon code={weatherCode} isDay={isDay} />
-              </div>
-            </div>
-
-            {/* Atmosphere Details Pill */}
-            <div className="mbs-auto grid grid-cols-2 gap-2 border-bs border-line/40 pbs-2 pbe-2 text-[11px]">
-              <div className="flex items-center gap-1.5 text-fg-muted">
-                <Drop className="shrink-0 text-accent-500 block-3.5 inline-3.5" weight="fill" />
-                <span>Humidity:</span>
-                <span className="font-mono font-medium text-fg">{weather.humidity}%</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-fg-muted">
-                <Wind className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
-                <span>Wind:</span>
-                <span className="font-mono font-medium text-fg">
-                  {windSpeed} {windUnit}
-                </span>
               </div>
             </div>
           </>

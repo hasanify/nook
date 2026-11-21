@@ -136,7 +136,17 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
   };
 
   return (
-    <WidgetShell instance={instance} editMode={editMode} title="Habits Tracker">
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      title="Habits Tracker"
+      footer={
+        <div className="flex items-center justify-between text-[10px] text-fg-muted inline-full">
+          <span>{habits.length} habits active</span>
+          <span>7-Day Rolling Streak</span>
+        </div>
+      }
+    >
       <div className="flex flex-col justify-between p-1.5 select-none min-block-full">
         {/* Header */}
         <div className="flex items-center justify-between border-be border-line/40 pbe-1.5 text-xs">
@@ -218,8 +228,8 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
                   <div className="mbe-1.5 flex items-center justify-between">
                     <span className="truncate text-xs font-semibold text-fg">{habit.title}</span>
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-400">
-                        <Flame className="text-amber-500 block-3 inline-3" weight="fill" />
+                      <span className="flex items-center gap-1 rounded-full border border-warn/30 bg-warn/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warn">
+                        <Flame className="text-warn block-3 inline-3" weight="fill" />
                         <span>{streak}</span>
                       </span>
                       <button
@@ -274,12 +284,6 @@ export function HabitsWidget({ instance, editMode, patchState }: WidgetProps) {
               );
             })
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-bs border-line/40 pbs-1 text-[10px] text-fg-muted">
-          <span>{habits.length} habits active</span>
-          <span>7-Day Rolling Streak</span>
         </div>
       </div>
     </WidgetShell>
