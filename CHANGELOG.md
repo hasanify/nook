@@ -1,3 +1,5 @@
+## [0.42.1](https://github.com/hasanify/nook/compare/v0.42.0...v0.42.1) (2026-11-22)
+
 # [0.42.0](https://github.com/hasanify/nook/compare/v0.41.3...v0.42.0) (2026-11-22)
 
 ### Features
