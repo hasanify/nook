@@ -27,6 +27,12 @@ pub fn enable() -> Result<(), Box<dyn std::error::Error>> {
         let _ = hklm_run.remove_value("Nook");
         let _ = hklm_run.remove_value("nook");
     }
+    if let Ok(hklm_approved) = LOCAL_MACHINE
+        .open(r"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run")
+    {
+        let _ = hklm_approved.remove_value("Nook");
+        let _ = hklm_approved.remove_value("nook");
+    }
 
     tracing::info!("Registered Windows autostart: {}", run_cmd);
     Ok(())

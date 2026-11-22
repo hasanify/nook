@@ -232,6 +232,19 @@ pub fn run() {
             // Spawn or restore configured widgets
             windows::ensure_all_widgets(&handle).map_err(Box::<dyn std::error::Error>::from)?;
 
+            // On Windows, during cold boot, Explorer desktop (WorkerW/SHELLDLL_DefView) may still be initializing.
+            // Run a delayed desktop-pinning verification pass at +2s and +5s to ensure widgets remain pinned above wallpaper.
+            #[cfg(windows)]
+            {
+                let h = handle.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                    let _ = windows::ensure_all_widgets(&h);
+                    tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
+                    let _ = windows::ensure_all_widgets(&h);
+                });
+            }
+
             // Pre-initialize context menu window so right-click is instantaneous and thread-safe
             windows::ensure_context_menu_window(&handle)
                 .map_err(Box::<dyn std::error::Error>::from)?;
