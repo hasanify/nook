@@ -1,3 +1,9 @@
+## [0.41.3](https://github.com/hasanify/nook/compare/v0.41.2...v0.41.3) (2026-11-22)
+
+### Bug Fixes
+
+- **settings:** redesign bento grid controls to native desktop segmented styling ([c7b57b4](https://github.com/hasanify/nook/commit/c7b57b412fa6b6fdf9d65c9413fe9e3877454b0d))
+
 ## [0.41.2](https://github.com/hasanify/nook/compare/v0.41.1...v0.41.2) (2026-11-22)
 
 ### Bug Fixes
