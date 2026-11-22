@@ -18,9 +18,8 @@ export function Toggle({ checked, onChange, disabled = false, id, ariaLabel }: T
       onClick={() => onChange(!checked)}
       className={`
         relative inline-flex shrink-0 cursor-pointer items-center rounded-full
-        border p-0 transition-colors duration-200 ease-in-out block-5 inline-9
-        focus:ring-2 focus:ring-accent-500/40 focus:ring-offset-1
-        focus:ring-offset-surface focus:outline-none
+        border p-0 transition-colors duration-200 ease-in-out outline-none select-none
+        block-5 inline-9
         disabled:cursor-not-allowed disabled:opacity-50
         ${checked ? "border-accent-500 bg-accent-500" : `border-line bg-surface-raised`}
       `}
