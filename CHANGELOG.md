@@ -1,3 +1,9 @@
+# [0.42.0](https://github.com/hasanify/nook/compare/v0.41.3...v0.42.0) (2026-11-22)
+
+### Features
+
+- **widgets:** enhance ambient sounds with gentle acoustic synthesis and fix now-playing detection ([85eb586](https://github.com/hasanify/nook/commit/85eb586a8335b8bc4e1fb4288f94698d72ffdfac))
+
 ## [0.41.3](https://github.com/hasanify/nook/compare/v0.41.2...v0.41.3) (2026-11-22)
 
 ### Bug Fixes
