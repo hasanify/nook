@@ -1341,22 +1341,23 @@ export function SettingsApp() {
 
               {/* Bento Grid Arranger Option */}
               {(config?.widgets.length ?? 0) > 0 && (
-                <div className="flex flex-col gap-2 rounded-xl border border-line/70 bg-surface-raised/40 p-2.5 text-xs backdrop-blur-xs">
+                <div className="flex flex-col gap-2.5 rounded-lg border border-line/60 bg-surface-raised/30 p-2.5 text-xs">
                   {/* Header Row */}
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-semibold text-fg">
-                      <SquaresFourIcon className="shrink-0 text-accent-500 block-3.5 inline-3.5" />
+                    <span className="flex items-center gap-1.5 font-medium text-fg">
+                      <SquaresFourIcon className="shrink-0 text-fg-muted block-3.5 inline-3.5" />
                       <span>Bento Grid</span>
                     </span>
                     {isBentoPreviewing && (
-                      <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-2xs font-medium text-accent-500">
-                        Previewing
+                      <span className="inline-flex items-center gap-1 rounded-sm border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 font-mono text-3xs font-medium text-accent-400">
+                        <span className="animate-pulse rounded-full bg-accent-400 block-1.5 inline-1.5" />
+                        Preview
                       </span>
                     )}
                   </div>
 
                   {/* Coverage Area Selector */}
-                  <div className="grid grid-cols-4 rounded-lg border border-line/60 bg-surface/70 p-0.5 text-center text-2xs">
+                  <div className="grid grid-cols-4 rounded-md border border-line/50 bg-surface p-0.5 text-center text-2xs">
                     {(
                       [
                         { id: "auto", label: "Auto", title: "Auto (adapts to widget count)" },
@@ -1371,11 +1372,11 @@ export function SettingsApp() {
                         onClick={() => void handleSetBentoCoverage(item.id)}
                         title={item.title}
                         className={`
-                          cursor-pointer rounded-md py-1 font-medium transition-all
+                          cursor-pointer rounded-sm py-1 font-medium transition-all
                           ${
                             bentoCoverage === item.id
-                              ? "bg-accent-500 font-semibold text-white shadow-2xs"
-                              : "text-fg-muted hover:bg-surface-raised hover:text-fg"
+                              ? "border border-line/60 bg-surface-raised font-semibold text-fg shadow-2xs"
+                              : "text-fg-muted hover:bg-surface-raised/40 hover:text-fg"
                           }
                         `}
                       >
@@ -1385,14 +1386,14 @@ export function SettingsApp() {
                   </div>
 
                   {/* Widget Gap Selector */}
-                  <div className="flex flex-col gap-1.5 pbs-0.5">
+                  <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between text-2xs">
-                      <span className="font-medium text-fg-muted">Widget Gap</span>
-                      <span className="font-mono font-semibold text-accent-500">{bentoGap}px</span>
+                      <span className="font-medium text-fg-muted">Gap</span>
+                      <span className="font-mono text-2xs text-fg">{bentoGap}px</span>
                     </div>
 
                     {/* Quick Preset Buttons starting from 0px */}
-                    <div className="grid grid-cols-5 rounded-lg border border-line/60 bg-surface/70 p-0.5 text-center text-3xs">
+                    <div className="grid grid-cols-5 rounded-md border border-line/50 bg-surface p-0.5 text-center text-3xs">
                       {([0, 4, 8, 12, 16] as const).map((gapVal) => (
                         <button
                           key={gapVal}
@@ -1400,11 +1401,11 @@ export function SettingsApp() {
                           onClick={() => handleSetBentoGap(gapVal, true)}
                           title={`${gapVal}px gap`}
                           className={`
-                            cursor-pointer rounded-md py-1 font-mono font-medium transition-all
+                            cursor-pointer rounded-sm py-1 font-mono font-medium transition-all
                             ${
                               bentoGap === gapVal
-                                ? "bg-accent-500 font-semibold text-white shadow-2xs"
-                                : "text-fg-muted hover:bg-surface-raised hover:text-fg"
+                                ? "border border-line/60 bg-surface-raised font-semibold text-fg shadow-2xs"
+                                : "text-fg-muted hover:bg-surface-raised/40 hover:text-fg"
                             }
                           `}
                         >
@@ -1432,14 +1433,14 @@ export function SettingsApp() {
                       type="button"
                       onClick={() => void handleCycleSettingsBento()}
                       className="
-                        flex cursor-pointer items-center justify-center gap-1.5 rounded-lg
-                        bg-accent-500 px-3 py-1.5 text-center text-xs font-semibold
-                        text-white shadow-xs transition-colors
-                        hover:bg-accent-600
+                        flex cursor-pointer items-center justify-center gap-1.5 rounded-md
+                        border border-line/70 bg-surface-raised/80 px-3 py-1.5 text-center text-xs
+                        font-medium text-fg shadow-2xs transition-all
+                        hover:border-line hover:bg-surface-raised
                         active:scale-95
                       "
                     >
-                      <ArrowClockwiseIcon className="block-3.5 inline-3.5" />
+                      <ArrowClockwiseIcon className="text-fg-muted block-3.5 inline-3.5" />
                       <span>{isBentoPreviewing ? "Next Layout" : "Cycle Layout"}</span>
                     </button>
 
@@ -1449,10 +1450,10 @@ export function SettingsApp() {
                           type="button"
                           onClick={handleDoneSettingsBento}
                           className="
-                            flex cursor-pointer items-center justify-center gap-1 rounded-lg
-                            bg-accent-500/15 py-1 text-center text-sub font-semibold
-                            text-accent-500 transition-colors
-                            hover:bg-accent-500/25
+                            flex cursor-pointer items-center justify-center gap-1 rounded-md
+                            bg-accent-500 px-2.5 py-1.5 text-center text-xs font-medium
+                            text-white shadow-2xs transition-all
+                            hover:bg-accent-600
                             active:scale-95
                           "
                           title="Save this layout"
@@ -1464,10 +1465,10 @@ export function SettingsApp() {
                           type="button"
                           onClick={() => void handleRevertSettingsBento()}
                           className="
-                            flex cursor-pointer items-center justify-center gap-1 rounded-lg
-                            border border-line bg-surface py-1 text-center text-sub
-                            font-medium text-fg-muted transition-colors
-                            hover:bg-surface-raised hover:text-fg
+                            flex cursor-pointer items-center justify-center gap-1 rounded-md
+                            border border-line/60 bg-surface/50 px-2.5 py-1.5 text-center text-xs
+                            font-medium text-fg-muted transition-all
+                            hover:border-line hover:bg-surface-raised hover:text-fg
                             active:scale-95
                           "
                           title="Restore previous layout"
