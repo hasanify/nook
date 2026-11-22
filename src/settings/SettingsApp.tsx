@@ -22,7 +22,6 @@ import {
   UserIcon,
 } from "@phosphor-icons/react";
 import { listen } from "@tauri-apps/api/event";
-import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -256,26 +255,6 @@ export function SettingsApp() {
       .then((ver) => setAppVersion(ver))
       .catch(() => {});
 
-    isEnabled()
-      .then(async (osEnabled) => {
-        const cfg = await getAppConfig().catch(() => null);
-        const wanted = cfg?.app?.autostart;
-        if (typeof wanted === "boolean") {
-          if (wanted && !osEnabled) {
-            await enable().catch(() => {});
-            setAutostartEnabled(true);
-          } else if (!wanted && osEnabled) {
-            await disable().catch(() => {});
-            setAutostartEnabled(false);
-          } else {
-            setAutostartEnabled(osEnabled);
-          }
-        } else {
-          setAutostartEnabled(osEnabled);
-        }
-      })
-      .catch(() => {});
-
     let unlisten: (() => void) | undefined;
     onConfigChanged(() => {
       fetchConfig();
@@ -479,16 +458,11 @@ export function SettingsApp() {
 
   const handleAutostartToggle = async () => {
     const next = !autostartEnabled;
+    setAutostartEnabled(next);
     try {
-      if (next) {
-        await enable();
-      } else {
-        await disable();
-      }
-      setAutostartEnabled(next);
-      void updateAppConfig({ autostart: next });
+      await updateAppConfig({ autostart: next });
     } catch {
-      // Autostart plugin error handling
+      setAutostartEnabled(!next);
     }
   };
 

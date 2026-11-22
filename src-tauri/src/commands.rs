@@ -278,14 +278,27 @@ pub fn update_app_config(
     });
 
     if let Some(a) = autostart {
-        use tauri_plugin_autostart::ManagerExt;
-        let autolaunch = app.autolaunch();
-        if a {
-            if let Err(e) = autolaunch.enable() {
-                tracing::warn!("Failed to enable autostart: {}", e);
+        #[cfg(windows)]
+        {
+            if a {
+                if let Err(e) = crate::autostart::enable() {
+                    tracing::warn!("Failed to enable autostart: {}", e);
+                }
+            } else if let Err(e) = crate::autostart::disable() {
+                tracing::warn!("Failed to disable autostart: {}", e);
             }
-        } else if let Err(e) = autolaunch.disable() {
-            tracing::warn!("Failed to disable autostart: {}", e);
+        }
+        #[cfg(not(windows))]
+        {
+            use tauri_plugin_autostart::ManagerExt;
+            let autolaunch = app.autolaunch();
+            if a {
+                if let Err(e) = autolaunch.enable() {
+                    tracing::warn!("Failed to enable autostart: {}", e);
+                }
+            } else if let Err(e) = autolaunch.disable() {
+                tracing::warn!("Failed to disable autostart: {}", e);
+            }
         }
     }
 

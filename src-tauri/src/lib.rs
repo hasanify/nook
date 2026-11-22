@@ -1,3 +1,4 @@
+pub mod autostart;
 pub mod commands;
 pub mod config;
 pub mod migrations;
@@ -203,27 +204,29 @@ pub fn run() {
             start_auto_update_loop(handle.clone());
 
             // Synchronize autostart with user preference in config.json.
-            // On Windows, NSIS uninstaller deletes the Run registry key during an update.
-            // When the updated app launches, we restore the autostart registration if config.autostart is true.
+            // On Windows, paths with spaces must be quoted in HKCU Run to boot properly.
             let autostart_wanted = state.config.get_config().app.autostart;
-            use tauri_plugin_autostart::ManagerExt;
-            let autolaunch = handle.autolaunch();
-            if autostart_wanted {
-                match autolaunch.is_enabled() {
-                    Ok(true) => {
-                        // Already enabled; call enable() again to ensure executable path is updated to new binary
-                        let _ = autolaunch.enable();
+            #[cfg(windows)]
+            {
+                if autostart_wanted {
+                    info!("Ensuring Windows autostart is registered with quoted path (enabled = true)");
+                    if let Err(e) = autostart::enable() {
+                        tracing::warn!("Failed to enable autostart on startup: {}", e);
                     }
-                    Ok(false) | Err(_) => {
-                        info!("Restoring autostart registration from config (enabled = true)");
-                        if let Err(e) = autolaunch.enable() {
-                            tracing::warn!("Failed to enable autostart on startup: {}", e);
-                        }
-                    }
+                } else if autostart::is_enabled() {
+                    info!("Disabling autostart to match config (enabled = false)");
+                    let _ = autostart::disable();
                 }
-            } else if let Ok(true) = autolaunch.is_enabled() {
-                info!("Disabling autostart to match config (enabled = false)");
-                let _ = autolaunch.disable();
+            }
+            #[cfg(not(windows))]
+            {
+                use tauri_plugin_autostart::ManagerExt;
+                let autolaunch = handle.autolaunch();
+                if autostart_wanted {
+                    let _ = autolaunch.enable();
+                } else if let Ok(true) = autolaunch.is_enabled() {
+                    let _ = autolaunch.disable();
+                }
             }
 
             // Spawn or restore configured widgets
