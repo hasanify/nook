@@ -1,3 +1,9 @@
+## [0.42.2](https://github.com/hasanify/nook/compare/v0.42.1...v0.42.2) (2026-11-22)
+
+### Bug Fixes
+
+- **windows:** switch manifest to asInvoker and add cold-boot desktop pin retry to enable autostart ([06105f6](https://github.com/hasanify/nook/commit/06105f690e51589b803d48996b8ea4163261c023))
+
 ## [0.42.1](https://github.com/hasanify/nook/compare/v0.42.0...v0.42.1) (2026-11-22)
 
 # [0.42.0](https://github.com/hasanify/nook/compare/v0.41.3...v0.42.0) (2026-11-22)
