@@ -1444,11 +1444,17 @@ pub async fn send_media_command(action: String) -> Result<(), String> {
 pub async fn get_media_status() -> Result<MediaStatus, String> {
     #[cfg(windows)]
     {
+        struct MediaDetection {
+            active: Option<MediaStatus>,
+            idle: Option<MediaStatus>,
+        }
+
         unsafe extern "system" fn enum_callback(hwnd: isize, lparam: isize) -> i32 {
             extern "system" {
                 fn IsWindowVisible(hwnd: isize) -> i32;
                 fn GetWindowTextLengthW(hwnd: isize) -> i32;
                 fn GetWindowTextW(hwnd: isize, lp_string: *mut u16, n_max_count: i32) -> i32;
+                fn GetWindowThreadProcessId(hwnd: isize, lpdw_process_id: *mut u32) -> u32;
             }
             if IsWindowVisible(hwnd) == 0 {
                 return 1;
@@ -1459,61 +1465,207 @@ pub async fn get_media_status() -> Result<MediaStatus, String> {
             }
             let mut buf: Vec<u16> = vec![0; (len + 1) as usize];
             let copied = GetWindowTextW(hwnd, buf.as_mut_ptr(), len + 1);
-            if copied > 0 {
-                let title_str = String::from_utf16_lossy(&buf[..copied as usize]);
-                let lower = title_str.to_lowercase();
-                // Filter common non-music apps
-                let is_ignored = lower.contains("visual studio")
-                    || lower.contains("powershell")
-                    || lower.contains("cmd.exe")
-                    || lower.contains("nook")
-                    || lower.contains("task manager");
+            if copied <= 0 {
+                return 1;
+            }
 
-                if !is_ignored {
-                    if (lower.contains("spotify")
-                        || lower.contains("music")
-                        || lower.contains("vlc"))
-                        && title_str.contains(" - ")
-                    {
-                        let parts: Vec<&str> = title_str.splitn(2, " - ").collect();
-                        if parts.len() == 2 {
-                            let slot = lparam as *mut Option<MediaStatus>;
-                            if let Some(out) = slot.as_mut() {
-                                if out.is_none() {
-                                    *out = Some(MediaStatus {
-                                        artist: parts[0].trim().to_string(),
-                                        title: parts[1].trim().to_string(),
-                                        player: if lower.contains("spotify") {
-                                            "Spotify".to_string()
-                                        } else {
-                                            "Media Player".to_string()
-                                        },
-                                        is_playing: true,
-                                    });
-                                    return 0;
-                                }
-                            }
-                        }
-                    } else if lower.ends_with(" - youtube") || lower.ends_with(" - youtube music") {
-                        let clean = title_str
-                            .trim_end_matches(" - YouTube")
-                            .trim_end_matches(" - YouTube Music")
-                            .trim();
-                        let slot = lparam as *mut Option<MediaStatus>;
-                        if let Some(out) = slot.as_mut() {
-                            if out.is_none() {
-                                *out = Some(MediaStatus {
-                                    artist: "YouTube".to_string(),
-                                    title: clean.to_string(),
-                                    player: "Browser".to_string(),
-                                    is_playing: true,
-                                });
-                                return 0;
-                            }
-                        }
+            let mut pid: u32 = 0;
+            GetWindowThreadProcessId(hwnd, &mut pid);
+            let proc_name = resolve_process_name(pid).to_lowercase();
+
+            let title_raw = String::from_utf16_lossy(&buf[..copied as usize]);
+            let mut title_str = title_raw.trim();
+
+            // Strip browser notification count prefixes like "(1) " or "(99+) "
+            if title_str.starts_with('(') {
+                if let Some(close_idx) = title_str.find(')') {
+                    let inside = &title_str[1..close_idx];
+                    if inside.chars().all(|c| c.is_ascii_digit() || c == '+') {
+                        title_str = title_str[close_idx + 1..].trim();
                     }
                 }
             }
+
+            if title_str.is_empty() {
+                return 1;
+            }
+
+            let lower = title_str.to_lowercase();
+            // Filter non-media utility apps
+            if proc_name.contains("code.exe")
+                || proc_name.contains("nook.exe")
+                || proc_name.contains("powershell")
+                || proc_name.contains("cmd.exe")
+                || proc_name.contains("taskmgr.exe")
+                || proc_name.contains("explorer.exe")
+            {
+                return 1;
+            }
+
+            let slot = lparam as *mut MediaDetection;
+            let detection = match slot.as_mut() {
+                Some(d) => d,
+                None => return 0,
+            };
+
+            // 1. Spotify
+            if proc_name == "spotify.exe" {
+                if lower == "spotify" || lower == "spotify free" || lower == "spotify premium" {
+                    if detection.idle.is_none() {
+                        detection.idle = Some(MediaStatus {
+                            artist: "Spotify".to_string(),
+                            title: "Ready to play".to_string(),
+                            player: "Spotify".to_string(),
+                            is_playing: false,
+                        });
+                    }
+                    return 1;
+                }
+
+                // When playing, Spotify sets window title to "Artist - Title"
+                let (artist, track) = if let Some((a, t)) = title_str.split_once(" - ") {
+                    (a.trim().to_string(), t.trim().to_string())
+                } else {
+                    ("Spotify".to_string(), title_str.to_string())
+                };
+
+                detection.active = Some(MediaStatus {
+                    artist,
+                    title: track,
+                    player: "Spotify".to_string(),
+                    is_playing: true,
+                });
+                return 0; // Found active player
+            }
+
+            // 2. VLC
+            if proc_name == "vlc.exe" {
+                let clean = title_str.trim_end_matches(" - VLC media player").trim();
+                if !clean.is_empty() && clean.to_lowercase() != "vlc media player" {
+                    let (artist, track) = if let Some((a, t)) = clean.split_once(" - ") {
+                        (a.trim().to_string(), t.trim().to_string())
+                    } else {
+                        ("VLC".to_string(), clean.to_string())
+                    };
+                    detection.active = Some(MediaStatus {
+                        artist,
+                        title: track,
+                        player: "VLC".to_string(),
+                        is_playing: true,
+                    });
+                    return 0;
+                }
+            }
+
+            // 3. Desktop Media Players (Foobar2000, MusicBee, AIMP, Apple Music, TIDAL)
+            if proc_name.contains("foobar2000")
+                || proc_name.contains("musicbee")
+                || proc_name.contains("aimp")
+                || proc_name.contains("applemusic")
+                || proc_name.contains("tidal")
+            {
+                let player_name = if proc_name.contains("foobar2000") {
+                    "foobar2000"
+                } else if proc_name.contains("musicbee") {
+                    "MusicBee"
+                } else if proc_name.contains("aimp") {
+                    "AIMP"
+                } else if proc_name.contains("applemusic") {
+                    "Apple Music"
+                } else {
+                    "TIDAL"
+                };
+
+                let (artist, track) = if let Some((a, t)) = title_str.split_once(" - ") {
+                    (a.trim().to_string(), t.trim().to_string())
+                } else {
+                    (player_name.to_string(), title_str.to_string())
+                };
+
+                detection.active = Some(MediaStatus {
+                    artist,
+                    title: track,
+                    player: player_name.to_string(),
+                    is_playing: true,
+                });
+                return 0;
+            }
+
+            // 4. Browsers (Chrome, Edge, Firefox, Brave, Opera, Vivaldi, Arc)
+            let is_browser = proc_name.contains("chrome")
+                || proc_name.contains("edge")
+                || proc_name.contains("firefox")
+                || proc_name.contains("brave")
+                || proc_name.contains("opera")
+                || proc_name.contains("vivaldi")
+                || proc_name.contains("arc");
+
+            if is_browser {
+                // Strip browser name suffix
+                let mut page_title = title_str;
+                let suffixes = [
+                    " - Google Chrome",
+                    " - Microsoft\u{200B} Edge",
+                    " - Microsoft Edge",
+                    " - Mozilla Firefox",
+                    " - Brave",
+                    " - Opera",
+                    " - Vivaldi",
+                    " - Arc",
+                ];
+                for s in suffixes {
+                    if let Some(stripped) = page_title.strip_suffix(s) {
+                        page_title = stripped.trim();
+                        break;
+                    }
+                }
+
+                let page_lower = page_title.to_lowercase();
+                if page_lower.ends_with(" - youtube music") {
+                    let clean = page_title[..page_title.len() - 16].trim();
+                    let (artist, track) = if let Some((a, t)) = clean.split_once(" - ") {
+                        (a.trim().to_string(), t.trim().to_string())
+                    } else {
+                        ("YouTube Music".to_string(), clean.to_string())
+                    };
+                    detection.active = Some(MediaStatus {
+                        artist,
+                        title: track,
+                        player: "YouTube Music".to_string(),
+                        is_playing: true,
+                    });
+                    return 0;
+                } else if page_lower.ends_with(" - youtube") {
+                    let clean = page_title[..page_title.len() - 10].trim();
+                    let (artist, track) = if let Some((a, t)) = clean.split_once(" - ") {
+                        (a.trim().to_string(), t.trim().to_string())
+                    } else {
+                        ("YouTube".to_string(), clean.to_string())
+                    };
+                    detection.active = Some(MediaStatus {
+                        artist,
+                        title: track,
+                        player: "YouTube".to_string(),
+                        is_playing: true,
+                    });
+                    return 0;
+                } else if page_lower.ends_with(" - soundcloud") {
+                    let clean = page_title[..page_title.len() - 13].trim();
+                    let (artist, track) = if let Some((a, t)) = clean.split_once(" - ") {
+                        (a.trim().to_string(), t.trim().to_string())
+                    } else {
+                        ("SoundCloud".to_string(), clean.to_string())
+                    };
+                    detection.active = Some(MediaStatus {
+                        artist,
+                        title: track,
+                        player: "SoundCloud".to_string(),
+                        is_playing: true,
+                    });
+                    return 0;
+                }
+            }
+
             1
         }
 
@@ -1524,17 +1676,27 @@ pub async fn get_media_status() -> Result<MediaStatus, String> {
             ) -> i32;
         }
 
-        let mut detected: Option<MediaStatus> = None;
+        let mut detection = MediaDetection {
+            active: None,
+            idle: None,
+        };
         unsafe {
-            EnumWindows(enum_callback, &mut detected as *mut _ as isize);
+            EnumWindows(enum_callback, &mut detection as *mut _ as isize);
         }
 
-        Ok(detected.unwrap_or(MediaStatus {
+        if let Some(active) = detection.active {
+            return Ok(active);
+        }
+        if let Some(idle) = detection.idle {
+            return Ok(idle);
+        }
+
+        Ok(MediaStatus {
             title: "No Active Track".to_string(),
             artist: "Ready to control".to_string(),
             player: "Windows Media".to_string(),
             is_playing: false,
-        }))
+        })
     }
     #[cfg(not(windows))]
     {

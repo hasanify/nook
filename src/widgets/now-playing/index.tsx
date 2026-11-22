@@ -31,9 +31,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
     try {
       const status = await getMediaStatus();
       setMedia(status);
-      if (status.is_playing) {
-        setIsPlayingLocal(true);
-      }
+      setIsPlayingLocal(status.is_playing);
     } catch {
       // Ignored
     }
@@ -47,9 +45,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
         const status = await getMediaStatus();
         if (!active) return;
         setMedia(status);
-        if (status.is_playing) {
-          setIsPlayingLocal(true);
-        }
+        setIsPlayingLocal(status.is_playing);
       } catch {
         // Ignored
       }
@@ -69,6 +65,7 @@ export function NowPlayingWidget({ instance, editMode }: WidgetProps) {
   const handleAction = async (action: string) => {
     if (action === "play_pause") {
       setIsPlayingLocal((prev) => !prev);
+      setMedia((prev) => (prev ? { ...prev, is_playing: !prev.is_playing } : null));
     }
     try {
       await sendMediaCommand(action);
