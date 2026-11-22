@@ -1,3 +1,9 @@
+## [0.41.2](https://github.com/hasanify/nook/compare/v0.41.1...v0.41.2) (2026-11-22)
+
+### Bug Fixes
+
+- **core:** ensure windows autostart path is quoted and properly registered ([bc7ba5f](https://github.com/hasanify/nook/commit/bc7ba5fae001b8480f6975c3e476d1ad762a12d1))
+
 ## [0.41.1](https://github.com/hasanify/nook/compare/v0.41.0...v0.41.1) (2026-11-21)
 
 # [0.41.0](https://github.com/hasanify/nook/compare/v0.40.0...v0.41.0) (2026-11-21)
