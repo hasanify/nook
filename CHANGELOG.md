@@ -1,3 +1,9 @@
+# [0.43.0](https://github.com/hasanify/nook/compare/v0.42.2...v0.43.0) (2026-11-22)
+
+### Features
+
+- **docs:** make header menu responsive for mobile ([797c86c](https://github.com/hasanify/nook/commit/797c86cef98e123937bc59c8500c2fa28ae4a9a6))
+
 ## [0.42.2](https://github.com/hasanify/nook/compare/v0.42.1...v0.42.2) (2026-11-22)
 
 ### Bug Fixes
