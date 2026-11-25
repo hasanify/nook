@@ -1,3 +1,9 @@
+# [0.44.0](https://github.com/hasanify/nook/compare/v0.43.1...v0.44.0) (2026-11-25)
+
+### Features
+
+- **shortcuts:** enhance desktop shortcuts layout, icons, and quick-picker; add global widget opacity slider ([3f2fc06](https://github.com/hasanify/nook/commit/3f2fc06d37eea6a4775c31468f3a36eb3482e12c))
+
 ## [0.43.1](https://github.com/hasanify/nook/compare/v0.43.0...v0.43.1) (2026-11-22)
 
 # [0.43.0](https://github.com/hasanify/nook/compare/v0.42.2...v0.43.0) (2026-11-22)
