@@ -1788,3 +1788,27 @@ pub async fn get_battery_status() -> Result<BatteryStatus, String> {
         })
     }
 }
+
+#[tauri::command]
+pub async fn list_custom_widgets() -> Result<Vec<crate::registry::WidgetManifest>, String> {
+    crate::custom_widgets::list_custom_widgets()
+}
+
+#[tauri::command]
+pub async fn import_custom_widget(
+    file_bytes: Vec<u8>,
+    file_name: String,
+) -> Result<crate::registry::WidgetManifest, String> {
+    crate::custom_widgets::import_custom_widget(file_bytes, file_name)
+}
+
+#[tauri::command]
+pub async fn delete_custom_widget(app: tauri::AppHandle, id: String) -> Result<(), String> {
+    crate::custom_widgets::delete_custom_widget(&app, id)
+}
+
+#[tauri::command]
+pub async fn get_custom_widget_content(id: String) -> Result<String, String> {
+    crate::custom_widgets::get_custom_widget_content(id)
+}
+

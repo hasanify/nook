@@ -1,6 +1,7 @@
 pub mod autostart;
 pub mod commands;
 pub mod config;
+pub mod custom_widgets;
 pub mod migrations;
 pub mod pin;
 pub mod poller;
@@ -315,6 +316,10 @@ pub fn run() {
             commands::send_media_command,
             commands::get_media_status,
             commands::get_battery_status,
+            commands::list_custom_widgets,
+            commands::import_custom_widget,
+            commands::delete_custom_widget,
+            commands::get_custom_widget_content,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
