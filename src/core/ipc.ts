@@ -358,10 +358,11 @@ export async function listCustomWidgets(): Promise<Manifest[]> {
 }
 
 export async function importCustomWidget(
-  fileBytes: number[],
+  fileBytes: number[] | Uint8Array,
   fileName: string,
 ): Promise<Manifest> {
-  return invoke<Manifest>("import_custom_widget", { fileBytes, fileName });
+  const bytes = fileBytes instanceof Uint8Array ? Array.from(fileBytes) : fileBytes;
+  return invoke<Manifest>("import_custom_widget", { fileBytes: bytes, fileName });
 }
 
 export async function deleteCustomWidget(id: string): Promise<void> {

@@ -44,7 +44,7 @@ pub fn list_custom_widgets() -> Result<Vec<WidgetManifest>, String> {
         }
     }
 
-    list.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    list.sort_by_key(|a| a.name.to_lowercase());
     Ok(list)
 }
 
@@ -116,7 +116,7 @@ fn find_ascii_case_insensitive(haystack: &[u8], needle: &[u8]) -> Option<usize> 
         window
             .iter()
             .zip(needle.iter())
-            .all(|(a, b)| a.to_ascii_lowercase() == b.to_ascii_lowercase())
+            .all(|(a, b)| a.eq_ignore_ascii_case(b))
     })
 }
 
@@ -254,6 +254,9 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
 
         let manifest = parse_manifest_with_defaults(&manifest_content, file_stem)?;
         validate_widget_id(&manifest.id)?;
+        if crate::registry::ManifestRegistry::is_builtin_id(&manifest.id) {
+            return Err(format!("Cannot import custom widget with built-in ID '{}'", manifest.id));
+        }
 
         let target_dir = get_custom_widgets_dir().join(&manifest.id);
         fs::create_dir_all(&target_dir)
@@ -338,6 +341,9 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
         };
 
         validate_widget_id(&manifest.id)?;
+        if crate::registry::ManifestRegistry::is_builtin_id(&manifest.id) {
+            return Err(format!("Cannot import custom widget with built-in ID '{}'", manifest.id));
+        }
 
         let target_dir = get_custom_widgets_dir().join(&manifest.id);
         fs::create_dir_all(&target_dir)
@@ -628,6 +634,39 @@ mod tests {
         }
         let err = import_custom_widget(buffer_too_many.into_inner(), "too_many.zip".to_string()).unwrap_err();
         assert!(err.contains("Archive contains too many files"));
+    }
+
+    #[test]
+    fn test_cannot_import_builtin_id() {
+        // Test HTML import with built-in ID
+        let html = r#"<!DOCTYPE html><html><head><script type="application/json" id="nook-manifest">
+        {"id": "notes", "name": "Fake Notes"}
+        </script></head><body>Fake</body></html>"#;
+        let err_html = import_custom_widget(html.as_bytes().to_vec(), "notes.html".to_string()).unwrap_err();
+        assert_eq!(err_html, "Cannot import custom widget with built-in ID 'notes'");
+
+        // Test ZIP import with built-in ID
+        let manifest_json = r#"{
+            "id": "clock",
+            "name": "Fake Clock",
+            "description": "Fake Clock",
+            "version": "1.0.0",
+            "author": "Hacker",
+            "defaultSize": { "w": 300, "h": 200 },
+            "minSize": { "w": 200, "h": 150 }
+        }"#;
+        let mut buffer = std::io::Cursor::new(Vec::new());
+        {
+            let mut zip = zip::ZipWriter::new(&mut buffer);
+            let options = SimpleFileOptions::default();
+            zip.start_file("manifest.json", options).unwrap();
+            zip.write_all(manifest_json.as_bytes()).unwrap();
+            zip.start_file("index.html", options).unwrap();
+            zip.write_all(b"<html></html>").unwrap();
+            zip.finish().unwrap();
+        }
+        let err_zip = import_custom_widget(buffer.into_inner(), "clock.zip".to_string()).unwrap_err();
+        assert_eq!(err_zip, "Cannot import custom widget with built-in ID 'clock'");
     }
 }
 

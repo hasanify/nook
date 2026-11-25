@@ -24,6 +24,40 @@ pub struct WidgetManifest {
     pub settings_schema: Option<Vec<serde_json::Value>>,
 }
 
+pub const BUILTIN_IDS: &[&str] = &[
+    "placeholder",
+    "notes",
+    "timer",
+    "github-repo",
+    "vercel-project",
+    "clock",
+    "weather",
+    "todo",
+    "ai-tone",
+    "ai-reply",
+    "ai-eli5",
+    "ai-book-nugget",
+    "ai-history",
+    "ai-stoic",
+    "ai-stretch",
+    "ai-journal-prompt",
+    "ai-unstuck",
+    "ai-vocab",
+    "port-sentinel",
+    "api-health",
+    "github-prs",
+    "system-vitals",
+    "now-playing",
+    "battery-monitor",
+    "world-clock",
+    "habits",
+    "ambient-sound",
+    "news-feed",
+    "shortcuts",
+    "clipboard",
+    "crypto-ticker",
+];
+
 pub struct ManifestRegistry {
     manifests: HashMap<String, WidgetManifest>,
     builtin_ids: HashSet<String>,
@@ -228,7 +262,7 @@ impl ManifestRegistry {
     }
 
     pub fn is_builtin_id(id: &str) -> bool {
-        Self::new_builtins().is_builtin(id)
+        BUILTIN_IDS.contains(&id)
     }
 
     pub fn get(&self, kind: &str) -> Option<&WidgetManifest> {
@@ -281,5 +315,94 @@ mod tests {
         let schema = manifest.settings_schema.unwrap();
         assert_eq!(schema.len(), 1);
         assert_eq!(schema[0]["key"], "apiKey");
+    }
+
+    #[test]
+    fn test_builtin_ids_complete() {
+        let reg = ManifestRegistry::new_builtins();
+        for id in reg.manifests.keys() {
+            assert!(
+                ManifestRegistry::is_builtin_id(id),
+                "Missing ID '{}' from BUILTIN_IDS",
+                id
+            );
+        }
+        for &id in BUILTIN_IDS {
+            assert!(
+                reg.manifests.contains_key(id),
+                "BUILTIN_IDS contains '{}' which is not in new_builtins()",
+                id
+            );
+        }
+    }
+
+    #[test]
+    fn test_custom_registry_merging_and_precedence() {
+        use std::fs;
+
+        let custom_dir = crate::custom_widgets::get_custom_widgets_dir();
+        fs::create_dir_all(&custom_dir).unwrap();
+
+        // 1. Create a custom widget with a unique ID
+        let custom_id = format!("test_merge_{}", uuid::Uuid::new_v4().simple());
+        let custom_widget_dir = custom_dir.join(&custom_id);
+        fs::create_dir_all(&custom_widget_dir).unwrap();
+        let custom_manifest_json = format!(
+            r#"{{
+                "id": "{}",
+                "name": "Custom Merged Widget",
+                "description": "Merged from disk",
+                "version": "1.0.0",
+                "author": "Custom",
+                "defaultSize": {{ "w": 300, "h": 200 }},
+                "minSize": {{ "w": 200, "h": 150 }},
+                "resizable": true
+            }}"#,
+            custom_id
+        );
+        fs::write(custom_widget_dir.join("manifest.json"), custom_manifest_json).unwrap();
+        fs::write(custom_widget_dir.join("index.html"), "<html></html>").unwrap();
+
+        // 2. Create a custom widget trying to shadow built-in "notes"
+        let shadow_dir = custom_dir.join("notes");
+        let shadow_existed = shadow_dir.exists();
+        if !shadow_existed {
+            let _ = fs::create_dir_all(&shadow_dir);
+        }
+        let fake_notes_manifest = r#"{
+            "id": "notes",
+            "name": "Fake Shadow Notes",
+            "description": "Attempted override",
+            "version": "9.9.9",
+            "author": "Attacker",
+            "defaultSize": { "w": 999, "h": 999 },
+            "minSize": { "w": 100, "h": 100 },
+            "resizable": false
+        }"#;
+        let _ = fs::write(shadow_dir.join("manifest.json"), fake_notes_manifest);
+
+        // Load registry via ManifestRegistry::new()
+        let reg = ManifestRegistry::new();
+
+        // Clean up immediately so later tests aren't affected
+        let _ = fs::remove_dir_all(&custom_widget_dir);
+        if !shadow_existed {
+            let _ = fs::remove_dir_all(&shadow_dir);
+        } else {
+            let _ = fs::remove_file(shadow_dir.join("manifest.json"));
+        }
+
+        // Verify the custom widget was merged
+        let custom_entry = reg.get(&custom_id).expect("Custom widget should be merged into registry");
+        assert_eq!(custom_entry.name, "Custom Merged Widget");
+        assert!(!reg.is_builtin(&custom_id));
+        assert!(!ManifestRegistry::is_builtin_id(&custom_id));
+
+        // Verify built-ins take precedence (notes is NOT overwritten by the fake manifest)
+        let notes_entry = reg.get("notes").expect("Builtin notes must exist");
+        assert_ne!(notes_entry.name, "Fake Shadow Notes");
+        assert_ne!(notes_entry.author, "Attacker");
+        assert!(reg.is_builtin("notes"));
+        assert!(ManifestRegistry::is_builtin_id("notes"));
     }
 }
