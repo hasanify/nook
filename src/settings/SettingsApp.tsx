@@ -158,6 +158,19 @@ export function SettingsApp() {
   const hasShownWindowRef = useRef(false);
   const opacityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSlidingOpacityRef = useRef(false);
+  const [globalOpacity, setGlobalOpacity] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("nook_global_opacity");
+      if (saved && !isNaN(Number(saved))) return Number(saved);
+    }
+    return 0.95;
+  });
+
+  useEffect(() => {
+    if (!isSlidingOpacityRef.current && config?.widgets?.[0]?.opacity !== undefined) {
+      setGlobalOpacity(config.widgets[0].opacity);
+    }
+  }, [config?.widgets]);
 
   const [appVersion, setAppVersion] = useState<string>("");
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -479,9 +492,44 @@ export function SettingsApp() {
     }
   };
 
+  const handleGlobalOpacityChange = (val: number) => {
+    const clamped = Math.max(0.1, Math.min(1.0, val));
+    setGlobalOpacity(clamped);
+    isSlidingOpacityRef.current = true;
+    try {
+      localStorage.setItem("nook_global_opacity", String(clamped));
+    } catch {}
+
+    setConfig((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        widgets: prev.widgets.map((w) => ({ ...w, opacity: clamped })),
+      };
+    });
+
+    if (opacityDebounceRef.current) {
+      clearTimeout(opacityDebounceRef.current);
+    }
+    opacityDebounceRef.current = setTimeout(async () => {
+      try {
+        if (config?.widgets && config.widgets.length > 0) {
+          await Promise.all(config.widgets.map((w) => setOpacity(w.id, clamped)));
+        }
+      } finally {
+        setTimeout(() => {
+          isSlidingOpacityRef.current = false;
+        }, 150);
+      }
+    }, 40);
+  };
+
   const handleAddWidget = async (kind: string) => {
     try {
       const instance = await addWidget(kind);
+      if (typeof globalOpacity === "number") {
+        await setOpacity(instance.id, globalOpacity);
+      }
       setSelectedWidgetId(instance.id);
       setActiveTab("widgets");
     } catch {
@@ -698,12 +746,6 @@ export function SettingsApp() {
     ? selectedWidget.kind || (selectedWidget as unknown as { type?: string }).type || ""
     : "";
   const selectedModule = selectedKind ? getWidgetModule(selectedKind) : undefined;
-  const selectedWidgetColor =
-    selectedWidget &&
-    typeof selectedWidget.settings?.widgetColor === "string" &&
-    selectedWidget.settings.widgetColor.trim() !== ""
-      ? selectedWidget.settings.widgetColor.trim()
-      : undefined;
 
   return (
     <div className="flex flex-col overflow-hidden overscroll-none bg-surface font-sans text-fg select-none block-full inline-full">
@@ -947,6 +989,44 @@ export function SettingsApp() {
                       <span>{item.label}</span>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Global Widget Opacity */}
+              <div className="flex flex-col gap-3 rounded-2xl border border-line/70 bg-surface-raised/40 p-4 backdrop-blur-xs">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 font-semibold text-fg">
+                      <SlidersHorizontalIcon className="text-accent-500 block-4 inline-4" />
+                      Widget Opacity
+                    </div>
+                    <div className="text-sub text-fg-muted">
+                      Control opacity across all active desktop widgets
+                    </div>
+                  </div>
+                  <span className="rounded-md border border-line/60 bg-surface px-2.5 py-0.5 font-mono text-xs font-semibold text-accent-500 shadow-2xs">
+                    {Math.round(globalOpacity * 100)}%
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 pbs-1">
+                  <span className="font-mono text-2xs text-fg-muted">20%</span>
+                  <input
+                    type="range"
+                    min="0.2"
+                    max="1.0"
+                    step="0.05"
+                    value={globalOpacity}
+                    onChange={(e) => handleGlobalOpacityChange(Number(e.target.value))}
+                    className="flex-1 cursor-pointer accent-accent-500"
+                    aria-label="All desktop widgets opacity"
+                  />
+                  <span className="font-mono text-2xs text-fg-muted">100%</span>
+                </div>
+
+                <div className="flex items-center justify-between text-3xs text-fg-muted/70">
+                  <span>Transparent</span>
+                  <span>Solid</span>
                 </div>
               </div>
 
@@ -1228,6 +1308,30 @@ export function SettingsApp() {
                           })}
                         </div>
                       </div>
+
+                      {/* Surface Opacity Slider */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-fg">Surface Opacity</span>
+                          <span className="font-mono text-2xs font-semibold text-accent-500">
+                            {Math.round(globalOpacity * 100)}%
+                          </span>
+                        </div>
+                        <div className="mbs-2 flex items-center gap-2">
+                          <span className="font-mono text-3xs text-fg-muted">20%</span>
+                          <input
+                            type="range"
+                            min="0.2"
+                            max="1.0"
+                            step="0.05"
+                            value={globalOpacity}
+                            onChange={(e) => handleGlobalOpacityChange(Number(e.target.value))}
+                            className="flex-1 cursor-pointer accent-accent-500"
+                            aria-label="Custom appearance surface opacity"
+                          />
+                          <span className="font-mono text-3xs text-fg-muted">100%</span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Column 3: Header & Live Interactive Preview */}
@@ -1275,7 +1379,10 @@ export function SettingsApp() {
                             (currentAppTheme === "system" &&
                               typeof window !== "undefined" &&
                               window.matchMedia("(prefers-color-scheme: dark)").matches);
-                          const shellStyle = previewPreset.getShellStyle(undefined, isDark, false);
+                          const shellStyle = {
+                            ...previewPreset.getShellStyle(undefined, isDark, false),
+                            opacity: globalOpacity,
+                          };
                           return (
                             <div
                               className={`overflow-hidden transition-all ${previewPreset.containerClass}`}
@@ -1628,59 +1735,6 @@ export function SettingsApp() {
                         void handleToggleAlwaysOnTop(selectedWidget.id, isAlwaysOnTop)
                       }
                       ariaLabel="Always on top"
-                    />
-                  </div>
-
-                  {/* Opacity slider */}
-                  <div className="flex flex-col gap-2 border-bs border-line/60 pbs-3">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-fg">Window Opacity</span>
-                      <span
-                        className={`
-                          font-mono font-medium
-                          ${!selectedWidgetColor ? `text-accent-500` : ""}
-                        `}
-                        style={selectedWidgetColor ? { color: selectedWidgetColor } : undefined}
-                      >
-                        {Math.round(selectedWidget.opacity * 100)}%
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0.3"
-                      max="1.0"
-                      step="0.05"
-                      value={selectedWidget.opacity}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        isSlidingOpacityRef.current = true;
-                        setConfig((prev) => {
-                          if (!prev) return prev;
-                          return {
-                            ...prev,
-                            widgets: prev.widgets.map((w) =>
-                              w.id === selectedWidget.id ? { ...w, opacity: val } : w,
-                            ),
-                          };
-                        });
-                        if (opacityDebounceRef.current) {
-                          clearTimeout(opacityDebounceRef.current);
-                        }
-                        opacityDebounceRef.current = setTimeout(async () => {
-                          try {
-                            await setOpacity(selectedWidget.id, val);
-                          } finally {
-                            setTimeout(() => {
-                              isSlidingOpacityRef.current = false;
-                            }, 150);
-                          }
-                        }, 40);
-                      }}
-                      className={`
-                        cursor-pointer
-                        ${!selectedWidgetColor ? `accent-accent-500` : ""}
-                      `}
-                      style={selectedWidgetColor ? { accentColor: selectedWidgetColor } : undefined}
                     />
                   </div>
 

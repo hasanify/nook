@@ -6,7 +6,6 @@ import {
   removeWidget,
   setAlwaysOnTop,
   setBounds,
-  setOpacity,
   verifyDesktopPin,
 } from "@/core/ipc";
 import type { Rect } from "@/core/types";
@@ -372,20 +371,6 @@ export function TestWidget({ id }: TestWidgetProps) {
                 </button>
               );
             })()}
-            <button
-              type="button"
-              className="
-                rounded-sm border border-line bg-surface-raised px-2 py-0.5
-                text-2xs font-medium text-fg-muted
-                hover:text-fg
-              "
-              onClick={() => {
-                const nextOp = instance.opacity < 0.9 ? 0.95 : 0.6;
-                void setOpacity(id, nextOp);
-              }}
-            >
-              Opacity: {Math.round(instance.opacity * 100)}%
-            </button>
           </div>
         </div>
       </div>
