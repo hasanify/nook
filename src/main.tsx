@@ -31,6 +31,7 @@ function WidgetHost({ id }: { id: string }) {
   }
 
   const widgetKind = instance.kind || instance.type;
+  // Resolves built-in modules or custom widgets through CustomWidgetHost fallback
   const mod = getWidgetModule(widgetKind ?? "") ?? getWidgetModule("placeholder");
   if (!mod) {
     return (

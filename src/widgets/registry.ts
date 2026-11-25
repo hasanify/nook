@@ -1,4 +1,5 @@
-import type { WidgetModule } from "@/core/types";
+import { CustomWidgetHost } from "@/components/CustomWidgetHost";
+import type { Manifest, WidgetModule } from "@/core/types";
 
 import aiBookNuggetModule from "./ai-book-nugget";
 import aiEli5Module from "./ai-eli5";
@@ -70,10 +71,47 @@ const ALL_MODULES: Record<string, WidgetModule> = {
   placeholder: placeholderModule,
 };
 
-export function getWidgetModule(kind: string): WidgetModule | undefined {
-  return ALL_MODULES[kind];
+const CUSTOM_MANIFESTS = new Map<string, Manifest>();
+
+export function registerCustomWidget(manifest: Manifest): void {
+  CUSTOM_MANIFESTS.set(manifest.id, manifest);
 }
 
-export function getAllManifests() {
-  return Object.values(WIDGET_REGISTRY).map((m) => m.manifest);
+export function isCustomWidget(kind: string): boolean {
+  if (!kind) return false;
+  return !(kind in ALL_MODULES);
+}
+
+export function getWidgetModule(kind: string): WidgetModule | undefined {
+  if (!kind) {
+    return undefined;
+  }
+  if (ALL_MODULES[kind]) {
+    return ALL_MODULES[kind];
+  }
+
+  const manifest: Manifest = CUSTOM_MANIFESTS.get(kind) ?? {
+    id: kind,
+    name: kind,
+    description: `Custom widget (${kind})`,
+    version: "1.0.0",
+    author: "Custom",
+    defaultSize: { w: 340, h: 320 },
+    minSize: { w: 200, h: 150 },
+    resizable: true,
+  };
+
+  return {
+    manifest,
+    component: CustomWidgetHost,
+    defaultSettings: {},
+    defaultState: {},
+  };
+}
+
+export function getAllManifests(): Manifest[] {
+  return [
+    ...Object.values(WIDGET_REGISTRY).map((m) => m.manifest),
+    ...Array.from(CUSTOM_MANIFESTS.values()),
+  ];
 }

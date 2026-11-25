@@ -372,4 +372,3 @@ export async function deleteCustomWidget(id: string): Promise<void> {
 export async function getCustomWidgetContent(id: string): Promise<string> {
   return invoke<string>("get_custom_widget_content", { id });
 }
-
