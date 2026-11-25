@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ManifestSize {
@@ -20,10 +20,13 @@ pub struct WidgetManifest {
     pub min_size: ManifestSize,
     #[serde(default)]
     pub resizable: bool,
+    #[serde(rename = "settingsSchema", default, skip_serializing_if = "Option::is_none")]
+    pub settings_schema: Option<Vec<serde_json::Value>>,
 }
 
 pub struct ManifestRegistry {
     manifests: HashMap<String, WidgetManifest>,
+    builtin_ids: HashSet<String>,
 }
 
 impl Default for ManifestRegistry {
@@ -33,7 +36,7 @@ impl Default for ManifestRegistry {
 }
 
 impl ManifestRegistry {
-    pub fn new() -> Self {
+    pub fn new_builtins() -> Self {
         let mut manifests = HashMap::new();
 
         let placeholder_json = r#"{
@@ -201,7 +204,31 @@ impl ManifestRegistry {
             manifests.insert(m.id.clone(), m);
         }
 
-        Self { manifests }
+        let builtin_ids: HashSet<String> = manifests.keys().cloned().collect();
+        Self {
+            manifests,
+            builtin_ids,
+        }
+    }
+
+    pub fn new() -> Self {
+        let mut reg = Self::new_builtins();
+        if let Ok(custom_manifests) = crate::custom_widgets::list_custom_widgets() {
+            for m in custom_manifests {
+                if !reg.builtin_ids.contains(&m.id) {
+                    reg.manifests.insert(m.id.clone(), m);
+                }
+            }
+        }
+        reg
+    }
+
+    pub fn is_builtin(&self, id: &str) -> bool {
+        self.builtin_ids.contains(id)
+    }
+
+    pub fn is_builtin_id(id: &str) -> bool {
+        Self::new_builtins().is_builtin(id)
     }
 
     pub fn get(&self, kind: &str) -> Option<&WidgetManifest> {
@@ -210,5 +237,49 @@ impl ManifestRegistry {
 
     pub fn list(&self) -> Vec<&WidgetManifest> {
         self.manifests.values().collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_manifest_registry_builtins() {
+        let reg = ManifestRegistry::new();
+        assert!(reg.is_builtin("notes"));
+        assert!(reg.is_builtin("clock"));
+        assert!(reg.get("notes").is_some());
+        assert!(!reg.is_builtin("nonexistent_random_widget"));
+        assert!(ManifestRegistry::is_builtin_id("notes"));
+        assert!(!ManifestRegistry::is_builtin_id("nonexistent_random_widget"));
+    }
+
+    #[test]
+    fn test_manifest_deserialization_with_settings_schema() {
+        let json = r#"{
+            "id": "test-settings",
+            "name": "Test Settings",
+            "description": "Test",
+            "version": "1.0.0",
+            "author": "Tester",
+            "defaultSize": { "w": 300, "h": 200 },
+            "minSize": { "w": 200, "h": 150 },
+            "resizable": true,
+            "settingsSchema": [
+                {
+                    "key": "apiKey",
+                    "label": "API Key",
+                    "type": "secret"
+                }
+            ]
+        }"#;
+
+        let manifest = serde_json::from_str::<WidgetManifest>(json).unwrap();
+        assert_eq!(manifest.id, "test-settings");
+        assert!(manifest.settings_schema.is_some());
+        let schema = manifest.settings_schema.unwrap();
+        assert_eq!(schema.len(), 1);
+        assert_eq!(schema[0]["key"], "apiKey");
     }
 }

@@ -101,6 +101,7 @@ fn default_manifest_for_stem(stem: &str) -> WidgetManifest {
         default_size: ManifestSize { w: 340, h: 320 },
         min_size: ManifestSize { w: 200, h: 150 },
         resizable: true,
+        settings_schema: None,
     }
 }
 
@@ -359,7 +360,7 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
 pub fn validate_can_delete_custom_widget(id: &str) -> Result<PathBuf, String> {
     validate_widget_id(id)?;
 
-    if crate::registry::ManifestRegistry::new().get(id).is_some() {
+    if crate::registry::ManifestRegistry::is_builtin_id(id) {
         return Err(format!("Cannot delete built-in widget '{}'", id));
     }
 

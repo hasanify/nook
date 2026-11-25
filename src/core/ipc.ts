@@ -9,7 +9,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
-import type { AppConfig, ProviderPayload, WidgetInstance } from "./types";
+import type { AppConfig, Manifest, ProviderPayload, WidgetInstance } from "./types";
 
 export interface ConfigChangedPayload {
   ids: string[];
@@ -352,3 +352,23 @@ export function onUpdateDownloadProgress(
     callback(event.payload);
   });
 }
+
+export async function listCustomWidgets(): Promise<Manifest[]> {
+  return invoke<Manifest[]>("list_custom_widgets");
+}
+
+export async function importCustomWidget(
+  fileBytes: number[],
+  fileName: string,
+): Promise<Manifest> {
+  return invoke<Manifest>("import_custom_widget", { fileBytes, fileName });
+}
+
+export async function deleteCustomWidget(id: string): Promise<void> {
+  return invoke<void>("delete_custom_widget", { id });
+}
+
+export async function getCustomWidgetContent(id: string): Promise<string> {
+  return invoke<string>("get_custom_widget_content", { id });
+}
+
