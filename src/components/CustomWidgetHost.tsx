@@ -10,18 +10,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { generateBridgeScript } from "@/core/custom-widget-bridge";
 import { getCustomWidgetContent } from "@/core/ipc";
-import type { WidgetProps } from "@/core/types";
+import type { Manifest, WidgetProps } from "@/core/types";
 
 function combineHtmlWithBridge(rawHtml: string, bridgeScript: string): string {
   const scriptTag = `<script id="nook-bridge">${bridgeScript}</script>`;
   if (/<\/head>/i.test(rawHtml)) {
-    return rawHtml.replace(/<\/head>/i, `${scriptTag}\n</head>`);
+    return rawHtml.replace(/<\/head>/i, () => `${scriptTag}\n</head>`);
   }
   if (/<body[^>]*>/i.test(rawHtml)) {
-    return rawHtml.replace(/<body[^>]*>/i, `$&${scriptTag}\n`);
+    return rawHtml.replace(/<body[^>]*>/i, (match) => `${match}${scriptTag}\n`);
   }
   if (/<html[^>]*>/i.test(rawHtml)) {
-    return rawHtml.replace(/<html[^>]*>/i, `$&<head>${scriptTag}</head>\n`);
+    return rawHtml.replace(/<html[^>]*>/i, (match) => `${match}<head>${scriptTag}</head>\n`);
   }
   return `<head>${scriptTag}</head>\n${rawHtml}`;
 }
@@ -289,6 +289,9 @@ export function CustomWidgetHost({
                 : typeof payload === "string"
                   ? payload
                   : "";
+            if (!/^(https?|mailto):/i.test(url)) {
+              throw new Error(`Invalid or unsafe URL protocol: ${url}`);
+            }
             try {
               await openUrl(url);
             } catch {
@@ -349,22 +352,39 @@ export function CustomWidgetHost({
     );
   }, [theme]);
 
-  // Memoize combined HTML and bridge script
+  // Capture initial snapshot once on mount so srcDoc does not recompute on subsequent
+  // settings, theme, or editMode changes, preventing iframe reload thrashing.
+  const [initialSnapshot] = useState(() => ({
+    theme: getSystemTheme(),
+    editMode,
+    settings: instance.settings ?? {},
+    state: instance.state ?? {},
+    manifest: (instance as unknown as { manifest?: Manifest }).manifest,
+  }));
+
+  // Memoize combined HTML and bridge script once per widget load / rawHtml change
   const srcDoc = useMemo(() => {
     if (!rawHtml) return "";
+    const manifest: Manifest = initialSnapshot.manifest ?? {
+      id: widgetKind,
+      name: widgetKind,
+      description: "",
+      version: "0.1.0",
+      author: "",
+      defaultSize: { w: 2, h: 2 },
+      minSize: { w: 1, h: 1 },
+      resizable: true,
+    };
     const script = generateBridgeScript({
       instanceId: instance.id,
-      manifest: (instance as unknown as { manifest?: unknown }).manifest ?? {
-        id: widgetKind,
-        name: widgetKind,
-      },
-      theme,
-      editMode,
-      settings: instance.settings ?? {},
-      state: instance.state ?? {},
+      manifest,
+      theme: initialSnapshot.theme,
+      editMode: initialSnapshot.editMode,
+      settings: initialSnapshot.settings,
+      state: initialSnapshot.state,
     });
     return combineHtmlWithBridge(rawHtml, script);
-  }, [rawHtml, instance, widgetKind, theme, editMode]);
+  }, [rawHtml, instance.id, widgetKind, initialSnapshot]);
 
   if (loading) {
     return (
@@ -387,7 +407,7 @@ export function CustomWidgetHost({
     /* oxlint-disable react/iframe-missing-sandbox */
     <iframe
       ref={iframeRef}
-      sandbox="allow-scripts allow-forms allow-same-origin allow-modals"
+      sandbox="allow-scripts allow-forms allow-modals"
       srcDoc={srcDoc}
       className="block border-0 bg-transparent block-full inline-full"
       title={widgetKind || "Custom Widget"}

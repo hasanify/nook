@@ -1,6 +1,8 @@
+import type { Manifest } from "./types";
+
 export interface BridgeConfig {
   instanceId: string;
-  manifest: unknown;
+  manifest: Manifest;
   theme: "dark" | "light";
   editMode: boolean;
   settings: Record<string, unknown>;
@@ -9,7 +11,7 @@ export interface BridgeConfig {
 
 export interface NookBridgeApi {
   instanceId: string;
-  manifest: unknown;
+  manifest: Manifest;
   theme: "dark" | "light";
   editMode: boolean;
   settings: Record<string, unknown>;
@@ -47,14 +49,7 @@ function safeJsonStringify(value: unknown): string {
     .replace(/\u2029/g, "\\u2029");
 }
 
-export function generateBridgeScript(config: {
-  instanceId: string;
-  manifest: unknown;
-  theme: "dark" | "light";
-  editMode: boolean;
-  settings: Record<string, unknown>;
-  state: Record<string, unknown>;
-}): string {
+export function generateBridgeScript(config: BridgeConfig): string {
   const serializedConfig = safeJsonStringify(config);
 
   return `(function() {
@@ -149,7 +144,13 @@ export function generateBridgeScript(config: {
   function sendRpc(action, payload) {
     return new Promise(function(resolve, reject) {
       const id = "rpc_" + (++reqId) + "_" + Math.random().toString(36).slice(2, 9);
-      pendingRequests.set(id, { resolve: resolve, reject: reject });
+      const timer = setTimeout(function() {
+        if (pendingRequests.has(id)) {
+          pendingRequests.delete(id);
+          reject(new Error("RPC request timed out after 15s for action: " + action));
+        }
+      }, 15000);
+      pendingRequests.set(id, { resolve: resolve, reject: reject, timer: timer });
       window.parent.postMessage({
         type: "nook:rpc:" + action,
         action: action,
@@ -254,6 +255,9 @@ export function generateBridgeScript(config: {
       const pending = pendingRequests.get(data.requestId);
       if (pending) {
         pendingRequests.delete(data.requestId);
+        if (pending.timer) {
+          clearTimeout(pending.timer);
+        }
         if (data.error) {
           pending.reject(new Error(data.error));
         } else {
