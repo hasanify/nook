@@ -19,6 +19,7 @@ import {
   SunIcon,
   TrashIcon,
   TriangleIcon,
+  UploadSimpleIcon,
   UserIcon,
 } from "@phosphor-icons/react";
 import { listen } from "@tauri-apps/api/event";
@@ -39,12 +40,14 @@ import {
   addWidget,
   checkForUpdates,
   clearAccountToken,
+  deleteCustomWidget,
   getAccountToken,
   getAppConfig,
   getAppVersion,
   getDesktopWorkArea,
   hasAccountToken,
   installUpdate,
+  listCustomWidgets,
   onConfigChanged,
   onUpdateDownloadProgress,
   removeWidget,
@@ -68,9 +71,16 @@ import {
   saveCustomPresetConfig,
   WIDGET_PRESETS,
 } from "@/core/presets";
-import type { AppConfig, WidgetInstance } from "@/core/types";
+import type { AppConfig, Manifest, WidgetInstance } from "@/core/types";
 import { useEditMode } from "@/core/use-edit-mode";
-import { getWidgetModule, WIDGET_REGISTRY } from "@/widgets/registry";
+import {
+  getWidgetModule,
+  isCustomWidget,
+  registerCustomWidget,
+  WIDGET_REGISTRY,
+} from "@/widgets/registry";
+
+import { ImportWidgetModal } from "./ImportWidgetModal";
 
 interface AIProviderItem {
   id: string;
@@ -155,6 +165,8 @@ export function SettingsApp() {
   const [bedrockEndpointInput, setBedrockEndpointInput] = useState("");
   const [bedrockEndpointConfigured, setBedrockEndpointConfigured] = useState(false);
   const [widgetToAdd, setWidgetToAdd] = useState("notes");
+  const [customWidgets, setCustomWidgets] = useState<Manifest[]>([]);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const hasShownWindowRef = useRef(false);
   const opacityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSlidingOpacityRef = useRef(false);
@@ -260,8 +272,56 @@ export function SettingsApp() {
       .catch(() => {});
   }, [selectedWidgetId]);
 
+  const loadCustomWidgets = useCallback(() => {
+    listCustomWidgets()
+      .then((list) => {
+        setCustomWidgets(list);
+        for (const m of list) {
+          registerCustomWidget(m);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleImportSuccess = useCallback(
+    (manifest: Manifest) => {
+      registerCustomWidget(manifest);
+      loadCustomWidgets();
+    },
+    [loadCustomWidgets],
+  );
+
+  const handleDeleteCustomWidget = async (manifestId: string) => {
+    try {
+      await deleteCustomWidget(manifestId);
+      if (config?.widgets) {
+        const instancesToRemove = config.widgets.filter((w) => {
+          const kind = w.kind || (w as unknown as { type?: string }).type || "";
+          return kind === manifestId;
+        });
+        for (const inst of instancesToRemove) {
+          await removeWidget(inst.id);
+        }
+      }
+      setCustomWidgets((prev) => prev.filter((m) => m.id !== manifestId));
+      if (
+        selectedWidgetId &&
+        config?.widgets.some(
+          (w) =>
+            w.id === selectedWidgetId &&
+            (w.kind === manifestId || (w as unknown as { type?: string }).type === manifestId),
+        )
+      ) {
+        setSelectedWidgetId(null);
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
   useEffect(() => {
     fetchConfig();
+    loadCustomWidgets();
     refreshAccountStatus();
 
     getAppVersion()
@@ -308,7 +368,7 @@ export function SettingsApp() {
       if (unlistenUpdate) unlistenUpdate();
       if (opacityDebounceRef.current) clearTimeout(opacityDebounceRef.current);
     };
-  }, [fetchConfig, refreshAccountStatus]);
+  }, [fetchConfig, loadCustomWidgets, refreshAccountStatus]);
 
   // Reveal settings window smoothly only after initial config is loaded and rendered
   useEffect(() => {
@@ -537,18 +597,39 @@ export function SettingsApp() {
     }
   };
 
-  const handleWidgetSettingChange = (widgetId: string, key: string, value: unknown) => {
+  const patchSettings = useCallback((widgetId: string, patch: Record<string, unknown>) => {
     setConfig((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         widgets: prev.widgets.map((w) =>
-          w.id === widgetId ? { ...w, settings: { ...w.settings, [key]: value } } : w,
+          w.id === widgetId ? { ...w, settings: { ...w.settings, ...patch } } : w,
         ),
       };
     });
-    void updateSettings(widgetId, { [key]: value });
-  };
+    void updateSettings(widgetId, patch);
+  }, []);
+
+  const handleWidgetSettingChange = useCallback(
+    (widgetId: string, key: string, value: unknown) => {
+      patchSettings(widgetId, { [key]: value });
+    },
+    [patchSettings],
+  );
+
+  const widgetSelectOptions = useMemo(() => {
+    const builtin = Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => ({
+      value: kind,
+      label: mod.manifest.name,
+      description: mod.manifest.description,
+    }));
+    const custom = customWidgets.map((m) => ({
+      value: m.id,
+      label: `${m.name} [Custom]`,
+      description: m.description,
+    }));
+    return [...builtin, ...custom];
+  }, [customWidgets]);
 
   const handleToggleAlwaysOnTop = async (widgetId: string, current: boolean) => {
     const next = !current;
@@ -1438,12 +1519,29 @@ export function SettingsApp() {
         {activeTab === "widgets" && (
           <div className="flex flex-1 gap-5 overflow-hidden px-6 py-0 min-block-0">
             {/* Left Column: Widget List */}
-            <div className="my-3 flex shrink-0 flex-col gap-2.5 border-e border-line/60 pe-4 inline-56">
+            <div className="my-3 flex shrink-0 flex-col gap-2.5 border-e border-line/60 pe-4 inline-60">
               <div className="flex items-center justify-between font-medium text-fg">
-                <span>Active Widgets</span>
-                <span className="font-mono text-sub text-fg-muted">
-                  {config?.widgets.length ?? 0}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span>Active Widgets</span>
+                  <span className="font-mono text-sub text-fg-muted">
+                    {config?.widgets.length ?? 0}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsImportModalOpen(true)}
+                  title="Import Custom Widget"
+                  className="
+                    flex cursor-pointer items-center gap-1 rounded-md border
+                    border-line/70 bg-surface-raised/80 px-2 py-0.5 text-2xs
+                    font-medium text-fg shadow-2xs transition-all
+                    hover:border-accent-500/60 hover:bg-surface-raised hover:text-accent-400
+                    active:scale-95
+                  "
+                >
+                  <UploadSimpleIcon className="block-3 inline-3" weight="bold" />
+                  <span>Import</span>
+                </button>
               </div>
 
               {/* Bento Grid Arranger Option */}
@@ -1664,6 +1762,74 @@ export function SettingsApp() {
                     No active widgets.
                   </div>
                 )}
+
+                {/* Custom Widgets Section */}
+                {customWidgets.length > 0 && (
+                  <div className="flex flex-col gap-2 border-bs border-line/60 pbs-2.5">
+                    <div className="flex items-center justify-between font-medium text-fg">
+                      <span className="text-xs">Custom Widgets</span>
+                      <span className="font-mono text-sub text-fg-muted">
+                        {customWidgets.length}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {customWidgets.map((m) => (
+                        <div
+                          key={m.id}
+                          className="flex flex-col gap-1.5 rounded-lg border border-line/70 bg-surface-raised/50 p-2 text-xs shadow-2xs"
+                        >
+                          <div className="flex items-start justify-between gap-1">
+                            <span className="truncate font-semibold text-fg" title={m.name}>
+                              {m.name}
+                            </span>
+                            <span className="shrink-0 rounded-sm bg-accent-500/15 px-1 py-0.5 font-mono text-3xs font-medium text-accent-400">
+                              v{m.version}
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-0.5 text-2xs text-fg-muted">
+                            <div className="truncate">
+                              <span className="font-medium text-fg-muted/80">Author: </span>
+                              <span>{m.author || "Unknown"}</span>
+                            </div>
+                            <div
+                              className="truncate font-mono text-3xs text-fg-muted/70"
+                              title={m.id}
+                            >
+                              <span className="font-sans font-medium text-fg-muted/80">ID: </span>
+                              {m.id}
+                            </div>
+                          </div>
+                          {m.description && (
+                            <p
+                              className="line-clamp-2 text-3xs text-fg-muted"
+                              title={m.description}
+                            >
+                              {m.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-1.5 pbs-1">
+                            <button
+                              type="button"
+                              onClick={() => void handleAddWidget(m.id)}
+                              className="flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-sm bg-accent-500 px-2 py-1 text-2xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+                            >
+                              <PlusIcon className="block-3 inline-3" weight="bold" />
+                              <span>Add to Canvas</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteCustomWidget(m.id)}
+                              className="flex cursor-pointer items-center justify-center rounded-sm border border-error/40 bg-error/10 p-1 text-xs text-error transition-colors hover:bg-error/20 active:scale-95"
+                              title="Delete custom widget"
+                            >
+                              <TrashIcon className="block-3.5 inline-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Add Widget */}
@@ -1673,11 +1839,7 @@ export function SettingsApp() {
                   <CustomSelect<string>
                     value={widgetToAdd}
                     onChange={(val) => setWidgetToAdd(val)}
-                    options={Object.entries(WIDGET_REGISTRY).map(([kind, mod]) => ({
-                      value: kind,
-                      label: mod.manifest.name,
-                      description: mod.manifest.description,
-                    }))}
+                    options={widgetSelectOptions}
                     placeholder="Choose widget..."
                     searchPlaceholder="Search widgets..."
                     searchable={true}
@@ -1714,11 +1876,21 @@ export function SettingsApp() {
               {selectedWidget ? (
                 <div className="flex flex-col gap-5 pbe-4 inline-full">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <h2 className="text-sm font-semibold text-fg">
                         {selectedModule?.manifest.name ?? (selectedKind ? selectedKind : "Widget")}
                       </h2>
+                      {isCustomWidget(selectedKind) && (
+                        <span className="rounded-sm bg-accent-500/15 px-1.5 py-0.5 font-mono text-3xs font-medium text-accent-400">
+                          Custom
+                        </span>
+                      )}
                     </div>
+                    {isCustomWidget(selectedKind) && selectedModule?.manifest.version && (
+                      <span className="font-mono text-2xs text-fg-muted">
+                        v{selectedModule.manifest.version}
+                      </span>
+                    )}
                   </div>
 
                   {/* Always on top */}
@@ -1858,7 +2030,7 @@ export function SettingsApp() {
                       <SettingsForm
                         fields={selectedModule.manifest.settingsSchema}
                         values={selectedWidget.settings}
-                        onChange={(k, v) => handleWidgetSettingChange(selectedWidget.id, k, v)}
+                        onChange={(k, v) => patchSettings(selectedWidget.id, { [k]: v })}
                       />
                     </div>
                   )}
@@ -1880,9 +2052,82 @@ export function SettingsApp() {
                     </button>
                   </div>
                 </div>
+              ) : customWidgets.length > 0 ? (
+                <div className="flex flex-col gap-4 p-2 inline-full">
+                  <div className="flex items-center justify-between border-be border-line/60 pbe-3">
+                    <div>
+                      <h2 className="text-sm font-semibold text-fg">Custom Widgets Manager</h2>
+                      <p className="text-sub text-fg-muted">
+                        Installed packages and third-party widgets
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsImportModalOpen(true)}
+                      className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+                    >
+                      <UploadSimpleIcon className="block-3.5 inline-3.5" weight="bold" />
+                      <span>Import Widget</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {customWidgets.map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex flex-col justify-between gap-3 rounded-xl border border-line/80 bg-surface-raised/40 p-3.5 shadow-2xs"
+                      >
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-xs font-semibold text-fg">{m.name}</span>
+                            <span className="shrink-0 rounded-sm bg-accent-500/15 px-1.5 py-0.5 font-mono text-3xs font-medium text-accent-400">
+                              v{m.version}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-2xs text-fg-muted">
+                            <span>By {m.author || "Unknown"}</span>
+                            <span className="font-mono text-3xs">{m.id}</span>
+                          </div>
+                          {m.description && (
+                            <p className="line-clamp-3 text-2xs/relaxed text-fg-muted">
+                              {m.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 border-bs border-line/50 pbs-2">
+                          <button
+                            type="button"
+                            onClick={() => void handleAddWidget(m.id)}
+                            className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-2xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-600 active:scale-95"
+                          >
+                            <PlusIcon className="block-3 inline-3" weight="bold" />
+                            <span>Add to Canvas</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleDeleteCustomWidget(m.id)}
+                            className="flex cursor-pointer items-center justify-center rounded-lg border border-error/40 bg-error/10 px-2 py-1.5 text-2xs font-medium text-error transition-colors hover:bg-error/20 active:scale-95"
+                            title="Delete custom widget"
+                          >
+                            <TrashIcon className="block-3.5 inline-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
-                <div className="flex items-center justify-center text-xs text-fg-muted italic block-full">
-                  Select a widget to view and edit its settings.
+                <div className="flex flex-col items-center justify-center gap-3 py-12 text-center text-xs text-fg-muted italic block-full">
+                  <p>Select a widget to view and edit its settings.</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsImportModalOpen(true)}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface-raised px-3.5 py-1.5 text-xs font-medium text-fg not-italic transition-colors hover:border-accent-500/60 hover:text-accent-400"
+                  >
+                    <UploadSimpleIcon className="block-3.5 inline-3.5" />
+                    <span>Import Custom Widget</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -2517,6 +2762,15 @@ export function SettingsApp() {
           </div>
         )}
       </div>
+
+      <ImportWidgetModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={handleImportSuccess}
+        onAddToDesktop={(manifest) => {
+          void handleAddWidget(manifest.id);
+        }}
+      />
     </div>
   );
 }
