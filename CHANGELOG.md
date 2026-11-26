@@ -1,3 +1,9 @@
+# [0.47.0](https://github.com/hasanify/nook/compare/v0.46.0...v0.47.0) (2026-11-26)
+
+### Features
+
+- **builder:** add online custom widget builder and simulator ([27e50bb](https://github.com/hasanify/nook/commit/27e50bb0bacbaff16c24bf00a538cb7965627d02))
+
 # [0.46.0](https://github.com/hasanify/nook/compare/v0.45.2...v0.46.0) (2026-11-26)
 
 ### Features
