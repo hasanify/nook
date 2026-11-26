@@ -1811,3 +1811,18 @@ pub async fn delete_custom_widget(app: tauri::AppHandle, id: String) -> Result<(
 pub async fn get_custom_widget_content(id: String) -> Result<String, String> {
     crate::custom_widgets::get_custom_widget_content(id)
 }
+
+#[tauri::command]
+pub fn get_installed_apps() -> Vec<crate::shortcuts::InstalledAppItem> {
+    crate::shortcuts::get_installed_apps()
+}
+
+#[tauri::command]
+pub fn pick_file_path() -> Option<crate::shortcuts::FilePickerResult> {
+    crate::shortcuts::pick_file_dialog()
+}
+
+#[tauri::command]
+pub fn pick_folder_path() -> Option<crate::shortcuts::FilePickerResult> {
+    crate::shortcuts::pick_folder_dialog()
+}

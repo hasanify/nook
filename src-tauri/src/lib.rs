@@ -9,6 +9,7 @@ pub mod providers;
 pub mod registry;
 pub mod secrets;
 pub mod shell_watch;
+pub mod shortcuts;
 pub mod state;
 pub mod timer;
 pub mod tray;
@@ -320,6 +321,9 @@ pub fn run() {
             commands::import_custom_widget,
             commands::delete_custom_widget,
             commands::get_custom_widget_content,
+            commands::get_installed_apps,
+            commands::pick_file_path,
+            commands::pick_folder_path,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

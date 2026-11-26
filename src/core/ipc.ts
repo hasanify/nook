@@ -372,3 +372,30 @@ export async function deleteCustomWidget(id: string): Promise<void> {
 export async function getCustomWidgetContent(id: string): Promise<string> {
   return invoke<string>("get_custom_widget_content", { id });
 }
+
+export interface InstalledAppItem {
+  id: string;
+  name: string;
+  path: string;
+  icon?: string;
+  category: string;
+  description?: string;
+}
+
+export interface FilePickerResult {
+  path: string;
+  name: string;
+  is_dir: boolean;
+}
+
+export async function getInstalledApps(): Promise<InstalledAppItem[]> {
+  return invoke<InstalledAppItem[]>("get_installed_apps");
+}
+
+export async function pickFilePath(): Promise<FilePickerResult | null> {
+  return invoke<FilePickerResult | null>("pick_file_path");
+}
+
+export async function pickFolderPath(): Promise<FilePickerResult | null> {
+  return invoke<FilePickerResult | null>("pick_folder_path");
+}

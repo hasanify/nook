@@ -2,9 +2,11 @@ import {
   AppWindowIcon,
   BookmarkSimpleIcon,
   CalculatorIcon,
+  CircleNotchIcon,
   CodeIcon,
   DiscordLogoIcon,
   FigmaLogoIcon,
+  FileIcon,
   FolderIcon,
   GithubLogoIcon,
   GlobeIcon,
@@ -28,6 +30,7 @@ import { type FormEvent, useMemo, useState } from "react";
 
 import { Banner } from "@/components/Banner";
 import { WidgetShell } from "@/components/WidgetShell";
+import { getInstalledApps, type InstalledAppItem, pickFilePath, pickFolderPath } from "@/core/ipc";
 import type { Manifest, WidgetModule, WidgetProps } from "@/core/types";
 
 import manifestJson from "./manifest.json";
@@ -46,84 +49,18 @@ export interface PresetApp {
   label: string;
   target: string;
   icon: string;
-  category: "dev" | "web" | "media";
+  category: string;
   description: string;
 }
 
 export const PRESET_APPS: PresetApp[] = [
-  // Developer & System Apps
-  {
-    id: "terminal",
-    label: "Terminal",
-    target: "wt.exe",
-    icon: "terminal",
-    category: "dev",
-    description: "Windows Terminal CLI",
-  },
-  {
-    id: "vscode",
-    label: "VS Code",
-    target: "code",
-    icon: "code",
-    category: "dev",
-    description: "Code Editor",
-  },
-  {
-    id: "explorer",
-    label: "Explorer",
-    target: "explorer.exe",
-    icon: "folder",
-    category: "dev",
-    description: "File Manager",
-  },
-  {
-    id: "localhost3000",
-    label: "Localhost :3000",
-    target: "http://localhost:3000",
-    icon: "rocket",
-    category: "dev",
-    description: "Local Dev Server",
-  },
-  {
-    id: "localhost5173",
-    label: "Localhost :5173",
-    target: "http://localhost:5173",
-    icon: "rocket",
-    category: "dev",
-    description: "Vite Dev Server",
-  },
-  {
-    id: "powershell",
-    label: "PowerShell",
-    target: "powershell.exe",
-    icon: "terminal",
-    category: "dev",
-    description: "PowerShell Console",
-  },
-  {
-    id: "cmd",
-    label: "CMD Prompt",
-    target: "cmd.exe",
-    icon: "terminal",
-    category: "dev",
-    description: "Command Prompt",
-  },
-  {
-    id: "calc",
-    label: "Calculator",
-    target: "calc.exe",
-    icon: "calculator",
-    category: "dev",
-    description: "Windows Calculator",
-  },
-
   // Web & Productivity
   {
     id: "github",
     label: "GitHub",
     target: "https://github.com",
     icon: "github",
-    category: "web",
+    category: "Web Bookmarks",
     description: "Code Repositories",
   },
   {
@@ -131,7 +68,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Google",
     target: "https://google.com",
     icon: "google",
-    category: "web",
+    category: "Web Bookmarks",
     description: "Search Engine",
   },
   {
@@ -139,7 +76,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "ChatGPT",
     target: "https://chatgpt.com",
     icon: "chatgpt",
-    category: "web",
+    category: "Web Bookmarks",
     description: "OpenAI Assistant",
   },
   {
@@ -147,7 +84,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Notion",
     target: "https://notion.so",
     icon: "globe",
-    category: "web",
+    category: "Web Bookmarks",
     description: "Notes & Docs",
   },
   {
@@ -155,7 +92,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Figma",
     target: "https://figma.com",
     icon: "figma",
-    category: "web",
+    category: "Web Bookmarks",
     description: "Collaborative Design",
   },
   {
@@ -163,8 +100,24 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Vercel",
     target: "https://vercel.com",
     icon: "rocket",
-    category: "web",
+    category: "Web Bookmarks",
     description: "Deployment Dashboard",
+  },
+  {
+    id: "localhost3000",
+    label: "Localhost :3000",
+    target: "http://localhost:3000",
+    icon: "rocket",
+    category: "Development",
+    description: "Local Dev Server",
+  },
+  {
+    id: "localhost5173",
+    label: "Localhost :5173",
+    target: "http://localhost:5173",
+    icon: "rocket",
+    category: "Development",
+    description: "Vite Dev Server",
   },
 
   // Media & Social
@@ -173,7 +126,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "YouTube",
     target: "https://youtube.com",
     icon: "youtube",
-    category: "media",
+    category: "Media & Social",
     description: "Videos & Music",
   },
   {
@@ -181,7 +134,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Discord",
     target: "https://discord.com/app",
     icon: "discord",
-    category: "media",
+    category: "Media & Social",
     description: "Voice & Text Chat",
   },
   {
@@ -189,7 +142,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Spotify",
     target: "https://open.spotify.com",
     icon: "spotify",
-    category: "media",
+    category: "Media & Social",
     description: "Music & Podcasts",
   },
   {
@@ -197,7 +150,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "X / Twitter",
     target: "https://x.com",
     icon: "twitter",
-    category: "media",
+    category: "Media & Social",
     description: "Social Feed",
   },
   {
@@ -205,7 +158,7 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Reddit",
     target: "https://reddit.com",
     icon: "reddit",
-    category: "media",
+    category: "Media & Social",
     description: "Internet Communities",
   },
   {
@@ -213,16 +166,16 @@ export const PRESET_APPS: PresetApp[] = [
     label: "Slack",
     target: "https://slack.com",
     icon: "slack",
-    category: "media",
+    category: "Media & Social",
     description: "Team Messaging",
   },
 ];
 
 const DEFAULT_SHORTCUTS: ShortcutItem[] = [
-  { id: "1", label: "GitHub", target: "https://github.com", icon: "github" },
-  { id: "2", label: "Google", target: "https://google.com", icon: "google" },
-  { id: "3", label: "Terminal", target: "wt.exe", icon: "terminal" },
-  { id: "4", label: "Localhost", target: "http://localhost:3000", icon: "rocket" },
+  { id: "1", label: "Google", target: "https://google.com", icon: "google" },
+  { id: "2", label: "Terminal", target: "wt.exe", icon: "terminal" },
+  { id: "3", label: "Localhost", target: "http://localhost:3000", icon: "rocket" },
+  { id: "4", label: "ChatGPT", target: "https://chatgpt.com", icon: "chatgpt" },
 ];
 
 /**
@@ -263,6 +216,11 @@ export function formatShortcutSubtitle(target: string): string {
     const port = url.port ? `:${url.port}` : "";
     return `${host}${port}`;
   } catch {
+    // If local file path, show only file name or clean path
+    if (target.includes("\\") || target.includes("/")) {
+      const parts = target.split(/[\\/]/);
+      return parts[parts.length - 1] || target;
+    }
     return target;
   }
 }
@@ -301,19 +259,7 @@ function autoDetectTargetMetadata(target: string): { label?: string; icon?: stri
     return { label: "File Explorer", icon: "folder" };
   if (norm.includes("calc.exe") || norm === "calc")
     return { label: "Calculator", icon: "calculator" };
-  if (norm.includes("taskmgr.exe") || norm === "taskmgr")
-    return { label: "Task Manager", icon: "app" };
-
-  // For generic URLs, extract root domain as title
-  if (/^https?:\/\//i.test(norm)) {
-    try {
-      const url = new URL(norm);
-      const name = url.hostname.replace(/^www\./, "").split(".")[0];
-      if (name) {
-        return { label: name.charAt(0).toUpperCase() + name.slice(1), icon: "globe" };
-      }
-    } catch {}
-  }
+  if (norm.includes("notepad.exe") || norm === "notepad") return { label: "Notepad", icon: "code" };
 
   return {};
 }
@@ -336,7 +282,7 @@ function ShortcutIconView({
 
   // Determine effective icon key
   const effectiveIconKey = useMemo(() => {
-    if (icon && icon !== "globe" && icon !== "code") return icon;
+    if (icon && icon !== "globe" && icon !== "code" && icon !== "app") return icon;
     const detected = autoDetectTargetMetadata(target);
     if (detected.icon) return detected.icon;
     const lowerLabel = label.toLowerCase();
@@ -344,6 +290,9 @@ function ShortcutIconView({
     if (lowerLabel.includes("google")) return "google";
     if (lowerLabel.includes("terminal")) return "terminal";
     if (lowerLabel.includes("localhost")) return "rocket";
+    if (lowerLabel.includes("discord")) return "discord";
+    if (lowerLabel.includes("spotify")) return "spotify";
+    if (lowerLabel.includes("youtube")) return "youtube";
     return icon || "globe";
   }, [icon, target, label]);
 
@@ -420,6 +369,29 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
   const [newIcon, setNewIcon] = useState("globe");
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
+  // Installed apps from OS
+  const [installedApps, setInstalledApps] = useState<InstalledAppItem[]>([]);
+  const [isLoadingApps, setIsLoadingApps] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  const openLauncher = () => {
+    setIsAdding((prev) => {
+      const next = !prev;
+      if (next && installedApps.length === 0) {
+        setIsLoadingApps(true);
+        getInstalledApps()
+          .then((apps) => {
+            setInstalledApps(apps);
+          })
+          .catch(() => {})
+          .finally(() => {
+            setIsLoadingApps(false);
+          });
+      }
+      return next;
+    });
+  };
+
   const columns = (instance.settings.columns as string) || "2";
   const layout = (instance.settings.layout as string) || "grid";
   const showLabels = instance.settings.showLabels !== false;
@@ -437,16 +409,49 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
     }
   }, [columns]);
 
-  const filteredPresets = useMemo(() => {
+  // Combine actual installed applications with popular curated web presets
+  const allPickOptions: PresetApp[] = useMemo(() => {
+    const installed: PresetApp[] = installedApps.map((app) => ({
+      id: app.id,
+      label: app.name,
+      target: app.path,
+      icon: app.icon || "app",
+      category: app.category || "Installed Software",
+      description: app.description || "Installed Application",
+    }));
+
+    return [...installed, ...PRESET_APPS];
+  }, [installedApps]);
+
+  const availableCategories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const opt of allPickOptions) {
+      counts.set(opt.category, (counts.get(opt.category) || 0) + 1);
+    }
+    const cats = ["All", ...Array.from(counts.keys())];
+    return cats.map((cat) => ({
+      name: cat,
+      count: cat === "All" ? allPickOptions.length : counts.get(cat) || 0,
+    }));
+  }, [allPickOptions]);
+
+  const filteredPickOptions = useMemo(() => {
+    let list = allPickOptions;
+    if (selectedCategory !== "All") {
+      list = list.filter((p) => p.category === selectedCategory);
+    }
     const q = presetSearch.toLowerCase().trim();
-    if (!q) return PRESET_APPS;
-    return PRESET_APPS.filter(
-      (p) =>
-        p.label.toLowerCase().includes(q) ||
-        p.target.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q),
-    );
-  }, [presetSearch]);
+    if (q) {
+      list = list.filter(
+        (p) =>
+          p.label.toLowerCase().includes(q) ||
+          p.target.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [allPickOptions, selectedCategory, presetSearch]);
 
   const handleLaunch = async (target: string) => {
     setErrorBanner(null);
@@ -489,6 +494,45 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
     }
   };
 
+  const handlePickFile = async () => {
+    try {
+      const res = await pickFilePath();
+      if (res) {
+        setNewTarget(res.path);
+        if (!newLabel.trim()) {
+          setNewLabel(res.name);
+        }
+        const lower = res.path.toLowerCase();
+        if (lower.endsWith(".exe") || lower.endsWith(".lnk")) {
+          setNewIcon("app");
+        } else if (lower.endsWith(".html") || lower.endsWith(".url")) {
+          setNewIcon("globe");
+        } else if (lower.endsWith(".bat") || lower.endsWith(".cmd") || lower.endsWith(".ps1")) {
+          setNewIcon("terminal");
+        } else {
+          setNewIcon("folder");
+        }
+      }
+    } catch {
+      setErrorBanner("Could not open file picker dialog");
+    }
+  };
+
+  const handlePickFolder = async () => {
+    try {
+      const res = await pickFolderPath();
+      if (res) {
+        setNewTarget(res.path);
+        if (!newLabel.trim()) {
+          setNewLabel(res.name);
+        }
+        setNewIcon("folder");
+      }
+    } catch {
+      setErrorBanner("Could not open folder picker dialog");
+    }
+  };
+
   const handleAddSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!newLabel.trim() || !newTarget.trim()) return;
@@ -520,7 +564,7 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
       headerActions={
         <button
           type="button"
-          onClick={() => setIsAdding((prev) => !prev)}
+          onClick={openLauncher}
           className={`
             flex cursor-pointer items-center justify-center rounded-md
             transition-all block-5 inline-5
@@ -540,7 +584,7 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
         </button>
       }
     >
-      <div className="flex flex-col gap-2 p-0.5 text-xs block-full inline-full min-block-0">
+      <div className="flex flex-col gap-2 p-1 text-xs block-full inline-full min-block-0">
         {errorBanner && (
           <Banner
             message={errorBanner}
@@ -598,14 +642,15 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
               </button>
             </div>
 
-            {/* TAB 1: Searchable Curated App Picker */}
+            {/* TAB 1: Searchable Curated & Installed Software Picker */}
             {activeAddTab === "preset" && (
               <div className="flex flex-col gap-2">
+                {/* Search Bar */}
                 <div className="relative flex items-center">
                   <MagnifyingGlassIcon className="absolute inset-s-2 text-fg-muted block-3.5 inline-3.5" />
                   <input
                     type="text"
-                    placeholder="Search apps, tools, web bookmarks..."
+                    placeholder="Search installed software, apps, web bookmarks..."
                     value={presetSearch}
                     onChange={(e) => setPresetSearch(e.target.value)}
                     className="
@@ -615,54 +660,120 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
                     "
                     autoFocus
                   />
+                  {isLoadingApps && (
+                    <CircleNotchIcon className="absolute inset-e-2.5 animate-spin text-accent-500 block-3 inline-3" />
+                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-1.5 overflow-y-auto overscroll-contain pbs-0.5 max-block-48">
-                  {filteredPresets.map((preset) => (
+                {/* Category Filter Chips */}
+                <div className="flex items-center gap-1 overflow-x-auto pbs-0.5 pbe-1">
+                  {availableCategories.map((cat) => (
                     <button
-                      key={preset.id}
+                      key={cat.name}
                       type="button"
-                      onClick={() => handleSelectPreset(preset)}
+                      onClick={() => setSelectedCategory(cat.name)}
+                      className={`
+                        shrink-0 cursor-pointer rounded-full px-2 py-0.5 text-3xs font-medium transition-all
+                        ${
+                          selectedCategory === cat.name
+                            ? "bg-accent-500 text-white shadow-2xs"
+                            : "border border-line/60 bg-surface/60 text-fg-muted hover:border-line hover:text-fg"
+                        }
+                      `}
+                    >
+                      {cat.name} ({cat.count})
+                    </button>
+                  ))}
+                </div>
+
+                {/* Apps Grid */}
+                <div className="grid grid-cols-2 gap-1.5 overflow-y-auto overscroll-contain pbs-0.5 max-block-52">
+                  {filteredPickOptions.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(item)}
                       className="
                         group flex cursor-pointer items-center gap-2 rounded-lg border
                         border-line/60 bg-surface/80 p-1.5 text-start transition-all
                         hover:border-accent-500/60 hover:bg-surface hover:shadow-2xs
                       "
-                      title={`Add ${preset.label} (${preset.target})`}
+                      title={`Add ${item.label} (${item.target})`}
                     >
                       <div className="flex shrink-0 items-center justify-center rounded-md bg-surface-raised p-1 text-accent-500 transition-transform block-6 inline-6 group-hover:scale-105">
                         <ShortcutIconView
-                          icon={preset.icon}
-                          target={preset.target}
-                          label={preset.label}
+                          icon={item.icon}
+                          target={item.target}
+                          label={item.label}
                           className="block-3.5 inline-3.5"
                         />
                       </div>
                       <div className="flex flex-1 flex-col min-inline-0">
                         <span className="truncate text-2xs font-semibold text-fg">
-                          {preset.label}
+                          {item.label}
                         </span>
                         <span className="truncate font-mono text-3xs text-fg-muted">
-                          {preset.description}
+                          {item.description}
                         </span>
                       </div>
                       <PlusIcon className="shrink-0 text-fg-muted opacity-0 transition-opacity block-3 inline-3 group-hover:opacity-100" />
                     </button>
                   ))}
+
+                  {filteredPickOptions.length === 0 && (
+                    <div className="col-span-2 py-6 text-center text-3xs text-fg-muted">
+                      No software or presets match your search.
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* TAB 2: Custom URL or App Executable */}
+            {/* TAB 2: Custom URL, Executable, or File Picker */}
             {activeAddTab === "custom" && (
-              <form onSubmit={handleAddSubmit} className="flex flex-col gap-2">
+              <form onSubmit={handleAddSubmit} className="flex flex-col gap-2.5">
+                {/* File / Folder Picker Buttons */}
+                <div className="flex items-center gap-1.5 border-be border-line/40 pbe-2">
+                  <button
+                    type="button"
+                    onClick={handlePickFile}
+                    className="
+                      flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg
+                      border border-line/80 bg-surface/80 px-2 py-1.5 text-2xs
+                      font-medium text-fg transition-all
+                      hover:border-accent-500/60 hover:bg-surface hover:text-accent-500
+                    "
+                    title="Browse local executable, script, or document file"
+                  >
+                    <FileIcon className="text-accent-500 block-3.5 inline-3.5" weight="bold" />
+                    <span>Browse File / App...</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePickFolder}
+                    className="
+                      flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg
+                      border border-line/80 bg-surface/80 px-2 py-1.5 text-2xs
+                      font-medium text-fg transition-all
+                      hover:border-accent-500/60 hover:bg-surface hover:text-accent-500
+                    "
+                    title="Browse local folder or directory"
+                  >
+                    <FolderIcon className="text-accent-500 block-3.5 inline-3.5" weight="bold" />
+                    <span>Browse Folder...</span>
+                  </button>
+                </div>
+
+                {/* Target Web Address or Command */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-3xs font-medium text-fg-muted">
-                    Target Web Address or Command
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-3xs font-medium text-fg-muted">
+                      Target Web Address, Executable, or File Path
+                    </label>
+                  </div>
                   <input
                     type="text"
-                    placeholder="e.g. https://github.com or wt.exe"
+                    placeholder="e.g. https://github.com or C:\App\tool.exe"
                     value={newTarget}
                     onChange={(e) => handleTargetChange(e.target.value)}
                     className="
@@ -672,13 +783,42 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
                     "
                     autoFocus
                   />
+
+                  {/* Quick Website & Port Fill Chips */}
+                  <div className="flex flex-wrap items-center gap-1 pbs-1">
+                    <span className="text-3xs text-fg-muted/60">Quick pick:</span>
+                    {[
+                      { label: "https://", val: "https://" },
+                      { label: ":3000", val: "http://localhost:3000" },
+                      { label: ":5173", val: "http://localhost:5173" },
+                      { label: ":8080", val: "http://localhost:8080" },
+                      { label: "GitHub", val: "https://github.com" },
+                      { label: "ChatGPT", val: "https://chatgpt.com" },
+                      { label: "YouTube", val: "https://youtube.com" },
+                      { label: "Google", val: "https://google.com" },
+                    ].map((chip) => (
+                      <button
+                        key={chip.label}
+                        type="button"
+                        onClick={() => handleTargetChange(chip.val)}
+                        className="
+                          cursor-pointer rounded-md border border-line/60 bg-surface/50
+                          px-1.5 py-0.5 text-3xs text-fg-muted transition-colors
+                          hover:border-accent-500/50 hover:bg-surface hover:text-fg
+                        "
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* Display Label */}
                 <div className="flex flex-col gap-1">
                   <label className="text-3xs font-medium text-fg-muted">Display Label</label>
                   <input
                     type="text"
-                    placeholder="e.g. GitHub"
+                    placeholder="e.g. My Project"
                     value={newLabel}
                     onChange={(e) => setNewLabel(e.target.value)}
                     className="
@@ -690,59 +830,83 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
                 </div>
 
                 {/* Live Preview & Icon Selection */}
-                <div className="flex items-center justify-between border-bs border-line/50 pbs-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xs text-fg-muted">Icon:</span>
-                    <div className="flex items-center gap-1">
-                      {[
-                        { key: "globe", label: "Globe" },
-                        { key: "terminal", label: "Terminal" },
-                        { key: "code", label: "Code" },
-                        { key: "folder", label: "Folder" },
-                        { key: "rocket", label: "Rocket" },
-                        { key: "star", label: "Star" },
-                        { key: "github", label: "GitHub" },
-                        { key: "google", label: "Google" },
-                        { key: "youtube", label: "YouTube" },
-                        { key: "discord", label: "Discord" },
-                      ].map((item) => (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => setNewIcon(item.key)}
-                          className={`
-                            flex cursor-pointer items-center justify-center rounded-md p-1 transition-colors block-5 inline-5
-                            ${
-                              newIcon === item.key
-                                ? "bg-accent-500 text-white"
-                                : "bg-surface text-fg-muted hover:bg-surface-raised hover:text-fg"
-                            }
-                          `}
-                          title={item.label}
-                        >
-                          <ShortcutIconView
-                            icon={item.key}
-                            target={newTarget}
-                            label={newLabel || item.label}
-                            className="block-3 inline-3"
-                          />
-                        </button>
-                      ))}
+                <div className="flex flex-col gap-2 border-bs border-line/50 pbs-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-3xs text-fg-muted">Icon:</span>
+                      <div className="flex items-center gap-1">
+                        {[
+                          { key: "globe", label: "Globe" },
+                          { key: "terminal", label: "Terminal" },
+                          { key: "code", label: "Code" },
+                          { key: "folder", label: "Folder" },
+                          { key: "rocket", label: "Rocket" },
+                          { key: "app", label: "App" },
+                          { key: "star", label: "Star" },
+                          { key: "github", label: "GitHub" },
+                          { key: "google", label: "Google" },
+                          { key: "youtube", label: "YouTube" },
+                          { key: "discord", label: "Discord" },
+                        ].map((item) => (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => setNewIcon(item.key)}
+                            className={`
+                              flex cursor-pointer items-center justify-center rounded-md p-1 transition-colors block-5 inline-5
+                              ${
+                                newIcon === item.key
+                                  ? "bg-accent-500 text-white"
+                                  : "bg-surface text-fg-muted hover:bg-surface-raised hover:text-fg"
+                              }
+                            `}
+                            title={item.label}
+                          >
+                            <ShortcutIconView
+                              icon={item.key}
+                              target={newTarget}
+                              label={newLabel || item.label}
+                              className="block-3 inline-3"
+                            />
+                          </button>
+                        ))}
+                      </div>
                     </div>
+
+                    <button
+                      type="submit"
+                      disabled={!newLabel.trim() || !newTarget.trim()}
+                      className="
+                        cursor-pointer rounded-lg bg-accent-500 px-3 py-1 text-2xs
+                        font-medium text-white shadow-2xs transition-all
+                        hover:bg-accent-600 disabled:cursor-not-allowed
+                        disabled:opacity-50
+                      "
+                    >
+                      Add Shortcut
+                    </button>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={!newLabel.trim() || !newTarget.trim()}
-                    className="
-                      cursor-pointer rounded-lg bg-accent-500 px-3 py-1 text-2xs
-                      font-medium text-white shadow-2xs transition-all
-                      hover:bg-accent-600 disabled:cursor-not-allowed
-                      disabled:opacity-50
-                    "
-                  >
-                    Add Shortcut
-                  </button>
+                  {/* Card Preview */}
+                  {newTarget.trim() && (
+                    <div className="flex items-center gap-2 rounded-lg border border-line/40 bg-surface/40 p-1.5">
+                      <span className="text-3xs text-fg-muted">Preview:</span>
+                      <div className="flex items-center gap-2 rounded-md bg-surface-raised px-2 py-1">
+                        <ShortcutIconView
+                          icon={newIcon}
+                          target={newTarget}
+                          label={newLabel || "Shortcut"}
+                          className="block-3.5 inline-3.5"
+                        />
+                        <span className="text-2xs font-semibold text-fg">
+                          {newLabel || "Shortcut"}
+                        </span>
+                        <span className="font-mono text-3xs text-fg-muted">
+                          {formatShortcutSubtitle(newTarget)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </form>
             )}
@@ -751,8 +915,8 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
 
         {/* Shortcuts View: App Tiles (Grid) or Compact Rows (List) */}
         {layout === "list" ? (
-          /* List Mode: Sleek Compact Cards */
-          <div className="flex flex-col gap-1.5 overflow-y-auto block-full">
+          /* List Mode: Sleek Compact Cards with adequate top clearance */
+          <div className="flex flex-col gap-2 overflow-y-auto px-1 pbs-2 pbe-2.5 block-full">
             {shortcuts.map((sc) => (
               <div
                 key={sc.id}
@@ -760,7 +924,7 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
                   group relative flex cursor-pointer items-center gap-2.5 rounded-xl
                   border border-line/60 bg-surface-raised/40 p-2 text-start
                   transition-all duration-150
-                  hover:border-accent-500/50 hover:bg-surface-raised hover:shadow-2xs
+                  hover:-translate-y-0.5 hover:border-accent-500/60 hover:bg-surface-raised hover:shadow-xs
                   active:scale-95
                 "
                 onClick={() => void handleLaunch(sc.target)}
@@ -810,9 +974,9 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
             ))}
           </div>
         ) : (
-          /* Grid Mode: Beautiful App Tiles */
+          /* Grid Mode: Beautiful App Tiles with generous top breathing room so hover never clips */
           <div
-            className={`grid ${gridColsClass} auto-rows-max content-start gap-2 overflow-y-auto block-full`}
+            className={`grid ${gridColsClass} auto-rows-max content-start gap-2.5 overflow-y-auto px-1 pbs-2 pbe-2.5 block-full`}
           >
             {shortcuts.map((sc) => (
               <div
@@ -821,7 +985,7 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
                   group relative flex cursor-pointer flex-col items-center justify-center
                   rounded-xl border border-line/50 bg-surface-raised/40 p-2.5 text-center
                   transition-all duration-150
-                  hover:-translate-y-0.5 hover:border-accent-500/40 hover:bg-surface-raised
+                  hover:-translate-y-0.5 hover:border-accent-500/60 hover:bg-surface-raised
                   hover:shadow-xs active:scale-95
                 "
                 onClick={() => void handleLaunch(sc.target)}
@@ -858,7 +1022,6 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
                   </div>
                 )}
 
-                {/* Edit Mode Delete Button */}
                 {editMode && (
                   <button
                     type="button"
@@ -893,7 +1056,7 @@ export function ShortcutsWidget({ instance, editMode, patchState }: WidgetProps)
             </span>
             <button
               type="button"
-              onClick={() => setIsAdding(true)}
+              onClick={openLauncher}
               className="
                 mbs-3 flex cursor-pointer items-center gap-1.5 rounded-lg bg-accent-500
                 px-3 py-1.5 text-2xs font-semibold text-white shadow-xs
