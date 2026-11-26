@@ -662,8 +662,10 @@ pub async fn install_update(
     {
         use std::os::windows::ffi::OsStrExt;
 
-        // Try standard spawn first; if elevation is required (os error 740), invoke via ShellExecuteW "runas"
-        let spawn_res = std::process::Command::new(&dest_path).spawn();
+        // Try standard spawn first with /UPDATE flag; if elevation is required (os error 740), invoke via ShellExecuteW "runas"
+        let spawn_res = std::process::Command::new(&dest_path)
+            .arg("/UPDATE")
+            .spawn();
 
         let launched = match spawn_res {
             Ok(_) => true,
@@ -685,13 +687,17 @@ pub async fn install_update(
                     .encode_wide()
                     .chain(Some(0))
                     .collect();
+                let wide_params: Vec<u16> = std::ffi::OsStr::new("/UPDATE")
+                    .encode_wide()
+                    .chain(Some(0))
+                    .collect();
 
                 let ret = unsafe {
                     ShellExecuteW(
                         0,
                         wide_verb.as_ptr(),
                         wide_path.as_ptr(),
-                        std::ptr::null(),
+                        wide_params.as_ptr(),
                         std::ptr::null(),
                         1, // SW_SHOWNORMAL
                     )
@@ -718,13 +724,17 @@ pub async fn install_update(
                     .encode_wide()
                     .chain(Some(0))
                     .collect();
+                let wide_params: Vec<u16> = std::ffi::OsStr::new("/UPDATE")
+                    .encode_wide()
+                    .chain(Some(0))
+                    .collect();
 
                 let ret = unsafe {
                     ShellExecuteW(
                         0,
                         wide_verb.as_ptr(),
                         wide_path.as_ptr(),
-                        std::ptr::null(),
+                        wide_params.as_ptr(),
                         std::ptr::null(),
                         1,
                     )

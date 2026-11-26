@@ -2,6 +2,9 @@
 ; Preserves launch on startup (HKCU Run key) across application updates
 
 !macro NSIS_HOOK_PREINSTALL
+  ; Terminate any running Nook instance so files in $INSTDIR are not locked during in-place upgrade
+  nsExec::Exec 'taskkill /F /IM nook.exe'
+
   ; Check if Nook autostart was registered in Windows Run key prior to update (HKCU or HKLM)
   StrCpy $R9 "0"
   ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Nook"
