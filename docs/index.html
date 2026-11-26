@@ -603,6 +603,7 @@
         </button>
         <nav class="nav-links" id="nav-menu">
           <a href="#widgets" class="nav-link">Widgets</a>
+          <a href="#custom-widgets" class="nav-link">Custom Widgets</a>
           <a href="#architecture" class="nav-link">Architecture</a>
           <a href="https://github.com/hasanify/nook" class="nav-link" target="_blank" rel="noopener"
             >GitHub</a
@@ -1513,6 +1514,77 @@
                   example context.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Custom Widgets Section -->
+      <section id="custom-widgets">
+        <div class="container">
+          <h2>Custom widget imports</h2>
+          <p class="section-intro">
+            Build your own desktop widgets or generate them with AI. Import a single HTML file or
+            ZIP archive directly into Nook with full access to native system telemetry.
+          </p>
+
+          <div class="specs-grid">
+            <div class="spec-item">
+              <div class="spec-title">Single file or ZIP import</div>
+              <p class="spec-desc">
+                Drop in a standalone <code>.html</code> file with an embedded manifest or a
+                <code>.zip</code> archive containing local styles and scripts. Unpacked directly
+                into your local app data.
+              </p>
+            </div>
+
+            <div class="spec-item">
+              <div class="spec-title">Native system telemetry</div>
+              <p class="spec-desc">
+                Custom widgets can read real-time CPU load, memory utilization, battery status, open
+                network ports, and control active Windows media playback via the
+                <code>window.Nook.system</code> bridge.
+              </p>
+            </div>
+
+            <div class="spec-item">
+              <div class="spec-title">Isolated sandbox security</div>
+              <p class="spec-desc">
+                Widgets execute in an isolated iframe with an opaque origin, strictly separated from
+                Nook's host DOM and the desktop window layer.
+              </p>
+            </div>
+
+            <div class="spec-item">
+              <div class="spec-title">Dynamic settings inspector</div>
+              <p class="spec-desc">
+                Declare a settings schema in your widget manifest. Nook automatically renders native
+                sliders, toggles, text inputs, and dropdowns in the Settings app.
+              </p>
+            </div>
+
+            <div class="spec-item">
+              <div class="spec-title">State persistence and theme sync</div>
+              <p class="spec-desc">
+                Persist widget state across app restarts with <code>Nook.setState()</code>. CSS
+                tokens for light and dark palettes update automatically when you switch themes.
+              </p>
+            </div>
+
+            <div class="spec-item">
+              <div class="spec-title">Turnkey AI agent guide</div>
+              <p class="spec-desc">
+                Give
+                <a
+                  href="https://github.com/hasanify/nook/blob/main/instructions.md"
+                  target="_blank"
+                  rel="noopener"
+                  style="text-decoration: underline"
+                  >instructions.md</a
+                >
+                to any AI assistant (Claude, ChatGPT, Gemini) to generate fully functional widgets
+                ready to drop into Nook.
+              </p>
             </div>
           </div>
         </div>

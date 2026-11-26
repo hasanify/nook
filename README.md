@@ -24,6 +24,7 @@
 - **Per-Widget Always on Top (`PinStrategy::Topmost`):** Any widget can be detached to stay above all normal application windows via right-click or settings.
 - **Zero-Lag & Low Footprint:** Single shared Rust background HTTP poller with ETag caching and rate-limit backoff; near-zero idle CPU usage (< 1%).
 - **Pluggable Architecture:** Adding a new widget type requires only a manifest, an `index.tsx` component, and single-line registrations.
+- **Custom Widget Imports & AI Integration:** Import community or AI-generated widgets as a standalone `.html` / `.nook` file or `.zip` archive directly in Settings. Widgets run inside a sandboxed iframe with a bidirectional `window.Nook` bridge supporting state persistence, settings schemas, theme adaptation, and native system telemetry (CPU, RAM, battery, active media playback, port radar, ping, and notifications). See [instructions.md](instructions.md) for the AI prompt guide.
 - **Resilient Lifecycle:** Automatic self-healing and reparenting after Windows Explorer restarts (`TaskbarCreated`).
 - **Secure Secret Storage:** API tokens (GitHub PAT, Vercel token) are stored in Windows Credential Manager via `keyring` and never written to disk, config, or logs.
 
@@ -82,6 +83,25 @@ _Connects to your choice of AI provider (OpenAI, Anthropic Claude, Google Gemini
 
 ---
 
+## Custom Widgets & AI Generation
+
+Nook allows you to import third-party and AI-generated widgets without rebuilding the app:
+
+1. **Package Formats:**
+   - **Single File (`.html` or `.nook`):** Standalone HTML containing embedded CSS, JavaScript, and an embedded `<script type="application/json" id="nook-manifest">` metadata tag.
+   - **ZIP Archive (`.zip`):** Folder bundle containing `manifest.json`, `index.html`, and any local assets (CSS, JS, images).
+2. **Native JavaScript Bridge (`window.Nook`):**
+   - **State Persistence:** `Nook.getState()` and `Nook.setState(patch)` save state across app reloads.
+   - **Settings Inspector:** Define a `settingsSchema` in your manifest, and Nook automatically renders interactive settings controls (text, number, toggle, select) in the Settings panel.
+   - **Theme Sync:** Adapts to dark/light modes with Nook's CSS custom properties (`--bg-surface`, `--fg`, `--accent`, `--line`, etc.) automatically injected on `:root`.
+   - **Native System APIs:** Query CPU/RAM vitals (`Nook.system.getVitals()`), battery level (`Nook.system.getBattery()`), active media session details and playback controls (`Nook.system.getMediaStatus()`, `Nook.system.sendMediaCommand()`), open network ports (`Nook.system.getListeningPorts()`), ping endpoints (`Nook.system.ping()`), and send desktop notifications (`Nook.system.notify()`).
+3. **Execution Sandbox:**
+   - Custom widgets run in an isolated iframe with an opaque origin (`"null"`), keeping your desktop shell and Nook's host environment safe.
+4. **AI Agent Prompting:**
+   - Refer to [`instructions.md`](instructions.md) for the turnkey developer specification. You can hand this file directly to any AI agent (Claude, ChatGPT, Gemini, Cursor) to generate complete, ready-to-run custom widgets with zero extra setup.
+
+---
+
 ## Stack
 
 | Layer          | Technology          | Version        | Purpose                                                                                    |
@@ -117,6 +137,7 @@ nook/
 ├── lint-staged.config.mjs          # Staged file linting and formatting configuration
 ├── icon.png                        # Master application icon (1024x1024)
 ├── banner.webp                     # GitHub banner graphic
+├── instructions.md                 # AI agent specification for generating custom widgets
 ├── README.md                       # Synchronized project documentation
 ├── index.html                      # Unified webview HTML entry
 ├── package.json                    # Project dependencies and operational scripts
@@ -128,9 +149,9 @@ nook/
 ├── src/
 │   ├── main.tsx                    # Window router (?w=<id> or ?view=settings)
 │   ├── styles/theme.css            # Tailwind v4 semantic tokens & styles
-│   ├── core/                       # IPC wrappers, types, hooks (use-instance, use-theme, use-provider, etc.)
-│   ├── components/                 # WidgetShell, EditOverlay, Banner, StatusDot, SettingsForm
-│   ├── settings/                   # Settings application interface (General, Accounts, Widget tabs)
+│   ├── core/                       # IPC wrappers, custom-widget-bridge, types, hooks
+│   ├── components/                 # CustomWidgetHost, WidgetShell, EditOverlay, SettingsForm
+│   ├── settings/                   # Settings application interface (ImportWidgetModal, General, Widgets)
 │   └── widgets/                    # Registered widgets (productivity, dev tools, system monitors, AI companions)
 └── src-tauri/
     ├── Cargo.toml                  # Pinned Rust dependencies
@@ -142,6 +163,7 @@ nook/
     └── src/
         ├── commands.rs             # Tauri IPC command handlers
         ├── config.rs               # Atomic debounced config persistence
+        ├── custom_widgets.rs       # Custom widget import, extraction, and validation engine
         ├── lib.rs                  # Tauri runtime builder & plugin setup
         ├── main.rs                 # Native Windows entrypoint
         ├── migrations.rs           # Config schema migrations
