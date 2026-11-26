@@ -1811,4 +1811,3 @@ pub async fn delete_custom_widget(app: tauri::AppHandle, id: String) -> Result<(
 pub async fn get_custom_widget_content(id: String) -> Result<String, String> {
     crate::custom_widgets::get_custom_widget_content(id)
 }
-

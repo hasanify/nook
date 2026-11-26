@@ -20,7 +20,11 @@ pub struct WidgetManifest {
     pub min_size: ManifestSize,
     #[serde(default)]
     pub resizable: bool,
-    #[serde(rename = "settingsSchema", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "settingsSchema",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub settings_schema: Option<Vec<serde_json::Value>>,
 }
 
@@ -286,7 +290,9 @@ mod tests {
         assert!(reg.get("notes").is_some());
         assert!(!reg.is_builtin("nonexistent_random_widget"));
         assert!(ManifestRegistry::is_builtin_id("notes"));
-        assert!(!ManifestRegistry::is_builtin_id("nonexistent_random_widget"));
+        assert!(!ManifestRegistry::is_builtin_id(
+            "nonexistent_random_widget"
+        ));
     }
 
     #[test]
@@ -360,7 +366,11 @@ mod tests {
             }}"#,
             custom_id
         );
-        fs::write(custom_widget_dir.join("manifest.json"), custom_manifest_json).unwrap();
+        fs::write(
+            custom_widget_dir.join("manifest.json"),
+            custom_manifest_json,
+        )
+        .unwrap();
         fs::write(custom_widget_dir.join("index.html"), "<html></html>").unwrap();
 
         // 2. Create a custom widget trying to shadow built-in "notes"
@@ -393,7 +403,9 @@ mod tests {
         }
 
         // Verify the custom widget was merged
-        let custom_entry = reg.get(&custom_id).expect("Custom widget should be merged into registry");
+        let custom_entry = reg
+            .get(&custom_id)
+            .expect("Custom widget should be merged into registry");
         assert_eq!(custom_entry.name, "Custom Merged Widget");
         assert!(!reg.is_builtin(&custom_id));
         assert!(!ManifestRegistry::is_builtin_id(&custom_id));

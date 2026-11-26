@@ -8,14 +8,15 @@ pub const MAX_ZIP_FILES: usize = 1000;
 pub const MAX_TOTAL_UNCOMPRESSED_SIZE: u64 = 50 * 1024 * 1024; // 50 MB
 
 const WINDOWS_RESERVED_NAMES: &[&str] = &[
-    "con", "prn", "aux", "nul",
-    "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9",
-    "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+    "con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8",
+    "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
 ];
 
 pub fn get_custom_widgets_dir() -> PathBuf {
     let app_data = std::env::var("APPDATA").unwrap_or_else(|_| ".".to_string());
-    PathBuf::from(app_data).join("com.nook.app").join("custom_widgets")
+    PathBuf::from(app_data)
+        .join("com.nook.app")
+        .join("custom_widgets")
 }
 
 pub fn list_custom_widgets() -> Result<Vec<WidgetManifest>, String> {
@@ -52,13 +53,19 @@ pub fn validate_widget_id(id: &str) -> Result<(), String> {
     if id.is_empty() {
         return Err("Widget ID cannot be empty".to_string());
     }
-    if !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
+    if !id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
         return Err(format!(
             "Invalid widget ID '{}': only alphanumeric characters, hyphens, and underscores are allowed",
             id
         ));
     }
-    if WINDOWS_RESERVED_NAMES.iter().any(|&r| r.eq_ignore_ascii_case(id)) {
+    if WINDOWS_RESERVED_NAMES
+        .iter()
+        .any(|&r| r.eq_ignore_ascii_case(id))
+    {
         return Err(format!(
             "Invalid widget ID '{}': reserved Windows device name",
             id
@@ -79,7 +86,10 @@ fn sanitize_id(stem: &str) -> String {
     let trimmed = id.trim_matches('-').to_string();
     if trimmed.is_empty() {
         "custom-widget".to_string()
-    } else if WINDOWS_RESERVED_NAMES.iter().any(|&r| r.eq_ignore_ascii_case(&trimmed)) {
+    } else if WINDOWS_RESERVED_NAMES
+        .iter()
+        .any(|&r| r.eq_ignore_ascii_case(&trimmed))
+    {
         format!("widget-{}", trimmed)
     } else {
         trimmed
@@ -128,12 +138,15 @@ fn extract_embedded_manifest(html: &str) -> Option<String> {
         if let Some(rel_end) = bytes[tag_begin..].iter().position(|&b| b == b'>') {
             let tag_end = tag_begin + rel_end;
             let tag_header = &bytes[tag_begin..=tag_end];
-            let has_manifest_id = find_ascii_case_insensitive(tag_header, b"id=\"nook-manifest\"").is_some()
+            let has_manifest_id = find_ascii_case_insensitive(tag_header, b"id=\"nook-manifest\"")
+                .is_some()
                 || find_ascii_case_insensitive(tag_header, b"id='nook-manifest'").is_some();
 
             if has_manifest_id {
                 let body_start = tag_end + 1;
-                if let Some(rel_close) = find_ascii_case_insensitive(&bytes[body_start..], b"</script>") {
+                if let Some(rel_close) =
+                    find_ascii_case_insensitive(&bytes[body_start..], b"</script>")
+                {
                     let body_end = body_start + rel_close;
                     if let Ok(manifest_str) = std::str::from_utf8(&bytes[body_start..body_end]) {
                         return Some(manifest_str.trim().to_string());
@@ -153,18 +166,31 @@ fn parse_manifest_with_defaults(json_str: &str, file_stem: &str) -> Result<Widge
         return Ok(m);
     }
 
-    let mut val: serde_json::Value = serde_json::from_str(json_str)
-        .map_err(|e| format!("Invalid JSON in manifest: {}", e))?;
+    let mut val: serde_json::Value =
+        serde_json::from_str(json_str).map_err(|e| format!("Invalid JSON in manifest: {}", e))?;
 
     if let Some(obj) = val.as_object_mut() {
-        if !obj.contains_key("id") || obj["id"].as_str().map(|s| s.trim().is_empty()).unwrap_or(true) {
+        if !obj.contains_key("id")
+            || obj["id"]
+                .as_str()
+                .map(|s| s.trim().is_empty())
+                .unwrap_or(true)
+        {
             obj.insert("id".to_string(), serde_json::json!(sanitize_id(file_stem)));
         }
-        if !obj.contains_key("name") || obj["name"].as_str().map(|s| s.trim().is_empty()).unwrap_or(true) {
+        if !obj.contains_key("name")
+            || obj["name"]
+                .as_str()
+                .map(|s| s.trim().is_empty())
+                .unwrap_or(true)
+        {
             obj.insert("name".to_string(), serde_json::json!(file_stem));
         }
         if !obj.contains_key("description") {
-            obj.insert("description".to_string(), serde_json::json!("Custom widget imported from file"));
+            obj.insert(
+                "description".to_string(),
+                serde_json::json!("Custom widget imported from file"),
+            );
         }
         if !obj.contains_key("version") {
             obj.insert("version".to_string(), serde_json::json!("1.0.0"));
@@ -173,10 +199,16 @@ fn parse_manifest_with_defaults(json_str: &str, file_stem: &str) -> Result<Widge
             obj.insert("author".to_string(), serde_json::json!("Custom"));
         }
         if !obj.contains_key("defaultSize") {
-            obj.insert("defaultSize".to_string(), serde_json::json!({ "w": 340, "h": 320 }));
+            obj.insert(
+                "defaultSize".to_string(),
+                serde_json::json!({ "w": 340, "h": 320 }),
+            );
         }
         if !obj.contains_key("minSize") {
-            obj.insert("minSize".to_string(), serde_json::json!({ "w": 200, "h": 150 }));
+            obj.insert(
+                "minSize".to_string(),
+                serde_json::json!({ "w": 200, "h": 150 }),
+            );
         }
         if !obj.contains_key("resizable") {
             obj.insert("resizable".to_string(), serde_json::json!(true));
@@ -187,14 +219,17 @@ fn parse_manifest_with_defaults(json_str: &str, file_stem: &str) -> Result<Widge
         .map_err(|e| format!("Failed to parse WidgetManifest: {}", e))
 }
 
-pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<WidgetManifest, String> {
-    let is_zip = file_name.to_lowercase().ends_with(".zip")
-        || file_bytes.starts_with(b"PK\x03\x04");
+pub fn import_custom_widget(
+    file_bytes: Vec<u8>,
+    file_name: String,
+) -> Result<WidgetManifest, String> {
+    let is_zip =
+        file_name.to_lowercase().ends_with(".zip") || file_bytes.starts_with(b"PK\x03\x04");
 
     if is_zip {
         let reader = std::io::Cursor::new(&file_bytes);
-        let mut archive = zip::ZipArchive::new(reader)
-            .map_err(|e| format!("Invalid ZIP archive: {}", e))?;
+        let mut archive =
+            zip::ZipArchive::new(reader).map_err(|e| format!("Invalid ZIP archive: {}", e))?;
 
         if archive.len() > MAX_ZIP_FILES {
             return Err(format!(
@@ -229,10 +264,12 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
         let mut total_uncompressed_bytes: u64 = 0;
         let mut manifest_content = String::new();
         {
-            let mut manifest_file = archive.by_name(&manifest_entry_name)
+            let mut manifest_file = archive
+                .by_name(&manifest_entry_name)
                 .map_err(|_| "Archive must contain 'manifest.json'".to_string())?;
             let mut limited = (&mut manifest_file).take(MAX_TOTAL_UNCOMPRESSED_SIZE + 1);
-            limited.read_to_string(&mut manifest_content)
+            limited
+                .read_to_string(&mut manifest_content)
                 .map_err(|e| format!("Failed to read manifest.json: {}", e))?;
             total_uncompressed_bytes += manifest_content.len() as u64;
             if total_uncompressed_bytes > MAX_TOTAL_UNCOMPRESSED_SIZE {
@@ -244,7 +281,8 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
         }
 
         // Verify index.html exists
-        archive.by_name(&index_entry_name)
+        archive
+            .by_name(&index_entry_name)
             .map_err(|_| "Archive must contain 'index.html'".to_string())?;
 
         let file_stem = Path::new(&file_name)
@@ -255,7 +293,10 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
         let manifest = parse_manifest_with_defaults(&manifest_content, file_stem)?;
         validate_widget_id(&manifest.id)?;
         if crate::registry::ManifestRegistry::is_builtin_id(&manifest.id) {
-            return Err(format!("Cannot import custom widget with built-in ID '{}'", manifest.id));
+            return Err(format!(
+                "Cannot import custom widget with built-in ID '{}'",
+                manifest.id
+            ));
         }
 
         let target_dir = get_custom_widgets_dir().join(&manifest.id);
@@ -264,7 +305,8 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
 
         let extract_result = (|| -> Result<(), String> {
             for i in 0..archive.len() {
-                let mut file = archive.by_index(i)
+                let mut file = archive
+                    .by_index(i)
                     .map_err(|e| format!("Failed to read entry {} from archive: {}", i, e))?;
 
                 let file_raw_name = file.name().to_string();
@@ -283,7 +325,14 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
                 let rel_path = Path::new(rel_name);
                 // ZipSlip prevention
                 if rel_path.is_absolute()
-                    || rel_path.components().any(|c| matches!(c, std::path::Component::ParentDir | std::path::Component::RootDir | std::path::Component::Prefix(_)))
+                    || rel_path.components().any(|c| {
+                        matches!(
+                            c,
+                            std::path::Component::ParentDir
+                                | std::path::Component::RootDir
+                                | std::path::Component::Prefix(_)
+                        )
+                    })
                 {
                     continue;
                 }
@@ -295,14 +344,16 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
                 } else {
                     if let Some(p) = outpath.parent() {
                         if !p.exists() {
-                            fs::create_dir_all(p)
-                                .map_err(|e| format!("Failed to create parent directory {:?}: {}", p, e))?;
+                            fs::create_dir_all(p).map_err(|e| {
+                                format!("Failed to create parent directory {:?}: {}", p, e)
+                            })?;
                         }
                     }
                     let mut outfile = fs::File::create(&outpath)
                         .map_err(|e| format!("Failed to create file {:?}: {}", outpath, e))?;
 
-                    let remaining = MAX_TOTAL_UNCOMPRESSED_SIZE.saturating_sub(total_uncompressed_bytes);
+                    let remaining =
+                        MAX_TOTAL_UNCOMPRESSED_SIZE.saturating_sub(total_uncompressed_bytes);
                     let mut limited = (&mut file).take(remaining + 1);
                     let copied = std::io::copy(&mut limited, &mut outfile)
                         .map_err(|e| format!("Failed to extract file {:?}: {}", outpath, e))?;
@@ -342,7 +393,10 @@ pub fn import_custom_widget(file_bytes: Vec<u8>, file_name: String) -> Result<Wi
 
         validate_widget_id(&manifest.id)?;
         if crate::registry::ManifestRegistry::is_builtin_id(&manifest.id) {
-            return Err(format!("Cannot import custom widget with built-in ID '{}'", manifest.id));
+            return Err(format!(
+                "Cannot import custom widget with built-in ID '{}'",
+                manifest.id
+            ));
         }
 
         let target_dir = get_custom_widgets_dir().join(&manifest.id);
@@ -378,11 +432,13 @@ pub fn validate_can_delete_custom_widget(id: &str) -> Result<PathBuf, String> {
     Ok(dir)
 }
 
-pub fn delete_custom_widget<R: tauri::Runtime>(app: &tauri::AppHandle<R>, id: String) -> Result<(), String> {
+pub fn delete_custom_widget<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    id: String,
+) -> Result<(), String> {
     let dir = validate_can_delete_custom_widget(&id)?;
 
-    fs::remove_dir_all(&dir)
-        .map_err(|e| format!("Failed to delete widget directory: {}", e))?;
+    fs::remove_dir_all(&dir).map_err(|e| format!("Failed to delete widget directory: {}", e))?;
 
     let state = app.state::<crate::state::AppState>();
     let instances_to_remove: Vec<String> = state
@@ -461,7 +517,8 @@ mod tests {
         let extracted_1 = extract_embedded_manifest(html_1).expect("Should extract manifest");
         assert!(extracted_1.contains("\"id\": \"test-1\""));
 
-        let html_2 = r#"<script id='nook-manifest' type="application/json">{"id":"test-2"}</script>"#;
+        let html_2 =
+            r#"<script id='nook-manifest' type="application/json">{"id":"test-2"}</script>"#;
         let extracted_2 = extract_embedded_manifest(html_2).expect("Should extract manifest");
         assert!(extracted_2.contains("\"id\":\"test-2\""));
 
@@ -518,7 +575,8 @@ mod tests {
             zip.write_all(manifest_json.as_bytes()).unwrap();
 
             zip.start_file("index.html", options).unwrap();
-            zip.write_all(b"<html><body><h1>Zip Widget</h1></body></html>").unwrap();
+            zip.write_all(b"<html><body><h1>Zip Widget</h1></body></html>")
+                .unwrap();
 
             zip.finish().unwrap();
         }
@@ -553,7 +611,8 @@ mod tests {
             <body>Merhaba Dünya!</body>
             </html>
         "#;
-        let extracted = extract_embedded_manifest(html_unicode).expect("Should extract manifest with non-ASCII text");
+        let extracted = extract_embedded_manifest(html_unicode)
+            .expect("Should extract manifest with non-ASCII text");
         assert!(extracted.contains("\"id\": \"unicode-widget\""));
     }
 
@@ -589,8 +648,12 @@ mod tests {
         assert_eq!(err_clock, "Cannot delete built-in widget 'clock'");
 
         // Non-existent custom widget should return not found
-        let err_missing = validate_can_delete_custom_widget("nonexistent_test_widget_xyz").unwrap_err();
-        assert_eq!(err_missing, "Custom widget 'nonexistent_test_widget_xyz' not found");
+        let err_missing =
+            validate_can_delete_custom_widget("nonexistent_test_widget_xyz").unwrap_err();
+        assert_eq!(
+            err_missing,
+            "Custom widget 'nonexistent_test_widget_xyz' not found"
+        );
     }
 
     #[test]
@@ -604,7 +667,11 @@ mod tests {
             zip.write_all(b"<html></html>").unwrap();
             zip.finish().unwrap();
         }
-        let err1 = import_custom_widget(buffer_no_manifest.into_inner(), "missing_manifest.zip".to_string()).unwrap_err();
+        let err1 = import_custom_widget(
+            buffer_no_manifest.into_inner(),
+            "missing_manifest.zip".to_string(),
+        )
+        .unwrap_err();
         assert!(err1.contains("Archive must contain 'manifest.json'"));
 
         // Missing index.html
@@ -613,10 +680,15 @@ mod tests {
             let mut zip = zip::ZipWriter::new(&mut buffer_no_index);
             let options = SimpleFileOptions::default();
             zip.start_file("manifest.json", options).unwrap();
-            zip.write_all(b"{\"id\": \"no-index\", \"name\": \"No Index\"}").unwrap();
+            zip.write_all(b"{\"id\": \"no-index\", \"name\": \"No Index\"}")
+                .unwrap();
             zip.finish().unwrap();
         }
-        let err2 = import_custom_widget(buffer_no_index.into_inner(), "missing_index.zip".to_string()).unwrap_err();
+        let err2 = import_custom_widget(
+            buffer_no_index.into_inner(),
+            "missing_index.zip".to_string(),
+        )
+        .unwrap_err();
         assert!(err2.contains("Archive must contain 'index.html'"));
     }
 
@@ -632,7 +704,8 @@ mod tests {
             }
             zip.finish().unwrap();
         }
-        let err = import_custom_widget(buffer_too_many.into_inner(), "too_many.zip".to_string()).unwrap_err();
+        let err = import_custom_widget(buffer_too_many.into_inner(), "too_many.zip".to_string())
+            .unwrap_err();
         assert!(err.contains("Archive contains too many files"));
     }
 
@@ -642,8 +715,12 @@ mod tests {
         let html = r#"<!DOCTYPE html><html><head><script type="application/json" id="nook-manifest">
         {"id": "notes", "name": "Fake Notes"}
         </script></head><body>Fake</body></html>"#;
-        let err_html = import_custom_widget(html.as_bytes().to_vec(), "notes.html".to_string()).unwrap_err();
-        assert_eq!(err_html, "Cannot import custom widget with built-in ID 'notes'");
+        let err_html =
+            import_custom_widget(html.as_bytes().to_vec(), "notes.html".to_string()).unwrap_err();
+        assert_eq!(
+            err_html,
+            "Cannot import custom widget with built-in ID 'notes'"
+        );
 
         // Test ZIP import with built-in ID
         let manifest_json = r#"{
@@ -665,8 +742,11 @@ mod tests {
             zip.write_all(b"<html></html>").unwrap();
             zip.finish().unwrap();
         }
-        let err_zip = import_custom_widget(buffer.into_inner(), "clock.zip".to_string()).unwrap_err();
-        assert_eq!(err_zip, "Cannot import custom widget with built-in ID 'clock'");
+        let err_zip =
+            import_custom_widget(buffer.into_inner(), "clock.zip".to_string()).unwrap_err();
+        assert_eq!(
+            err_zip,
+            "Cannot import custom widget with built-in ID 'clock'"
+        );
     }
 }
-
