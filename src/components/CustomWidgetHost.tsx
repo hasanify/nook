@@ -478,6 +478,20 @@ export function CustomWidgetHost({
     return combineHtmlWithBridge(rawHtml, script);
   }, [rawHtml, instance.id, initialSnapshot]);
 
+  const blobUrl = useMemo(() => {
+    if (!srcDoc) return "";
+    const blob = new Blob([srcDoc], { type: "text/html;charset=utf-8" });
+    return URL.createObjectURL(blob);
+  }, [srcDoc]);
+
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -537,6 +551,7 @@ export function CustomWidgetHost({
       <iframe
         ref={iframeRef}
         allowTransparency={true}
+        src={blobUrl || undefined}
         srcDoc={srcDoc}
         style={{
           width: "100%",

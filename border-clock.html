@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Border Clock</title>
+    <script type="application/json" id="nook-manifest">
+      {
+        "id": "border-clock",
+        "name": "Border Clock",
+        "description": "Minimal clock with an animated border that fills as seconds advance",
+        "version": "1.0.0",
+        "author": "Nook",
+        "defaultSize": { "w": 280, "h": 180 },
+        "minSize": { "w": 180, "h": 120 },
+        "resizable": true,
+        "settingsSchema": [
+          {
+            "key": "hour12",
+            "label": "12-hour format",
+            "type": "boolean",
+            "defaultValue": false
+          },
+          {
+            "key": "showSeconds",
+            "label": "Show seconds digits",
+            "type": "boolean",
+            "defaultValue": true
+          },
+          {
+            "key": "showDate",
+            "label": "Show date",
+            "type": "boolean",
+            "defaultValue": true
+          },
+          {
+            "key": "smooth",
+            "label": "Smooth border animation",
+            "type": "boolean",
+            "defaultValue": true
+          }
+        ]
+      }
+    </script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        background: var(--bg-surface, #18181b);
+        color: var(--fg, #fafafa);
+        border: 1px solid var(--line, #27272a);
+        border-radius: 14px;
+        user-select: none;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      svg#border-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      #track {
+        fill: none;
+        stroke: var(--line, #27272a);
+        stroke-width: 3;
+      }
+
+      #progress {
+        fill: none;
+        stroke: var(--accent, #3b82f6);
+        stroke-width: 3;
+        stroke-linecap: butt;
+      }
+
+      .content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        z-index: 1;
+      }
+
+      .time-row {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+
+      #hm {
+        font-size: var(--hm-size, 46px);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--fg, #fafafa);
+      }
+
+      #sec {
+        font-size: calc(var(--hm-size, 46px) * 0.42);
+        font-weight: 500;
+        color: var(--fg-muted, #a1a1aa);
+      }
+
+      #ampm {
+        font-size: calc(var(--hm-size, 46px) * 0.3);
+        font-weight: 600;
+        color: var(--fg-muted, #a1a1aa);
+        text-transform: uppercase;
+      }
+
+      #date {
+        font-size: calc(var(--hm-size, 46px) * 0.32);
+        font-weight: 500;
+        color: var(--fg-muted, #a1a1aa);
+        letter-spacing: -0.01em;
+      }
+    </style>
+  </head>
+  <body>
+    <svg id="border-svg" xmlns="http://www.w3.org/2000/svg">
+      <path id="track" />
+      <path id="progress" pathLength="60" />
+    </svg>
+
+    <div class="content">
+      <div class="time-row">
+        <span id="hm">00:00</span>
+        <span id="sec">00</span>
+        <span id="ampm"></span>
+      </div>
+      <div id="date"></div>
+    </div>
+
+    <script>
+      (function () {
+        const track = document.getElementById("track");
+        const progress = document.getElementById("progress");
+        const hmEl = document.getElementById("hm");
+        const secEl = document.getElementById("sec");
+        const ampmEl = document.getElementById("ampm");
+        const dateEl = document.getElementById("date");
+
+        const defaults = {
+          hour12: false,
+          showSeconds: true,
+          showDate: true,
+          smooth: true,
+        };
+
+        let cfg = Object.assign({}, defaults, (window.Nook && window.Nook.settings) || {});
+
+        const STROKE = 3;
+        const pad = (n) => String(n).padStart(2, "0");
+
+        function buildPath() {
+          const W = Math.max(120, window.innerWidth || 280);
+          const H = Math.max(80, window.innerHeight || 180);
+          const offset = STROKE / 2;
+          const r = Math.max(4, Math.min(14 - offset, W / 2 - offset, H / 2 - offset));
+          const x0 = offset;
+          const y0 = offset;
+          const x1 = W - offset;
+          const y1 = H - offset;
+          const cx = W / 2;
+
+          const d = [
+            "M " + cx + " " + y0,
+            "H " + (x1 - r),
+            "A " + r + " " + r + " 0 0 1 " + x1 + " " + (y0 + r),
+            "V " + (y1 - r),
+            "A " + r + " " + r + " 0 0 1 " + (x1 - r) + " " + y1,
+            "H " + (x0 + r),
+            "A " + r + " " + r + " 0 0 1 " + x0 + " " + (y1 - r),
+            "V " + (y0 + r),
+            "A " + r + " " + r + " 0 0 1 " + (x0 + r) + " " + y0,
+            "H " + cx,
+          ].join(" ");
+
+          track.setAttribute("d", d);
+          progress.setAttribute("d", d);
+
+          const size = Math.max(22, Math.min(W / 4.8, H / 2.7));
+          document.documentElement.style.setProperty("--hm-size", Math.round(size) + "px");
+        }
+
+        function render() {
+          const now = new Date();
+          let h = now.getHours();
+          const m = now.getMinutes();
+          const s = now.getSeconds();
+          const ms = now.getMilliseconds();
+
+          let suffix = "";
+          if (cfg.hour12) {
+            suffix = h >= 12 ? "PM" : "AM";
+            h = h % 12 || 12;
+          }
+
+          hmEl.textContent = (cfg.hour12 ? String(h) : pad(h)) + ":" + pad(m);
+          secEl.textContent = pad(s);
+          secEl.style.display = cfg.showSeconds ? "" : "none";
+          ampmEl.textContent = suffix;
+          ampmEl.style.display = cfg.hour12 ? "" : "none";
+
+          dateEl.style.display = cfg.showDate ? "" : "none";
+          if (cfg.showDate) {
+            dateEl.textContent = now.toLocaleDateString(undefined, {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            });
+          }
+
+          const filled = cfg.smooth ? s + ms / 1000 : s + 1;
+          progress.setAttribute("stroke-dasharray", filled.toFixed(2) + " 60");
+        }
+
+        let loopToken = 0;
+        function restartLoop() {
+          loopToken++;
+          const currentToken = loopToken;
+
+          function tick() {
+            if (currentToken !== loopToken) return;
+            render();
+            if (cfg.smooth) {
+              requestAnimationFrame(tick);
+            } else {
+              const delay = 1000 - (Date.now() % 1000) + 5;
+              setTimeout(tick, delay);
+            }
+          }
+
+          tick();
+        }
+
+        window.addEventListener("resize", function () {
+          buildPath();
+          render();
+        });
+
+        if (window.Nook && typeof window.Nook.onSettingsChange === "function") {
+          window.Nook.onSettingsChange(function (newSettings) {
+            cfg = Object.assign({}, defaults, newSettings);
+            restartLoop();
+          });
+        }
+
+        function init() {
+          buildPath();
+          restartLoop();
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>System Vitals</title>
+    <script type="application/json" id="nook-manifest">
+      {
+        "id": "system-vitals-mini",
+        "name": "System Vitals Mini",
+        "description": "Clean live CPU, RAM, and Battery telemetry gauges",
+        "version": "1.0.0",
+        "author": "Nook",
+        "defaultSize": { "w": 280, "h": 180 },
+        "minSize": { "w": 220, "h": 150 },
+        "resizable": true,
+        "settingsSchema": [
+          {
+            "key": "refreshInterval",
+            "label": "Poll Interval (seconds)",
+            "type": "number",
+            "defaultValue": 2,
+            "min": 1,
+            "max": 30
+          }
+        ]
+      }
+    </script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        background: var(--bg-surface, #18181b);
+        color: var(--fg, #fafafa);
+        border: 1px solid var(--line, #27272a);
+        border-radius: 14px;
+        padding: 14px 16px;
+        user-select: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .header-title svg {
+        width: 15px;
+        height: 15px;
+        color: var(--accent, #3b82f6);
+      }
+
+      .uptime-tag {
+        font-size: 10px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        color: var(--fg-muted, #a1a1aa);
+        background: var(--bg-elevated, #27272a);
+        padding: 2px 7px;
+        border-radius: 6px;
+      }
+
+      .meters-col {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: auto 0;
+      }
+
+      .meter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .meter-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 11px;
+      }
+
+      .meter-name {
+        color: var(--fg-muted, #a1a1aa);
+        font-weight: 500;
+      }
+
+      .meter-val {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 600;
+        color: var(--fg, #fafafa);
+      }
+
+      .bar-track {
+        height: 6px;
+        width: 100%;
+        background: var(--line, #27272a);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        transition:
+          width 0.35s ease,
+          background-color 0.35s ease;
+      }
+
+      .bar-cpu {
+        background: var(--accent, #3b82f6);
+      }
+
+      .bar-ram {
+        background: #8b5cf6;
+      }
+
+      .bar-bat {
+        background: var(--success, #22c55e);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-title">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span>System Vitals</span>
+      </div>
+      <span id="uptime-label" class="uptime-tag">UP: --:--</span>
+    </div>
+
+    <div class="meters-col">
+      <div class="meter-item">
+        <div class="meter-labels">
+          <span class="meter-name">CPU</span>
+          <span id="cpu-text" class="meter-val">--%</span>
+        </div>
+        <div class="bar-track">
+          <div id="cpu-bar" class="bar-fill bar-cpu"></div>
+        </div>
+      </div>
+
+      <div class="meter-item">
+        <div class="meter-labels">
+          <span class="meter-name">Memory</span>
+          <span id="ram-text" class="meter-val">-- / -- GB</span>
+        </div>
+        <div class="bar-track">
+          <div id="ram-bar" class="bar-fill bar-ram"></div>
+        </div>
+      </div>
+
+      <div class="meter-item" id="battery-item">
+        <div class="meter-labels">
+          <span class="meter-name" id="bat-label">Battery</span>
+          <span id="bat-text" class="meter-val">--%</span>
+        </div>
+        <div class="bar-track">
+          <div id="bat-bar" class="bar-fill bar-bat"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const cpuText = document.getElementById("cpu-text");
+        const cpuBar = document.getElementById("cpu-bar");
+        const ramText = document.getElementById("ram-text");
+        const ramBar = document.getElementById("ram-bar");
+        const batText = document.getElementById("bat-text");
+        const batBar = document.getElementById("bat-bar");
+        const batLabel = document.getElementById("bat-label");
+        const uptimeLabel = document.getElementById("uptime-label");
+
+        let pollInterval = 2;
+        if (window.Nook && window.Nook.settings && window.Nook.settings.refreshInterval) {
+          pollInterval = Number(window.Nook.settings.refreshInterval) || 2;
+        }
+
+        function formatUptime(secs) {
+          if (!secs || secs < 0) return "UP: 0m";
+          const h = Math.floor(secs / 3600);
+          const m = Math.floor((secs % 3600) / 60);
+          if (h > 0) return "UP: " + h + "h " + m + "m";
+          return "UP: " + m + "m";
+        }
+
+        async function fetchMetrics() {
+          if (!window.Nook || !window.Nook.system) {
+            // Standalone preview fallback simulation
+            const fakeCpu = Math.floor(20 + Math.random() * 25);
+            const fakeRamUsed = (7.4 + Math.random() * 0.4).toFixed(1);
+            cpuText.textContent = fakeCpu + "%";
+            cpuBar.style.width = fakeCpu + "%";
+            ramText.textContent = fakeRamUsed + " / 16.0 GB";
+            ramBar.style.width = Math.round((parseFloat(fakeRamUsed) / 16) * 100) + "%";
+            batText.textContent = "85%";
+            batBar.style.width = "85%";
+            uptimeLabel.textContent = "UP: 4h 12m";
+            return;
+          }
+
+          try {
+            const vitals = await window.Nook.system.getVitals();
+            if (vitals) {
+              const cpu = Math.round(vitals.cpu_usage || 0);
+              cpuText.textContent = cpu + "%";
+              cpuBar.style.width = Math.min(100, Math.max(0, cpu)) + "%";
+
+              const usedGb = ((vitals.memory_used_mb || 0) / 1024).toFixed(1);
+              const totalGb = Math.round((vitals.memory_total_mb || 0) / 1024);
+              const ramPct =
+                totalGb > 0
+                  ? Math.round(((vitals.memory_used_mb || 0) / (vitals.memory_total_mb || 1)) * 100)
+                  : 0;
+              ramText.textContent = usedGb + " / " + totalGb + " GB";
+              ramBar.style.width = Math.min(100, Math.max(0, ramPct)) + "%";
+
+              if (typeof vitals.uptime_seconds === "number") {
+                uptimeLabel.textContent = formatUptime(vitals.uptime_seconds);
+              }
+            }
+          } catch (e) {}
+
+          try {
+            const bat = await window.Nook.system.getBattery();
+            if (bat && bat.has_battery) {
+              const level = Math.round(bat.level || 0);
+              batText.textContent = level + "%";
+              batBar.style.width = Math.min(100, Math.max(0, level)) + "%";
+              batLabel.textContent = bat.is_charging ? "Charging" : "Battery";
+              batBar.style.backgroundColor =
+                level < 20 ? "var(--error, #ef4444)" : "var(--success, #22c55e)";
+            } else {
+              batLabel.textContent = "Power";
+              batText.textContent = "AC Connected";
+              batBar.style.width = "100%";
+            }
+          } catch (e) {}
+        }
+
+        let timerId = null;
+        function startPolling() {
+          if (timerId) clearInterval(timerId);
+          fetchMetrics();
+          timerId = setInterval(fetchMetrics, Math.max(1, pollInterval) * 1000);
+        }
+
+        if (window.Nook && typeof window.Nook.onSettingsChange === "function") {
+          window.Nook.onSettingsChange(function (s) {
+            if (s && s.refreshInterval) {
+              pollInterval = Number(s.refreshInterval) || 2;
+              startPolling();
+            }
+          });
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", startPolling);
+        } else {
+          startPolling();
+        }
+      })();
+    </script>
+  </body>
+</html>
