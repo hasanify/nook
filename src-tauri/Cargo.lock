@@ -2405,7 +2405,7 @@ dependencies = [
 
 [[package]]
 name = "nook"
-version = "0.45.1"
+version = "0.45.2"
 dependencies = [
  "keyring",
  "reqwest 0.12.28",

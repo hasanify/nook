@@ -1,3 +1,9 @@
+## [0.45.2](https://github.com/hasanify/nook/compare/v0.45.1...v0.45.2) (2026-11-26)
+
+### Bug Fixes
+
+- **custom-widgets:** fix canvas rendering, context menu forwarding, and edit mode overlay ([fa25551](https://github.com/hasanify/nook/commit/fa25551628f5896528e7b17ade3e27143f08acc8))
+
 ## [0.45.1](https://github.com/hasanify/nook/compare/v0.45.0...v0.45.1) (2026-11-26)
 
 # [0.45.0](https://github.com/hasanify/nook/compare/v0.44.0...v0.45.0) (2026-11-26)
