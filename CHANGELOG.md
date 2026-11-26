@@ -1,3 +1,9 @@
+## [0.47.4](https://github.com/hasanify/nook/compare/v0.47.3...v0.47.4) (2026-11-26)
+
+### Bug Fixes
+
+- **widget-host:** disable asset CSP modification on scripts and styles, and add blobUrl iframe loader ([68d6a42](https://github.com/hasanify/nook/commit/68d6a422742f36c01004fe792493893ed6e0c65e))
+
 ## [0.47.3](https://github.com/hasanify/nook/compare/v0.47.2...v0.47.3) (2026-11-26)
 
 ### Bug Fixes
