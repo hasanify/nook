@@ -536,7 +536,6 @@ export function CustomWidgetHost({
       {/* oxlint-disable react/iframe-missing-sandbox */}
       <iframe
         ref={iframeRef}
-        sandbox="allow-scripts allow-forms allow-modals allow-same-origin"
         allowTransparency={true}
         srcDoc={srcDoc}
         style={{
