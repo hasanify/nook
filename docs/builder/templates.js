@@ -152,8 +152,8 @@ export const TEMPLATES = {
       const pad = (n) => String(n).padStart(2, "0");
 
       function buildPath() {
-        const W = window.innerWidth;
-        const H = window.innerHeight;
+        const W = window.innerWidth || 280;
+        const H = window.innerHeight || 180;
         const i = STROKE / 2;
         const r = Math.max(2, Math.min(14 - i, W / 2 - i, H / 2 - i));
         const x0 = i, y0 = i, x1 = W - i, y1 = H - i, cx = W / 2;
@@ -230,8 +230,15 @@ export const TEMPLATES = {
         });
       }
 
-      buildPath();
-      restart();
+      function boot() {
+        buildPath();
+        restart();
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
     </script>
   </body>
 </html>`,
@@ -413,7 +420,7 @@ export const TEMPLATES = {
 
           const battery = await window.Nook.system.getBattery();
           if (battery && battery.has_battery) {
-            batteryBadge.textContent = battery.level + "% " + (battery.charging ? "⚡" : "");
+            batteryBadge.textContent = battery.level + "%" + (battery.charging ? " [AC]" : "");
           } else {
             batteryBadge.textContent = "AC Power";
           }
@@ -688,7 +695,11 @@ export const TEMPLATES = {
   </head>
   <body>
     <div class="track-info">
-      <div class="album-art" id="art">🎵</div>
+      <div class="album-art" id="art">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+        </svg>
+      </div>
       <div class="meta">
         <span class="title" id="title">No Active Media</span>
         <span class="artist" id="artist">Start Spotify, YouTube, or browser audio</span>

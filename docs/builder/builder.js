@@ -842,6 +842,114 @@ Widget specifications:
 Ensure the code is self-contained with no external CSS/JS build requirements.`;
 }
 
+function setupSplitResizers() {
+  const leftPane = document.getElementById("left-pane");
+  const rightPane = document.getElementById("right-pane");
+  const resizerH = document.getElementById("split-resizer-h");
+  const resizerV = document.getElementById("split-resizer-v");
+  const drawer = document.getElementById("simulator-drawer");
+  const widgetResizer = document.getElementById("widget-resizer");
+
+  // 1. Horizontal Splitter (Editor vs Canvas)
+  if (resizerH && leftPane) {
+    resizerH.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      resizerH.classList.add("is-dragging");
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      if (previewIframe) previewIframe.style.pointerEvents = "none";
+
+      function onMouseMove(moveEvent) {
+        const totalW = window.innerWidth;
+        const newW = Math.max(280, Math.min(totalW - 320, moveEvent.clientX));
+        leftPane.style.width = `${newW}px`;
+        leftPane.style.maxWidth = "none";
+      }
+
+      function onMouseUp() {
+        resizerH.classList.remove("is-dragging");
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+        if (previewIframe) previewIframe.style.pointerEvents = "";
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      }
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    });
+  }
+
+  // 2. Vertical Splitter (Canvas vs Simulator Drawer)
+  if (resizerV && drawer && rightPane) {
+    resizerV.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      resizerV.classList.add("is-dragging");
+      document.body.style.cursor = "row-resize";
+      document.body.style.userSelect = "none";
+      if (previewIframe) previewIframe.style.pointerEvents = "none";
+
+      function onMouseMove(moveEvent) {
+        const rect = rightPane.getBoundingClientRect();
+        const newH = Math.max(90, Math.min(rect.height - 100, rect.bottom - moveEvent.clientY));
+        drawer.style.height = `${newH}px`;
+      }
+
+      function onMouseUp() {
+        resizerV.classList.remove("is-dragging");
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+        if (previewIframe) previewIframe.style.pointerEvents = "";
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      }
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    });
+  }
+
+  // 3. Widget Box Corner Resizer
+  if (widgetResizer) {
+    widgetResizer.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      document.body.style.cursor = "se-resize";
+      document.body.style.userSelect = "none";
+      if (previewIframe) previewIframe.style.pointerEvents = "none";
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startW = simState.size.w;
+      const startH = simState.size.h;
+      const minW = simState.manifest?.minSize?.w ?? 160;
+      const minH = simState.manifest?.minSize?.h ?? 100;
+
+      function onMouseMove(moveEvent) {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+        const newW = Math.max(minW, Math.round(startW + deltaX));
+        const newH = Math.max(minH, Math.round(startH + deltaY));
+        simState.size.w = newW;
+        simState.size.h = newH;
+        widgetBox.dataset.customResized = "true";
+        applySize();
+      }
+
+      function onMouseUp() {
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+        if (previewIframe) previewIframe.style.pointerEvents = "";
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      }
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    });
+  }
+}
+
 // Setup Event Listeners
 function setupEvents() {
   // Code editor input debounce
@@ -852,7 +960,7 @@ function setupEvents() {
   });
 
   // Template picker
-  document.getElementById("template-select").addEventListener("change", (e) => {
+  document.getElementById("template-select")?.addEventListener("change", (e) => {
     const key = e.target.value;
     if (TEMPLATES[key]) {
       codeEditor.value = TEMPLATES[key].code;
@@ -863,7 +971,7 @@ function setupEvents() {
   });
 
   // New Widget button
-  document.getElementById("btn-new-widget").addEventListener("click", () => {
+  document.getElementById("btn-new-widget")?.addEventListener("click", () => {
     codeEditor.value = TEMPLATES["border-clock"].code;
     delete widgetBox.dataset.customResized;
     updatePreview();
@@ -871,15 +979,15 @@ function setupEvents() {
   });
 
   // Export buttons
-  document.getElementById("btn-export-html").addEventListener("click", () => exportHtml("html"));
-  document.getElementById("btn-export-nook").addEventListener("click", () => exportHtml("nook"));
-  document.getElementById("btn-export-zip").addEventListener("click", exportZip);
-  document.getElementById("btn-copy-code").addEventListener("click", copyCode);
+  document.getElementById("btn-export-html")?.addEventListener("click", () => exportHtml("html"));
+  document.getElementById("btn-export-nook")?.addEventListener("click", () => exportHtml("nook"));
+  document.getElementById("btn-export-zip")?.addEventListener("click", exportZip);
+  document.getElementById("btn-copy-code")?.addEventListener("click", copyCode);
 
   // File upload input
   const fileInput = document.getElementById("file-upload-input");
-  document.getElementById("btn-upload-file").addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", async (e) => {
+  document.getElementById("btn-upload-file")?.addEventListener("click", () => fileInput?.click());
+  fileInput?.addEventListener("change", async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.name.endsWith(".zip")) {
@@ -900,15 +1008,15 @@ function setupEvents() {
   });
 
   // Edit Mode toggle button
-  document.getElementById("btn-edit-mode").addEventListener("click", toggleEditMode);
+  document.getElementById("btn-edit-mode")?.addEventListener("click", toggleEditMode);
 
   // Theme toggle button
-  document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+  document.getElementById("btn-theme-toggle")?.addEventListener("click", () => {
     setTheme(simState.theme === "dark" ? "light" : "dark");
   });
 
   // Wallpaper toggle
-  document.getElementById("wallpaper-select").addEventListener("change", (e) => {
+  document.getElementById("wallpaper-select")?.addEventListener("change", (e) => {
     setWallpaper(e.target.value);
   });
 
@@ -1036,10 +1144,23 @@ function setupEvents() {
 }
 
 // Initial Boot
-document.addEventListener("DOMContentLoaded", () => {
-  codeEditor.value = TEMPLATES["border-clock"].code;
-  setupEvents();
-  renderTelemetryControls();
-  renderStateInspector();
-  updatePreview();
-});
+function init() {
+  try {
+    if (codeEditor && TEMPLATES["border-clock"]) {
+      codeEditor.value = TEMPLATES["border-clock"].code;
+    }
+    updatePreview();
+    setupEvents();
+    setupSplitResizers();
+    renderTelemetryControls();
+    renderStateInspector();
+  } catch {
+    // Silently handle any initialization failure
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

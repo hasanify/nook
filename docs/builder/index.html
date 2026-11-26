@@ -84,7 +84,7 @@
     <!-- Main Workspace Split Pane -->
     <main class="app-workspace">
       <!-- Left Pane: Editor & Manifest Builder -->
-      <section class="left-pane">
+      <section class="left-pane" id="left-pane">
         <!-- Tab Navigation (Segmented Control) -->
         <div class="pane-nav">
           <div class="segmented-control">
@@ -205,8 +205,15 @@
         </div>
       </section>
 
+      <!-- Horizontal Split Resizer -->
+      <div
+        id="split-resizer-h"
+        class="split-resizer-h"
+        title="Drag to resize editor and canvas"
+      ></div>
+
       <!-- Right Pane: Live Desktop Canvas & Simulator -->
-      <section class="right-pane">
+      <section class="right-pane" id="right-pane">
         <!-- Canvas Toolbar -->
         <div class="canvas-toolbar">
           <div class="toolbar-group">
@@ -252,7 +259,7 @@
           <div id="widget-box" class="widget-window-box" style="width: 280px; height: 180px">
             <iframe
               id="preview-iframe"
-              sandbox="allow-scripts allow-forms allow-modals"
+              sandbox="allow-scripts allow-forms allow-modals allow-same-origin"
               allowtransparency="true"
               class="widget-iframe"
               title="Widget Preview"
@@ -263,11 +270,17 @@
               <span id="edit-badge" class="edit-badge">Custom Widget</span>
               <span id="edit-dimensions" class="edit-dimensions">280 × 180px</span>
             </div>
+
+            <!-- Corner Resize Handle -->
+            <div id="widget-resizer" class="widget-resizer" title="Drag to resize widget"></div>
           </div>
         </div>
 
+        <!-- Vertical Split Resizer -->
+        <div id="split-resizer-v" class="split-resizer-v" title="Drag to resize drawer"></div>
+
         <!-- Simulator Drawer -->
-        <div class="simulator-drawer">
+        <div class="simulator-drawer" id="simulator-drawer">
           <div class="drawer-header">
             <div class="segmented-control">
               <button class="segment-btn drawer-tab-btn active" data-drawer-tab="settings">

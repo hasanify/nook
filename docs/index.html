@@ -99,15 +99,18 @@
         align-items: center;
         justify-content: space-between;
         height: 64px;
+        gap: 20px;
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         font-weight: 600;
         font-size: 16px;
         letter-spacing: -0.01em;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
 
       .brand-icon {
@@ -116,18 +119,23 @@
         border-radius: var(--radius-sm);
         display: block;
         box-shadow: var(--brand-icon-shadow);
+        flex-shrink: 0;
       }
 
       .nav-links {
         display: flex;
         align-items: center;
-        gap: 24px;
+        gap: 20px;
         font-size: 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
 
       .nav-link {
         color: var(--text-muted);
         transition: color 150ms ease;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
 
       .nav-link:hover {
@@ -208,6 +216,19 @@
       .btn-secondary:hover {
         background-color: var(--surface-raised);
         border-color: var(--border-hover);
+      }
+
+      .btn-builder {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .btn-builder:hover {
+        background-color: var(--surface-raised);
+        border-color: var(--accent);
+        color: var(--accent);
       }
 
       /* Hero Section */
@@ -603,17 +624,11 @@
         </button>
         <nav class="nav-links" id="nav-menu">
           <a href="#widgets" class="nav-link">Widgets</a>
-          <a href="#custom-widgets" class="nav-link">Custom Widgets</a>
-          <a
-            href="builder/index.html"
-            class="nav-link"
-            style="color: var(--accent); font-weight: 600"
-            >Widget Builder</a
-          >
           <a href="#architecture" class="nav-link">Architecture</a>
           <a href="https://github.com/hasanify/nook" class="nav-link" target="_blank" rel="noopener"
             >GitHub</a
           >
+          <a href="builder/index.html" class="btn btn-builder">Widget Builder</a>
           <a href="#" class="btn btn-primary direct-download-link">Download</a>
         </nav>
       </div>

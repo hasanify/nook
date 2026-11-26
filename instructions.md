@@ -282,18 +282,43 @@ Add this baseline CSS to make your widget feel native to Nook:
   padding: 0;
 }
 
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  background-color: var(--bg-surface);
-  color: var(--fg);
-  border: 1px solid var(--line);
+  background-color: var(--bg-surface, #18181b);
+  color: var(--fg, #fafafa);
+  border: 1px solid var(--line, #27272a);
   border-radius: 14px;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
   user-select: none;
+  position: relative;
 }
 ```
+
+### Essential Guidelines for AI Agents & Developers
+
+1. **Always provide CSS variable fallbacks:** When using theme tokens like `var(--bg-surface)`, always specify a fallback color (for example: `background: var(--bg-surface, #18181b); color: var(--fg, #fafafa);`).
+2. **Prevent scrollbars strictly:** Set `overflow: hidden;` on `html, body` and use `width: 100%; height: 100%;` instead of viewport units (`100vw`/`100vh`) which can trigger sub-pixel scrollbars inside sandboxed iframes.
+3. **Safe script lifecycle boot:** Iframe documents may execute while `document.readyState` is already interactive or complete. Always boot your widget with:
+   ```js
+   function initWidget() {
+     // Your widget initialization logic here
+   }
+
+   if (document.readyState === "loading") {
+     document.addEventListener("DOMContentLoaded", initWidget);
+   } else {
+     initWidget();
+   }
+   ```
+4. **Handle window resize for dynamic layouts:** When drawing SVGs or canvas graphics, recalculate dimensions inside a `window.addEventListener("resize", ...)` handler so the widget scales smoothly when resized by the user. Guard against zero initial dimensions with `Math.max(1, window.innerWidth)`.
+5. **Use inline SVG icons instead of emojis or HTML altcodes:** Never use emojis (such as ⚡, 🎵, ⚙, 📶) or HTML altcodes/unicode entities (such as ⏮, ⏯, ⏭, ★, •) for icons in widget interfaces. Emojis and altcodes render inconsistently across Windows font configurations, distort layout line heights, and clash with customized widget palettes. Always use crisp, inline vector `<svg>` icons with `viewBox="0 0 24 24"`, `fill="currentColor"` or `stroke="currentColor"`, and explicit dimensions (`width` and `height`).
+6. **Preview with the Online Builder:** Test and verify your widget in the [Online Custom Widget Builder](https://hasanify.github.io/nook/builder/) to inspect manifest parsing, mock system APIs, and test light/dark theme transitions before importing into Nook desktop.
 
 You may also use Tailwind CSS by including `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>` in `<head>`.
 
@@ -439,20 +464,32 @@ Below is a complete, production-ready single-file widget: a **Hardware HUD & Med
       }
       .btn-group {
         display: flex;
-        gap: 4px;
+        gap: 6px;
       }
       button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         background: var(--bg-surface);
         border: 1px solid var(--line);
         color: var(--fg);
         border-radius: 6px;
-        padding: 4px 8px;
-        font-size: 11px;
+        width: 28px;
+        height: 28px;
+        padding: 0;
         cursor: pointer;
-        transition: background 0.15s;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
       }
       button:hover {
         background: var(--line);
+        border-color: var(--fg-muted);
+      }
+      button svg {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
       }
     </style>
   </head>
@@ -481,9 +518,29 @@ Below is a complete, production-ready single-file widget: a **Hardware HUD & Med
         <div class="media-artist" id="media-artist">Idle</div>
       </div>
       <div class="btn-group">
-        <button onclick="window.Nook.system.sendMediaCommand('previous')">⏮</button>
-        <button onclick="window.Nook.system.sendMediaCommand('playPause')">⏯</button>
-        <button onclick="window.Nook.system.sendMediaCommand('next')">⏭</button>
+        <button
+          onclick="window.Nook.system.sendMediaCommand('previous')"
+          title="Previous Track"
+          aria-label="Previous Track"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
+        </button>
+        <button
+          onclick="window.Nook.system.sendMediaCommand('playPause')"
+          title="Play or Pause"
+          aria-label="Play or Pause"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+        </button>
+        <button
+          onclick="window.Nook.system.sendMediaCommand('next')"
+          title="Next Track"
+          aria-label="Next Track"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+          </svg>
+        </button>
       </div>
     </div>
 
