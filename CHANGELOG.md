@@ -1,3 +1,18 @@
+# [0.45.0](https://github.com/hasanify/nook/compare/v0.44.0...v0.45.0) (2026-11-26)
+
+### Bug Fixes
+
+- **backend:** resolve review findings in custom widget storage engine ([8749612](https://github.com/hasanify/nook/commit/8749612beee3971013f8412fe4db734b8f2a12db))
+- **bridge:** resolve sandbox security and iframe lifecycle review findings ([19211cd](https://github.com/hasanify/nook/commit/19211cd373aa090e4fedd0d5b938082797642bd6))
+- **registry:** address code review feedback for custom manifest integration ([1b64b52](https://github.com/hasanify/nook/commit/1b64b5230f4248c237567ca3778cb689e04df558))
+
+### Features
+
+- add CustomWidgetHost and window.Nook bridge with native system telemetry ([105078b](https://github.com/hasanify/nook/commit/105078bf0141adabbc10900c31ca6d2247921752))
+- **backend:** add custom widget import, storage, and manifest management ([40ed965](https://github.com/hasanify/nook/commit/40ed965ea64ad8e834bdc35203050895ed88e652))
+- integrate custom widget manifests with Tauri registry and IPC ([76e7546](https://github.com/hasanify/nook/commit/76e7546d4e7f61a8842124409694c6167ad43bd3))
+- **settings:** add custom widget importer modal and management section ([8d0461e](https://github.com/hasanify/nook/commit/8d0461e93743755ebfb0ffa242a9cbe825de2d20))
+
 # [0.44.0](https://github.com/hasanify/nook/compare/v0.43.1...v0.44.0) (2026-11-25)
 
 ### Features
