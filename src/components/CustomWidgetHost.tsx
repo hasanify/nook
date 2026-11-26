@@ -6,11 +6,13 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { generateBridgeScript } from "@/core/custom-widget-bridge";
-import { getCustomWidgetContent } from "@/core/ipc";
-import type { Manifest, WidgetProps } from "@/core/types";
+import { getCustomWidgetContent, openContextMenu, setBounds } from "@/core/ipc";
+import type { Manifest, Rect, WidgetProps } from "@/core/types";
+
+import { EditOverlay } from "./EditOverlay";
 
 function combineHtmlWithBridge(rawHtml: string, bridgeScript: string): string {
   const scriptTag = `<script id="nook-bridge">${bridgeScript}</script>`;
@@ -26,12 +28,26 @@ function combineHtmlWithBridge(rawHtml: string, bridgeScript: string): string {
   return `<head>${scriptTag}</head>\n${rawHtml}`;
 }
 
+function rectsEqual(a: Rect, b: Rect): boolean {
+  return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
+}
+
 function getSystemTheme(): "dark" | "light" {
   if (typeof document === "undefined") return "dark";
-  return document.documentElement.classList.contains("dark") ||
+  if (
+    document.documentElement.classList.contains("dark") ||
     document.documentElement.getAttribute("data-theme") === "dark"
-    ? "dark"
-    : "light";
+  ) {
+    return "dark";
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "dark";
+  }
+  return "light";
 }
 
 export function CustomWidgetHost({
@@ -74,6 +90,86 @@ export function CustomWidgetHost({
 
     return () => observer.disconnect();
   }, []);
+
+  // Sync bounds for moving and resizing in Edit Mode
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [prevInstanceRect, setPrevInstanceRect] = useState(instance.rect);
+  const [localBounds, setLocalBounds] = useState<Rect>(instance.rect);
+
+  if (!isInteracting && !rectsEqual(prevInstanceRect, instance.rect)) {
+    setPrevInstanceRect(instance.rect);
+    setLocalBounds(instance.rect);
+  }
+
+  const inFlightRef = useRef(false);
+  const queuedBoundsRef = useRef<{ bounds: Rect; commit: boolean } | null>(null);
+
+  const sendBounds = useCallback(
+    (bounds: Rect, commit: boolean) => {
+      const prevCommit = queuedBoundsRef.current?.commit ?? false;
+      queuedBoundsRef.current = { bounds, commit: commit || prevCommit };
+      if (inFlightRef.current) return;
+
+      const flush = async () => {
+        while (queuedBoundsRef.current) {
+          const next = queuedBoundsRef.current;
+          queuedBoundsRef.current = null;
+          inFlightRef.current = true;
+          try {
+            await setBounds(
+              instance.id,
+              next.bounds.x,
+              next.bounds.y,
+              next.bounds.w,
+              next.bounds.h,
+              next.commit,
+            );
+          } catch {
+            // Silently catch IPC errors during bounds updates
+          } finally {
+            inFlightRef.current = false;
+          }
+        }
+      };
+
+      void flush();
+    },
+    [instance.id],
+  );
+
+  const handleBoundsChange = (bounds: Rect, commit: boolean) => {
+    setIsInteracting(!commit);
+    if (commit) {
+      setLocalBounds(bounds);
+      setPrevInstanceRect(bounds);
+    }
+    sendBounds(bounds, commit);
+  };
+
+  const manifest: Manifest = (instance as unknown as { manifest?: Manifest }).manifest ?? {
+    id: widgetKind,
+    name: widgetKind,
+    description: "",
+    version: "0.1.0",
+    author: "",
+    defaultSize: { w: 280, h: 180 },
+    minSize: { w: 160, h: 100 },
+    resizable: true,
+  };
+
+  const handleResetToDefault = () => {
+    if (!manifest.defaultSize) return;
+    handleBoundsChange(
+      { ...localBounds, w: manifest.defaultSize.w, h: manifest.defaultSize.h },
+      true,
+    );
+  };
+
+  const handleResetToFit = () => {
+    const targetW = manifest.minSize?.w ?? 160;
+    const targetH = manifest.minSize?.h ?? 100;
+    handleBoundsChange({ ...localBounds, w: targetW, h: targetH }, true);
+  };
 
   // Fetch widget HTML content
   useEffect(() => {
@@ -172,6 +268,12 @@ export function CustomWidgetHost({
 
       try {
         switch (actionType) {
+          case "nook:rpc:context-menu": {
+            const p = payload as { screenX?: number; screenY?: number } | undefined;
+            void openContextMenu(instanceRef.current.id, p?.screenX, p?.screenY);
+            replySuccess(true);
+            break;
+          }
           case "nook:rpc:get-state": {
             replySuccess(instanceRef.current.state ?? {});
             break;
@@ -359,36 +461,35 @@ export function CustomWidgetHost({
     editMode,
     settings: instance.settings ?? {},
     state: instance.state ?? {},
-    manifest: (instance as unknown as { manifest?: Manifest }).manifest,
+    manifest,
   }));
 
   // Memoize combined HTML and bridge script once per widget load / rawHtml change
   const srcDoc = useMemo(() => {
     if (!rawHtml) return "";
-    const manifest: Manifest = initialSnapshot.manifest ?? {
-      id: widgetKind,
-      name: widgetKind,
-      description: "",
-      version: "0.1.0",
-      author: "",
-      defaultSize: { w: 2, h: 2 },
-      minSize: { w: 1, h: 1 },
-      resizable: true,
-    };
     const script = generateBridgeScript({
       instanceId: instance.id,
-      manifest,
+      manifest: initialSnapshot.manifest,
       theme: initialSnapshot.theme,
       editMode: initialSnapshot.editMode,
       settings: initialSnapshot.settings,
       state: initialSnapshot.state,
     });
     return combineHtmlWithBridge(rawHtml, script);
-  }, [rawHtml, instance.id, widgetKind, initialSnapshot]);
+  }, [rawHtml, instance.id, initialSnapshot]);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    void openContextMenu(instance.id, e.screenX, e.screenY);
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted select-none block-full inline-full">
+      <div
+        onContextMenu={handleContextMenu}
+        className="flex items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted select-none block-full inline-full"
+      >
         Loading custom widget...
       </div>
     );
@@ -396,7 +497,10 @@ export function CustomWidgetHost({
 
   if (error || !rawHtml) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-card border border-error bg-surface p-4 text-center text-xs text-error select-none block-full inline-full">
+      <div
+        onContextMenu={handleContextMenu}
+        className="flex flex-col items-center justify-center rounded-card border border-error bg-surface p-4 text-center text-xs text-error select-none block-full inline-full"
+      >
         <span className="mbe-1 font-semibold">Failed to load custom widget</span>
         <span className="text-fg-muted">{error || "No content found"}</span>
       </div>
@@ -404,14 +508,52 @@ export function CustomWidgetHost({
   }
 
   return (
-    /* oxlint-disable react/iframe-missing-sandbox */
-    <iframe
-      ref={iframeRef}
-      sandbox="allow-scripts allow-forms allow-modals"
-      srcDoc={srcDoc}
-      className="block border-0 bg-transparent block-full inline-full"
-      title={widgetKind || "Custom Widget"}
-    />
+    <div
+      onContextMenu={handleContextMenu}
+      className={`relative flex flex-col overflow-hidden select-none block-full inline-full ${
+        editMode ? "rounded-card border-accent-500/80! ring-2 ring-accent-500/80 ring-inset" : ""
+      }`}
+      style={{ background: "transparent" }}
+    >
+      {editMode && (
+        <EditOverlay
+          id={instance.id}
+          title={manifest.name || widgetKind}
+          kind={widgetKind}
+          editMode={editMode}
+          resizable={manifest.resizable ?? true}
+          minSize={manifest.minSize ?? { w: 160, h: 100 }}
+          defaultSize={manifest.defaultSize}
+          currentBounds={localBounds}
+          onBoundsChange={handleBoundsChange}
+          onToggleEditMode={onToggleEditMode ?? (() => {})}
+          onContextMenu={handleContextMenu}
+          onResetToDefault={manifest.defaultSize ? handleResetToDefault : undefined}
+          onResetToFit={handleResetToFit}
+        />
+      )}
+
+      {/* oxlint-disable react/iframe-missing-sandbox */}
+      <iframe
+        ref={iframeRef}
+        sandbox="allow-scripts allow-forms allow-modals"
+        allowTransparency={true}
+        srcDoc={srcDoc}
+        style={{
+          width: "100%",
+          height: "100%",
+          border: 0,
+          background: "transparent",
+          backgroundColor: "transparent",
+          colorScheme: theme === "light" ? "light" : "dark",
+          overflow: "hidden",
+          display: "block",
+          pointerEvents: editMode ? "none" : "auto",
+        }}
+        className="block border-0 bg-transparent block-full inline-full"
+        title={manifest.name || widgetKind || "Custom Widget"}
+      />
+    </div>
   );
 }
 

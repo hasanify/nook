@@ -92,6 +92,7 @@ export function generateBridgeScript(config: BridgeConfig): string {
       root.style.setProperty(key, val);
     }
     root.setAttribute("data-theme", theme);
+    root.style.colorScheme = theme;
     if (theme === "dark") {
       root.classList.add("dark");
       root.classList.remove("light");
@@ -109,27 +110,35 @@ export function generateBridgeScript(config: BridgeConfig): string {
       *, *::before, *::after {
         box-sizing: border-box;
       }
-      :root {
-        font-family: system-ui, -apple-system, sans-serif;
+      :root, html {
+        background: transparent !important;
       }
       body {
         margin: 0;
         padding: 0;
         background: transparent;
         color: var(--fg);
-        font-family: system-ui, sans-serif;
+        font-family: system-ui, -apple-system, sans-serif;
         box-sizing: border-box;
-        overflow: auto;
+        overflow: hidden;
       }
     \`;
     const target = document.head || document.documentElement || document.body;
     if (target) {
-      target.appendChild(styleEl);
+      if (target.firstChild) {
+        target.insertBefore(styleEl, target.firstChild);
+      } else {
+        target.appendChild(styleEl);
+      }
     } else {
       document.addEventListener("DOMContentLoaded", function() {
         const t = document.head || document.documentElement || document.body;
         if (t && !document.getElementById("nook-bridge-styles")) {
-          t.appendChild(styleEl);
+          if (t.firstChild) {
+            t.insertBefore(styleEl, t.firstChild);
+          } else {
+            t.appendChild(styleEl);
+          }
         }
       });
     }
@@ -137,6 +146,32 @@ export function generateBridgeScript(config: BridgeConfig): string {
 
   applyTheme(config.theme);
   injectBaseStyles();
+
+  window.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      window.parent.postMessage({
+        type: "nook:rpc:context-menu",
+        action: "context-menu",
+        instanceId: config.instanceId,
+        payload: {
+          screenX: typeof e.screenX === "number" ? Math.round(e.screenX) : null,
+          screenY: typeof e.screenY === "number" ? Math.round(e.screenY) : null,
+          clientX: typeof e.clientX === "number" ? Math.round(e.clientX) : null,
+          clientY: typeof e.clientY === "number" ? Math.round(e.clientY) : null
+        }
+      }, "*");
+    } catch (err) {
+      console.error("[Nook Bridge] Context menu forward error:", err);
+    }
+  }, true);
+
+  window.addEventListener("load", function() {
+    try {
+      window.dispatchEvent(new Event("resize"));
+    } catch (e) {}
+  });
 
   let reqId = 0;
   const pendingRequests = new Map();
