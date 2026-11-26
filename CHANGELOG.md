@@ -1,3 +1,9 @@
+## [0.47.3](https://github.com/hasanify/nook/compare/v0.47.2...v0.47.3) (2026-11-26)
+
+### Bug Fixes
+
+- **widget-host:** remove restrictive iframe sandbox blocking webview2 script execution ([0563ba7](https://github.com/hasanify/nook/commit/0563ba7142b19e521292d1fa2e47f8a62dcea0da))
+
 ## [0.47.2](https://github.com/hasanify/nook/compare/v0.47.1...v0.47.2) (2026-11-26)
 
 ### Bug Fixes
