@@ -1,3 +1,9 @@
+## [0.47.2](https://github.com/hasanify/nook/compare/v0.47.1...v0.47.2) (2026-11-26)
+
+### Bug Fixes
+
+- **updater:** configure updater signing secrets, workflow env, and direct in-place update ([1aa1f20](https://github.com/hasanify/nook/commit/1aa1f205f5522193aade6b1704892b19b631f137))
+
 ## [0.47.1](https://github.com/hasanify/nook/compare/v0.47.0...v0.47.1) (2026-11-26)
 
 ### Bug Fixes
