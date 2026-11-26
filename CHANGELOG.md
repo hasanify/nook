@@ -1,3 +1,9 @@
+# [0.46.0](https://github.com/hasanify/nook/compare/v0.45.2...v0.46.0) (2026-11-26)
+
+### Features
+
+- **shortcuts:** fix hover clipping, add installed apps discovery, and native file/app picker ([73d1af0](https://github.com/hasanify/nook/commit/73d1af03ca1b9221086aee586634c3d14e8ed91f))
+
 ## [0.45.2](https://github.com/hasanify/nook/compare/v0.45.1...v0.45.2) (2026-11-26)
 
 ### Bug Fixes
