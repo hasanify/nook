@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nook: Custom Widget Builder</title>
+    <meta
+      name="description"
+      content="Interactive online builder, simulator, and file tester for Nook desktop widgets. Build with live code, drag and drop widget files, and test against full Nook desktop system APIs."
+    />
+    <link rel="icon" type="image/png" href="../favicon.png" />
+
+    <!-- Standalone CSS: Guaranteed rendering with zero CDN dependencies -->
+    <link rel="stylesheet" href="builder.css" />
+    <!-- JSZip for handling .zip widget packages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  </head>
+  <body>
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="brand-group">
+        <a href="../index.html" class="brand-link" title="Back to Nook Homepage">
+          <img src="../icon.png" alt="Nook logo" class="brand-icon" />
+          <span>Nook</span>
+        </a>
+        <span class="brand-badge">Widget Studio</span>
+      </div>
+
+      <div class="header-actions">
+        <!-- Template Selector -->
+        <div class="template-selector-box">
+          <span class="template-label">Template:</span>
+          <select id="template-select" class="select-input">
+            <option value="border-clock">Border Clock</option>
+            <option value="system-vitals">System Vitals</option>
+            <option value="quick-notes">Quick Scratchpad</option>
+            <option value="media-controller">Media Player Mini</option>
+          </select>
+        </div>
+
+        <button id="btn-new-widget" class="btn" title="Reset to boilerplate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span>Reset</span>
+        </button>
+
+        <button id="btn-upload-file" class="btn" title="Drop or pick a .html, .nook, or .zip file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+          </svg>
+          <span>Drop / Open File</span>
+        </button>
+        <input type="file" id="file-upload-input" style="display: none" accept=".html,.nook,.zip" />
+
+        <div class="header-divider"></div>
+
+        <!-- Export Buttons -->
+        <button
+          id="btn-export-html"
+          class="btn btn-primary"
+          title="Download standalone .html file ready to drop into Nook"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          <span>Export .html</span>
+        </button>
+
+        <button id="btn-export-zip" class="btn" title="Package as a .zip bundle">
+          <span>.zip</span>
+        </button>
+
+        <button id="btn-copy-code" class="btn" title="Copy code to clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+          </svg>
+          <span>Copy Code</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Split Pane -->
+    <main class="app-workspace">
+      <!-- Left Pane: Editor & Manifest Builder -->
+      <section class="left-pane">
+        <!-- Tab Navigation (Segmented Control) -->
+        <div class="pane-nav">
+          <div class="segmented-control">
+            <button class="segment-btn tab-btn active" data-tab="code">Code Editor</button>
+            <button class="segment-btn tab-btn" data-tab="manifest">Manifest Inspector</button>
+            <button class="segment-btn tab-btn" data-tab="prompt">AI Prompt Helper</button>
+          </div>
+          <span class="autosave-hint">Autosaves preview live</span>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="pane-body">
+          <!-- Code Editor Tab -->
+          <div id="tab-code" class="pane-tab-view active-pane">
+            <textarea
+              id="code-editor"
+              class="code-textarea"
+              spellcheck="false"
+              placeholder="Paste or write widget HTML/JS/CSS..."
+            ></textarea>
+          </div>
+
+          <!-- Manifest Form Tab -->
+          <div id="tab-manifest" class="pane-tab-view form-view">
+            <div class="form-header">
+              <div>
+                <h3>Widget Metadata</h3>
+                <p>Configure manifest properties stored in #nook-manifest</p>
+              </div>
+              <button
+                id="btn-sync-manifest"
+                class="btn btn-primary"
+                style="height: 34px; padding: 0 14px; font-size: 12px"
+              >
+                Apply to Code
+              </button>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="mf-id" class="form-label">Widget ID</label>
+                <input type="text" id="mf-id" class="form-input" placeholder="e.g. border-clock" />
+              </div>
+              <div class="form-group">
+                <label for="mf-name" class="form-label">Display Name</label>
+                <input
+                  type="text"
+                  id="mf-name"
+                  class="form-input"
+                  placeholder="e.g. Border Clock"
+                />
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="mf-version" class="form-label">Version</label>
+                <input type="text" id="mf-version" class="form-input" placeholder="1.0.0" />
+              </div>
+              <div class="form-group">
+                <label for="mf-author" class="form-label">Author</label>
+                <input type="text" id="mf-author" class="form-input" placeholder="Your Name" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="mf-desc" class="form-label">Description</label>
+              <textarea
+                id="mf-desc"
+                rows="2"
+                class="form-textarea"
+                placeholder="Short description of what the widget does..."
+              ></textarea>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Default Size (W x H)</label>
+                <div class="size-pair">
+                  <input type="number" id="mf-default-w" class="form-input" placeholder="280" />
+                  <span class="size-divider">×</span>
+                  <input type="number" id="mf-default-h" class="form-input" placeholder="180" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Min Size (W x H)</label>
+                <div class="size-pair">
+                  <input type="number" id="mf-min-w" class="form-input" placeholder="180" />
+                  <span class="size-divider">×</span>
+                  <input type="number" id="mf-min-h" class="form-input" placeholder="120" />
+                </div>
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="mf-resizable" checked />
+              <span>Resizable on desktop canvas</span>
+            </div>
+          </div>
+
+          <!-- AI Prompt Generator Tab -->
+          <div id="tab-prompt" class="pane-tab-view prompt-view">
+            <div class="form-header">
+              <div>
+                <h3>AI Prompt Generator</h3>
+                <p>Turnkey prompt adhering to instructions.md for any AI agent</p>
+              </div>
+              <button
+                id="btn-copy-prompt"
+                class="btn btn-primary"
+                style="height: 34px; padding: 0 14px; font-size: 12px"
+              >
+                Copy Prompt
+              </button>
+            </div>
+            <textarea id="ai-prompt-textarea" class="prompt-textarea" readonly></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Pane: Live Desktop Canvas & Simulator -->
+      <section class="right-pane">
+        <!-- Canvas Toolbar -->
+        <div class="canvas-toolbar">
+          <div class="toolbar-group">
+            <!-- Wallpaper Simulator -->
+            <select id="wallpaper-select" class="select-input" style="height: 34px">
+              <option value="dots">Canvas Grid</option>
+              <option value="solid">Dark Wallpaper</option>
+              <option value="bloom">Windows Bloom</option>
+              <option value="sonoma">Sonoma Wallpaper</option>
+              <option value="light">Pure White</option>
+            </select>
+
+            <!-- Theme Toggle -->
+            <button id="btn-theme-toggle" class="toolbar-btn" title="Toggle simulated widget theme">
+              🌙 Dark
+            </button>
+
+            <!-- Edit Mode Toggle -->
+            <button
+              id="btn-edit-mode"
+              class="toolbar-btn"
+              title="Toggle desktop edit mode (Ctrl+Alt+E)"
+            >
+              🎯 Edit Mode
+            </button>
+          </div>
+
+          <!-- Size Presets -->
+          <div class="toolbar-group">
+            <span style="font-size: 12px; color: #64748b; font-weight: 500">Presets:</span>
+            <div class="presets-container">
+              <button data-size-preset="180x120" class="preset-btn">180×120</button>
+              <button data-size-preset="280x180" class="preset-btn">280×180</button>
+              <button data-size-preset="384x240" class="preset-btn">384×240</button>
+              <button data-size-preset="384x400" class="preset-btn">384×400</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div id="canvas-wrapper" class="canvas-wrapper">
+          <!-- Widget Window Box Container -->
+          <div id="widget-box" class="widget-window-box" style="width: 280px; height: 180px">
+            <iframe
+              id="preview-iframe"
+              sandbox="allow-scripts allow-forms allow-modals"
+              allowtransparency="true"
+              class="widget-iframe"
+              title="Widget Preview"
+            ></iframe>
+
+            <!-- Edit Mode Overlay (Simulating Nook Desktop) -->
+            <div class="edit-overlay">
+              <span id="edit-badge" class="edit-badge">Custom Widget</span>
+              <span id="edit-dimensions" class="edit-dimensions">280 × 180px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulator Drawer -->
+        <div class="simulator-drawer">
+          <div class="drawer-header">
+            <div class="segmented-control">
+              <button class="segment-btn drawer-tab-btn active" data-drawer-tab="settings">
+                Settings Inspector
+              </button>
+              <button class="segment-btn drawer-tab-btn" data-drawer-tab="state">
+                State Store
+              </button>
+              <button class="segment-btn drawer-tab-btn" data-drawer-tab="telemetry">
+                System Telemetry
+              </button>
+              <button class="segment-btn drawer-tab-btn" data-drawer-tab="log">
+                RPC Event Log
+              </button>
+            </div>
+            <span style="font-size: 11px; color: #94a3b8; font-family: var(--font-mono)"
+              >window.Nook RPC Bridge Emulation</span
+            >
+          </div>
+
+          <div class="drawer-body">
+            <!-- Settings Inspector Tab View -->
+            <div id="drawer-settings" class="drawer-view active-drawer">
+              <div id="settings-inspector-fields" class="settings-grid">
+                <!-- Dynamically rendered from manifest settingsSchema -->
+              </div>
+            </div>
+
+            <!-- State Store Tab View -->
+            <div id="drawer-state" class="drawer-view">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding-bottom: 8px;
+                  margin-bottom: 8px;
+                  border-bottom: 1px solid var(--border);
+                "
+              >
+                <span style="font-size: 12px; color: #64748b; font-family: var(--font-mono)"
+                  >Persisted state recorded via Nook.setState():</span
+                >
+                <button
+                  id="btn-reset-state"
+                  class="btn"
+                  style="height: 28px; padding: 0 10px; font-size: 11px"
+                >
+                  Clear State
+                </button>
+              </div>
+              <pre
+                id="state-json-view"
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 12px;
+                  color: #0f172a;
+                  background: #f8fafc;
+                  border: 1px solid var(--border);
+                  padding: 12px;
+                  border-radius: 8px;
+                  overflow: auto;
+                  max-height: 120px;
+                "
+              >
+{}</pre>
+            </div>
+
+            <!-- System Telemetry Tab View -->
+            <div id="drawer-telemetry" class="drawer-view">
+              <div class="telemetry-grid">
+                <!-- CPU & RAM -->
+                <div class="telemetry-card">
+                  <div class="telemetry-row">
+                    <span style="color: #64748b">Simulated CPU:</span>
+                    <span
+                      id="telem-cpu-val"
+                      style="color: var(--accent); font-family: var(--font-mono)"
+                      >24%</span
+                    >
+                  </div>
+                  <input
+                    type="range"
+                    id="telem-cpu"
+                    min="1"
+                    max="99"
+                    value="24"
+                    class="telemetry-slider"
+                  />
+
+                  <div class="telemetry-row" style="margin-top: 6px">
+                    <span style="color: #64748b">Simulated RAM:</span>
+                    <span
+                      id="telem-ram-val"
+                      style="color: var(--accent); font-family: var(--font-mono)"
+                      >8420 MB</span
+                    >
+                  </div>
+                  <input
+                    type="range"
+                    id="telem-ram"
+                    min="1024"
+                    max="32768"
+                    value="8420"
+                    class="telemetry-slider"
+                  />
+                </div>
+
+                <!-- Battery Status -->
+                <div class="telemetry-card">
+                  <div class="telemetry-row">
+                    <span style="color: #64748b">Battery Level:</span>
+                    <span
+                      id="telem-bat-val"
+                      style="color: var(--accent); font-family: var(--font-mono)"
+                      >88%</span
+                    >
+                  </div>
+                  <input
+                    type="range"
+                    id="telem-battery-level"
+                    min="5"
+                    max="100"
+                    value="88"
+                    class="telemetry-slider"
+                  />
+
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      font-size: 12px;
+                      font-weight: 500;
+                      color: #334155;
+                      cursor: pointer;
+                      margin-top: 6px;
+                    "
+                  >
+                    <input type="checkbox" id="telem-battery-charging" />
+                    <span>AC Charging connected</span>
+                  </label>
+                </div>
+
+                <!-- Media Player -->
+                <div class="telemetry-card">
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      font-size: 12px;
+                      font-weight: 500;
+                      color: #334155;
+                      cursor: pointer;
+                    "
+                  >
+                    <input type="checkbox" id="telem-media-playing" checked />
+                    <span>Media is playing</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="telem-media-title"
+                    class="form-input"
+                    style="height: 32px; font-size: 12px"
+                    value="Midnight City"
+                    placeholder="Track title"
+                  />
+                  <input
+                    type="text"
+                    id="telem-media-artist"
+                    class="form-input"
+                    style="height: 32px; font-size: 12px"
+                    value="M83"
+                    placeholder="Artist"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- RPC Event Log Tab View -->
+            <div id="drawer-log" class="drawer-view">
+              <div id="rpc-log" class="log-view">
+                <div style="color: #94a3b8; font-style: italic">
+                  Listening for window.Nook RPC messages...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Drag & Drop Fullscreen Overlay -->
+    <div id="dropzone-overlay" class="dropzone-overlay">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+      </svg>
+      <h2 style="font-size: 20px; font-weight: 700; color: #0f172a">
+        Drop your custom widget file here
+      </h2>
+      <p style="font-size: 14px; color: #64748b">Supports .html, .nook, or .zip packages</p>
+    </div>
+
+    <!-- Right-click Simulated Context Menu -->
+    <div id="context-menu" class="nook-context-menu">
+      <div id="ctx-settings" class="menu-item">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+          />
+        </svg>
+        <span>Widget Settings</span>
+      </div>
+      <div id="ctx-edit" class="menu-item">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+        <span>Toggle Edit Mode</span>
+      </div>
+      <div id="ctx-reload" class="menu-item">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16M16 21h5v-5"
+          />
+        </svg>
+        <span>Reload Widget</span>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main Builder Controller -->
+    <script type="module" src="builder.js"></script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 
 This specification teaches AI agents (and human developers) how to build custom widgets for **Nook**—a native desktop widget canvas for Windows built with Tauri, Rust, and React.
 
-Users can import widgets directly into Nook using **a single `.html` / `.nook` file** or **a `.zip` archive**.
+Users can import widgets directly into Nook using **a single `.html` / `.nook` file** or **a `.zip` archive**. You can also test and preview your widgets instantly in the browser with full system API simulation using the [Online Custom Widget Builder](https://hasanify.github.io/nook/builder/).
 
 ---
 

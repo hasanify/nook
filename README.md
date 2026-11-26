@@ -87,6 +87,8 @@ _Connects to your choice of AI provider (OpenAI, Anthropic Claude, Google Gemini
 
 Nook allows you to import third-party and AI-generated widgets without rebuilding the app:
 
+- **[Try the Online Custom Widget Builder](https://hasanify.github.io/nook/builder/):** Build, simulate, or drop in custom widget files in your browser with full `window.Nook` API emulation, live settings schemas, and export options.
+
 1. **Package Formats:**
    - **Single File (`.html` or `.nook`):** Standalone HTML containing embedded CSS, JavaScript, and an embedded `<script type="application/json" id="nook-manifest">` metadata tag.
    - **ZIP Archive (`.zip`):** Folder bundle containing `manifest.json`, `index.html`, and any local assets (CSS, JS, images).
