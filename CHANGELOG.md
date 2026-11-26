@@ -1,3 +1,9 @@
+## [0.47.1](https://github.com/hasanify/nook/compare/v0.47.0...v0.47.1) (2026-11-26)
+
+### Bug Fixes
+
+- **builder:** fix initial render, add resizers, crisp borders, and update widget specs ([e4fb959](https://github.com/hasanify/nook/commit/e4fb9595421b66f1c3df3500c0d2a795e4adcbcd))
+
 # [0.47.0](https://github.com/hasanify/nook/compare/v0.46.0...v0.47.0) (2026-11-26)
 
 ### Features
