@@ -13,8 +13,7 @@
     "withGlobalTauri": false,
     "windows": [],
     "security": {
-      "csp": "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; frame-src 'self' blob: data: about:; connect-src ipc: http://ipc.localhost https://geocoding-api.open-meteo.com https://api.open-meteo.com https:",
-      "dangerousDisableAssetCspModification": ["script-src", "style-src"]
+      "csp": null
     }
   },
   "bundle": {

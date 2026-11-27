@@ -7,6 +7,8 @@ export interface BridgeConfig {
   editMode: boolean;
   settings: Record<string, unknown>;
   state: Record<string, unknown>;
+  fontFamily?: string;
+  radius?: string;
 }
 
 export interface NookBridgeApi {
@@ -59,30 +61,32 @@ export function generateBridgeScript(config: BridgeConfig): string {
   const config = ${serializedConfig};
 
   const DARK_TOKENS = {
-    "--bg-canvas": "#09090b",
-    "--bg-surface": "#18181b",
-    "--bg-elevated": "#27272a",
+    "--bg-canvas": "transparent",
+    "--bg-surface": "transparent",
+    "--bg-elevated": "rgba(255, 255, 255, 0.06)",
     "--fg": "#fafafa",
     "--fg-muted": "#a1a1aa",
     "--fg-subtle": "#71717a",
-    "--line": "#27272a",
+    "--line": "rgba(255, 255, 255, 0.12)",
     "--accent": "#3b82f6",
     "--error": "#ef4444",
     "--success": "#22c55e"
   };
 
   const LIGHT_TOKENS = {
-    "--bg-canvas": "#ffffff",
-    "--bg-surface": "#f4f4f5",
-    "--bg-elevated": "#e4e4e7",
+    "--bg-canvas": "transparent",
+    "--bg-surface": "transparent",
+    "--bg-elevated": "rgba(0, 0, 0, 0.04)",
     "--fg": "#09090b",
     "--fg-muted": "#71717a",
     "--fg-subtle": "#a1a1aa",
-    "--line": "#e4e4e7",
+    "--line": "rgba(0, 0, 0, 0.08)",
     "--accent": "#2563eb",
     "--error": "#dc2626",
     "--success": "#16a34a"
   };
+
+  let currentAccent = (config.settings && typeof config.settings.widgetColor === "string" && config.settings.widgetColor) || "";
 
   function applyTheme(theme) {
     const root = document.documentElement;
@@ -90,6 +94,9 @@ export function generateBridgeScript(config: BridgeConfig): string {
     const tokens = theme === "light" ? LIGHT_TOKENS : DARK_TOKENS;
     for (const [key, val] of Object.entries(tokens)) {
       root.style.setProperty(key, val);
+    }
+    if (currentAccent) {
+      root.style.setProperty("--accent", currentAccent);
     }
     root.setAttribute("data-theme", theme);
     root.style.colorScheme = theme;
@@ -104,23 +111,66 @@ export function generateBridgeScript(config: BridgeConfig): string {
 
   function injectBaseStyles() {
     if (document.getElementById("nook-bridge-styles")) return;
+
+    try {
+      if (window.parent && window.parent.document) {
+        const parentNodes = window.parent.document.querySelectorAll('link[rel="stylesheet"], style');
+        parentNodes.forEach(function(node) {
+          if (node.tagName === "STYLE" && (node.id === "nook-bridge-styles" || (node.textContent && node.textContent.includes("nook-bridge")))) return;
+          const clone = node.cloneNode(true);
+          document.head.appendChild(clone);
+        });
+      }
+    } catch (e) {}
+
     const styleEl = document.createElement("style");
     styleEl.id = "nook-bridge-styles";
+    const initialFont = config.fontFamily || '"Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif';
+    const initialRadius = config.radius || "16px";
     styleEl.textContent = \`
       *, *::before, *::after {
         box-sizing: border-box;
       }
       :root, html {
         background: transparent !important;
+        background-color: transparent !important;
+        overflow: hidden !important;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        --font-mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, monospace;
+        --font-serif: "Newsreader", "Charter", "Georgia", "Times New Roman", serif;
+        --font-rounded: "Quicksand", "Nunito", system-ui, sans-serif;
+        --font-tech: "Space Mono", "Cascadia Code", "Consolas", monospace;
+        --font-family: \${initialFont};
+        --radius: \${initialRadius};
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
       }
       body {
         margin: 0;
         padding: 0;
-        background: transparent;
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+        background-color: transparent !important;
         color: var(--fg);
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: var(--font-family, var(--font-sans));
         box-sizing: border-box;
-        overflow: hidden;
+        overflow: hidden !important;
+      }
+      html, body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      ::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
       }
     \`;
     const target = document.head || document.documentElement || document.body;
@@ -165,6 +215,10 @@ export function generateBridgeScript(config: BridgeConfig): string {
     } catch (err) {
       console.error("[Nook Bridge] Context menu forward error:", err);
     }
+  }, true);
+
+  document.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
   }, true);
 
   window.addEventListener("load", function() {
@@ -305,9 +359,24 @@ export function generateBridgeScript(config: BridgeConfig): string {
     if (data.type === "nook:settings-changed") {
       const newSettings = (data.payload && data.payload.settings) || {};
       nook.settings = newSettings;
+      if (typeof newSettings.widgetColor === "string" && newSettings.widgetColor) {
+        currentAccent = newSettings.widgetColor;
+        document.documentElement.style.setProperty("--accent", currentAccent);
+      }
+      if (typeof newSettings.fontFamily === "string" && newSettings.fontFamily) {
+        document.documentElement.style.setProperty("--font-family", newSettings.fontFamily);
+      }
       settingsListeners.forEach(function(cb) {
         try { cb(newSettings); } catch (err) { console.error("[Nook Bridge] Settings listener error:", err); }
       });
+    } else if (data.type === "nook:appearance-changed") {
+      const payload = data.payload || {};
+      if (payload.fontFamily) {
+        document.documentElement.style.setProperty("--font-family", payload.fontFamily);
+      }
+      if (payload.radius) {
+        document.documentElement.style.setProperty("--radius", payload.radius);
+      }
     } else if (data.type === "nook:theme-changed") {
       const newTheme = data.payload && data.payload.theme === "light" ? "light" : "dark";
       nook.theme = newTheme;

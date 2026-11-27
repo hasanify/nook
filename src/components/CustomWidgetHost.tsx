@@ -6,13 +6,15 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { generateBridgeScript } from "@/core/custom-widget-bridge";
-import { getCustomWidgetContent, openContextMenu, setBounds } from "@/core/ipc";
-import type { Manifest, Rect, WidgetProps } from "@/core/types";
+import { getCustomWidgetContent, openContextMenu } from "@/core/ipc";
+import { getPresetAppearance } from "@/core/presets";
+import type { Manifest, WidgetProps } from "@/core/types";
+import { useTheme } from "@/core/use-theme";
 
-import { EditOverlay } from "./EditOverlay";
+import { WidgetShell } from "./WidgetShell";
 
 function combineHtmlWithBridge(rawHtml: string, bridgeScript: string): string {
   const scriptTag = `<script id="nook-bridge">${bridgeScript}</script>`;
@@ -26,10 +28,6 @@ function combineHtmlWithBridge(rawHtml: string, bridgeScript: string): string {
     return rawHtml.replace(/<html[^>]*>/i, (match) => `${match}<head>${scriptTag}</head>\n`);
   }
   return `<head>${scriptTag}</head>\n${rawHtml}`;
-}
-
-function rectsEqual(a: Rect, b: Rect): boolean {
-  return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
 }
 
 function getSystemTheme(): "dark" | "light" {
@@ -73,6 +71,32 @@ export function CustomWidgetHost({
   });
 
   const [theme, setTheme] = useState<"dark" | "light">(getSystemTheme);
+  const { preset: globalPresetId } = useTheme();
+  const [appearanceTick, setAppearanceTick] = useState(0);
+
+  // Sync with appearance custom preset broadcasts
+  useEffect(() => {
+    if (typeof BroadcastChannel === "undefined") return;
+    const channel = new BroadcastChannel("nook-appearance");
+    const handleMessage = () => {
+      setAppearanceTick((t) => t + 1);
+    };
+    channel.addEventListener("message", handleMessage);
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+    };
+  }, []);
+
+  const effectivePresetId =
+    (typeof instance.settings.widgetPreset === "string" && instance.settings.widgetPreset) ||
+    globalPresetId;
+  const widgetCustomFont =
+    typeof instance.settings.widgetFont === "string" ? instance.settings.widgetFont : undefined;
+
+  const { fontFamily, radius } = useMemo(() => {
+    return getPresetAppearance(effectivePresetId, widgetCustomFont, appearanceTick);
+  }, [effectivePresetId, widgetCustomFont, appearanceTick]);
 
   // Sync theme changes from root documentElement
   useEffect(() => {
@@ -91,61 +115,6 @@ export function CustomWidgetHost({
     return () => observer.disconnect();
   }, []);
 
-  // Sync bounds for moving and resizing in Edit Mode
-  const [isInteracting, setIsInteracting] = useState(false);
-  const [prevInstanceRect, setPrevInstanceRect] = useState(instance.rect);
-  const [localBounds, setLocalBounds] = useState<Rect>(instance.rect);
-
-  if (!isInteracting && !rectsEqual(prevInstanceRect, instance.rect)) {
-    setPrevInstanceRect(instance.rect);
-    setLocalBounds(instance.rect);
-  }
-
-  const inFlightRef = useRef(false);
-  const queuedBoundsRef = useRef<{ bounds: Rect; commit: boolean } | null>(null);
-
-  const sendBounds = useCallback(
-    (bounds: Rect, commit: boolean) => {
-      const prevCommit = queuedBoundsRef.current?.commit ?? false;
-      queuedBoundsRef.current = { bounds, commit: commit || prevCommit };
-      if (inFlightRef.current) return;
-
-      const flush = async () => {
-        while (queuedBoundsRef.current) {
-          const next = queuedBoundsRef.current;
-          queuedBoundsRef.current = null;
-          inFlightRef.current = true;
-          try {
-            await setBounds(
-              instance.id,
-              next.bounds.x,
-              next.bounds.y,
-              next.bounds.w,
-              next.bounds.h,
-              next.commit,
-            );
-          } catch {
-            // Silently catch IPC errors during bounds updates
-          } finally {
-            inFlightRef.current = false;
-          }
-        }
-      };
-
-      void flush();
-    },
-    [instance.id],
-  );
-
-  const handleBoundsChange = (bounds: Rect, commit: boolean) => {
-    setIsInteracting(!commit);
-    if (commit) {
-      setLocalBounds(bounds);
-      setPrevInstanceRect(bounds);
-    }
-    sendBounds(bounds, commit);
-  };
-
   const manifest: Manifest = (instance as unknown as { manifest?: Manifest }).manifest ?? {
     id: widgetKind,
     name: widgetKind,
@@ -155,20 +124,6 @@ export function CustomWidgetHost({
     defaultSize: { w: 280, h: 180 },
     minSize: { w: 160, h: 100 },
     resizable: true,
-  };
-
-  const handleResetToDefault = () => {
-    if (!manifest.defaultSize) return;
-    handleBoundsChange(
-      { ...localBounds, w: manifest.defaultSize.w, h: manifest.defaultSize.h },
-      true,
-    );
-  };
-
-  const handleResetToFit = () => {
-    const targetW = manifest.minSize?.w ?? 160;
-    const targetH = manifest.minSize?.h ?? 100;
-    handleBoundsChange({ ...localBounds, w: targetW, h: targetH }, true);
   };
 
   // Fetch widget HTML content
@@ -454,6 +409,18 @@ export function CustomWidgetHost({
     );
   }, [theme]);
 
+  // Broadcast appearance (font family and corner radius) changes to iframe
+  useEffect(() => {
+    if (!iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage(
+      {
+        type: "nook:appearance-changed",
+        payload: { fontFamily, radius },
+      },
+      "*",
+    );
+  }, [fontFamily, radius]);
+
   // Capture initial snapshot once on mount so srcDoc does not recompute on subsequent
   // settings, theme, or editMode changes, preventing iframe reload thrashing.
   const [initialSnapshot] = useState(() => ({
@@ -462,6 +429,8 @@ export function CustomWidgetHost({
     settings: instance.settings ?? {},
     state: instance.state ?? {},
     manifest,
+    fontFamily,
+    radius,
   }));
 
   // Memoize combined HTML and bridge script once per widget load / rawHtml change
@@ -474,100 +443,82 @@ export function CustomWidgetHost({
       editMode: initialSnapshot.editMode,
       settings: initialSnapshot.settings,
       state: initialSnapshot.state,
+      fontFamily: initialSnapshot.fontFamily,
+      radius: initialSnapshot.radius,
     });
     return combineHtmlWithBridge(rawHtml, script);
   }, [rawHtml, instance.id, initialSnapshot]);
 
-  const blobUrl = useMemo(() => {
-    if (!srcDoc) return "";
-    const blob = new Blob([srcDoc], { type: "text/html;charset=utf-8" });
-    return URL.createObjectURL(blob);
-  }, [srcDoc]);
-
-  useEffect(() => {
-    return () => {
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
-    };
-  }, [blobUrl]);
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    void openContextMenu(instance.id, e.screenX, e.screenY);
-  };
-
   if (loading) {
     return (
-      <div
-        onContextMenu={handleContextMenu}
-        className="flex items-center justify-center rounded-card border border-line bg-surface p-4 text-xs text-fg-muted select-none block-full inline-full"
+      <WidgetShell
+        instance={instance}
+        editMode={editMode}
+        onToggleEditMode={onToggleEditMode}
+        title={manifest.name || widgetKind}
+        resizable={manifest.resizable ?? true}
+        minSize={manifest.minSize ?? { w: 160, h: 100 }}
+        defaultSize={manifest.defaultSize}
       >
-        Loading custom widget...
-      </div>
+        <div className="flex flex-1 items-center justify-center p-4 text-xs text-fg-muted select-none">
+          Loading custom widget...
+        </div>
+      </WidgetShell>
     );
   }
 
   if (error || !rawHtml) {
     return (
-      <div
-        onContextMenu={handleContextMenu}
-        className="flex flex-col items-center justify-center rounded-card border border-error bg-surface p-4 text-center text-xs text-error select-none block-full inline-full"
+      <WidgetShell
+        instance={instance}
+        editMode={editMode}
+        onToggleEditMode={onToggleEditMode}
+        title={manifest.name || widgetKind}
+        resizable={manifest.resizable ?? true}
+        minSize={manifest.minSize ?? { w: 160, h: 100 }}
+        defaultSize={manifest.defaultSize}
       >
-        <span className="mbe-1 font-semibold">Failed to load custom widget</span>
-        <span className="text-fg-muted">{error || "No content found"}</span>
-      </div>
+        <div className="flex flex-1 flex-col items-center justify-center p-4 text-center text-xs text-error select-none">
+          <span className="mbe-1 font-semibold">Failed to load custom widget</span>
+          <span className="text-fg-muted">{error || "No content found"}</span>
+        </div>
+      </WidgetShell>
     );
   }
 
   return (
-    <div
-      onContextMenu={handleContextMenu}
-      className={`relative flex flex-col overflow-hidden select-none block-full inline-full ${
-        editMode ? "rounded-card border-accent-500/80! ring-2 ring-accent-500/80 ring-inset" : ""
-      }`}
-      style={{ background: "transparent" }}
+    <WidgetShell
+      instance={instance}
+      editMode={editMode}
+      onToggleEditMode={onToggleEditMode}
+      title={manifest.name || widgetKind}
+      resizable={manifest.resizable ?? true}
+      minSize={manifest.minSize ?? { w: 160, h: 100 }}
+      defaultSize={manifest.defaultSize}
+      contentClass="flex flex-1 flex-col overflow-hidden relative block-full inline-full min-block-0 p-0"
     >
-      {editMode && (
-        <EditOverlay
-          id={instance.id}
-          title={manifest.name || widgetKind}
-          kind={widgetKind}
-          editMode={editMode}
-          resizable={manifest.resizable ?? true}
-          minSize={manifest.minSize ?? { w: 160, h: 100 }}
-          defaultSize={manifest.defaultSize}
-          currentBounds={localBounds}
-          onBoundsChange={handleBoundsChange}
-          onToggleEditMode={onToggleEditMode ?? (() => {})}
-          onContextMenu={handleContextMenu}
-          onResetToDefault={manifest.defaultSize ? handleResetToDefault : undefined}
-          onResetToFit={handleResetToFit}
-        />
-      )}
-
       {/* oxlint-disable react/iframe-missing-sandbox */}
-      <iframe
-        ref={iframeRef}
-        allowTransparency={true}
-        src={blobUrl || undefined}
-        srcDoc={srcDoc}
-        style={{
-          width: "100%",
-          height: "100%",
-          border: 0,
-          background: "transparent",
-          backgroundColor: "transparent",
-          colorScheme: theme === "light" ? "light" : "dark",
-          overflow: "hidden",
-          display: "block",
-          pointerEvents: editMode ? "none" : "auto",
-        }}
-        className="block border-0 bg-transparent block-full inline-full"
-        title={manifest.name || widgetKind || "Custom Widget"}
-      />
-    </div>
+      {srcDoc ? (
+        <iframe
+          ref={iframeRef}
+          allowTransparency={true}
+          srcDoc={srcDoc}
+          style={{
+            width: "100%",
+            height: "100%",
+            border: 0,
+            background: "transparent",
+            backgroundColor: "transparent",
+            colorScheme: theme === "light" ? "light" : "dark",
+            overflow: "hidden",
+            display: "block",
+            pointerEvents: editMode ? "none" : "auto",
+          }}
+          className="block border-0 bg-transparent block-full inline-full"
+          title={manifest.name || widgetKind || "Custom Widget"}
+        />
+      ) : null}
+    </WidgetShell>
   );
 }
 

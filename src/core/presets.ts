@@ -490,3 +490,74 @@ export function getWidgetPreset(id?: string): WidgetPreset {
   }
   return WIDGET_PRESETS.find((p) => p.id === id) ?? WIDGET_PRESETS[0]!;
 }
+
+export function getPresetFontFamily(font?: string): string {
+  switch (font) {
+    case "mono":
+    case "font-mono":
+      return '"JetBrains Mono", "Cascadia Mono", ui-monospace, monospace';
+    case "serif":
+    case "font-serif":
+      return '"Newsreader", "Charter", "Georgia", "Times New Roman", serif';
+    case "rounded":
+    case "font-rounded":
+      return '"Quicksand", "Nunito", system-ui, sans-serif';
+    case "tech":
+    case "font-tech":
+      return '"Space Mono", "Cascadia Code", "Consolas", monospace';
+    case "sans":
+    case "font-sans":
+    default:
+      return '"Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif';
+  }
+}
+
+export function getPresetRadiusPx(radius?: string): string {
+  switch (radius) {
+    case "none":
+      return "0px";
+    case "sm":
+      return "6px";
+    case "md":
+      return "10px";
+    case "lg":
+      return "16px";
+    case "xl":
+      return "24px";
+    case "full":
+      return "32px";
+    default:
+      return "16px";
+  }
+}
+
+export function getPresetAppearance(
+  presetId?: string,
+  customFont?: string,
+  _tick?: number,
+): {
+  fontFamily: string;
+  radius: string;
+} {
+  if (presetId === "custom") {
+    const customCfg = getCustomPresetConfig();
+    const effectiveFont = customFont || customCfg.font;
+    return {
+      fontFamily: getPresetFontFamily(effectiveFont),
+      radius: getPresetRadiusPx(customCfg.radius),
+    };
+  }
+
+  const preset = getWidgetPreset(presetId);
+  const effectiveFont = customFont || preset.font || "font-sans";
+
+  let radius = "16px";
+  if (presetId === "ghost") radius = "0px";
+  else if (presetId === "compact") radius = "10px";
+  else if (presetId === "retro") radius = "6px";
+
+  return {
+    fontFamily: getPresetFontFamily(effectiveFont),
+    radius,
+  };
+}

@@ -312,12 +312,12 @@ pub fn update_app_config(
 }
 
 #[tauri::command]
-pub fn open_settings_window(app: AppHandle, widget_id: Option<String>) -> Result<(), String> {
+pub async fn open_settings_window(app: AppHandle, widget_id: Option<String>) -> Result<(), String> {
     windows::open_settings_window(&app, widget_id)
 }
 
 #[tauri::command]
-pub fn open_context_menu(
+pub async fn open_context_menu(
     app: AppHandle,
     widget_id: String,
     screen_x: Option<i32>,
@@ -327,19 +327,13 @@ pub fn open_context_menu(
 }
 
 #[tauri::command]
-pub fn hide_context_menu(app: AppHandle) -> Result<(), String> {
+pub async fn hide_context_menu(app: AppHandle) -> Result<(), String> {
     windows::hide_context_menu_window(&app)
 }
 
 #[tauri::command]
-pub fn show_settings_window(app: AppHandle) -> Result<(), String> {
-    if let Some(window) = app.get_webview_window("settings") {
-        let _ = window.set_skip_taskbar(false);
-        let _ = window.show();
-        let _ = window.unminimize();
-        let _ = window.set_focus();
-    }
-    Ok(())
+pub async fn show_settings_window(app: AppHandle) -> Result<(), String> {
+    windows::show_settings_window(&app)
 }
 
 #[tauri::command]

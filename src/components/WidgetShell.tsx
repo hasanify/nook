@@ -25,6 +25,7 @@ export interface WidgetShellProps {
   resizable?: boolean | undefined;
   minSize?: { w: number; h: number } | undefined;
   defaultSize?: { w: number; h: number } | undefined;
+  contentClass?: string | undefined;
   children: React.ReactNode;
 }
 
@@ -40,6 +41,7 @@ export function WidgetShell({
   resizable = true,
   minSize = { w: 200, h: 160 },
   defaultSize,
+  contentClass,
   children,
 }: WidgetShellProps) {
   const { editMode: hookEditMode, toggleEditMode: hookToggleEditMode } = useEditMode(instance.id);
@@ -232,14 +234,17 @@ export function WidgetShell({
 
       {banner && <div className="shrink-0 px-3.5 pbs-2">{banner}</div>}
 
-      {/* Scrollable Content Body with adequate bottom breathing room */}
+      {/* Content Body */}
       <div
-        className="
+        className={
+          contentClass ??
+          `
         flex flex-1 flex-col overflow-x-hidden overflow-y-auto
         overscroll-y-contain px-3.5 pbs-2 pbe-3 text-sm select-auto
         min-block-0
         *:block-auto *:min-block-full
-      "
+      `
+        }
       >
         {children}
       </div>

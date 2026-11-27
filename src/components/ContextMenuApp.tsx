@@ -7,6 +7,7 @@ import {
   NotePencilIcon,
   PushPinIcon,
   TrashIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -25,13 +26,95 @@ import { getWidgetModule } from "@/widgets/registry";
 
 import { WIDGET_COLOR_OPTIONS } from "./WidgetContextMenu";
 
+const EXTENDED_PALETTE = [
+  "#ef4444",
+  "#f97316",
+  "#f59e0b",
+  "#eab308",
+  "#84cc16",
+  "#22c55e",
+  "#10b981",
+  "#14b8a6",
+  "#06b6d4",
+  "#0ea5e9",
+  "#3b82f6",
+  "#6366f1",
+  "#8b5cf6",
+  "#a855f7",
+  "#d946ef",
+  "#ec4899",
+  "#f43f5e",
+  "#64748b",
+];
+
+function hslToHex(h: number, s: number, l: number): string {
+  const lNorm = l / 100;
+  const a = (s * Math.min(lNorm, 1 - lNorm)) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = lNorm - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  let c = hex.replace("#", "").trim();
+  if (c.length === 3) {
+    c = c
+      .split("")
+      .map((x) => x + x)
+      .join("");
+  }
+  const num = parseInt(c, 16);
+  if (Number.isNaN(num) || c.length !== 6) {
+    return { h: 217, s: 91, l: 60 };
+  }
+  const r = (num >> 16) / 255;
+  const g = ((num >> 8) & 255) / 255;
+  const b = (num & 255) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+    h = Math.round(h * 60);
+  }
+
+  return { h, s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
 export function ContextMenuApp() {
   const [widgetId, setWidgetId] = useState<string>(() => {
     if (typeof window === "undefined") return "";
     return new URLSearchParams(window.location.search).get("w") || "";
   });
 
-  const isPickingColorRef = useRef(false);
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const showCustomPickerRef = useRef(false);
+
+  useEffect(() => {
+    showCustomPickerRef.current = showCustomPicker;
+  }, [showCustomPicker]);
+
   const openTimeRef = useRef(0);
   const hasFocusedRef = useRef(false);
 
@@ -44,7 +127,7 @@ export function ContextMenuApp() {
 
     const resetInactivityTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
-      if (isPickingColorRef.current) return;
+      if (showCustomPickerRef.current) return;
       inactivityTimer = setTimeout(() => {
         void hideContextMenu();
       }, INACTIVITY_DELAY_MS);
@@ -56,6 +139,7 @@ export function ContextMenuApp() {
       }
       openTimeRef.current = Date.now();
       hasFocusedRef.current = false;
+      setShowCustomPicker(false);
       resetInactivityTimer();
     });
 
@@ -63,8 +147,9 @@ export function ContextMenuApp() {
       hasFocusedRef.current = true;
     };
 
-    const handleBlur = () => {
-      if (isPickingColorRef.current) return;
+    const handleBlur = (e: FocusEvent) => {
+      if (showCustomPickerRef.current) return;
+      if (e.relatedTarget && document.contains(e.relatedTarget as Node)) return;
       // Protect from immediate blur right after open (focus transition)
       if (Date.now() - openTimeRef.current < 500) return;
       void hideContextMenu();
@@ -72,7 +157,11 @@ export function ContextMenuApp() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        void hideContextMenu();
+        if (showCustomPickerRef.current) {
+          setShowCustomPicker(false);
+        } else {
+          void hideContextMenu();
+        }
       } else {
         resetInactivityTimer();
       }
@@ -103,6 +192,41 @@ export function ContextMenuApp() {
 
   const { instance, patchSettings } = useInstance(widgetId);
   const { editMode, toggleEditMode } = useEditMode(widgetId || undefined);
+
+  const widgetColor =
+    typeof instance?.settings?.widgetColor === "string" && instance.settings.widgetColor
+      ? instance.settings.widgetColor
+      : "";
+
+  const [prevColor, setPrevColor] = useState(widgetColor);
+  const [hue, setHue] = useState(() =>
+    widgetColor && widgetColor.startsWith("#") ? hexToHsl(widgetColor).h : 217,
+  );
+  const [saturation, setSaturation] = useState(() =>
+    widgetColor && widgetColor.startsWith("#") ? hexToHsl(widgetColor).s : 91,
+  );
+  const [lightness, setLightness] = useState(() =>
+    widgetColor && widgetColor.startsWith("#") ? hexToHsl(widgetColor).l : 60,
+  );
+  const [hexInput, setHexInput] = useState(widgetColor || "#3b82f6");
+
+  if (prevColor !== widgetColor) {
+    setPrevColor(widgetColor);
+    if (widgetColor && widgetColor.startsWith("#")) {
+      const hsl = hexToHsl(widgetColor);
+      setHue(hsl.h);
+      setSaturation(hsl.s);
+      setLightness(hsl.l);
+      setHexInput(widgetColor);
+    }
+  }
+
+  const applyColor = useCallback(
+    (hex: string) => {
+      patchSettings({ widgetColor: hex });
+    },
+    [patchSettings],
+  );
 
   const handleClose = useCallback(() => {
     void hideContextMenu();
@@ -141,11 +265,6 @@ export function ContextMenuApp() {
       </div>
     );
   }
-
-  const widgetColor =
-    typeof instance.settings.widgetColor === "string" && instance.settings.widgetColor
-      ? instance.settings.widgetColor
-      : "";
 
   const isAlwaysOnTop = Boolean(instance.alwaysOnTop ?? instance.always_on_top);
 
@@ -302,20 +421,22 @@ export function ContextMenuApp() {
               );
             })}
 
-            {/* Custom Color Swatch */}
+            {/* Custom Color Swatch Toggle */}
             {(() => {
               const isCustomActive =
                 Boolean(widgetColor) && !WIDGET_COLOR_OPTIONS.some((o) => o.value === widgetColor);
               return (
-                <label
-                  title={isCustomActive ? `Custom Color (${widgetColor})` : "Pick custom color"}
+                <button
+                  type="button"
+                  onClick={() => setShowCustomPicker((prev) => !prev)}
+                  title={isCustomActive ? `Custom Color (${widgetColor})` : "Custom color picker"}
                   className={`
                         relative flex shrink-0 cursor-pointer items-center
                         justify-center rounded-full transition-transform
                         block-3.5 inline-3.5
                         hover:scale-125
                         ${
-                          isCustomActive
+                          isCustomActive || showCustomPicker
                             ? `scale-110 ring-2 ring-white ring-offset-1 ring-offset-surface`
                             : "border border-line/60"
                         }
@@ -328,32 +449,168 @@ export function ContextMenuApp() {
                             "conic-gradient(from 180deg at 50% 50%, #f43f5e, #fbbf24, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e)",
                         }
                   }
-                >
-                  <input
-                    type="color"
-                    value={widgetColor?.startsWith("#") ? widgetColor : "#3b82f6"}
-                    onPointerDown={() => {
-                      isPickingColorRef.current = true;
-                    }}
-                    onChange={(e) => {
-                      isPickingColorRef.current = false;
-                      patchSettings({ widgetColor: e.target.value });
-                      handleClose();
-                    }}
-                    className="absolute inset-0 cursor-pointer opacity-0 block-full inline-full"
-                  />
-                </label>
+                />
               );
             })()}
           </div>
+
+          {/* Custom Color Picker Drawer */}
+          {showCustomPicker && (
+            <div className="mbs-2 flex flex-col gap-2 rounded-lg border border-line/60 bg-surface-raised/80 p-2 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-2xs font-semibold text-fg">Custom Color</span>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="rounded-full border border-white/20 shadow-xs block-3.5 inline-3.5"
+                    style={{ backgroundColor: hexInput }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomPicker(false)}
+                    className="cursor-pointer text-fg-muted hover:text-fg"
+                    title="Close picker"
+                  >
+                    <XIcon className="block-3 inline-3" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Extended Color Palette */}
+              <div className="grid grid-cols-6 gap-1 pbs-0.5">
+                {EXTENDED_PALETTE.map((hex) => {
+                  const isSelected = hex.toLowerCase() === hexInput.toLowerCase();
+                  return (
+                    <button
+                      key={hex}
+                      type="button"
+                      onClick={() => {
+                        const hsl = hexToHsl(hex);
+                        setHue(hsl.h);
+                        setSaturation(hsl.s);
+                        setLightness(hsl.l);
+                        setHexInput(hex);
+                        applyColor(hex);
+                      }}
+                      className={`
+                        cursor-pointer rounded-md transition-transform block-3.5 inline-full
+                        hover:scale-110
+                        ${isSelected ? "shadow-xs ring-2 ring-white ring-offset-1 ring-offset-surface" : ""}
+                      `}
+                      style={{ backgroundColor: hex }}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Hue Slider */}
+              <div className="flex flex-col gap-0.5">
+                <div className="flex justify-between text-3xs text-fg-muted">
+                  <span>Hue</span>
+                  <span className="font-mono">{hue}°</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={hue}
+                  onChange={(e) => {
+                    const h = Number(e.target.value);
+                    setHue(h);
+                    const newHex = hslToHex(h, saturation, lightness);
+                    setHexInput(newHex);
+                    applyColor(newHex);
+                  }}
+                  className="cursor-pointer appearance-none rounded-full block-2 inline-full"
+                  style={{
+                    background:
+                      "linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)",
+                  }}
+                />
+              </div>
+
+              {/* Lightness Slider */}
+              <div className="flex flex-col gap-0.5">
+                <div className="flex justify-between text-3xs text-fg-muted">
+                  <span>Lightness</span>
+                  <span className="font-mono">{lightness}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="20"
+                  max="85"
+                  value={lightness}
+                  onChange={(e) => {
+                    const l = Number(e.target.value);
+                    setLightness(l);
+                    const newHex = hslToHex(hue, saturation, l);
+                    setHexInput(newHex);
+                    applyColor(newHex);
+                  }}
+                  className="cursor-pointer appearance-none rounded-full block-2 inline-full"
+                  style={{
+                    background: `linear-gradient(to right, #111 0%, hsl(${hue}, ${saturation}%, 50%) 50%, #fff 100%)`,
+                  }}
+                />
+              </div>
+
+              {/* Hex Input and Action Buttons */}
+              <div className="flex items-center gap-1.5 pbs-0.5">
+                <div className="flex flex-1 items-center rounded-md border border-line bg-surface px-1.5 py-0.5">
+                  <span className="font-mono text-3xs text-fg-muted">#</span>
+                  <input
+                    type="text"
+                    maxLength={7}
+                    value={hexInput.startsWith("#") ? hexInput.slice(1) : hexInput}
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
+                      const formatted = `#${clean}`;
+                      setHexInput(formatted);
+                      if (clean.length === 6 || clean.length === 3) {
+                        const hsl = hexToHsl(formatted);
+                        setHue(hsl.h);
+                        setSaturation(hsl.s);
+                        setLightness(hsl.l);
+                        applyColor(formatted);
+                      }
+                    }}
+                    className="flex-1 bg-transparent font-mono text-3xs text-fg outline-hidden select-text min-inline-0"
+                    placeholder="3b82f6"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    patchSettings({ widgetColor: "" });
+                    setShowCustomPicker(false);
+                  }}
+                  className="cursor-pointer rounded-md border border-line/60 bg-surface px-1.5 py-0.5 font-mono text-3xs text-fg-muted transition-colors hover:text-fg"
+                  title="Reset to default theme accent"
+                >
+                  Reset
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCustomPicker(false);
+                    handleClose();
+                  }}
+                  className="cursor-pointer rounded-md bg-accent-500 px-2 py-0.5 text-3xs font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Settings */}
         <button
           type="button"
-          onClick={() => {
-            handleClose();
-            void openSettingsWindow(instance.id);
+          onClick={async () => {
+            await hideContextMenu();
+            await openSettingsWindow(instance.id);
           }}
           className="
                 flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5

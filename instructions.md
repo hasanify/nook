@@ -1,6 +1,6 @@
 # Nook Custom Widget Developer & AI Agent Guide
 
-This specification teaches AI agents (and human developers) how to build custom widgets for **Nook**—a native desktop widget canvas for Windows built with Tauri, Rust, and React.
+This specification teaches AI agents (and human developers) how to build custom widgets for **Nook**, a native desktop widget canvas for Windows built with Tauri, Rust, and React.
 
 Users can import widgets directly into Nook using **a single `.html` / `.nook` file** or **a `.zip` archive**. You can also test and preview your widgets instantly in the browser with full system API simulation using the [Online Custom Widget Builder](https://hasanify.github.io/nook/builder/).
 
@@ -256,27 +256,49 @@ interface NookBridge {
 
 ## 5. Styling & Theme Integration
 
-Nook automatically injects CSS variables into the widget's root document (`:root` / `html`) that adapt when the user switches between **Dark** and **Light** modes:
+Nook automatically injects CSS variables into the widget's root document (`:root` / `html`) that adapt when the user switches themes, selects appearance presets, or changes accent colors:
 
-| CSS Variable    | Dark Theme Value | Light Theme Value | Usage                            |
-| --------------- | ---------------- | ----------------- | -------------------------------- |
-| `--bg-canvas`   | `#09090b`        | `#ffffff`         | Deepest background               |
-| `--bg-surface`  | `#18181b`        | `#f4f4f5`         | Default card / widget background |
-| `--bg-elevated` | `#27272a`        | `#e4e4e7`         | Hovered cards, badges, buttons   |
-| `--fg`          | `#fafafa`        | `#09090b`         | Primary text and headings        |
-| `--fg-muted`    | `#a1a1aa`        | `#71717a`         | Secondary text, labels           |
-| `--fg-subtle`   | `#71717a`        | `#a1a1aa`         | Hints, timestamps, dividers      |
-| `--line`        | `#27272a`        | `#e4e4e7`         | Borders and dividers             |
-| `--accent`      | `#3b82f6`        | `#2563eb`         | Primary interactive color (Blue) |
-| `--error`       | `#ef4444`        | `#dc2626`         | Error indicators                 |
-| `--success`     | `#22c55e`        | `#16a34a`         | Success indicators               |
+### Color Tokens
+
+| CSS Variable    | Dark Theme Value | Light Theme Value | Usage                                              |
+| --------------- | ---------------- | ----------------- | -------------------------------------------------- |
+| `--bg-canvas`   | `#09090b`        | `#ffffff`         | Deepest background                                 |
+| `--bg-surface`  | `#18181b`        | `#f4f4f5`         | Default card / widget background                   |
+| `--bg-elevated` | `#27272a`        | `#e4e4e7`         | Hovered cards, badges, buttons                     |
+| `--fg`          | `#fafafa`        | `#09090b`         | Primary text and headings                          |
+| `--fg-muted`    | `#a1a1aa`        | `#71717a`         | Secondary text, labels                             |
+| `--fg-subtle`   | `#71717a`        | `#a1a1aa`         | Hints, timestamps, dividers                        |
+| `--line`        | `#27272a`        | `#e4e4e7`         | Borders and dividers                               |
+| `--accent`      | `#3b82f6`        | `#2563eb`         | Interactive accent (customizable via context menu) |
+| `--error`       | `#ef4444`        | `#dc2626`         | Error indicators                                   |
+| `--success`     | `#22c55e`        | `#16a34a`         | Success indicators                                 |
+
+### Typography & Roundness Tokens
+
+Nook synchronizes the user's active Appearance preset (Clean Modern, Glass, Neo Brutalist, Terminal, etc.) and custom studio settings into your widget:
+
+| CSS Variable     | Description                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `--font-family`  | The active font family chosen by the user in Nook Settings.                                     |
+| `--font-sans`    | Sans-serif font stack (`"Inter", "Segoe UI Variable Text", system-ui, sans-serif`).             |
+| `--font-mono`    | Monospace font stack (`"JetBrains Mono", "Cascadia Mono", monospace`).                          |
+| `--font-serif`   | Serif font stack (`"Newsreader", "Charter", "Georgia", serif`).                                 |
+| `--font-rounded` | Rounded font stack (`"Quicksand", "Nunito", sans-serif`).                                       |
+| `--font-tech`    | Technical font stack (`"Space Mono", "Cascadia Code", monospace`).                              |
+| `--radius`       | Active border radius (e.g. `16px` for Clean Modern, `0px` for Neo Brutalist, `24px` for Round). |
+| `--radius-sm`    | Small radius token (`6px`).                                                                     |
+| `--radius-md`    | Medium radius token (`10px`).                                                                   |
+| `--radius-lg`    | Large radius token (`16px`).                                                                    |
+| `--radius-xl`    | Extra-large radius token (`24px`).                                                              |
 
 ### Recommended Baseline Styles
 
-Add this baseline CSS to make your widget feel native to Nook:
+Custom widgets are hosted directly inside Nook's native `WidgetShell` card, which applies the active preset's backdrop, surface, border, and shadows. Therefore, custom widget content should keep `html, body` transparent and inherit fonts and tokens:
 
 ```css
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -287,14 +309,15 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background: transparent;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  background-color: var(--bg-surface, #18181b);
+  font-family: var(
+    --font-family,
+    var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)
+  );
   color: var(--fg, #fafafa);
-  border: 1px solid var(--line, #27272a);
-  border-radius: 14px;
   user-select: none;
   position: relative;
 }

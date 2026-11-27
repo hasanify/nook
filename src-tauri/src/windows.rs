@@ -598,6 +598,13 @@ pub fn open_settings_window(app: &AppHandle, widget_id: Option<String>) -> Resul
         let _ = window.show();
         let _ = window.unminimize();
         let _ = window.set_focus();
+        #[cfg(windows)]
+        unsafe {
+            if let Ok(raw_hwnd) = window.hwnd() {
+                use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
+                let _ = SetForegroundWindow(HWND(raw_hwnd.0));
+            }
+        }
         if let Some(w_id) = widget_id {
             let _ = window.emit("focus-widget", serde_json::json!({ "id": w_id }));
         }
@@ -652,8 +659,8 @@ pub fn apply_window_corners(hwnd: HWND) {
 
 pub fn ensure_context_menu_window(app: &AppHandle) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: f64 = 216.0;
-    const MENU_H: f64 = 360.0;
+    const MENU_W: f64 = 240.0;
+    const MENU_H: f64 = 520.0;
 
     if app.get_webview_window(LABEL).is_some() {
         return Ok(());
@@ -686,8 +693,8 @@ pub fn show_context_menu_window(
     _screen_y: Option<i32>,
 ) -> Result<(), String> {
     const LABEL: &str = "widget-context-menu";
-    const MENU_W: i32 = 216;
-    const MENU_H: i32 = 360;
+    const MENU_W: i32 = 240;
+    const MENU_H: i32 = 520;
 
     #[cfg(windows)]
     let (mut phys_x, mut phys_y) = unsafe {
@@ -741,6 +748,23 @@ pub fn show_context_menu_window(
 pub fn hide_context_menu_window(app: &AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("widget-context-menu") {
         let _ = window.hide();
+    }
+    Ok(())
+}
+
+pub fn show_settings_window(app: &AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("settings") {
+        let _ = window.set_skip_taskbar(false);
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+        #[cfg(windows)]
+        unsafe {
+            if let Ok(raw_hwnd) = window.hwnd() {
+                use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
+                let _ = SetForegroundWindow(HWND(raw_hwnd.0));
+            }
+        }
     }
     Ok(())
 }
