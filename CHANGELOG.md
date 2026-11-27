@@ -1,3 +1,9 @@
+## [0.47.5](https://github.com/hasanify/nook/compare/v0.47.4...v0.47.5) (2026-11-27)
+
+### Bug Fixes
+
+- **custom-widgets:** restore srcdoc iframe rendering and sync appearance tokens ([c79f148](https://github.com/hasanify/nook/commit/c79f14897b1490a2cd88f32c490e495dfa864fcf))
+
 ## [0.47.4](https://github.com/hasanify/nook/compare/v0.47.3...v0.47.4) (2026-11-26)
 
 ### Bug Fixes
